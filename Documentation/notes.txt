@@ -1,0 +1,5 @@
+libtcod setup instructions:
+https://www.reddit.com/r/roguelikedev/comments/6imw2p/libtcod_on_os_x_sierra/
+
+Roguelike tutorial:
+http://www.roguebasin.com/index.php?title=Complete_Roguelike_Tutorial,_using_python%2Blibtcod
