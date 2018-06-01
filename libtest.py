@@ -26,17 +26,15 @@ LEVEL_SCREEN_WIDTH = 40
 ROOM_MAX_SIZE = 10
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
-MAX_ROOM_MONSTERS = 3
-MAX_ROOM_ITEMS = 2
 
 #spell values
-HEAL_AMOUNT = 4
-LIGHTNING_DAMAGE = 20
+HEAL_AMOUNT = 40
+LIGHTNING_DAMAGE = 40
 LIGHTNING_RANGE = 5
 CONFUSE_RANGE = 8
 CONFUSE_NUM_TURNS = 10
 FIREBALL_RADIUS = 3
-FIREBALL_DAMAGE = 12
+FIREBALL_DAMAGE = 25
 
 #experience and level-ups
 LEVEL_UP_BASE = 200
@@ -367,9 +365,59 @@ def make_map():
     objects.append(stairs)
     stairs.send_to_back()  #so it's drawn below the monsters
 
+def random_choice_index(chances):  #choose one option from list of chances, returning its index
+    #the dice will land on some number between 1 and the sum of the chances
+    dice = libtcod.random_get_int(0, 1, sum(chances))
+
+    #go through all chances, keeping the sum so far
+    running_sum = 0
+    choice = 0
+    for w in chances:
+        running_sum += w
+
+        #see if the dice landed in the part that corresponds to this choice
+        if dice <= running_sum:
+            return choice
+        choice += 1
+
+def random_choice(chances_dict):
+    #choose one option from dictionary of chances, returning its key
+    chances = chances_dict.values()
+    strings = chances_dict.keys()
+
+    return strings[random_choice_index(chances)]
+
+def from_dungeon_level(table):
+    #returns a value that depends on level. the table specifies what value occurs after each level, default is 0.
+    for (value, level) in reversed(table):
+        if dungeon_level >= level:
+            return value
+    return 0
+
 def place_objects(room):
+    #this is where we decide the chance of each monster or item appearing.
+
+    #maximum number of monsters per room
+    max_monsters = from_dungeon_level([[2, 1], [3, 4], [5, 6]])
+
+    #chance of each monster
+    monster_chances = {}
+    monster_chances['orc'] = 80  #orc always shows up, even if all other monsters have 0 chance
+    monster_chances['troll'] = from_dungeon_level([[15, 3], [30, 5], [60, 7]])
+
+    #maximum number of items per room
+    max_items = from_dungeon_level([[1, 1], [2, 4]])
+
+    #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
+    item_chances = {}
+    item_chances['heal'] = 35  #healing potion always shows up, even if all other items have 0 chance
+    item_chances['lightning'] = from_dungeon_level([[25, 4]])
+    item_chances['fireball'] =  from_dungeon_level([[25, 6]])
+    item_chances['confuse'] =   from_dungeon_level([[10, 2]])
+
+
     #choose random number of monsters
-    num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
+    num_monsters = libtcod.random_get_int(0, 0, max_monsters)
 
     for i in range(num_monsters):
         #choose random spot for this monster
@@ -378,16 +426,18 @@ def place_objects(room):
 
         #only place it if the tile is not blocked
         if not is_blocked(x, y):
-            if libtcod.random_get_int(0, 0, 100) < 80:  #80% chance of getting an orc
+            choice = random_choice(monster_chances)
+            if choice == 'orc':
                 #create an orc
-                fighter_component = Fighter(hp=10, defense=0, power=3, xp=35, death_function=monster_death)
+                fighter_component = Fighter(hp=20, defense=0, power=4, xp=35, death_function=monster_death)
                 ai_component = BasicMonster()
 
                 monster = Object(x, y, 'o', 'orc', libtcod.desaturated_green,
                     blocks=True, fighter=fighter_component, ai=ai_component)
-            else:
+
+            elif choice == 'troll':
                 #create a troll
-                fighter_component = Fighter(hp=16, defense=1, power=4, xp=100, death_function=monster_death)
+                fighter_component = Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
                 ai_component = BasicMonster()
 
                 monster = Object(x, y, 'T', 'troll', libtcod.darker_green,
@@ -396,7 +446,7 @@ def place_objects(room):
             objects.append(monster)
 
     #choose random number of items
-    num_items = libtcod.random_get_int(0, 0, MAX_ROOM_ITEMS)
+    num_items = libtcod.random_get_int(0, 0, max_items)
 
     for i in range(num_items):
         #choose random spot for this item
@@ -405,26 +455,25 @@ def place_objects(room):
 
         #only place it if the tile is not blocked
         if not is_blocked(x, y):
-            dice = libtcod.random_get_int(0, 0, 100)
-            if dice < 70:
-                #create a healing potion (70% chance)
+            choice = random_choice(item_chances)
+            if choice == 'heal':
+                #create a healing potion
                 item_component = Item(use_function=cast_heal)
-
                 item = Object(x, y, '!', 'healing potion', libtcod.violet, item=item_component)
-            elif dice < 70+10:
-                #create a lightning bolt scroll (10% chance)
+
+            elif choice == 'lightning':
+                #create a lightning bolt scroll
                 item_component = Item(use_function=cast_lightning)
-
                 item = Object(x, y, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
-            elif dice < 70+10+10:
-                #create a fireball scroll (10% chance)
+
+            elif choice == 'fireball':
+                #create a fireball scroll
                 item_component = Item(use_function=cast_fireball)
-
                 item = Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
-            else:
-                #create a confuse scroll (10% chance)
-                item_component = Item(use_function=cast_confuse)
 
+            elif choice == 'confuse':
+                #create a confuse scroll
+                item_component = Item(use_function=cast_confuse)
                 item = Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
 
             objects.append(item)
@@ -858,7 +907,7 @@ def new_game():
     global player, inventory, game_msgs, game_state, dungeon_level
 
     #create object representing the player
-    fighter_component = Fighter(hp=30, defense=2, power=5, xp=0, death_function=player_death)
+    fighter_component = Fighter(hp=100, defense=1, power=4, xp=0, death_function=player_death)
     player = Object(0, 0, '@', 'player', libtcod.white, blocks=True, fighter=fighter_component)
 
     player.level = 1
