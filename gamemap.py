@@ -263,9 +263,9 @@ def place_objects(room):
 
     #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
     item_chances = {}
-    item_chances['potion'] = 35  #healing potion always shows up, even if all other items have 0 chance
+    item_chances['potion'] = 25  #healing potion always shows up, even if all other items have 0 chance
     item_chances['scroll'] = baseclasses.from_dungeon_level([[25, 2]])
-    item_chances['sword'] = baseclasses.from_dungeon_level([[5, 2]])
+    item_chances['weapon'] = 35
     item_chances['shield'] = baseclasses.from_dungeon_level([[15, 2]])
     item_chances['helmet'] = baseclasses.from_dungeon_level([[15, 2]])
 
@@ -304,10 +304,8 @@ def place_objects(room):
                 item = equipment.random_potion(x,y)
             elif choice == 'scroll':
                 item = equipment.random_scroll(x,y)
-            elif choice == 'sword':
-                #create a sword
-                equipment_component = equipment.Equipment(slot='right hand', power_bonus=3)
-                item = baseclasses.Object(x, y, '/', 'sword', libtcod.sky, gear=equipment_component)
+            elif choice == 'weapon':
+                item = equipment.random_weapon(x,y)
 
             elif choice == 'shield':
                 #create a shield

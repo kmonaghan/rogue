@@ -135,3 +135,27 @@ def random_scroll(x,y):
         item = baseclasses.Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
 
     return item
+
+def random_weapon(x,y):
+    item_chances = {}
+    item_chances['dagger'] = 40
+    item_chances['short sword'] = 30
+    item_chances['long sword'] = 30
+
+    choice = baseclasses.random_choice(item_chances)
+    if choice == 'dagger':
+        #create a sword
+        equipment_component = Equipment(slot='right hand', power_bonus=2)
+        item = baseclasses.Object(0, 0, '-', 'dagger', libtcod.sky, gear=equipment_component)
+
+    elif choice == 'short sword':
+        #create a sword
+        equipment_component = Equipment(slot='right hand', power_bonus=3)
+        item = baseclasses.Object(x, y, '/', 'short sword', libtcod.sky, gear=equipment_component)
+
+    elif choice == 'long sword':
+        #create a sword
+        equipment_component = Equipment(slot='right hand', power_bonus=4)
+        item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
+
+    return item
