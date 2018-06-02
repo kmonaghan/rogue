@@ -21,16 +21,6 @@ MIN_SIZE = 5
 #set this to tru to have a full map
 FULL_ROOMS = False
 
-#spell values
-HEAL_AMOUNT = 40
-LIGHTNING_DAMAGE = 40
-LIGHTNING_RANGE = 5
-CONFUSE_RANGE = 8
-
-FIREBALL_RADIUS = 3
-FIREBALL_DAMAGE = 25
-
-
 dungeon_level = 1
 
 map = []
@@ -260,26 +250,24 @@ def place_objects(room):
     #this is where we decide the chance of each monster or item appearing.
 
     #maximum number of monsters per room
-    max_monsters = from_dungeon_level([[2, 1], [3, 3], [5, 4]])
+    max_monsters = baseclasses.from_dungeon_level([[2, 1], [3, 3], [5, 4]])
 
     #chance of each monster
     monster_chances = {}
-    monster_chances['goblin'] = from_dungeon_level([[60, 1], [30, 2], [15, 3]])
-    monster_chances['orc'] = from_dungeon_level([[15, 2], [30, 3], [60, 4]])
-    monster_chances['troll'] = from_dungeon_level([[15, 3], [30, 4], [60, 5]])
+    monster_chances['goblin'] = baseclasses.from_dungeon_level([[60, 1], [30, 2], [15, 3]])
+    monster_chances['orc'] = baseclasses.from_dungeon_level([[15, 2], [30, 3], [60, 4]])
+    monster_chances['troll'] = baseclasses.from_dungeon_level([[15, 3], [30, 4], [60, 5]])
 
     #maximum number of items per room
-    max_items = from_dungeon_level([[1, 1], [2, 4]])
+    max_items = baseclasses.from_dungeon_level([[1, 1], [2, 4]])
 
     #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
     item_chances = {}
-    item_chances['heal'] = 35  #healing potion always shows up, even if all other items have 0 chance
-    item_chances['lightning'] = from_dungeon_level([[25, 2]])
-    item_chances['fireball'] =  from_dungeon_level([[25, 3]])
-    item_chances['confuse'] =   from_dungeon_level([[10, 4]])
-    item_chances['sword'] =     from_dungeon_level([[5, 2]])
-    item_chances['shield'] =    from_dungeon_level([[15, 2]])
-    item_chances['helmet'] =    from_dungeon_level([[15, 2]])
+    item_chances['potion'] = 35  #healing potion always shows up, even if all other items have 0 chance
+    item_chances['scroll'] = baseclasses.from_dungeon_level([[25, 2]])
+    item_chances['sword'] = baseclasses.from_dungeon_level([[5, 2]])
+    item_chances['shield'] = baseclasses.from_dungeon_level([[15, 2]])
+    item_chances['helmet'] = baseclasses.from_dungeon_level([[15, 2]])
 
     #choose random number of monsters
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
@@ -291,7 +279,7 @@ def place_objects(room):
 
         #only place it if the tile is not blocked
         if not baseclasses.is_blocked(x, y):
-            choice = random_choice(monster_chances)
+            choice = baseclasses.random_choice(monster_chances)
             if choice == 'orc':
                 monster = beastery.orc(x, y)
             elif choice == 'troll':
@@ -311,27 +299,11 @@ def place_objects(room):
 
         #only place it if the tile is not blocked
         if not baseclasses.is_blocked(x, y):
-            choice = random_choice(item_chances)
-            if choice == 'heal':
-                #create a healing potion
-                item_component = equipment.Item(use_function=cast_heal)
-                item = baseclasses.Object(x, y, '!', 'healing potion', libtcod.violet, item=item_component)
-
-            elif choice == 'lightning':
-                #create a lightning bolt scroll
-                item_component = equipment.Item(use_function=cast_lightning)
-                item = baseclasses.Object(x, y, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
-
-            elif choice == 'fireball':
-                #create a fireball scroll
-                item_component = equipment.Item(use_function=cast_fireball)
-                item = baseclasses.Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
-
-            elif choice == 'confuse':
-                #create a confuse scroll
-                item_component = equipment.Item(use_function=cast_confuse)
-                item = baseclasses.Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
-
+            choice = baseclasses.random_choice(item_chances)
+            if choice == 'potion':
+                item = equipment.random_potion(x,y)
+            elif choice == 'scroll':
+                item = equipment.random_scroll(x,y)
             elif choice == 'sword':
                 #create a sword
                 equipment_component = equipment.Equipment(slot='right hand', power_bonus=3)
@@ -389,77 +361,3 @@ def hline_right(map, x, y):
         map[x][y].blocked = False
         map[x][y].block_sight = False
         x += 1
-
-def from_dungeon_level(table):
-    #returns a value that depends on level. the table specifies what value occurs after each level, default is 0.
-    for (value, level) in reversed(table):
-        if dungeon_level >= level:
-            return value
-    return 0
-
-def random_choice_index(chances):  #choose one option from list of chances, returning its index
-    #the dice will land on some number between 1 and the sum of the chances
-    dice = libtcod.random_get_int(0, 1, sum(chances))
-
-    #go through all chances, keeping the sum so far
-    running_sum = 0
-    choice = 0
-    for w in chances:
-        running_sum += w
-
-        #see if the dice landed in the part that corresponds to this choice
-        if dice <= running_sum:
-            return choice
-        choice += 1
-
-def random_choice(chances_dict):
-    #choose one option from dictionary of chances, returning its key
-    chances = chances_dict.values()
-    strings = chances_dict.keys()
-
-    return strings[random_choice_index(chances)]
-
-def cast_heal():
-    #heal the player
-    if pc.player.fighter.hp == pc.player.fighter.max_hp:
-        messageconsole.message('You are already at full health.', libtcod.red)
-        return 'cancelled'
-
-    messageconsole.message('Your wounds start to feel better!', libtcod.light_violet)
-    pc.player.fighter.heal(HEAL_AMOUNT)
-
-def cast_lightning():
-    #find closest enemy (inside a maximum range) and damage it
-    monster = closest_monster(LIGHTNING_RANGE)
-    if monster is None:  #no enemy found within maximum range
-        messageconsole.message('No enemy is close enough to strike.', libtcod.red)
-        return 'cancelled'
-
-    #zap it!
-    messageconsole.message('A lighting bolt strikes the ' + monster.name + ' with a loud thunder! The damage is '
-            + str(LIGHTNING_DAMAGE) + ' hit points.', libtcod.light_blue)
-    monster.fighter.take_damage(LIGHTNING_DAMAGE)
-
-def cast_fireball():
-    #ask the player for a target tile to throw a fireball at
-    messageconsole.message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan)
-    (x, y) = target_tile()
-    if x is None: return 'cancelled'
-    messageconsole.message('The fireball explodes, burning everything within ' + str(FIREBALL_RADIUS) + ' tiles!', libtcod.orange)
-
-    for obj in baseclasses.objects:  #damage every fighter in range, including the player
-        if obj.distance(x, y) <= FIREBALL_RADIUS and obj.fighter:
-            messageconsole.message('The ' + obj.name + ' gets burned for ' + str(FIREBALL_DAMAGE) + ' hit points.', libtcod.orange)
-            obj.fighter.take_damage(FIREBALL_DAMAGE)
-
-def cast_confuse():
-    #ask the player for a target to confuse
-    messageconsole.message('Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan)
-    monster = target_monster(CONFUSE_RANGE)
-    if monster is None: return 'cancelled'
-
-    #replace the monster's AI with a "confused" one; after some turns it will restore the old AI
-    old_ai = monster.ai
-    monster.ai = ConfusedMonster(old_ai)
-    monster.ai.owner = monster  #tell the new component who owns it
-    messageconsole.message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)

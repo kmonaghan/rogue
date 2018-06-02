@@ -2,8 +2,7 @@ import libtcodpy as libtcod
 import baseclasses
 import pc
 import messageconsole
-
-CONFUSE_NUM_TURNS = 10
+import tome
 
 class BasicMonster:
     #AI for a basic monster.
@@ -22,7 +21,7 @@ class BasicMonster:
 
 class ConfusedMonster:
     #AI for a temporarily confused monster (reverts to previous AI after a while).
-    def __init__(self, old_ai, num_turns=CONFUSE_NUM_TURNS):
+    def __init__(self, old_ai, num_turns=tome.CONFUSE_NUM_TURNS):
         self.old_ai = old_ai
         self.num_turns = num_turns
 

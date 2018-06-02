@@ -2,6 +2,7 @@ import libtcodpy as libtcod
 import messageconsole
 import pc
 import baseclasses
+import tome
 
 inventory = []
 
@@ -98,3 +99,39 @@ def get_all_equipped(obj):  #returns a list of equipped items
         return equipped_list
     else:
         return []  #other objects have no equipment
+
+def random_potion(x,y):
+    item_chances = {}
+    item_chances['heal'] = 40
+
+    choice = baseclasses.random_choice(item_chances)
+    if choice == 'heal':
+        #create a healing potion
+        item_component = Item(use_function=tome.cast_heal)
+        item = baseclasses.Object(x, y, '!', 'healing potion', libtcod.violet, item=item_component)
+
+    return item
+
+def random_scroll(x,y):
+    item_chances = {}
+    item_chances['lightning'] = 40
+    item_chances['fireball'] = 30
+    item_chances['confuse'] = 30
+
+    choice = baseclasses.random_choice(item_chances)
+    if choice == 'lightning':
+        #create a lightning bolt scroll
+        item_component = Item(use_function=tome.cast_lightning)
+        item = baseclasses.Object(x, y, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
+
+    elif choice == 'fireball':
+        #create a fireball scroll
+        item_component = Item(use_function=tome.cast_fireball)
+        item = baseclasses.Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
+
+    elif choice == 'confuse':
+        #create a confuse scroll
+        item_component = Item(use_function=tome.cast_confuse)
+        item = baseclasses.Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
+
+    return item
