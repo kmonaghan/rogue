@@ -390,7 +390,8 @@ def new_game():
 
     #generate map (at this point it's not drawn to the screen)
     gamemap.dungeon_level = 1
-    gamemap.make_map()
+    #gamemap.make_map()
+    gamemap.make_bsp()
     initialize_fov()
 
     baseclasses.game_state = 'playing'
@@ -405,7 +406,9 @@ def next_level():
 
     gamemap.dungeon_level += 1
     messageconsole.message('After a rare moment of peace, you descend deeper into the heart of the dungeon...', libtcod.red)
-    gamemap.make_map()  #create a fresh new level!
+    #gamemap.make_map()
+    gamemap.make_bsp()
+
     initialize_fov()
 
 def initialize_fov():
