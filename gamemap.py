@@ -331,7 +331,7 @@ class BasicMonster:
 
             #move towards player if far away
             if monster.distance_to(pc.player) >= 2:
-                monster.move_towards(pc.player.x, pc.player.y)
+                monster.move_astar(pc.player)
 
             #close enough, attack! (if the player is still alive.)
             elif pc.player.fighter.hp > 0:
