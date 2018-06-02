@@ -5,6 +5,7 @@ import equipment
 import characterclass
 import messageconsole
 import random
+import beastery
 
 #size of the map
 MAP_WIDTH = 80
@@ -17,6 +18,7 @@ MAX_ROOMS = 30
 
 DEPTH = 10
 MIN_SIZE = 5
+#set this to tru to have a full map
 FULL_ROOMS = False
 
 #spell values
@@ -24,7 +26,7 @@ HEAL_AMOUNT = 40
 LIGHTNING_DAMAGE = 40
 LIGHTNING_RANGE = 5
 CONFUSE_RANGE = 8
-CONFUSE_NUM_TURNS = 10
+
 FIREBALL_RADIUS = 3
 FIREBALL_DAMAGE = 25
 
@@ -291,27 +293,11 @@ def place_objects(room):
         if not baseclasses.is_blocked(x, y):
             choice = random_choice(monster_chances)
             if choice == 'orc':
-                #create an orc
-                fighter_component = characterclass.Fighter(hp=20, defense=0, power=4, xp=35, death_function=monster_death)
-                ai_component = BasicMonster()
-
-                monster = baseclasses.Object(x, y, 'o', 'orc', libtcod.desaturated_green,
-                                 blocks=True, fighter=fighter_component, ai=ai_component)
-
+                monster = beastery.orc(x, y)
             elif choice == 'troll':
-                #create a troll
-                fighter_component = characterclass.Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
-                ai_component = BasicMonster()
-
-                monster = baseclasses.Object(x, y, 'T', 'troll', libtcod.darker_green,
-                                 blocks=True, fighter=fighter_component, ai=ai_component)
+                monster = beastery.troll(x, y)
             elif choice == 'goblin':
-                #create a goblin
-                fighter_component = characterclass.Fighter(hp=15, defense=1, power=4, xp=50, death_function=monster_death)
-                ai_component = BasicMonster()
-
-                monster = baseclasses.Object(x, y, 'G', 'goblin', libtcod.darker_green,
-                                 blocks=True, fighter=fighter_component, ai=ai_component)
+                monster = beastery.goblin(x, y)
 
             baseclasses.objects.append(monster)
 
@@ -477,46 +463,3 @@ def cast_confuse():
     monster.ai = ConfusedMonster(old_ai)
     monster.ai.owner = monster  #tell the new component who owns it
     messageconsole.message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
-
-def monster_death(monster):
-    #transform it into a nasty corpse! it doesn't block, can't be
-    #attacked and doesn't move
-    messageconsole.message('The ' + monster.name + ' is dead! You gain ' + str(monster.fighter.xp) + ' experience points.', libtcod.orange)
-    monster.char = '%'
-    monster.color = libtcod.dark_red
-    monster.blocks = False
-    monster.fighter = None
-    monster.ai = None
-    monster.name = 'remains of ' + monster.name
-    monster.send_to_back()
-
-class BasicMonster:
-    #AI for a basic monster.
-    def take_turn(self):
-        #a basic monster takes its turn. if you can see it, it can see you
-        monster = self.owner
-        if libtcod.map_is_in_fov(baseclasses.fov_map, monster.x, monster.y):
-
-            #move towards player if far away
-            if monster.distance_to(pc.player) >= 2:
-                monster.move_astar(pc.player)
-
-            #close enough, attack! (if the player is still alive.)
-            elif pc.player.fighter.hp > 0:
-                monster.fighter.attack(pc.player)
-
-class ConfusedMonster:
-    #AI for a temporarily confused monster (reverts to previous AI after a while).
-    def __init__(self, old_ai, num_turns=CONFUSE_NUM_TURNS):
-        self.old_ai = old_ai
-        self.num_turns = num_turns
-
-    def take_turn(self):
-        if self.num_turns > 0:  #still confused...
-            #move in a random direction, and decrease the number of turns confused
-            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
-            self.num_turns -= 1
-
-        else:  #restore the previous AI (this one will be deleted because it's not referenced anymore)
-            self.owner.ai = self.old_ai
-            messageconsole.message('The ' + self.owner.name + ' is no longer confused!', libtcod.red)
