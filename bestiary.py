@@ -9,8 +9,18 @@ def goblin(x, y):
     fighter_component = characterclass.Fighter(hp=10, defense=0, power=2, xp=50, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
-    monster = baseclasses.Object(x, y, 'G', 'goblin', libtcod.darker_green,
+    colour = libtcod.desaturated_green
+
+    monster = baseclasses.Object(x, y, 'G', 'goblin', colour,
                      blocks=True, fighter=fighter_component, ai=ai_component)
+
+    dice = libtcod.random_get_int(0, 1, 100)
+
+    if (dice >= 99):
+        monster.colour = libtcod.silver
+        monster.fighter.multiplier = 1.5
+        monster.fighter.xp = monster.fighter.xp * 1.5
+        monster.loot = equipment.random_magic_weapon()
 
     return monster
 
@@ -19,8 +29,18 @@ def orc(x, y):
     fighter_component = characterclass.Fighter(hp=20, defense=1, power=4, xp=35, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
-    monster = baseclasses.Object(x, y, 'o', 'orc', libtcod.desaturated_green,
+    colour = libtcod.desaturated_green
+
+    monster = baseclasses.Object(x, y, 'O', 'Orc', colour,
                                     blocks=True, fighter=fighter_component, ai=ai_component)
+
+    dice = libtcod.random_get_int(0, 1, 100)
+
+    if (dice >= 99):
+        monster.colour = libtcod.silver
+        monster.fighter.multiplier = 1.5
+        monster.fighter.xp = monster.fighter.xp * 1.5
+        monster.loot = equipment.random_magic_weapon()
 
     return monster
 
@@ -29,8 +49,18 @@ def troll(x, y):
     fighter_component = characterclass.Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
-    monster = baseclasses.Object(x, y, 'T', 'troll', libtcod.darker_green,
+    colour = libtcod.darker_green
+
+    monster = baseclasses.Object(x, y, 'T', 'troll', color,
                      blocks=True, fighter=fighter_component, ai=ai_component)
+
+    dice = libtcod.random_get_int(0, 1, 100)
+
+    if (dice >= 99):
+        monster.colour = libtcod.silver
+        monster.fighter.multiplier = 1.5
+        monster.fighter.xp = monster.fighter.xp * 1.5
+        monster.loot = equipment.random_magic_weapon()
 
     return monster
 
@@ -45,3 +75,8 @@ def monster_death(monster):
     monster.ai = None
     monster.name = 'remains of ' + monster.name
     monster.send_to_back()
+
+    if (monster.loot != None):
+        loot.x = monster.x
+        loot.y = monster.y
+        baseclasses.object.append(loot)
