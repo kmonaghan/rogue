@@ -159,3 +159,28 @@ def random_weapon(x,y):
         item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
 
     return item
+
+
+def random_magic_weapon():
+    item = random_weapon(0,0)
+
+    dice = libtcod.random_get_int(0, 1, 1000)
+
+    if (dice <= 500):
+        item.name = item.name + " of Stabby Stabby"
+        item.color = libtcod.chartreuse
+        item.equipment.power_bonus = item.equipment.power_bonus * 1.25
+    elif (dice <= 750):
+        item.name = item.name + " of YORE MA"
+        item.color = libtcod.blue
+        item.equipment.power_bonus = item.equipment.power_bonus * 1.5
+    elif (dice <= 990):
+        item.name = item.name + " of I'll FUCKING Have You"
+        item.color = libtcod.purple
+        item.equipment.power_bonus = item.equipment.power_bonus * 2
+    else:
+        item.name = item.name + " of Des and Troy"
+        item.color = libtcod.crimson
+        item.equipment.power_bonus = item.equipment.power_bonus * 4
+
+    return item

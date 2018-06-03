@@ -12,21 +12,23 @@ class Fighter:
         self.base_power = power
         self.xp = xp
         self.death_function = death_function
-
+        self.multiplier = 1
+        self.owner = None
+        
     @property
     def power(self):  #return actual power, by summing up the bonuses from all equipped items
         bonus = sum(equipment.power_bonus for equipment in equipment.get_all_equipped(self.owner))
-        return self.base_power + bonus
+        return (self.base_power + bonus) * self.multiplier
 
     @property
     def defense(self):  #return actual defense, by summing up the bonuses from all equipped items
         bonus = sum(equipment.defense_bonus for equipment in equipment.get_all_equipped(self.owner))
-        return self.base_defense + bonus
+        return (self.base_defense + bonus) * self.multiplier
 
     @property
     def max_hp(self):  #return actual max_hp, by summing up the bonuses from all equipped items
         bonus = sum(equipment.max_hp_bonus for equipment in equipment.get_all_equipped(self.owner))
-        return self.base_max_hp + bonus
+        return (self.base_max_hp + bonus) * self.multiplier
 
     def attack(self, target):
         #a simple formula for attack damage

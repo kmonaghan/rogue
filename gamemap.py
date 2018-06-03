@@ -5,7 +5,7 @@ import equipment
 import characterclass
 import messageconsole
 import random
-import beastery
+import bestiary
 
 #size of the map
 MAP_WIDTH = 80
@@ -281,11 +281,11 @@ def place_objects(room):
         if not baseclasses.is_blocked(x, y):
             choice = baseclasses.random_choice(monster_chances)
             if choice == 'orc':
-                monster = beastery.orc(x, y)
+                monster = bestiary.orc(x, y)
             elif choice == 'troll':
-                monster = beastery.troll(x, y)
+                monster = bestiary.troll(x, y)
             elif choice == 'goblin':
-                monster = beastery.goblin(x, y)
+                monster = bestiary.goblin(x, y)
 
             baseclasses.objects.append(monster)
 

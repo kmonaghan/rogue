@@ -50,6 +50,8 @@ class Object:
             self.item = equipment.Item()
             self.item.owner = self
 
+        self.loot = None
+        
     def move(self, dx, dy):
         #move by the given amount, if the destination is not blocked
         if not is_blocked(self.x + dx, self.y + dy):

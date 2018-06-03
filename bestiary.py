@@ -3,6 +3,7 @@ import baseclasses
 import characterclass
 import messageconsole
 import ai
+import equipment
 
 def goblin(x, y):
     #create a goblin
@@ -16,7 +17,7 @@ def goblin(x, y):
 
     dice = libtcod.random_get_int(0, 1, 100)
 
-    if (dice >= 99):
+    if (dice >= 97):
         monster.colour = libtcod.silver
         monster.fighter.multiplier = 1.5
         monster.fighter.xp = monster.fighter.xp * 1.5
@@ -36,7 +37,7 @@ def orc(x, y):
 
     dice = libtcod.random_get_int(0, 1, 100)
 
-    if (dice >= 99):
+    if (dice >= 97):
         monster.colour = libtcod.silver
         monster.fighter.multiplier = 1.5
         monster.fighter.xp = monster.fighter.xp * 1.5
@@ -49,14 +50,14 @@ def troll(x, y):
     fighter_component = characterclass.Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
-    colour = libtcod.darker_green
+    color = libtcod.darker_green
 
     monster = baseclasses.Object(x, y, 'T', 'troll', color,
                      blocks=True, fighter=fighter_component, ai=ai_component)
 
     dice = libtcod.random_get_int(0, 1, 100)
 
-    if (dice >= 99):
+    if (dice >= 97):
         monster.colour = libtcod.silver
         monster.fighter.multiplier = 1.5
         monster.fighter.xp = monster.fighter.xp * 1.5
@@ -77,6 +78,6 @@ def monster_death(monster):
     monster.send_to_back()
 
     if (monster.loot != None):
-        loot.x = monster.x
-        loot.y = monster.y
-        baseclasses.object.append(loot)
+        monster.loot.x = monster.x
+        monster.loot.y = monster.y
+        baseclasses.objects.append(monster.loot)
