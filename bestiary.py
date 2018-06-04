@@ -5,6 +5,14 @@ import messageconsole
 import ai
 import equipment
 
+def upgrade_npc(npc):
+    npc.color = libtcod.silver
+    npc.fighter.multiplier = 1.5
+    npc.fighter.xp = npc.fighter.xp * 1.5
+    npc.loot = equipment.random_magic_weapon()
+    npc.loot.x = None
+    npc.loot.y = None
+
 def goblin(x, y):
     #create a goblin
     fighter_component = characterclass.Fighter(hp=10, defense=0, power=3, xp=5, death_function=monster_death)
@@ -16,10 +24,7 @@ def goblin(x, y):
     dice = libtcod.random_get_int(0, 1, 100)
 
     if (dice >= 98):
-        monster.color = libtcod.silver
-        monster.fighter.multiplier = 1.5
-        monster.fighter.xp = monster.fighter.xp * 1.5
-        monster.loot = equipment.random_magic_weapon()
+        upgrade_npc(monster)
 
     return monster
 
@@ -34,10 +39,7 @@ def orc(x, y):
     dice = libtcod.random_get_int(0, 1, 100)
 
     if (dice >= 98):
-        monster.color = libtcod.silver
-        monster.fighter.multiplier = 1.5
-        monster.fighter.xp = monster.fighter.xp * 1.5
-        monster.loot = equipment.random_magic_weapon()
+        upgrade_npc(monster)
 
     return monster
 
@@ -52,10 +54,7 @@ def troll(x, y):
     dice = libtcod.random_get_int(0, 1, 100)
 
     if (dice >= 98):
-        monster.color = libtcod.silver
-        monster.fighter.multiplier = 1.5
-        monster.fighter.xp = monster.fighter.xp * 1.5
-        monster.loot = equipment.random_magic_weapon()
+        upgrade_npc(monster)
 
     return monster
 
