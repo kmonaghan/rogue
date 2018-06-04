@@ -7,7 +7,7 @@ import equipment
 
 def goblin(x, y):
     #create a goblin
-    fighter_component = characterclass.Fighter(hp=10, defense=0, power=2, xp=50, death_function=monster_death)
+    fighter_component = characterclass.Fighter(hp=10, defense=0, power=2, xp=5, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
     colour = libtcod.desaturated_green
@@ -27,7 +27,7 @@ def goblin(x, y):
 
 def orc(x, y):
     #create an orc
-    fighter_component = characterclass.Fighter(hp=20, defense=1, power=4, xp=35, death_function=monster_death)
+    fighter_component = characterclass.Fighter(hp=20, defense=1, power=4, xp=15, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
     colour = libtcod.desaturated_green
