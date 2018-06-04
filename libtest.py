@@ -318,6 +318,8 @@ def check_level_up():
         elif choice == 2:
             pc.player.fighter.base_defense += 1
 
+        pc.player.fighter.hp = pc.player.fighter.max_hp
+
 def target_tile(max_range=None):
     global key, mouse
     #return the position of a tile left-clicked in player's FOV (optionally in a range), or (None,None) if right-clicked.
