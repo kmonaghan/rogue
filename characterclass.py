@@ -14,28 +14,31 @@ class Fighter:
         self.death_function = death_function
         self.multiplier = 1
         self.owner = None
-        
+
     @property
     def power(self):  #return actual power, by summing up the bonuses from all equipped items
-        bonus = sum(equipment.power_bonus for equipment in equipment.get_all_equipped(self.owner))
+        bonus = sum(equipment.power_bonus for equipment in self.owner.get_all_equipped())
         return (self.base_power + bonus) * self.multiplier
 
     @property
     def defense(self):  #return actual defense, by summing up the bonuses from all equipped items
-        bonus = sum(equipment.defense_bonus for equipment in equipment.get_all_equipped(self.owner))
+        bonus = sum(equipment.defense_bonus for equipment in self.owner.get_all_equipped())
         return (self.base_defense + bonus) * self.multiplier
 
     @property
     def max_hp(self):  #return actual max_hp, by summing up the bonuses from all equipped items
-        bonus = sum(equipment.max_hp_bonus for equipment in equipment.get_all_equipped(self.owner))
+        bonus = sum(equipment.max_hp_bonus for equipment in self.owner.get_all_equipped())
         return (self.base_max_hp + bonus) * self.multiplier
 
     def attack(self, target):
         #a simple formula for attack damage
-        damage = self.power - target.fighter.defense
+        hit = self.power - target.fighter.defense
 
-        if damage > 0:
+        if hit > 0:
             #make the target take some damage
+            weapon = self.owner.get_equipped_in_slot("right hand")
+            damage = weapon.damage()
+
             messageconsole.message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
             target.fighter.take_damage(damage)
         else:

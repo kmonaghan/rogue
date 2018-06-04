@@ -8,22 +8,20 @@ class Item:
     #an item that can be picked up and used.
     def __init__(self, use_function=None):
         self.use_function = use_function
-        self.number_of_dice = 1
-        self.type_of_dice = 6
-        self.bonus_damage = 0
 
-    def pick_up(self):
+    def pick_up(self, npc):
         #add to the player's inventory and remove from the map
-        if len(pc.player.inventory) >= 26:
+        if len(npc.inventory) >= 26:
             messageconsole.message('Your inventory is full, cannot pick up ' + self.owner.name + '.', libtcod.red)
         else:
-            pc.player.inventory.append(self.owner)
+            npc.add_to_inventory(self.owner)
             baseclasses.objects.remove(self.owner)
-            messageconsole.message('You picked up a ' + self.owner.name + '!', libtcod.green)
+            if (npc == pc.player):
+                messageconsole.message('You picked up a ' + self.owner.name + '!', libtcod.green)
 
             #special case: automatically equip, if the corresponding equipment slot is unused
             equipment = self.owner.equipment
-            if equipment and get_equipped_in_slot(equipment.slot) is None:
+            if equipment and npc.get_equipped_in_slot(equipment.slot) is None:
                 equipment.equip()
 
     def drop(self):
@@ -33,7 +31,7 @@ class Item:
 
         #add to the map and remove from the player's inventory. also, place it at the player's coordinates
         baseclasses.objects.append(self.owner)
-        pc.player.inventory.remove(self.owner)
+        pc.player.remove_from_inventory(self.owner)
         self.owner.x = pc.player.x
         self.owner.y = pc.player.y
         messageconsole.message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
@@ -52,21 +50,15 @@ class Item:
             if self.use_function() != 'cancelled':
                 pc.player.inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason
 
-    def damage(self):
-        total = bonus
-
-        for x in range(0, self.number_of_dice):
-            total += libtcod.random_get_int(0, 1, self.type_of_dice)
-
-        return total
-
 class Equipment:
     #an object that can be equipped, yielding bonuses. automatically adds the Item component.
     def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0):
         self.power_bonus = power_bonus
         self.defense_bonus = defense_bonus
         self.max_hp_bonus = max_hp_bonus
-
+        self.number_of_dice = 1
+        self.type_of_dice = 6
+        self.bonus_damage = 0
         self.slot = slot
         self.is_equipped = False
 
@@ -78,7 +70,7 @@ class Equipment:
 
     def equip(self):
         #if the slot is already being used, dequip whatever is there first
-        old_equipment = get_equipped_in_slot(self.slot)
+        old_equipment = self.owner.owner.get_equipped_in_slot(self.slot)
         if old_equipment is not None:
             old_equipment.dequip()
 
@@ -94,22 +86,13 @@ class Equipment:
         if (self.owner == pc.player):
             messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
 
-def get_equipped_in_slot(slot):  #returns the equipment in a slot, or None if it's empty
-    for obj in pc.player.inventory:
-        if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
-            return obj.equipment
-    return None
+    def damage(self):
+        total = self.bonus_damage
 
-def get_all_equipped(obj):  #returns a list of equipped items
-    if obj == pc.player:
-        equipped_list = []
-        for item in pc.player.inventory:
-            if item.equipment and item.equipment.is_equipped:
-                equipped_list.append(item.equipment)
-        return equipped_list
-    else:
-        return []  #other objects have no equipment
+        for x in range(0, self.number_of_dice):
+            total += libtcod.random_get_int(0, 1, self.type_of_dice)
 
+        return total
 
 def random_armour(x,y):
     item_chances = {}
@@ -223,11 +206,14 @@ def random_magic_weapon():
         item.color = libtcod.crimson
         item.equipment.power_bonus = item.equipment.power_bonus * 4
 
+    item.equipment.number_of_dice = 2
+    
     return item
 
 def dagger():
     #create a sword
     equipment_component = Equipment(slot='right hand', power_bonus=2)
+    equipment_component.type_of_dice = 4
     item = baseclasses.Object(0, 0, '-', 'dagger', libtcod.sky, gear=equipment_component)
 
     return item
@@ -235,12 +221,14 @@ def dagger():
 def shortsword():
     #create a sword
     equipment_component = Equipment(slot='right hand', power_bonus=3)
+    equipment_component.type_of_dice = 6
     item = baseclasses.Object(x, y, '/', 'short sword', libtcod.sky, gear=equipment_component)
 
     return item
 
 def longsword():
     #create a sword
+    equipment_component.type_of_dice = 8
     equipment_component = Equipment(slot='right hand', power_bonus=4)
     item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
 

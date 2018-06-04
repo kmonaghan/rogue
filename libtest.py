@@ -264,7 +264,7 @@ def handle_keys():
                 #pick up an item
                 for object in baseclasses.objects:  #look for an item in the player's tile
                     if object.x == pc.player.x and object.y == pc.player.y and object.item:
-                        object.item.pick_up()
+                        object.item.pick_up(pc.player)
                         break
 
             if key_char == 'i':

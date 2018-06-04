@@ -18,7 +18,7 @@ def create_player():
     #initial equipment: a dagger
     equipment_component = equipment.Equipment(slot='right hand', power_bonus=2)
     obj = baseclasses.Object(0, 0, '-', 'dagger', libtcod.sky, gear=equipment_component)
-    player.inventory.append(obj)
+    player.add_to_inventory(obj)
     equipment_component.equip()
     obj.always_visible = True
 

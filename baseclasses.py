@@ -52,7 +52,7 @@ class Object:
             self.item = equipment.Item()
             self.item.owner = self
 
-        self.loot = None
+        self.lootable = True
 
     def move(self, dx, dy):
         #move by the given amount, if the destination is not blocked
@@ -148,6 +148,27 @@ class Character(Object):
     def __init__(self, x, y, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
         super(Character, self).__init__(x, y, char, name, color, blocks, always_visible, fighter, ai, item, gear)
         self.inventory = []
+
+    def get_equipped_in_slot(self, slot):  #returns the equipment in a slot, or None if it's empty
+        for obj in self.inventory:
+            if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
+                return obj.equipment
+        return None
+
+    def get_all_equipped(self):  #returns a list of equipped items
+        equipped_list = []
+        for item in self.inventory:
+            if item.equipment and item.equipment.is_equipped:
+                equipped_list.append(item.equipment)
+        return equipped_list
+
+    def add_to_inventory(self, obj):
+        obj.owner = self
+        self.inventory.append(obj)
+
+    def remove_from_inventory(self, obj):
+        self.inventory.remove(obj)
+        obj.owner = None
 
 class Point:
     #a rectangle on the map. used to characterize a room.
