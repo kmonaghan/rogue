@@ -51,7 +51,7 @@ class Object:
             self.item.owner = self
 
         self.loot = None
-        
+
     def move(self, dx, dy):
         #move by the given amount, if the destination is not blocked
         if not is_blocked(self.x + dx, self.y + dy):
@@ -141,6 +141,12 @@ class Object:
 
         #Delete the path to free memory
         libtcod.path_delete(my_path)
+
+class Point:
+    #a rectangle on the map. used to characterize a room.
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 class Rect:
     #a rectangle on the map. used to characterize a room.
