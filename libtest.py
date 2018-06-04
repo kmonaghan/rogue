@@ -126,7 +126,12 @@ def render_all():
     #show the player's stats
     render_bar(1, 1, BAR_WIDTH, 'HP', pc.player.fighter.hp, pc.player.fighter.max_hp,
                libtcod.light_red, libtcod.darker_red)
-    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(gamemap.dungeon_level))
+
+    level_up_xp = LEVEL_UP_BASE + pc.player.level * LEVEL_UP_FACTOR
+    render_bar(1, 3, BAR_WIDTH, 'XP', pc.player.fighter.xp, level_up_xp,
+               libtcod.light_green, libtcod.darker_green)
+
+    libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(gamemap.dungeon_level))
 
     #display names of objects under the mouse
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
