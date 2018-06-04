@@ -25,7 +25,7 @@ CHARACTER_SCREEN_WIDTH = 30
 LEVEL_SCREEN_WIDTH = 40
 
 #experience and level-ups
-LEVEL_UP_BASE = 200
+LEVEL_UP_BASE = 100
 LEVEL_UP_FACTOR = 150
 
 FOV_ALGO = 0  #default FOV algorithm
