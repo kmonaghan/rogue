@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 import messageconsole
+import pc
 
 #spell values
 HEAL_AMOUNT = 40
