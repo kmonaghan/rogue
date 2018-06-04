@@ -12,6 +12,9 @@ import ai
 MAP_WIDTH = 80
 MAP_HEIGHT = 40
 
+MAX_MAP_WIDTH = 80
+MAX_MAP_HEIGHT = 40
+
 #parameters for dungeon generator
 ROOM_MAX_SIZE = 10
 ROOM_MIN_SIZE = 6
@@ -115,9 +118,16 @@ def traverse_node(node, dat):
     return True
 
 def make_bsp():
-    global map, stairs, bsp_rooms
+    global map, stairs, bsp_rooms, MAP_HEIGHT, MAP_WIDTH
 
     baseclasses.objects = [pc.player]
+
+    if (dungeon_level <= 2):
+        MAP_HEIGHT = (MAX_MAP_HEIGHT / 3) * 2
+        MAP_WIDTH = (MAX_MAP_WIDTH / 3) * 2
+    else:
+        MAP_HEIGHT = MAX_MAP_HEIGHT
+        MAP_WIDTH = MAX_MAP_WIDTH
 
     map = [[baseclasses.Tile(True) for y in range(MAP_HEIGHT)] for x in range(MAP_WIDTH)]
 
@@ -151,16 +161,16 @@ def make_bsp():
         new_room = baseclasses.Rect(room[0], room[1], 2, 2)
         place_objects(new_room)
 
-    num_to_select = 4                           # set the number to select here.
-    list_of_random_items = random.sample(bsp_rooms, num_to_select)
+#    num_to_select = 4                           # set the number to select here.
+#    list_of_random_items = random.sample(bsp_rooms, num_to_select)
 
-    start_room = list_of_random_items[0]
-    monster = bestiary.goblin(start_room[0], start_room[1])
-    monster.color = libtcod.red
-    monster.ai = ai.WanderingMonster(list_of_random_items, monster.ai)
-    monster.ai.owner = monster
-    bestiary.upgrade_npc(monster)
-    baseclasses.objects.append(monster)
+#    start_room = list_of_random_items[0]
+#    monster = bestiary.goblin(start_room[0], start_room[1])
+#    monster.color = libtcod.red
+#    monster.ai = ai.WanderingMonster(list_of_random_items, monster.ai)
+#    monster.ai.owner = monster
+#    bestiary.upgrade_npc(monster)
+#    baseclasses.objects.append(monster)
 
 def place_objects(room):
     #this is where we decide the chance of each monster or item appearing.
