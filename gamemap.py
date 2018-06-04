@@ -6,6 +6,7 @@ import characterclass
 import messageconsole
 import random
 import bestiary
+import ai
 
 #size of the map
 MAP_WIDTH = 80
@@ -245,6 +246,17 @@ def make_bsp():
     for room in bsp_rooms:
         new_room = baseclasses.Rect(room[0], room[1], 2, 2)
         place_objects(new_room)
+
+    num_to_select = 4                           # set the number to select here.
+    list_of_random_items = random.sample(bsp_rooms, num_to_select)
+
+    start_room = list_of_random_items[0]
+    monster = bestiary.goblin(start_room[0], start_room[1])
+    monster.color = libtcod.red
+    monster.ai = ai.WanderingMonster(list_of_random_items, monster.ai)
+    monster.ai.owner = monster
+    bestiary.upgrade_npc(monster)
+    baseclasses.objects.append(monster)
 
 def place_objects(room):
     #this is where we decide the chance of each monster or item appearing.
