@@ -1,3 +1,5 @@
+__metaclass__ = type
+
 import libtcodpy as libtcod
 import gamemap
 import equipment
@@ -141,6 +143,11 @@ class Object:
 
         #Delete the path to free memory
         libtcod.path_delete(my_path)
+
+class Character(Object):
+    def __init__(self, x, y, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
+        super(Character, self).__init__(x, y, char, name, color, blocks, always_visible, fighter, ai, item, gear)
+        self.inventory = []
 
 class Point:
     #a rectangle on the map. used to characterize a room.

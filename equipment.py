@@ -4,19 +4,20 @@ import pc
 import baseclasses
 import tome
 
-inventory = []
-
 class Item:
     #an item that can be picked up and used.
     def __init__(self, use_function=None):
         self.use_function = use_function
+        self.number_of_dice = 1
+        self.type_of_dice = 6
+        self.bonus_damage = 0
 
     def pick_up(self):
         #add to the player's inventory and remove from the map
-        if len(inventory) >= 26:
+        if len(pc.player.inventory) >= 26:
             messageconsole.message('Your inventory is full, cannot pick up ' + self.owner.name + '.', libtcod.red)
         else:
-            inventory.append(self.owner)
+            pc.player.inventory.append(self.owner)
             baseclasses.objects.remove(self.owner)
             messageconsole.message('You picked up a ' + self.owner.name + '!', libtcod.green)
 
@@ -32,7 +33,7 @@ class Item:
 
         #add to the map and remove from the player's inventory. also, place it at the player's coordinates
         baseclasses.objects.append(self.owner)
-        inventory.remove(self.owner)
+        pc.player.inventory.remove(self.owner)
         self.owner.x = pc.player.x
         self.owner.y = pc.player.y
         messageconsole.message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
@@ -49,7 +50,15 @@ class Item:
             messageconsole.message('The ' + self.owner.name + ' cannot be used.')
         else:
             if self.use_function() != 'cancelled':
-                inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason
+                pc.player.inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason
+
+    def damage(self):
+        total = bonus
+
+        for x in range(0, self.number_of_dice):
+            total += libtcod.random_get_int(0, 1, self.type_of_dice)
+
+        return total
 
 class Equipment:
     #an object that can be equipped, yielding bonuses. automatically adds the Item component.
@@ -86,7 +95,7 @@ class Equipment:
             messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
 
 def get_equipped_in_slot(slot):  #returns the equipment in a slot, or None if it's empty
-    for obj in inventory:
+    for obj in pc.player.inventory:
         if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
             return obj.equipment
     return None
@@ -94,7 +103,7 @@ def get_equipped_in_slot(slot):  #returns the equipment in a slot, or None if it
 def get_all_equipped(obj):  #returns a list of equipped items
     if obj == pc.player:
         equipped_list = []
-        for item in inventory:
+        for item in pc.player.inventory:
             if item.equipment and item.equipment.is_equipped:
                 equipped_list.append(item.equipment)
         return equipped_list
@@ -182,19 +191,13 @@ def random_weapon(x,y):
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'dagger':
-        #create a sword
-        equipment_component = Equipment(slot='right hand', power_bonus=2)
-        item = baseclasses.Object(0, 0, '-', 'dagger', libtcod.sky, gear=equipment_component)
+        item = dagger()
 
     elif choice == 'short sword':
-        #create a sword
-        equipment_component = Equipment(slot='right hand', power_bonus=3)
-        item = baseclasses.Object(x, y, '/', 'short sword', libtcod.sky, gear=equipment_component)
+        item = shortsword()
 
     elif choice == 'long sword':
-        #create a sword
-        equipment_component = Equipment(slot='right hand', power_bonus=4)
-        item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
+        item = longsword()
 
     return item
 
@@ -219,5 +222,26 @@ def random_magic_weapon():
         item.name = item.name + " of Des and Troy"
         item.color = libtcod.crimson
         item.equipment.power_bonus = item.equipment.power_bonus * 4
+
+    return item
+
+def dagger():
+    #create a sword
+    equipment_component = Equipment(slot='right hand', power_bonus=2)
+    item = baseclasses.Object(0, 0, '-', 'dagger', libtcod.sky, gear=equipment_component)
+
+    return item
+
+def shortsword():
+    #create a sword
+    equipment_component = Equipment(slot='right hand', power_bonus=3)
+    item = baseclasses.Object(x, y, '/', 'short sword', libtcod.sky, gear=equipment_component)
+
+    return item
+
+def longsword():
+    #create a sword
+    equipment_component = Equipment(slot='right hand', power_bonus=4)
+    item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
 
     return item

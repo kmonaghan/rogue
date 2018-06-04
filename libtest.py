@@ -206,11 +206,11 @@ def menu(header, options, width):
 
 def inventory_menu(header):
     #show a menu with each item of the inventory as an option
-    if len(equipment.inventory) == 0:
+    if len(pc.player.inventory) == 0:
         options = ['Inventory is empty.']
     else:
         options = []
-        for item in equipment.inventory:
+        for item in pc.player.inventory:
             text = item.name
             #show additional information, in case it's equipped
             if item.equipment and item.equipment.is_equipped:
@@ -220,8 +220,8 @@ def inventory_menu(header):
     index = menu(header, options, INVENTORY_WIDTH)
 
     #if an item was chosen, return it
-    if index is None or len(equipment.inventory) == 0: return None
-    return equipment.inventory[index].item
+    if index is None or len(pc.player.inventory) == 0: return None
+    return pc.player.inventory[index].item
 
 def msgbox(text, width=50):
     menu(text, [], width)  #use menu() as a sort of "message box"
@@ -370,7 +370,6 @@ def save_game():
     file['objects'] = baseclasses.objects
     file['player_index'] = baseclasses.objects.index(pc.player)  #index of player in objects list
     file['stairs_index'] = baseclasses.objects.index(gamemap.stairs)  #same for the stairs
-    file['inventory'] = equipment.inventory
     file['game_msgs'] = messageconsole.game_msgs
     file['game_state'] = baseclasses.game_state
     file['dungeon_level'] = gamemap.dungeon_level
@@ -382,7 +381,6 @@ def load_game():
     baseclasses.objects = file['objects']
     pc.player = baseclasses.objects[file['player_index']]  #get index of player in objects list and access it
     gamemap.stairs = baseclasses.objects[file['stairs_index']]  #same for the stairs
-    equipment.inventory = file['inventory']
     messageconsole.game_msgs = file['game_msgs']
     baseclasses.game_state = file['game_state']
     gamemap.dungeon_level = file['dungeon_level']
