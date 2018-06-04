@@ -98,35 +98,29 @@ def random_armour(x,y):
     item_chances = {}
     item_chances['shield'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
     item_chances['helmet'] = baseclasses.from_dungeon_level([[30, 2], [15, 3], [10, 4]])
+    item_chances['leather shirt'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
     item_chances['scalemail'] = baseclasses.from_dungeon_level([[40, 2], [30, 3], [15, 4]])
-    item_chances['chainmail'] = baseclasses.from_dungeon_level([[15, 3], [30, 4]])
+    item_chances['chainmail'] = baseclasses.from_dungeon_level([[40, 3], [30, 4]])
     item_chances['breastplate'] = baseclasses.from_dungeon_level([[15, 4]])
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'shield':
-        #create a shield
-        equipment_component = Equipment(slot='left hand', defense_bonus=1)
-        item = baseclasses.Object(x, y, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
+        item = shield()
 
     elif choice == 'helmet':
-        #create a helmet
-        equipment_component = Equipment(slot='head', defense_bonus=1)
-        item = baseclasses.Object(x, y, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
+        item = helmet()
+
+    elif choice == 'leather shirt':
+        item = leathershirt()
 
     elif choice == 'scalemail':
-        #create a chainmail
-        equipment_component = Equipment(slot='chest', defense_bonus=1)
-        item = baseclasses.Object(x, y, '=', 'scalemail', libtcod.sky, gear=equipment_component)
+        item = scalemail()
 
     elif choice == 'chainmail':
-        #create a chainmail
-        equipment_component = Equipment(slot='chest', defense_bonus=2)
-        item = baseclasses.Object(x, y, '=', 'chainmail', libtcod.sky, gear=equipment_component)
+        item = chainmail()
 
     elif choice == 'breastplate':
-        #create a chainmail
-        equipment_component = Equipment(slot='chest', defense_bonus=3)
-        item = baseclasses.Object(x, y, '=', 'breastplate', libtcod.sky, gear=equipment_component)
+        item = breastplate()
 
     return item
 
@@ -207,7 +201,49 @@ def random_magic_weapon():
         item.equipment.power_bonus = item.equipment.power_bonus * 4
 
     item.equipment.number_of_dice = 2
-    
+
+    return item
+
+def shield():
+    #create a shield
+    equipment_component = Equipment(slot='left hand', defense_bonus=1)
+    item = baseclasses.Object(x, y, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
+
+    return item
+
+def helmet():
+    #create a helmet
+    equipment_component = Equipment(slot='head', defense_bonus=1)
+    item = baseclasses.Object(x, y, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
+
+    return item
+
+def leathershirt():
+    #create a chainmail
+    equipment_component = Equipment(slot='chest', defense_bonus=1)
+    item = baseclasses.Object(x, y, '=', 'leather shirt', libtcod.sky, gear=equipment_component)
+
+    return item
+
+def scalemail():
+    #create a chainmail
+    equipment_component = Equipment(slot='chest', defense_bonus=2)
+    item = baseclasses.Object(x, y, '=', 'scalemail', libtcod.sky, gear=equipment_component)
+
+    return item
+
+def chainmail():
+    #create a chainmail
+    equipment_component = Equipment(slot='chest', defense_bonus=3)
+    item = baseclasses.Object(x, y, '=', 'chainmail', libtcod.sky, gear=equipment_component)
+
+    return item
+
+def breastplate():
+    #create a breastplate
+    equipment_component = Equipment(slot='chest', defense_bonus=4)
+    item = baseclasses.Object(x, y, '=', 'breastplate', libtcod.sky, gear=equipment_component)
+
     return item
 
 def dagger():
