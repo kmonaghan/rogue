@@ -4,48 +4,48 @@ import pc
 import messageconsole
 import tome
 
-class BasicMonster:
-    #AI for a basic monster.
+class BasicNPC:
+    #AI for a basic npc.
     def take_turn(self):
-        #a basic monster takes its turn. if you can see it, it can see you
-        monster = self.owner
-        if libtcod.map_is_in_fov(baseclasses.fov_map, monster.x, monster.y):
+        #a basic npc takes its turn. if you can see it, it can see you
+        npc = self.owner
+        if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
 
             #move towards player if far away
-            if monster.distance_to(pc.player) >= 2:
-                monster.move_astar(pc.player)
+            if npc.distance_to(pc.player) >= 2:
+                npc.move_astar(pc.player)
 
             #close enough, attack! (if the player is still alive.)
             elif pc.player.fighter.hp > 0:
-                monster.fighter.attack(pc.player)
+                npc.fighter.attack(pc.player)
 
-class WanderingMonster:
-    #AI for a temporarily confused monster (reverts to previous AI after a while).
+class Wanderingnpc:
+    #AI for a temporarily confused npc (reverts to previous AI after a while).
     def __init__(self, rooms, old_ai):
         self.rooms = rooms
         self.old_ai = old_ai
         self.next_target()
 
-    #AI for a basic monster.
+    #AI for a basic npc.
     def take_turn(self):
-        #a basic monster takes its turn. if you can see it, it can see you
-        monster = self.owner
-        if libtcod.map_is_in_fov(baseclasses.fov_map, monster.x, monster.y):
+        #a basic npc takes its turn. if you can see it, it can see you
+        npc = self.owner
+        if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
             self.owner.ai = self.old_ai
 
         else:
-            if (monster.x == self.target.x) and (monster.y == self.target.y):
+            if (npc.x == self.target.x) and (npc.y == self.target.y):
                 self.next_target()
 
-            monster.move_astar(self.target)
+            npc.move_astar(self.target)
 
     def next_target(self):
         room = self.rooms.pop(0)
         self.target = baseclasses.Point(room[0], room[1])
         self.rooms.append(room)
 
-class ConfusedMonster:
-    #AI for a temporarily confused monster (reverts to previous AI after a while).
+class ConfusedNPC:
+    #AI for a temporarily confused npc (reverts to previous AI after a while).
     def __init__(self, old_ai, num_turns=tome.CONFUSE_NUM_TURNS):
         self.old_ai = old_ai
         self.num_turns = num_turns

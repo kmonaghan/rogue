@@ -22,15 +22,15 @@ def cast_heal():
 
 def cast_lightning():
     #find closest enemy (inside a maximum range) and damage it
-    monster = closest_monster(LIGHTNING_RANGE)
-    if monster is None:  #no enemy found within maximum range
+    npc = closest_npc(LIGHTNING_RANGE)
+    if npc is None:  #no enemy found within maximum range
         messageconsole.message('No enemy is close enough to strike.', libtcod.red)
         return 'cancelled'
 
     #zap it!
-    messageconsole.message('A lighting bolt strikes the ' + monster.name + ' with a loud thunder! The damage is '
+    messageconsole.message('A lighting bolt strikes the ' + npc.name + ' with a loud thunder! The damage is '
             + str(LIGHTNING_DAMAGE) + ' hit points.', libtcod.light_blue)
-    monster.fighter.take_damage(LIGHTNING_DAMAGE)
+    npc.fighter.take_damage(LIGHTNING_DAMAGE)
 
 def cast_fireball():
     #ask the player for a target tile to throw a fireball at
@@ -47,11 +47,11 @@ def cast_fireball():
 def cast_confuse():
     #ask the player for a target to confuse
     messageconsole.message('Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan)
-    monster = target_monster(CONFUSE_RANGE)
-    if monster is None: return 'cancelled'
+    npc = target_npc(CONFUSE_RANGE)
+    if npc is None: return 'cancelled'
 
-    #replace the monster's AI with a "confused" one; after some turns it will restore the old AI
-    old_ai = monster.ai
-    monster.ai = ConfusedMonster(old_ai)
-    monster.ai.owner = monster  #tell the new component who owns it
-    messageconsole.message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
+    #replace the npc's AI with a "confused" one; after some turns it will restore the old AI
+    old_ai = npc.ai
+    npc.ai = ConfusedNPC(old_ai)
+    npc.ai.owner = npc  #tell the new component who owns it
+    messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)

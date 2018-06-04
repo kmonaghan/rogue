@@ -143,12 +143,16 @@ def make_bsp():
     #Traverse the nodes and create rooms
     libtcod.bsp_traverse_inverted_level_order(bsp, traverse_node)
 
-    #Random room for the stairs
-    stairs_location = random.choice(bsp_rooms)
-    bsp_rooms.remove(stairs_location)
-    stairs = baseclasses.Object(stairs_location[0], stairs_location[1], '<', 'stairs', libtcod.white, always_visible=True)
-    baseclasses.objects.append(stairs)
-    stairs.send_to_back()
+    if (dungeon_level <= 4):
+        #Random room for the stairs
+        stairs_location = random.choice(bsp_rooms)
+        bsp_rooms.remove(stairs_location)
+        stairs = baseclasses.Object(stairs_location[0], stairs_location[1], '<', 'stairs', libtcod.white, always_visible=True)
+        baseclasses.objects.append(stairs)
+        stairs.send_to_back()
+    else:
+        boss_location = random.choice(bsp_rooms)
+        bsp_rooms.remove(boss_location)
 
     #Random room for player start
     player_room = random.choice(bsp_rooms)
@@ -156,7 +160,7 @@ def make_bsp():
     pc.player.x = player_room[0]
     pc.player.y = player_room[1]
 
-    #Add monsters and items
+    #Add npcs and items
     for room in bsp_rooms:
         new_room = baseclasses.Rect(room[0], room[1], 2, 2)
         place_objects(new_room)
@@ -165,54 +169,54 @@ def make_bsp():
     list_of_random_items = random.sample(bsp_rooms, num_to_select)
 
     start_room = list_of_random_items[0]
-    monster = bestiary.goblin(start_room[0], start_room[1])
-    monster.color = libtcod.red
-    monster.ai = ai.WanderingMonster(list_of_random_items, monster.ai)
-    monster.ai.owner = monster
-    bestiary.upgrade_npc(monster)
-    baseclasses.objects.append(monster)
+    npc = bestiary.goblin(start_room[0], start_room[1])
+    npc.color = libtcod.red
+    npc.ai = ai.Wanderingnpc(list_of_random_items, npc.ai)
+    npc.ai.owner = npc
+    bestiary.upgrade_npc(npc)
+    baseclasses.objects.append(npc)
 
 def place_objects(room):
-    #this is where we decide the chance of each monster or item appearing.
+    #this is where we decide the chance of each npc or item appearing.
 
-    #maximum number of monsters per room
-    max_monsters = baseclasses.from_dungeon_level([[2, 1], [3, 3], [5, 4]])
+    #maximum number of npcs per room
+    max_npcs = baseclasses.from_dungeon_level([[2, 1], [3, 3], [5, 4]])
 
-    #chance of each monster
-    monster_chances = {}
-    monster_chances['goblin'] = baseclasses.from_dungeon_level([[60, 1], [30, 2], [15, 3]])
-    monster_chances['orc'] = baseclasses.from_dungeon_level([[15, 2], [30, 3], [60, 4]])
-    monster_chances['troll'] = baseclasses.from_dungeon_level([[15, 3], [30, 4], [60, 5]])
+    #chance of each npc
+    npc_chances = {}
+    npc_chances['goblin'] = baseclasses.from_dungeon_level([[95, 1], [30, 2], [15, 3], [10, 4], [5, 5]])
+    npc_chances['orc'] = baseclasses.from_dungeon_level([[4,1], [65, 2], [65, 3], [50, 4], [45, 5]])
+    npc_chances['troll'] = baseclasses.from_dungeon_level([[1,1], [5, 2], [20, 3], [40, 4], [60, 5]])
 
     #maximum number of items per room
-    max_items = baseclasses.from_dungeon_level([[1, 1], [2, 4]])
+    max_items = baseclasses.from_dungeon_level([[2, 1], [3, 4]])
 
     #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
     item_chances = {}
     item_chances['potion'] = 25  #healing potion always shows up, even if all other items have 0 chance
     item_chances['scroll'] = baseclasses.from_dungeon_level([[25, 2]])
-    item_chances['weapon'] = 35
+    item_chances['weapon'] = 25
     item_chances['armour'] = 25
 
-    #choose random number of monsters
-    num_monsters = libtcod.random_get_int(0, 0, max_monsters)
+    #choose random number of npcs
+    num_npcs = libtcod.random_get_int(0, 0, max_npcs)
 
-    for i in range(num_monsters):
-        #choose random spot for this monster
+    for i in range(num_npcs):
+        #choose random spot for this npc
         x = libtcod.random_get_int(0, room.x1+1, room.x2-1)
         y = libtcod.random_get_int(0, room.y1+1, room.y2-1)
 
         #only place it if the tile is not blocked
         if not baseclasses.is_blocked(x, y):
-            choice = baseclasses.random_choice(monster_chances)
+            choice = baseclasses.random_choice(npc_chances)
             if choice == 'orc':
-                monster = bestiary.orc(x, y)
+                npc = bestiary.orc(x, y)
             elif choice == 'troll':
-                monster = bestiary.troll(x, y)
+                npc = bestiary.troll(x, y)
             elif choice == 'goblin':
-                monster = bestiary.goblin(x, y)
+                npc = bestiary.goblin(x, y)
 
-            baseclasses.objects.append(monster)
+            baseclasses.objects.append(npc)
 
     #choose random number of items
     num_items = libtcod.random_get_int(0, 0, max_items)

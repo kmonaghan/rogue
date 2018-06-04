@@ -22,7 +22,7 @@ def is_blocked(x, y):
     return False
 
 class Object:
-    #this is a generic object: the pc.player, a monster, an item, the stairs...
+    #this is a generic object: the pc.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, x, y, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
         self.x = x
@@ -127,8 +127,8 @@ class Object:
         libtcod.path_compute(my_path, self.x, self.y, target.x, target.y)
 
         #Check if the path exists, and in this case, also the path is shorter than 25 tiles
-        #The path size matters if you want the monster to use alternative longer paths (for example through other rooms) if for example the player is in a corridor
-        #It makes sense to keep path size relatively low to keep the monsters from running around the map if there's an alternative path really far away
+        #The path size matters if you want the npc to use alternative longer paths (for example through other rooms) if for example the player is in a corridor
+        #It makes sense to keep path size relatively low to keep the npcs from running around the map if there's an alternative path really far away
         if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 25:
             #Find the next coordinates in the computed full path
             x, y = libtcod.path_walk(my_path, True)
@@ -137,7 +137,7 @@ class Object:
                 self.x = x
                 self.y = y
         else:
-            #Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
+            #Keep the old move function as a backup so that if there are no paths (for example another npc blocks a corridor)
             #it will still try to move towards the player (closer to the corridor opening)
             self.move_towards(target.x, target.y)
 

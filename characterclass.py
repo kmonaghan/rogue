@@ -4,7 +4,7 @@ import messageconsole
 import pc
 
 class Fighter:
-    #combat-related properties and methods (monster, player, NPC).
+    #combat-related properties and methods (npc, player, NPC).
     def __init__(self, hp, defense, power, xp, death_function=None):
         self.base_max_hp = hp
         self.hp = hp

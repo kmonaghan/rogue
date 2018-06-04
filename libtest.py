@@ -255,7 +255,7 @@ def handle_keys():
         elif key.vk == libtcod.KEY_PAGEDOWN or key.vk == libtcod.KEY_KP3:
             player_move_or_attack(1, 1)
         elif key.vk == libtcod.KEY_KP5:
-            pass  #do nothing ie wait for the monster to come to you
+            pass  #do nothing ie wait for the npc to come to you
         else:
             #test for other keys
             key_char = chr(key.c)
@@ -339,19 +339,19 @@ def target_tile(max_range=None):
                 (max_range is None or pc.player.distance(x, y) <= max_range)):
             return (x, y)
 
-def target_monster(max_range=None):
-    #returns a clicked monster inside FOV up to a range, or None if right-clicked
+def target_npc(max_range=None):
+    #returns a clicked npc inside FOV up to a range, or None if right-clicked
     while True:
         (x, y) = target_tile(max_range)
         if x is None:  #player cancelled
             return None
 
-        #return the first clicked monster, otherwise continue looping
+        #return the first clicked npc, otherwise continue looping
         for obj in baseclasses.objects:
             if obj.x == x and obj.y == y and obj.fighter and obj != pc.player:
                 return obj
 
-def closest_monster(max_range):
+def closest_npc(max_range):
     #find closest enemy, up to a maximum range, and in the player's FOV
     closest_enemy = None
     closest_dist = max_range + 1  #start with (slightly more than) maximum range
@@ -456,7 +456,7 @@ def play_game():
             save_game()
             break
 
-        #let monsters take their turn
+        #let npcs take their turn
         if baseclasses.game_state == 'playing' and player_action != 'didnt-take-turn':
             for object in baseclasses.objects:
                 if object.ai:

@@ -14,10 +14,10 @@ def upgrade_npc(npc):
 
 def goblin(x, y):
     #create a goblin
-    fighter_component = characterclass.Fighter(hp=10, defense=7, power=3, xp=10, death_function=monster_death)
-    ai_component = ai.BasicMonster()
+    fighter_component = characterclass.Fighter(hp=10, defense=7, power=3, xp=10, death_function=npc_death)
+    ai_component = ai.BasicNPC()
 
-    monster = baseclasses.Character(x, y, 'G', 'goblin', libtcod.desaturated_green,
+    npc = baseclasses.Character(x, y, 'G', 'goblin', libtcod.desaturated_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
 
     dice = libtcod.random_get_int(0, 1, 100)
@@ -25,70 +25,91 @@ def goblin(x, y):
     item = equipment.dagger()
     item.lootable = False
 
-    monster.add_to_inventory(item)
+    npc.add_to_inventory(item)
     item.equipment.equip()
 
     if (dice >= 98):
-        upgrade_npc(monster)
+        upgrade_npc(npc)
 
-    return monster
+    return npc
 
 def orc(x, y):
     #create an orc
-    fighter_component = characterclass.Fighter(hp=20, defense=10, power=4, xp=35, death_function=monster_death)
-    ai_component = ai.BasicMonster()
+    fighter_component = characterclass.Fighter(hp=20, defense=10, power=4, xp=35, death_function=npc_death)
+    ai_component = ai.BasicNPC()
 
-    monster = baseclasses.Character(x, y, 'O', 'Orc', libtcod.light_green,
+    npc = baseclasses.Character(x, y, 'O', 'Orc', libtcod.light_green,
                                     blocks=True, fighter=fighter_component, ai=ai_component)
 
     item = equipment.shortsword()
     item.lootable = False
 
-    monster.add_to_inventory(item)
+    npc.add_to_inventory(item)
     item.equipment.equip()
 
     dice = libtcod.random_get_int(0, 1, 100)
 
     if (dice >= 98):
-        upgrade_npc(monster)
+        upgrade_npc(npc)
 
-    return monster
+    return npc
 
 def troll(x, y):
     #create a troll
-    fighter_component = characterclass.Fighter(hp=30, defense=12, power=8, xp=100, death_function=monster_death)
-    ai_component = ai.BasicMonster()
+    fighter_component = characterclass.Fighter(hp=30, defense=12, power=8, xp=100, death_function=npc_death)
+    ai_component = ai.BasicNPC()
 
-    monster = baseclasses.Character(x, y, 'T', 'troll', libtcod.darker_green,
+    npc = baseclasses.Character(x, y, 'T', 'troll', libtcod.darker_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
 
     item = equipment.longsword()
     item.lootable = False
 
-    monster.add_to_inventory(item)
+    npc.add_to_inventory(item)
     item.equipment.equip()
 
     dice = libtcod.random_get_int(0, 1, 100)
 
     if (dice >= 98):
-        upgrade_npc(monster)
+        upgrade_npc(npc)
 
-    return monster
+    return npc
 
-def monster_death(monster):
+def orc(x, y):
+    #create an orc
+    fighter_component = characterclass.Fighter(hp=20, defense=10, power=4, xp=35, death_function=npc_death)
+    ai_component = ai.BasicNPC()
+
+    npc = baseclasses.Character(x, y, 'O', 'Orc', libtcod.light_green,
+                                    blocks=True, fighter=fighter_component, ai=ai_component)
+
+    item = equipment.shortsword()
+    item.lootable = False
+
+    npc.add_to_inventory(item)
+    item.equipment.equip()
+
+    dice = libtcod.random_get_int(0, 1, 100)
+
+    if (dice >= 98):
+        upgrade_npc(npc)
+
+    return npc
+    
+def npc_death(npc):
     #transform it into a nasty corpse! it doesn't block, can't be
     #attacked and doesn't move
-    messageconsole.message('The ' + monster.name + ' is dead! You gain ' + str(monster.fighter.xp) + ' experience points.', libtcod.orange)
-    monster.char = '%'
-    monster.color = libtcod.dark_red
-    monster.blocks = False
-    monster.fighter = None
-    monster.ai = None
-    monster.name = 'remains of ' + monster.name
-    monster.send_to_back()
+    messageconsole.message('The ' + npc.name + ' is dead! You gain ' + str(npc.fighter.xp) + ' experience points.', libtcod.orange)
+    npc.char = '%'
+    npc.color = libtcod.dark_red
+    npc.blocks = False
+    npc.fighter = None
+    npc.ai = None
+    npc.name = 'remains of ' + npc.name
+    npc.send_to_back()
 
-    for item in monster.inventory:
+    for item in npc.inventory:
         if (item.lootable):
-            item.x = monster.x
-            item.y = monster.y
+            item.x = npc.x
+            item.y = npc.y
             baseclasses.objects.append(item)
