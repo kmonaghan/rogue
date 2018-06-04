@@ -266,8 +266,7 @@ def place_objects(room):
     item_chances['potion'] = 25  #healing potion always shows up, even if all other items have 0 chance
     item_chances['scroll'] = baseclasses.from_dungeon_level([[25, 2]])
     item_chances['weapon'] = 35
-    item_chances['shield'] = baseclasses.from_dungeon_level([[15, 2]])
-    item_chances['helmet'] = baseclasses.from_dungeon_level([[15, 2]])
+    item_chances['armour'] = 25
 
     #choose random number of monsters
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
@@ -306,16 +305,8 @@ def place_objects(room):
                 item = equipment.random_scroll(x,y)
             elif choice == 'weapon':
                 item = equipment.random_weapon(x,y)
-
-            elif choice == 'shield':
-                #create a shield
-                equipment_component = equipment.Equipment(slot='left hand', defense_bonus=1)
-                item = baseclasses.Object(x, y, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
-
-            elif choice == 'helmet':
-                #create a helmet
-                equipment_component = equipment.Equipment(slot='head', defense_bonus=1)
-                item = baseclasses.Object(x, y, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
+            elif choice == 'armour':
+                item = equipment.random_armour(x,y)
 
             baseclasses.objects.append(item)
             item.send_to_back()  #items appear below other objects

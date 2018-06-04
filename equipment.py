@@ -75,14 +75,15 @@ class Equipment:
 
         #equip object and show a message about it
         self.is_equipped = True
-        messageconsole.message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green)
+        if (self.owner == pc.player):
+            messageconsole.message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green)
 
     def dequip(self):
         #dequip object and show a message about it
         if not self.is_equipped: return
         self.is_equipped = False
-        messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
-
+        if (self.owner == pc.player):
+            messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
 
 def get_equipped_in_slot(slot):  #returns the equipment in a slot, or None if it's empty
     for obj in inventory:
@@ -99,6 +100,43 @@ def get_all_equipped(obj):  #returns a list of equipped items
         return equipped_list
     else:
         return []  #other objects have no equipment
+
+
+def random_armour(x,y):
+    item_chances = {}
+    item_chances['shield'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
+    item_chances['helmet'] = baseclasses.from_dungeon_level([[30, 2], [15, 3], [10, 4]])
+    item_chances['scalemail'] = baseclasses.from_dungeon_level([[40, 2], [30, 3], [15, 4]])
+    item_chances['chainmail'] = baseclasses.from_dungeon_level([[15, 3], [30, 4]])
+    item_chances['breastplate'] = baseclasses.from_dungeon_level([[15, 4]])
+
+    choice = baseclasses.random_choice(item_chances)
+    if choice == 'shield':
+        #create a shield
+        equipment_component = Equipment(slot='left hand', defense_bonus=1)
+        item = baseclasses.Object(x, y, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
+
+    elif choice == 'helmet':
+        #create a helmet
+        equipment_component = Equipment(slot='head', defense_bonus=1)
+        item = baseclasses.Object(x, y, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
+
+    elif choice == 'scalemail':
+        #create a chainmail
+        equipment_component = Equipment(slot='chest', defense_bonus=1)
+        item = baseclasses.Object(x, y, '=', 'scalemail', libtcod.sky, gear=equipment_component)
+
+    elif choice == 'chainmail':
+        #create a chainmail
+        equipment_component = Equipment(slot='chest', defense_bonus=2)
+        item = baseclasses.Object(x, y, '=', 'chainmail', libtcod.sky, gear=equipment_component)
+
+    elif choice == 'breastplate':
+        #create a chainmail
+        equipment_component = Equipment(slot='chest', defense_bonus=3)
+        item = baseclasses.Object(x, y, '=', 'breastplate', libtcod.sky, gear=equipment_component)
+
+    return item
 
 def random_potion(x,y):
     item_chances = {}
@@ -138,9 +176,9 @@ def random_scroll(x,y):
 
 def random_weapon(x,y):
     item_chances = {}
-    item_chances['dagger'] = 40
-    item_chances['short sword'] = 30
-    item_chances['long sword'] = 30
+    item_chances['dagger'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
+    item_chances['short sword'] = baseclasses.from_dungeon_level([[30, 2], [15, 3], [10, 4]])
+    item_chances['long sword'] = baseclasses.from_dungeon_level([[15, 3], [30, 4], [60, 4]])
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'dagger':
@@ -159,7 +197,6 @@ def random_weapon(x,y):
         item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
 
     return item
-
 
 def random_magic_weapon():
     item = random_weapon(0,0)
