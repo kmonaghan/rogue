@@ -7,18 +7,16 @@ import equipment
 
 def goblin(x, y):
     #create a goblin
-    fighter_component = characterclass.Fighter(hp=10, defense=0, power=2, xp=5, death_function=monster_death)
+    fighter_component = characterclass.Fighter(hp=10, defense=0, power=3, xp=5, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
-    colour = libtcod.desaturated_green
-
-    monster = baseclasses.Object(x, y, 'G', 'goblin', colour,
+    monster = baseclasses.Object(x, y, 'G', 'goblin', libtcod.desaturated_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
 
     dice = libtcod.random_get_int(0, 1, 100)
 
-    if (dice >= 97):
-        monster.colour = libtcod.silver
+    if (dice >= 98):
+        monster.color = libtcod.silver
         monster.fighter.multiplier = 1.5
         monster.fighter.xp = monster.fighter.xp * 1.5
         monster.loot = equipment.random_magic_weapon()
@@ -30,15 +28,13 @@ def orc(x, y):
     fighter_component = characterclass.Fighter(hp=20, defense=1, power=4, xp=15, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
-    colour = libtcod.desaturated_green
-
-    monster = baseclasses.Object(x, y, 'O', 'Orc', colour,
+    monster = baseclasses.Object(x, y, 'O', 'Orc', libtcod.light_green,
                                     blocks=True, fighter=fighter_component, ai=ai_component)
 
     dice = libtcod.random_get_int(0, 1, 100)
 
-    if (dice >= 97):
-        monster.colour = libtcod.silver
+    if (dice >= 98):
+        monster.color = libtcod.silver
         monster.fighter.multiplier = 1.5
         monster.fighter.xp = monster.fighter.xp * 1.5
         monster.loot = equipment.random_magic_weapon()
@@ -50,15 +46,13 @@ def troll(x, y):
     fighter_component = characterclass.Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
-    color = libtcod.darker_green
-
-    monster = baseclasses.Object(x, y, 'T', 'troll', color,
+    monster = baseclasses.Object(x, y, 'T', 'troll', libtcod.darker_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
 
     dice = libtcod.random_get_int(0, 1, 100)
 
-    if (dice >= 97):
-        monster.colour = libtcod.silver
+    if (dice >= 98):
+        monster.color = libtcod.silver
         monster.fighter.multiplier = 1.5
         monster.fighter.xp = monster.fighter.xp * 1.5
         monster.loot = equipment.random_magic_weapon()
