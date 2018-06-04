@@ -99,7 +99,7 @@ def random_armour(x,y):
     item_chances['shield'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
     item_chances['helmet'] = baseclasses.from_dungeon_level([[30, 2], [15, 3], [10, 4]])
     item_chances['leather shirt'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
-    item_chances['scalemail'] = baseclasses.from_dungeon_level([[40, 2], [30, 3], [15, 4]])
+    item_chances['scalemail'] = baseclasses.from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]])
     item_chances['chainmail'] = baseclasses.from_dungeon_level([[40, 3], [30, 4]])
     item_chances['breastplate'] = baseclasses.from_dungeon_level([[15, 4]])
 
@@ -162,9 +162,9 @@ def random_scroll(x,y):
 
 def random_weapon(x,y):
     item_chances = {}
-    item_chances['dagger'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
-    item_chances['short sword'] = baseclasses.from_dungeon_level([[30, 2], [15, 3], [10, 4]])
-    item_chances['long sword'] = baseclasses.from_dungeon_level([[15, 3], [30, 4], [60, 4]])
+    item_chances['dagger'] = baseclasses.from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]])
+    item_chances['short sword'] = baseclasses.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]])
+    item_chances['long sword'] = baseclasses.from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]])
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'dagger':
@@ -264,8 +264,8 @@ def shortsword(x=0, y=0):
 
 def longsword(x=0, y=0):
     #create a sword
-    equipment_component.type_of_dice = 8
     equipment_component = Equipment(slot='right hand', power_bonus=4)
+    equipment_component.type_of_dice = 8
     item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
 
     return item

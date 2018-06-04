@@ -15,7 +15,7 @@ SCREEN_HEIGHT = 50
 
 #sizes and coordinates relevant for the GUI
 BAR_WIDTH = 20
-PANEL_HEIGHT = 7
+PANEL_HEIGHT = 10
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 MSG_X = BAR_WIDTH + 2
 #MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
@@ -109,7 +109,7 @@ def render_all():
     pc.player.draw()
 
     #blit the contents of "con" to the root console
-    libtcod.console_blit(baseclasses.con, 0, 0, gamemap.MAP_WIDTH, gamemap.MAP_HEIGHT, 0, 0, 0)
+    libtcod.console_blit(baseclasses.con, 0, 0, gamemap.MAX_MAP_WIDTH, gamemap.MAX_MAP_HEIGHT, 0, 0, 0)
 
 
     #prepare to render the GUI panel
@@ -494,7 +494,7 @@ def main_menu():
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
-baseclasses.con = libtcod.console_new(gamemap.MAP_WIDTH, gamemap.MAP_HEIGHT)
+baseclasses.con = libtcod.console_new(gamemap.MAX_MAP_WIDTH, gamemap.MAX_MAP_HEIGHT)
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
 main_menu()
