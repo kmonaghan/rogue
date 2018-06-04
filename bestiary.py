@@ -14,7 +14,7 @@ def upgrade_npc(npc):
 
 def goblin(x, y):
     #create a goblin
-    fighter_component = characterclass.Fighter(hp=10, defense=0, power=3, xp=5, death_function=monster_death)
+    fighter_component = characterclass.Fighter(hp=10, defense=7, power=3, xp=10, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
     monster = baseclasses.Character(x, y, 'G', 'goblin', libtcod.desaturated_green,
@@ -35,7 +35,7 @@ def goblin(x, y):
 
 def orc(x, y):
     #create an orc
-    fighter_component = characterclass.Fighter(hp=20, defense=1, power=4, xp=15, death_function=monster_death)
+    fighter_component = characterclass.Fighter(hp=20, defense=10, power=4, xp=35, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
     monster = baseclasses.Character(x, y, 'O', 'Orc', libtcod.light_green,
@@ -56,7 +56,7 @@ def orc(x, y):
 
 def troll(x, y):
     #create a troll
-    fighter_component = characterclass.Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
+    fighter_component = characterclass.Fighter(hp=30, defense=12, power=8, xp=100, death_function=monster_death)
     ai_component = ai.BasicMonster()
 
     monster = baseclasses.Character(x, y, 'T', 'troll', libtcod.darker_green,

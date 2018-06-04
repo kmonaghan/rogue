@@ -32,7 +32,8 @@ class Fighter:
 
     def attack(self, target):
         #a simple formula for attack damage
-        hit = self.power - target.fighter.defense
+        total = libtcod.random_get_int(0, 1, 20) + self.power
+        hit = total - target.fighter.defense
 
         if hit > 0:
             #make the target take some damage
