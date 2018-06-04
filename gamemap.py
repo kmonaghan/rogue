@@ -153,6 +153,8 @@ def make_bsp():
     else:
         boss_location = random.choice(bsp_rooms)
         bsp_rooms.remove(boss_location)
+        warlord = bestiary.warlord(boss_location[0], boss_location[1])
+        baseclasses.objects.append(warlord)
 
     #Random room for player start
     player_room = random.choice(bsp_rooms)
@@ -170,8 +172,7 @@ def make_bsp():
 
     start_room = list_of_random_items[0]
     npc = bestiary.goblin(start_room[0], start_room[1])
-    npc.color = libtcod.red
-    npc.ai = ai.Wanderingnpc(list_of_random_items, npc.ai)
+    npc.ai = ai.WanderingNPC(list_of_random_items, npc.ai)
     npc.ai.owner = npc
     bestiary.upgrade_npc(npc)
     baseclasses.objects.append(npc)

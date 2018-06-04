@@ -1,6 +1,8 @@
 import libtcodpy as libtcod
 import messageconsole
 import pc
+import bestiary
+import baseclasses
 
 #spell values
 HEAL_AMOUNT = 40
@@ -55,3 +57,42 @@ def cast_confuse():
     npc.ai = ConfusedNPC(old_ai)
     npc.ai.owner = npc  #tell the new component who owns it
     messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
+
+def cast_summon_goblin(pc):
+    dice = libtcod.random_get_int(0, 1, 6)
+
+    npcs = []
+    for idx in range(0, dice):
+        npc = bestiary.goblin()
+        npcs.append(npc)
+
+    start_x = pc.x - 1
+    start_y = pc.y - 1
+
+    for offset in range(0, 2):
+        if (baseclasses.is_blocked(start_x + offset, start_y + offset) == False):
+            npc = npcs.pop(0)
+            baseclasses.objects.append(npc)
+
+        if len(npcs) == 0:
+            return
+
+    start_x = pc.x
+
+    for offset in range(0, 2):
+        if (baseclasses.is_blocked(start_x + offset, start_y + offset) == False):
+            npc = npcs.pop(0)
+            baseclasses.objects.append(npc)
+
+        if len(npcs) == 0:
+            return
+
+    start_x = pc.x + 1
+
+    for offset in range(0, 2):
+        if (baseclasses.is_blocked(start_x + offset, start_y + offset) == False):
+            npc = npcs.pop(0)
+            baseclasses.objects.append(npc)
+
+        if len(npcs) == 0:
+            return
