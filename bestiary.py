@@ -121,9 +121,7 @@ def npc_death(npc):
 
     for item in npc.inventory:
         if (item.lootable):
-            item.x = npc.x
-            item.y = npc.y
-            baseclasses.objects.append(item)
+            item.item.drop()
 
 def warlord_death(npc):
     #transform it into a nasty corpse! it doesn't block, can't be
@@ -139,6 +137,4 @@ def warlord_death(npc):
 
     for item in npc.inventory:
         if (item.lootable):
-            item.x = npc.x
-            item.y = npc.y
-            baseclasses.objects.append(item)
+            item.item.drop()

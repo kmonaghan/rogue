@@ -29,12 +29,14 @@ class Item:
         if self.owner.equipment:
             self.owner.equipment.dequip()
 
+        npc = self.owner.owner
         #add to the map and remove from the player's inventory. also, place it at the player's coordinates
         baseclasses.objects.append(self.owner)
-        pc.player.remove_from_inventory(self.owner)
-        self.owner.x = pc.player.x
-        self.owner.y = pc.player.y
-        messageconsole.message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
+        npc.remove_from_inventory(self.owner)
+        self.owner.x = npc.x
+        self.owner.y = npc.y
+        if (npc == pc.player):
+            messageconsole.message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
 
     def use(self):
         #special case: if the object has the Equipment component, the "use" action is to equip/dequip
@@ -76,14 +78,14 @@ class Equipment:
 
         #equip object and show a message about it
         self.is_equipped = True
-        if (self.owner == pc.player):
+        if (self.owner.owner == pc.player):
             messageconsole.message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green)
 
     def dequip(self):
         #dequip object and show a message about it
         if not self.is_equipped: return
         self.is_equipped = False
-        if (self.owner == pc.player):
+        if (self.owner.owner == pc.player):
             messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
 
     def damage(self):
