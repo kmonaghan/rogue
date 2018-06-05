@@ -371,10 +371,11 @@ def save_game():
     file['map'] = gamemap.map
     file['objects'] = baseclasses.objects
     file['player_index'] = baseclasses.objects.index(pc.player)  #index of player in objects list
-    file['stairs_index'] = baseclasses.objects.index(gamemap.stairs)  #same for the stairs
     file['game_msgs'] = messageconsole.game_msgs
     file['game_state'] = baseclasses.game_state
     file['dungeon_level'] = gamemap.dungeon_level
+    if (gamemap.stairs != None):
+        file['stairs_index'] = baseclasses.objects.index(gamemap.stairs)  #same for the stairs
     file.close()
 
 def load_game():
