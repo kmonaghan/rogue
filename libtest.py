@@ -181,8 +181,9 @@ def menu(header, options, width):
     #print all the options
     y = header_height
     letter_index = ord('a')
-    for option_text in options:
+    for (option_text, option_color) in options:
         text = '(' + chr(letter_index) + ') ' + option_text
+        libtcod.console_set_default_foreground(window, option_color)
         libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
         y += 1
         letter_index += 1
@@ -215,7 +216,7 @@ def inventory_menu(header):
             #show additional information, in case it's equipped
             if item.equipment and item.equipment.is_equipped:
                 text = text + ' (on ' + item.equipment.slot + ')'
-            options.append(text)
+            options.append([text, item.color])
 
     index = menu(header, options, INVENTORY_WIDTH)
 
@@ -306,9 +307,9 @@ def check_level_up():
         choice = None
         while choice == None:  #keep asking until a choice is made
             choice = menu('Level up! Choose a stat to raise:\n',
-                          ['Constitution (+20 HP, from ' + str(pc.player.fighter.max_hp) + ')',
-                           'Strength (+1 attack, from ' + str(pc.player.fighter.power) + ')',
-                           'Agility (+1 defense, from ' + str(pc.player.fighter.defense) + ')'], LEVEL_SCREEN_WIDTH)
+                          [['Constitution (+20 HP, from ' + str(pc.player.fighter.max_hp) + ')',libtcod.white],
+                           ['Strength (+1 attack, from ' + str(pc.player.fighter.power) + ')',libtcod.white],
+                           ['Agility (+1 defense, from ' + str(pc.player.fighter.defense) + ')',libtcod.white]], LEVEL_SCREEN_WIDTH)
 
         if choice == 0:
             pc.player.fighter.base_max_hp += 20
@@ -477,7 +478,7 @@ def main_menu():
         libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT-2, libtcod.BKGND_NONE, libtcod.CENTER, 'By Jotaf')
 
         #show options and wait for the player's choice
-        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
+        choice = menu('', [['Play a new game',libtcod.white], ['Continue last game',libtcod.white], ['Quit',libtcod.white]], 24)
 
         if choice == 0:  #new game
             new_game()
