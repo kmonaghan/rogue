@@ -72,7 +72,7 @@ class WarlordNPC:
         if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
 
             if (self.summoned_orcs == False) or (self.summoned_goblins == False):
-                health = (npc.fighter.hp * 100.0) / npc.fighter.base_max_hp
+                health = (npc.fighter.hp * 100.0) / npc.fighter.max_hp
 
                 if (health < 40):
                     if (self.summoned_trolls == False):
