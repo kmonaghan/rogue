@@ -3,6 +3,8 @@ import messageconsole
 import pc
 import bestiary
 import baseclasses
+import screenrendering
+import ai
 
 #spell values
 HEAL_AMOUNT = 40
@@ -26,23 +28,22 @@ def closest_npc(max_range):
                 closest_enemy = object
                 closest_dist = dist
     return closest_enemy
-    
+
 def target_tile(max_range=None):
-    global key, mouse
     #return the position of a tile left-clicked in player's FOV (optionally in a range), or (None,None) if right-clicked.
     while True:
         #render the screen. this erases the inventory and shows the names of objects under the mouse.
         libtcod.console_flush()
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-        render_all()
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, screenrendering.key, screenrendering.mouse)
+        screenrendering.render_all()
 
-        (x, y) = (mouse.cx, mouse.cy)
+        (x, y) = (screenrendering.mouse.cx, screenrendering.mouse.cy)
 
-        if mouse.rbutton_pressed or key.vk == libtcod.KEY_ESCAPE:
+        if screenrendering.mouse.rbutton_pressed or screenrendering.key.vk == libtcod.KEY_ESCAPE:
             return (None, None)  #cancel if the player right-clicked or pressed Escape
 
         #accept the target if the player clicked in FOV, and in case a range is specified, if it's in that range
-        if (mouse.lbutton_pressed and libtcod.map_is_in_fov(baseclasses.fov_map, x, y) and
+        if (screenrendering.mouse.lbutton_pressed and libtcod.map_is_in_fov(baseclasses.fov_map, x, y) and
                 (max_range is None or pc.player.distance(x, y) <= max_range)):
             return (x, y)
 
@@ -99,7 +100,7 @@ def cast_confuse():
 
     #replace the npc's AI with a "confused" one; after some turns it will restore the old AI
     old_ai = npc.ai
-    npc.ai = ConfusedNPC(old_ai)
+    npc.ai = ai.ConfusedNPC(old_ai)
     npc.ai.owner = npc  #tell the new component who owns it
     messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
 

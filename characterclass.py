@@ -2,6 +2,38 @@ import libtcodpy as libtcod
 import equipment
 import messageconsole
 import pc
+import screenrendering
+
+#experience and level-ups
+LEVEL_UP_BASE = 100
+LEVEL_UP_FACTOR = 150
+
+def check_level_up():
+    #see if the player's experience is enough to level-up
+    level_up_xp = LEVEL_UP_BASE + pc.player.level * LEVEL_UP_FACTOR
+    if pc.player.fighter.xp >= level_up_xp:
+        #it is! level up and ask to raise some stats
+        pc.player.level += 1
+        pc.player.fighter.xp -= level_up_xp
+        messageconsole.message('Your battle skills grow stronger! You reached level ' + str(pc.player.level) + '!', libtcod.yellow)
+
+        choice = None
+        while choice == None:  #keep asking until a choice is made
+            choice = screenrendering.menu('Level up! Choose a stat to raise:\n',
+                                            [['Constitution (+20 HP, from ' + str(pc.player.fighter.max_hp) + ')',libtcod.white],
+                                            ['Strength (+1 attack, from ' + str(pc.player.fighter.power) + ')',libtcod.white],
+                                            ['Agility (+1 defense, from ' + str(pc.player.fighter.defense) + ')',libtcod.white]],
+                                            screenrendering.LEVEL_SCREEN_WIDTH)
+
+        if choice == 0:
+            pc.player.fighter.base_max_hp += 20
+            pc.player.fighter.hp += 20
+        elif choice == 1:
+            pc.player.fighter.base_power += 1
+        elif choice == 2:
+            pc.player.fighter.base_defense += 1
+
+        pc.player.fighter.hp = pc.player.fighter.max_hp
 
 class Fighter:
     #combat-related properties and methods (npc, player, NPC).
