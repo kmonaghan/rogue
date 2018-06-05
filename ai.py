@@ -63,15 +63,38 @@ class ConfusedNPC:
 class WarlordNPC:
     def __init__(self):
         self.summoned_goblins = False
+        self.summoned_orcs = False
+        self.summoned_trolls = False
 
     def take_turn(self):
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
         if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
 
-            if (self.summoned_goblins == False):
-                self.summoned_goblins = True
-                tome.cast_summon_goblin(npc)
+            if (self.summoned_orcs == False) or (self.summoned_goblins == False):
+                health = (npc.fighter.hp * 100.0) / npc.fighter.base_max_hp
+
+                if (health < 40):
+                    if (self.summoned_trolls == False):
+                        self.summoned_trolls = True
+                        messageconsole.message('Trolls! To me!', libtcod.red)
+                        tome.cast_summon_troll(npc)
+
+                        return
+                elif (health < 60):
+                    if (self.summoned_orcs == False):
+                        self.summoned_orcs = True
+                        messageconsole.message('Orcs! To me!', libtcod.red)
+                        tome.cast_summon_orc(npc)
+
+                        return
+                elif (health < 80):
+                    if (self.summoned_goblins == False):
+                        self.summoned_goblins = True
+                        messageconsole.message('Goblins! To me!', libtcod.red)
+                        tome.cast_summon_goblin(npc)
+
+                        return
 
             #move towards player if far away
             if npc.distance_to(pc.player) >= 2:

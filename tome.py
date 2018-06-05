@@ -97,5 +97,80 @@ def cast_summon_goblin(pc):
         if dice < 1:
             return
 
-        if len(npcs) == 0:
+def cast_summon_orc(pc):
+    dice = libtcod.random_get_int(0, 1, 4)
+
+    print "Will generate orcs: " + str(dice)
+
+    start_x = pc.x - 1
+    start_y = pc.y - 1
+
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.orc(start_x, start_y + offset)
+            baseclasses.objects.append(npc)
+            dice -= 1
+
+        if dice < 1:
+            return
+
+    start_x = pc.x
+
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.orc(start_x, start_y + offset)
+            baseclasses.objects.append(npc)
+            dice -=1
+
+        if dice < 1:
+            return
+
+    start_x = pc.x + 1
+
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.orc(start_x, start_y + offset)
+            baseclasses.objects.append(npc)
+            dice -= 1
+
+        if dice < 1:
+            return
+
+def cast_summon_troll(pc):
+    dice = libtcod.random_get_int(0, 1, 2)
+
+    print "Will generate trolls: " + str(dice)
+
+    start_x = pc.x - 1
+    start_y = pc.y - 1
+
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.troll(start_x, start_y + offset)
+            baseclasses.objects.append(npc)
+            dice -= 1
+
+        if dice < 1:
+            return
+
+    start_x = pc.x
+
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.troll(start_x, start_y + offset)
+            baseclasses.objects.append(npc)
+            dice -=1
+
+        if dice < 1:
+            return
+
+    start_x = pc.x + 1
+
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.troll(start_x, start_y + offset)
+            baseclasses.objects.append(npc)
+            dice -= 1
+
+        if dice < 1:
             return

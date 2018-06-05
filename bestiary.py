@@ -81,7 +81,7 @@ def warlord(x = 0, y = 0):
     fighter_component = characterclass.Fighter(hp=50, defense=10, power=4, xp=100, death_function=warlord_death)
     ai_component = ai.WarlordNPC()
 
-    npc = baseclasses.Character(x, y, 'W', 'Warlord', libtcod.gold,
+    npc = baseclasses.Character(x, y, 'W', 'Warlord', libtcod.black,
                                     blocks=True, fighter=fighter_component, ai=ai_component)
 
     item = equipment.longsword()
