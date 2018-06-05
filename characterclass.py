@@ -40,7 +40,7 @@ class Fighter:
             weapon = self.owner.get_equipped_in_slot("right hand")
             damage = weapon.damage()
 
-            messageconsole.message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
+            messageconsole.message(self.owner.name.capitalize() + ' attacks ' + target.name + ' with ' + weapon.owner.name + ' for ' + str(damage) + ' hit points.')
             target.fighter.take_damage(damage)
         else:
             messageconsole.message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
