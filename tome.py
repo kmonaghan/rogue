@@ -61,38 +61,41 @@ def cast_confuse():
 def cast_summon_goblin(pc):
     dice = libtcod.random_get_int(0, 1, 6)
 
-    npcs = []
-    for idx in range(0, dice):
-        npc = bestiary.goblin()
-        npcs.append(npc)
+    print "Will generate goblins: " + str(dice)
 
     start_x = pc.x - 1
     start_y = pc.y - 1
 
-    for offset in range(0, 2):
-        if (baseclasses.is_blocked(start_x + offset, start_y + offset) == False):
-            npc = npcs.pop(0)
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.goblin(start_x, start_y + offset)
             baseclasses.objects.append(npc)
+            dice -= 1
 
-        if len(npcs) == 0:
+        if dice < 1:
             return
 
     start_x = pc.x
 
-    for offset in range(0, 2):
-        if (baseclasses.is_blocked(start_x + offset, start_y + offset) == False):
-            npc = npcs.pop(0)
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.goblin(start_x, start_y + offset)
             baseclasses.objects.append(npc)
+            dice -=1
 
-        if len(npcs) == 0:
+        if dice < 1:
             return
 
     start_x = pc.x + 1
 
-    for offset in range(0, 2):
-        if (baseclasses.is_blocked(start_x + offset, start_y + offset) == False):
-            npc = npcs.pop(0)
+    for offset in range(0, 3):
+        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+            npc = npc = bestiary.goblin(start_x, start_y + offset)
             baseclasses.objects.append(npc)
+            dice -= 1
+
+        if dice < 1:
+            return
 
         if len(npcs) == 0:
             return
