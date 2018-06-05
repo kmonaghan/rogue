@@ -4,7 +4,7 @@ import textwrap
 #MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
 MSG_WIDTH = 80 - 20 - 2
 #MSG_HEIGHT = PANEL_HEIGHT - 1
-MSG_HEIGHT = 7 - 1
+MSG_HEIGHT = 10 - 1
 
 #create the list of game messages and their colors, starts empty
 game_msgs = []
