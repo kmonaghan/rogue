@@ -146,19 +146,13 @@ def random_scroll(x,y):
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'lightning':
-        #create a lightning bolt scroll
-        item_component = Item(use_function=tome.cast_lightning)
-        item = baseclasses.Object(x, y, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
+        item = lighting_scroll(x,y)
 
     elif choice == 'fireball':
-        #create a fireball scroll
-        item_component = Item(use_function=tome.cast_fireball)
-        item = baseclasses.Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
+        item = fireball_scroll(x,y)
 
     elif choice == 'confuse':
-        #create a confuse scroll
-        item_component = Item(use_function=tome.cast_confuse)
-        item = baseclasses.Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
+        item = confusion_scroll(x,y)
 
     return item
 
@@ -203,6 +197,27 @@ def random_magic_weapon():
         item.equipment.power_bonus = item.equipment.power_bonus * 4
 
     item.equipment.number_of_dice = 2
+
+    return item
+
+def lighting_scroll(x=0, y=0):
+    #create a lightning bolt scroll
+    item_component = Item(use_function=tome.cast_lightning)
+    item = baseclasses.Object(x, y, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
+
+    return item
+
+def fireball_scroll(x=0, y=0):
+    #create a fireball scroll
+    item_component = Item(use_function=tome.cast_fireball)
+    item = baseclasses.Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
+
+    return item
+
+def confusion_scroll(x=0, y=0):
+    #create a confuse scroll
+    item_component = Item(use_function=tome.cast_confuse)
+    item = baseclasses.Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
 
     return item
 
