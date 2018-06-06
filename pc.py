@@ -21,10 +21,6 @@ def create_player():
     obj.equipment.equip()
     obj.always_visible = True
 
-    player.add_to_inventory(equipment.confusion_scroll())
-    player.add_to_inventory(equipment.fireball_scroll())
-    player.add_to_inventory(equipment.lighting_scroll())
-
 def player_death(player):
     #the game ended!
     messageconsole.message('You died!', libtcod.red)
