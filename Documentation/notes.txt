@@ -3,3 +3,14 @@ https://www.reddit.com/r/roguelikedev/comments/6imw2p/libtcod_on_os_x_sierra/
 
 Roguelike tutorial:
 http://www.roguebasin.com/index.php?title=Complete_Roguelike_Tutorial,_using_python%2Blibtcod
+Updated/Python 3 version: http://rogueliketutorials.com/libtcod/3
+
+List of Resources
+https://github.com/marukrap/RoguelikeDevResources
+
+http://www.gridsagegames.com/blog/2017/01/map-prefabs-in-depth/
+
+Map algos:
+http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
+https://github.com/AtTheMatinee/dungeon-generation/blob/master/dungeonGenerationAlgorithms.py
+https://www.gamasutra.com/blogs/AAdonaac/20150903/252889/Procedural_Dungeon_Generation_Algorithm.php
