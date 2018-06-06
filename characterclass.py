@@ -3,6 +3,7 @@ import equipment
 import messageconsole
 import pc
 import screenrendering
+import quest
 
 #experience and level-ups
 LEVEL_UP_BASE = 100
@@ -104,3 +105,14 @@ class Fighter:
         self.hp += amount
         if self.hp > self.max_hp:
             self.hp = self.max_hp
+
+class Questgiver:
+    def __init__(self, quest):
+        self.owner = None
+        self.quest = quest
+
+    def talk(self, pc):
+        if (self.quest.started == False):
+            self.quest.start_quest(pc)
+        else:
+            messageconsole.message('Have you done it yet?')

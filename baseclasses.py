@@ -4,6 +4,8 @@ import libtcodpy as libtcod
 import gamemap
 import equipment
 import math
+import screenrendering
+import messageconsole
 
 objects = []
 fov_map = None
@@ -53,6 +55,8 @@ class Object:
             self.item.owner = self
 
         self.lootable = True
+
+        self.questgiver = None
 
     def move(self, dx, dy):
         #move by the given amount, if the destination is not blocked
@@ -148,6 +152,7 @@ class Character(Object):
     def __init__(self, x, y, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
         super(Character, self).__init__(x, y, char, name, color, blocks, always_visible, fighter, ai, item, gear)
         self.inventory = []
+        self.quests = []
 
     def get_equipped_in_slot(self, slot):  #returns the equipment in a slot, or None if it's empty
         for obj in self.inventory:
@@ -169,6 +174,36 @@ class Character(Object):
     def remove_from_inventory(self, obj):
         self.inventory.remove(obj)
         obj.owner = None
+
+    def add_quest(self, quest):
+        quest.owner = self
+        self.quests.append(quest)
+
+    def list_quests(self):
+        titles = []
+        if len(self.quests) == 0:
+            titles = [['No active quests.', libtcod.white]]
+        else:
+            for quest in self.quests:
+                titles.append([quest.title, libtcod.white])
+
+        index = screenrendering.menu("Quests", titles, screenrendering.INVENTORY_WIDTH)
+
+        #if an item was chosen, return it
+        if index is None or len(self.quests) == 0: return None
+
+        messageconsole.message(quest.title, libtcod.white)
+        messageconsole.message(quest.description, libtcod.white)
+
+    def complete_quest(self, quest):
+        if (self.fighter is not None):
+            self.fighter.xp = self.fighter.xp + quest.xp
+        self.quests.remove(quest)
+        quest.owner = None
+
+    def check_quests_for_npc_death(self, npc):
+        for quest in self.quests:
+            quest.kill_count(npc)
 
 class Point:
     #a rectangle on the map. used to characterize a room.

@@ -4,6 +4,8 @@ import characterclass
 import messageconsole
 import ai
 import equipment
+import quest
+import pc
 
 def upgrade_npc(npc):
     npc.color = libtcod.silver
@@ -12,6 +14,25 @@ def upgrade_npc(npc):
     item = equipment.random_magic_weapon()
     npc.add_to_inventory(item)
     item.equipment.equip()
+
+def bountyhunter(x = 0, y = 0):
+    #create a questgiver
+
+    npc = baseclasses.Character(x, y, '?', 'Bounty Hunter', libtcod.red,
+                     blocks=True)
+
+    title = "Kill Gobbos"
+    description = "Get rid of them. I don't care how."
+
+    q = quest.Quest(title, description, 100)
+    q.kill = 5
+    q.kill_type = "goblin"
+
+    questgiver = characterclass.Questgiver(q)
+    questgiver.owner = npc
+    npc.questgiver = questgiver
+
+    return npc
 
 def goblin(x = 0, y = 0):
     #create a goblin
@@ -111,6 +132,9 @@ def npc_death(npc):
     #transform it into a nasty corpse! it doesn't block, can't be
     #attacked and doesn't move
     messageconsole.message('The ' + npc.name + ' is dead! You gain ' + str(npc.fighter.xp) + ' experience points.', libtcod.orange)
+
+    pc.player.check_quests_for_npc_death(npc)
+
     npc.char = '%'
     npc.color = libtcod.dark_red
     npc.blocks = False

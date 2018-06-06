@@ -162,6 +162,13 @@ def make_bsp():
     pc.player.x = player_room[0]
     pc.player.y = player_room[1]
 
+    npc = bestiary.bountyhunter()
+
+    if (baseclasses.is_blocked(player_room[0]-1, player_room[1]-1) == False):
+        npc.x = player_room[0]-1
+        npc.y = player_room[1]-1
+        baseclasses.objects.append(npc)
+        
     #Add npcs and items
     for room in bsp_rooms:
         new_room = baseclasses.Rect(room[0], room[1], 2, 2)

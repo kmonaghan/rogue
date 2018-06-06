@@ -20,13 +20,16 @@ def player_move_or_attack(dx, dy):
     #try to find an attackable object there
     target = None
     for object in baseclasses.objects:
-        if object.fighter and object.x == x and object.y == y:
+        if (object.fighter and object.x == x and object.y == y) or (object.questgiver and object.x == x and object.y == y):
             target = object
             break
 
     #attack if target found, move otherwise
     if target is not None:
-        pc.player.fighter.attack(target)
+        if (target.fighter is not None):
+            pc.player.fighter.attack(target)
+        elif (target.questgiver is not None):
+            target.questgiver.talk(pc.player)
     else:
         pc.player.move(dx, dy)
         screenrendering.fov_recompute = True
@@ -110,6 +113,9 @@ def handle_keys():
                 msgbox('Character Information\n\nLevel: ' + str(pc.player.level) + '\nExperience: ' + str(pc.player.fighter.xp) +
                        '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(pc.player.fighter.max_hp) +
                        '\nAttack: ' + str(pc.player.fighter.power) + '\nDefense: ' + str(pc.player.fighter.defense), CHARACTER_SCREEN_WIDTH)
+
+            if key_char == 'q':
+                pc.player.list_quests()
 
             if (key_char == '<') or (key_char == ','):
                 #go down stairs, if the player is on them
