@@ -64,15 +64,23 @@ class Fighter:
 
     def attack(self, target):
         #a simple formula for attack damage
-        total = libtcod.random_get_int(0, 1, 20) + self.power
+        total = libtcod.random_get_int(0, 1, 20)
+        multiplier = 1;
+        if (total == 20):
+            multiplier = 2
+
+        total = total + self.power
         hit = total - target.fighter.defense
 
-        if hit > 0:
+        if (hit > 0) or (multiplier == 2):
             #make the target take some damage
             weapon = self.owner.get_equipped_in_slot("right hand")
-            damage = weapon.damage()
+            damage = weapon.damage() * multiplier
 
-            messageconsole.message(self.owner.name.capitalize() + ' attacks ' + target.name + ' with ' + weapon.owner.name + ' for ' + str(damage) + ' hit points.')
+            msg = self.owner.name.capitalize() + ' attacks ' + target.name + ' with ' + weapon.owner.name + ' for ' + str(damage) + ' hit points.'
+            if (multiplier == 2):
+                msg = self.owner.name.capitalize() + ' smashes ' + target.name + ' with a massive blow from their ' + weapon.owner.name + ' for ' + str(damage) + ' hit points.'
+            messageconsole.message(msg)
             target.fighter.take_damage(damage)
         else:
             messageconsole.message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
