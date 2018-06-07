@@ -18,8 +18,9 @@ def upgrade_npc(npc):
 def bountyhunter(x = 0, y = 0):
     #create a questgiver
 
+    ai_component = ai.StrollingNPC()
     npc = baseclasses.Character(x, y, '?', 'Bounty Hunter', libtcod.red,
-                     blocks=True)
+                     blocks=True, fighter=None, ai=ai_component)
 
     title = "Kill Gobbos"
     description = "Get rid of them. I don't care how."

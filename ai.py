@@ -60,6 +60,17 @@ class ConfusedNPC:
             self.owner.ai = self.old_ai
             messageconsole.message('The ' + self.owner.name + ' is no longer confused!', libtcod.red)
 
+class StrollingNPC:
+    #AI for a temporarily confused npc (reverts to previous AI after a while).
+    def __init__(self):
+        self.moved = False
+    def take_turn(self):
+        if (self.moved == False):
+            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
+            self.moved = True
+        else:
+            self.moved = False
+
 class WarlordNPC:
     def __init__(self):
         self.summoned_goblins = False
