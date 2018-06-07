@@ -191,7 +191,7 @@ def play_game():
         libtcod.console_flush()
 
         #level up if needed
-        characterclass.check_level_up()
+        pc.player.fighter.check_level_up()
 
         #erase all objects at their old locations, before they move
         for object in baseclasses.objects:
