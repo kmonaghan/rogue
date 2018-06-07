@@ -58,11 +58,12 @@ def traverse_node(node, dat):
             maxx = libtcod.random_get_int(None, minx + MIN_SIZE - 2, maxx)
             maxy = libtcod.random_get_int(None, miny + MIN_SIZE - 2, maxy)
 
-        room = Room(minx, miny, maxx, maxy)
         node.x = minx
         node.y = miny
         node.w = maxx-minx + 1
         node.h = maxy-miny + 1
+
+        room = Room(minx, miny, maxx, maxy)
 
         #Dig room
         for x in range(minx, maxx + 1):
@@ -126,7 +127,7 @@ def traverse_node(node, dat):
 def make_bsp():
     global stairs, bsp_rooms, MAP_HEIGHT, MAP_WIDTH
 
-    game_state.objects = [pc.player]
+    game_state.objects = []
 
     if (dungeon_level <= 2):
         MAP_HEIGHT = (MAX_MAP_HEIGHT / 3) * 2
@@ -167,14 +168,11 @@ def make_bsp():
     point = room.random_tile()
     pc.player.x = point.x
     pc.player.y = point.y
+    game_state.objects.append(pc.player)
 
     point = room.random_tile()
     npc = bestiary.bountyhunter(point)
-    npc.always_visible = True
-    print "Bounty Hunter point: " + str(point.x) + ", " + str(point.y)
     game_state.objects.append(npc)
-
-    print "map size: " + str(len(game_state.map))
 
     #Add npcs and items
     for room in bsp_rooms:

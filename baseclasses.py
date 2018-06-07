@@ -86,7 +86,8 @@ class Object:
     def draw(self):
         #only show if it's visible to the player; or it's set to "always visible" and on an explored tile
         if (libtcod.map_is_in_fov(fov_map, self.x, self.y) or
-                (self.always_visible and game_state.map[self.x][self.y].explored)):
+                (self.always_visible and game_state.map[self.x][self.y].explored) or
+                game_state.debug):
             #set the color and then draw the character that represents this object at its position
             libtcod.console_set_default_foreground(con, self.color)
             libtcod.console_put_char(con, self.x, self.y, self.char, libtcod.BKGND_NONE)

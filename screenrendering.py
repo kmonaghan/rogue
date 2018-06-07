@@ -86,10 +86,10 @@ def get_names_under_mouse():
 
     #create a list with the names of all objects at the mouse's coordinates and in FOV
     names = [obj.name for obj in game_state.objects
-             if obj.x == x and obj.y == y and libtcod.map_is_in_fov(baseclasses.fov_map, obj.x, obj.y)]
+             if obj.x == x and obj.y == y and (libtcod.map_is_in_fov(baseclasses.fov_map, obj.x, obj.y) or game_state.debug)]
 
     names = ', '.join(names)  #join the names, separated by commas
-    return names.capitalize()
+    return str(x) + ',' + str(y) + ' ' + names.capitalize()
 
 def initialize_fov():
     global fov_recompute
@@ -116,7 +116,7 @@ def render_all():
         #go through all tiles, and set their background color according to the FOV
         for y in range(gamemap.MAP_HEIGHT):
             for x in range(gamemap.MAP_WIDTH):
-                visible = libtcod.map_is_in_fov(baseclasses.fov_map, x, y)
+                visible = (libtcod.map_is_in_fov(baseclasses.fov_map, x, y) or game_state.debug)
                 wall = game_state.map[x][y].block_sight
                 if not visible:
                     #if it's not visible right now, the player can only see it if it's explored

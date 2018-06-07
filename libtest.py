@@ -119,6 +119,12 @@ def handle_keys():
             if key_char == 'q':
                 pc.player.list_quests()
 
+            if key_char == ']':
+                game_state.debug = True
+
+            if key_char == '[':
+                game_state.debug = False
+
             if (key_char == '<') or (key_char == ','):
                 #go down stairs, if the player is on them
                 if gamemap.stairs.x == pc.player.x and gamemap.stairs.y == pc.player.y:
