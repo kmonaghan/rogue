@@ -5,6 +5,8 @@ import pc
 import messageconsole
 import characterclass
 
+import game_state
+
 #actual size of the window
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
@@ -83,7 +85,7 @@ def get_names_under_mouse():
     (x, y) = (mouse.cx, mouse.cy)
 
     #create a list with the names of all objects at the mouse's coordinates and in FOV
-    names = [obj.name for obj in baseclasses.objects
+    names = [obj.name for obj in game_state.objects
              if obj.x == x and obj.y == y and libtcod.map_is_in_fov(baseclasses.fov_map, obj.x, obj.y)]
 
     names = ', '.join(names)  #join the names, separated by commas
@@ -97,7 +99,7 @@ def initialize_fov():
     baseclasses.fov_map = libtcod.map_new(gamemap.MAP_WIDTH, gamemap.MAP_HEIGHT)
     for y in range(gamemap.MAP_HEIGHT):
         for x in range(gamemap.MAP_WIDTH):
-            libtcod.map_set_properties(baseclasses.fov_map, x, y, not gamemap.map[x][y].block_sight, not gamemap.map[x][y].blocked)
+            libtcod.map_set_properties(baseclasses.fov_map, x, y, not game_state.map[x][y].block_sight, not game_state.map[x][y].blocked)
 
     libtcod.console_clear(baseclasses.con)  #unexplored areas start black (which is the default background color)
 
@@ -115,10 +117,10 @@ def render_all():
         for y in range(gamemap.MAP_HEIGHT):
             for x in range(gamemap.MAP_WIDTH):
                 visible = libtcod.map_is_in_fov(baseclasses.fov_map, x, y)
-                wall = gamemap.map[x][y].block_sight
+                wall = game_state.map[x][y].block_sight
                 if not visible:
                     #if it's not visible right now, the player can only see it if it's explored
-                    if gamemap.map[x][y].explored:
+                    if game_state.map[x][y].explored:
                         if wall:
                             libtcod.console_set_char_background(baseclasses.con, x, y, color_dark_wall, libtcod.BKGND_SET)
                         else:
@@ -130,11 +132,11 @@ def render_all():
                     else:
                         libtcod.console_set_char_background(baseclasses.con, x, y, color_light_ground, libtcod.BKGND_SET )
                         #since it's visible, explore it
-                    gamemap.map[x][y].explored = True
+                    game_state.map[x][y].explored = True
 
     #draw all objects in the list, except the player. we want it to
     #always appear over all other objects! so it's drawn later.
-    for object in baseclasses.objects:
+    for object in game_state.objects:
         if object != pc.player:
             object.draw()
     pc.player.draw()

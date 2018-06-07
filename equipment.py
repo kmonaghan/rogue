@@ -4,6 +4,8 @@ import pc
 import baseclasses
 import tome
 
+import game_state
+
 class Item:
     #an item that can be picked up and used.
     def __init__(self, use_function=None):
@@ -15,7 +17,7 @@ class Item:
             messageconsole.message('Your inventory is full, cannot pick up ' + self.owner.name + '.', libtcod.red)
         else:
             npc.add_to_inventory(self.owner)
-            baseclasses.objects.remove(self.owner)
+            game_state.objects.remove(self.owner)
             if (npc == pc.player):
                 messageconsole.message('You picked up a ' + self.owner.name + '!', libtcod.green)
 
@@ -31,7 +33,7 @@ class Item:
 
         npc = self.owner.owner
         #add to the map and remove from the player's inventory. also, place it at the player's coordinates
-        baseclasses.objects.append(self.owner)
+        game_state.objects.append(self.owner)
         npc.remove_from_inventory(self.owner)
         self.owner.x = npc.x
         self.owner.y = npc.y
@@ -96,7 +98,7 @@ class Equipment:
 
         return total
 
-def random_armour(x,y):
+def random_armour(point = None):
     item_chances = {}
     item_chances['shield'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
     item_chances['helmet'] = baseclasses.from_dungeon_level([[30, 2], [15, 3], [10, 4]])
@@ -107,26 +109,26 @@ def random_armour(x,y):
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'shield':
-        item = shield(x,y)
+        item = shield(point)
 
     elif choice == 'helmet':
-        item = helmet(x,y)
+        item = helmet(point)
 
     elif choice == 'leather shirt':
-        item = leathershirt(x,y)
+        item = leathershirt(point)
 
     elif choice == 'scalemail':
-        item = scalemail(x,y)
+        item = scalemail(point)
 
     elif choice == 'chainmail':
-        item = chainmail(x,y)
+        item = chainmail(point)
 
     elif choice == 'breastplate':
-        item = breastplate(x,y)
+        item = breastplate(point)
 
     return item
 
-def random_potion(x,y):
+def random_potion(point = None):
     item_chances = {}
     item_chances['heal'] = 40
 
@@ -134,11 +136,11 @@ def random_potion(x,y):
     if choice == 'heal':
         #create a healing potion
         item_component = Item(use_function=tome.cast_heal)
-        item = baseclasses.Object(x, y, '!', 'healing potion', libtcod.violet, item=item_component)
+        item = baseclasses.Object(point, '!', 'healing potion', libtcod.violet, item=item_component)
 
     return item
 
-def random_scroll(x,y):
+def random_scroll(point = None):
     item_chances = {}
     item_chances['lightning'] = 40
     item_chances['fireball'] = 30
@@ -146,17 +148,17 @@ def random_scroll(x,y):
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'lightning':
-        item = lighting_scroll(x,y)
+        item = lighting_scroll(point)
 
     elif choice == 'fireball':
-        item = fireball_scroll(x,y)
+        item = fireball_scroll(point)
 
     elif choice == 'confuse':
-        item = confusion_scroll(x,y)
+        item = confusion_scroll(point)
 
     return item
 
-def random_weapon(x,y):
+def random_weapon(point = None):
     item_chances = {}
     item_chances['dagger'] = baseclasses.from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]])
     item_chances['short sword'] = baseclasses.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]])
@@ -164,18 +166,18 @@ def random_weapon(x,y):
 
     choice = baseclasses.random_choice(item_chances)
     if choice == 'dagger':
-        item = dagger(x,y)
+        item = dagger(point)
 
     elif choice == 'short sword':
-        item = shortsword(x,y)
+        item = shortsword(point)
 
     elif choice == 'long sword':
-        item = longsword(x,y)
+        item = longsword(point)
 
     return item
 
 def random_magic_weapon():
-    item = random_weapon(0,0)
+    item = random_weapon(None)
 
     dice = libtcod.random_get_int(0, 1, 1000)
 
@@ -200,89 +202,89 @@ def random_magic_weapon():
 
     return item
 
-def lighting_scroll(x=0, y=0):
+def lighting_scroll(point = None):
     #create a lightning bolt scroll
     item_component = Item(use_function=tome.cast_lightning)
-    item = baseclasses.Object(x, y, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
+    item = baseclasses.Object(point, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
 
     return item
 
-def fireball_scroll(x=0, y=0):
+def fireball_scroll(point = None):
     #create a fireball scroll
     item_component = Item(use_function=tome.cast_fireball)
-    item = baseclasses.Object(x, y, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
+    item = baseclasses.Object(point, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
 
     return item
 
-def confusion_scroll(x=0, y=0):
+def confusion_scroll(point = None):
     #create a confuse scroll
     item_component = Item(use_function=tome.cast_confuse)
-    item = baseclasses.Object(x, y, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
+    item = baseclasses.Object(point, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
 
     return item
 
-def shield(x=0, y=0):
+def shield(point = None):
     #create a shield
     equipment_component = Equipment(slot='left hand', defense_bonus=1)
-    item = baseclasses.Object(x, y, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
+    item = baseclasses.Object(point, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
 
     return item
 
-def helmet(x=0, y=0):
+def helmet(point = None):
     #create a helmet
     equipment_component = Equipment(slot='head', defense_bonus=1)
-    item = baseclasses.Object(x, y, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
+    item = baseclasses.Object(point, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
 
     return item
 
-def leathershirt(x=0, y=0):
+def leathershirt(point = None):
     #create a chainmail
     equipment_component = Equipment(slot='chest', defense_bonus=1)
-    item = baseclasses.Object(x, y, '=', 'leather shirt', libtcod.sky, gear=equipment_component)
+    item = baseclasses.Object(point, '=', 'leather shirt', libtcod.sky, gear=equipment_component)
 
     return item
 
-def scalemail(x=0, y=0):
+def scalemail(point = None):
     #create a chainmail
     equipment_component = Equipment(slot='chest', defense_bonus=2)
-    item = baseclasses.Object(x, y, '=', 'scalemail', libtcod.sky, gear=equipment_component)
+    item = baseclasses.Object(point, '=', 'scalemail', libtcod.sky, gear=equipment_component)
 
     return item
 
-def chainmail(x=0, y=0):
+def chainmail(point = None):
     #create a chainmail
     equipment_component = Equipment(slot='chest', defense_bonus=3)
-    item = baseclasses.Object(x, y, '=', 'chainmail', libtcod.sky, gear=equipment_component)
+    item = baseclasses.Object(point, '=', 'chainmail', libtcod.sky, gear=equipment_component)
 
     return item
 
-def breastplate(x=0, y=0):
+def breastplate(point = None):
     #create a breastplate
     equipment_component = Equipment(slot='chest', defense_bonus=4)
-    item = baseclasses.Object(x, y, '=', 'breastplate', libtcod.sky, gear=equipment_component)
+    item = baseclasses.Object(point, '=', 'breastplate', libtcod.sky, gear=equipment_component)
 
     return item
 
-def dagger(x=0, y=0):
+def dagger(point = None):
     #create a sword
     equipment_component = Equipment(slot='right hand', power_bonus=2)
     equipment_component.type_of_dice = 4
-    item = baseclasses.Object(x, y, '-', 'dagger', libtcod.sky, gear=equipment_component)
+    item = baseclasses.Object(point, '-', 'dagger', libtcod.sky, gear=equipment_component)
 
     return item
 
-def shortsword(x=0, y=0):
+def shortsword(point = None):
     #create a sword
     equipment_component = Equipment(slot='right hand', power_bonus=3)
     equipment_component.type_of_dice = 6
-    item = baseclasses.Object(x, y, '/', 'short sword', libtcod.sky, gear=equipment_component)
+    item = baseclasses.Object(point, '/', 'short sword', libtcod.sky, gear=equipment_component)
 
     return item
 
-def longsword(x=0, y=0):
+def longsword(point = None):
     #create a sword
     equipment_component = Equipment(slot='right hand', power_bonus=4)
     equipment_component.type_of_dice = 8
-    item = baseclasses.Object(x, y, '\\', 'long sword', libtcod.sky, gear=equipment_component)
+    item = baseclasses.Object(point, '\\', 'long sword', libtcod.sky, gear=equipment_component)
 
     return item

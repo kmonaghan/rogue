@@ -11,7 +11,7 @@ def create_player():
 
     #create object representing the player
     fighter_component = characterclass.Fighter(hp=100, defense=10, power=2, xp=0, death_function=player_death)
-    player = baseclasses.Character(0, 0, '@', 'player', libtcod.white, blocks=True, fighter=fighter_component)
+    player = baseclasses.Character(None, '@', 'player', libtcod.white, blocks=True, fighter=fighter_component)
 
     player.level = 1
 
@@ -24,7 +24,7 @@ def create_player():
 def player_death(player):
     #the game ended!
     messageconsole.message('You died!', libtcod.red)
-    baseclasses.game_state = 'dead'
+    baseclasses.game_status = 'dead'
 
     #for added effect, transform the player into a corpse!
     player.char = '%'

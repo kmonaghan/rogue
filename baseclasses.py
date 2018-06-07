@@ -7,28 +7,20 @@ import math
 import screenrendering
 import messageconsole
 
-objects = []
+from map_objects.point import Point
+from map_objects.map_utils import is_blocked
+
+import game_state
+
 fov_map = None
-game_state = 'playing'
-
-def is_blocked(x, y):
-    #first test the map tile
-    if gamemap.map[x][y].blocked:
-        return True
-
-    #now check for any blocking objects
-    for object in objects:
-        if object.blocks and object.x == x and object.y == y:
-            return True
-
-    return False
 
 class Object:
     #this is a generic object: the pc.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
-    def __init__(self, x, y, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
-        self.x = x
-        self.y = y
+    def __init__(self, point, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
+        if point is not None:
+            self.x = point.x
+            self.y = point.y
         self.char = char
         self.name = name
         self.color = color
@@ -60,7 +52,7 @@ class Object:
 
     def move(self, dx, dy):
         #move by the given amount, if the destination is not blocked
-        if not is_blocked(self.x + dx, self.y + dy):
+        if not is_blocked(Point(self.x + dx, self.y + dy)):
             self.x += dx
             self.y += dy
 
@@ -88,14 +80,13 @@ class Object:
 
     def send_to_back(self):
         #make this object be drawn first, so all others appear above it if they're in the same tile.
-        global objects
-        objects.remove(self)
-        objects.insert(0, self)
+        game_state.objects.remove(self)
+        game_state.objects.insert(0, self)
 
     def draw(self):
         #only show if it's visible to the player; or it's set to "always visible" and on an explored tile
         if (libtcod.map_is_in_fov(fov_map, self.x, self.y) or
-                (self.always_visible and gamemap.map[self.x][self.y].explored)):
+                (self.always_visible and game_state.map[self.x][self.y].explored)):
             #set the color and then draw the character that represents this object at its position
             libtcod.console_set_default_foreground(con, self.color)
             libtcod.console_put_char(con, self.x, self.y, self.char, libtcod.BKGND_NONE)
@@ -105,20 +96,18 @@ class Object:
         libtcod.console_put_char(con, self.x, self.y, ' ', libtcod.BKGND_NONE)
 
     def move_astar(self, target):
-        global objects
-
         #Create a FOV map that has the dimensions of the map
         fov = libtcod.map_new(gamemap.MAP_WIDTH, gamemap.MAP_HEIGHT)
 
         #Scan the current map each turn and set all the walls as unwalkable
         for y1 in range(gamemap.MAP_HEIGHT):
             for x1 in range(gamemap.MAP_WIDTH):
-                libtcod.map_set_properties(fov, x1, y1, not gamemap.map[x1][y1].block_sight, not gamemap.map[x1][y1].blocked)
+                libtcod.map_set_properties(fov, x1, y1, not game_state.map[x1][y1].block_sight, not game_state.map[x1][y1].blocked)
 
         #Scan all the objects to see if there are objects that must be navigated around
         #Check also that the object isn't self or the target (so that the start and the end points are free)
         #The AI class handles the situation if self is next to the target so it will not use this A* function anyway
-        for obj in objects:
+        for obj in game_state.objects:
             if obj.blocks and obj != self and obj != target:
                 #Set the tile as a wall so it must be navigated around
                 libtcod.map_set_properties(fov, obj.x, obj.y, True, False)
@@ -149,8 +138,8 @@ class Object:
         libtcod.path_delete(my_path)
 
 class Character(Object):
-    def __init__(self, x, y, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
-        super(Character, self).__init__(x, y, char, name, color, blocks, always_visible, fighter, ai, item, gear)
+    def __init__(self, point, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
+        super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear)
         self.inventory = []
         self.quests = []
 
@@ -204,42 +193,6 @@ class Character(Object):
     def check_quests_for_npc_death(self, npc):
         for quest in self.quests:
             quest.kill_count(npc)
-
-class Point:
-    #a rectangle on the map. used to characterize a room.
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-class Rect:
-    #a rectangle on the map. used to characterize a room.
-    def __init__(self, x, y, w, h):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + w
-        self.y2 = y + h
-
-    def center(self):
-        center_x = (self.x1 + self.x2) / 2
-        center_y = (self.y1 + self.y2) / 2
-        return (center_x, center_y)
-
-    def intersect(self, other):
-        #returns true if this rectangle intersects with another one
-        return (self.x1 <= other.x2 and self.x2 >= other.x1 and
-                self.y1 <= other.y2 and self.y2 >= other.y1)
-
-class Tile:
-    #a tile of the map and its properties
-    def __init__(self, blocked, block_sight = None):
-        self.blocked = blocked
-
-        #all tiles start unexplored
-        self.explored = False
-
-        #by default, if a tile is blocked, it also blocks sight
-        if block_sight is None: block_sight = blocked
-        self.block_sight = block_sight
 
 def from_dungeon_level(table):
     #returns a value that depends on level. the table specifies what value occurs after each level, default is 0.

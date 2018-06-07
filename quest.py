@@ -2,6 +2,9 @@ import libtcodpy as libtcod
 import messageconsole
 import screenrendering
 
+def asdadasd():
+    print "asdasd"
+
 class Quest:
     def __init__(self, title, description, xp, kill=0, kill_type=None):
         self.title = title

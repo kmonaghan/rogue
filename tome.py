@@ -6,6 +6,10 @@ import baseclasses
 import screenrendering
 import ai
 
+from map_objects.map_utils import is_blocked
+
+import game_state
+
 #spell values
 HEAL_AMOUNT = 40
 LIGHTNING_DAMAGE = 40
@@ -20,7 +24,7 @@ def closest_npc(max_range):
     closest_enemy = None
     closest_dist = max_range + 1  #start with (slightly more than) maximum range
 
-    for object in baseclasses.objects:
+    for object in game_state.objects:
         if object.fighter and not object == pc.player and libtcod.map_is_in_fov(baseclasses.fov_map, object.x, object.y):
             #calculate distance between this object and the player
             dist = pc.player.distance_to(object)
@@ -55,7 +59,7 @@ def target_npc(max_range=None):
             return None
 
         #return the first clicked npc, otherwise continue looping
-        for obj in baseclasses.objects:
+        for obj in game_state.objects:
             if obj.x == x and obj.y == y and obj.fighter and obj != pc.player:
                 return obj
 
@@ -87,7 +91,7 @@ def cast_fireball():
     if x is None: return 'cancelled'
     messageconsole.message('The fireball explodes, burning everything within ' + str(FIREBALL_RADIUS) + ' tiles!', libtcod.orange)
 
-    for obj in baseclasses.objects:  #damage every fighter in range, including the player
+    for obj in game_state.objects:  #damage every fighter in range, including the player
         if obj.distance(x, y) <= FIREBALL_RADIUS and obj.fighter:
             messageconsole.message('The ' + obj.name + ' gets burned for ' + str(FIREBALL_DAMAGE) + ' hit points.', libtcod.orange)
             obj.fighter.take_damage(FIREBALL_DAMAGE)
@@ -113,9 +117,9 @@ def cast_summon_goblin(pc):
     start_y = pc.y - 1
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.goblin(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -= 1
 
         if dice < 1:
@@ -124,9 +128,9 @@ def cast_summon_goblin(pc):
     start_x = pc.x
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.goblin(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -=1
 
         if dice < 1:
@@ -135,9 +139,9 @@ def cast_summon_goblin(pc):
     start_x = pc.x + 1
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.goblin(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -= 1
 
         if dice < 1:
@@ -152,9 +156,9 @@ def cast_summon_orc(pc):
     start_y = pc.y - 1
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.orc(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -= 1
 
         if dice < 1:
@@ -163,9 +167,9 @@ def cast_summon_orc(pc):
     start_x = pc.x
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.orc(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -=1
 
         if dice < 1:
@@ -174,9 +178,9 @@ def cast_summon_orc(pc):
     start_x = pc.x + 1
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.orc(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -= 1
 
         if dice < 1:
@@ -191,9 +195,9 @@ def cast_summon_troll(pc):
     start_y = pc.y - 1
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.troll(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -= 1
 
         if dice < 1:
@@ -202,9 +206,9 @@ def cast_summon_troll(pc):
     start_x = pc.x
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.troll(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -=1
 
         if dice < 1:
@@ -213,9 +217,9 @@ def cast_summon_troll(pc):
     start_x = pc.x + 1
 
     for offset in range(0, 3):
-        if (baseclasses.is_blocked(start_x, start_y + offset) == False):
+        if (is_blocked(Point(start_x, start_y + offset)) == False):
             npc = npc = bestiary.troll(start_x, start_y + offset)
-            baseclasses.objects.append(npc)
+            game_state.objects.append(npc)
             dice -= 1
 
         if dice < 1:

@@ -4,6 +4,8 @@ import pc
 import messageconsole
 import tome
 
+from map_objects.point import Point
+
 class BasicNPC:
     #AI for a basic npc.
     def take_turn(self):
@@ -41,7 +43,7 @@ class WanderingNPC:
 
     def next_target(self):
         room = self.rooms.pop(0)
-        self.target = baseclasses.Point(room[0], room[1])
+        self.target = room.center()
         self.rooms.append(room)
 
 class ConfusedNPC:

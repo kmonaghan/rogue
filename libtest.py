@@ -10,6 +10,8 @@ import gamemap
 import screenrendering
 import characterclass
 
+import game_state
+
 LIMIT_FPS = 20  #20 frames-per-second maximum
 
 def player_move_or_attack(dx, dy):
@@ -19,7 +21,7 @@ def player_move_or_attack(dx, dy):
 
     #try to find an attackable object there
     target = None
-    for object in baseclasses.objects:
+    for object in game_state.objects:
         if (object.fighter and object.x == x and object.y == y) or (object.questgiver and object.x == x and object.y == y):
             target = object
             break
@@ -64,7 +66,7 @@ def handle_keys():
     elif screenrendering.key.vk == libtcod.KEY_ESCAPE:
         return 'exit'  #exit game
 
-    if baseclasses.game_state == 'playing':
+    if baseclasses.game_status == 'playing':
         #movement keys
         if screenrendering.key.vk == libtcod.KEY_UP or screenrendering.key.vk == libtcod.KEY_KP8:
             player_move_or_attack(0, -1)
@@ -90,7 +92,7 @@ def handle_keys():
 
             if key_char == 'g':
                 #pick up an item
-                for object in baseclasses.objects:  #look for an item in the player's tile
+                for object in game_state.objects:  #look for an item in the player's tile
                     if object.x == pc.player.x and object.y == pc.player.y and object.item:
                         object.item.pick_up(pc.player)
                         break
@@ -128,24 +130,24 @@ def handle_keys():
 def save_game():
     #open a new empty shelve (possibly overwriting an old one) to write the game data
     file = shelve.open('savegame', 'n')
-    file['map'] = gamemap.map
-    file['objects'] = baseclasses.objects
-    file['player_index'] = baseclasses.objects.index(pc.player)  #index of player in objects list
+    file['map'] = game_state.map
+    file['objects'] = game_state.objects
+    file['player_index'] = game_state.objects.index(pc.player)  #index of player in objects list
     file['game_msgs'] = messageconsole.game_msgs
-    file['game_state'] = baseclasses.game_state
+    file['game_status'] = baseclasses.game_status
     file['dungeon_level'] = gamemap.dungeon_level
     if (gamemap.stairs != None):
-        file['stairs_index'] = baseclasses.objects.index(gamemap.stairs)  #same for the stairs
+        file['stairs_index'] = game_state.objects.index(gamemap.stairs)  #same for the stairs
     file.close()
 
 def load_game():
     file = shelve.open('savegame', 'r')
-    gamemap.map = file['map']
-    baseclasses.objects = file['objects']
-    pc.player = baseclasses.objects[file['player_index']]  #get index of player in objects list and access it
-    gamemap.stairs = baseclasses.objects[file['stairs_index']]  #same for the stairs
+    game_state.map = file['map']
+    game_state.objects = file['objects']
+    pc.player = game_state.objects[file['player_index']]  #get index of player in objects list and access it
+    gamemap.stairs = game_state.objects[file['stairs_index']]  #same for the stairs
     messageconsole.game_msgs = file['game_msgs']
-    baseclasses.game_state = file['game_state']
+    baseclasses.game_status = file['game_status']
     gamemap.dungeon_level = file['dungeon_level']
     file.close()
 
@@ -156,11 +158,10 @@ def new_game():
 
     #generate map (at this point it's not drawn to the screen)
     gamemap.dungeon_level = 1
-    #gamemap.make_map()
     gamemap.make_bsp()
     screenrendering.initialize_fov()
 
-    baseclasses.game_state = 'playing'
+    baseclasses.game_status = 'playing'
 
     #a warm welcoming message!
     messageconsole.message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', libtcod.red)
@@ -194,7 +195,7 @@ def play_game():
         pc.player.fighter.check_level_up()
 
         #erase all objects at their old locations, before they move
-        for object in baseclasses.objects:
+        for object in game_state.objects:
             object.clear()
 
         #handle keys and exit game if needed
@@ -204,8 +205,8 @@ def play_game():
             break
 
         #let npcs take their turn
-        if baseclasses.game_state == 'playing' and player_action != 'didnt-take-turn':
-            for object in baseclasses.objects:
+        if baseclasses.game_status == 'playing' and player_action != 'didnt-take-turn':
+            for object in game_state.objects:
                 if object.ai:
                     object.ai.take_turn()
 
