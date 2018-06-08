@@ -43,6 +43,12 @@ def target_tile(max_range=None):
 
         (x, y) = (screenrendering.mouse.cx, screenrendering.mouse.cy)
 
+        #x_offset = (gamemap.MAX_MAP_WIDTH - gamemap.MAP_WIDTH)/ 2
+        #y_offset = (gamemap.MAX_MAP_HEIGHT - gamemap.MAP_HEIGHT) / 2
+
+        #x -= x_offset
+        #y -= y_offset
+
         if screenrendering.mouse.rbutton_pressed or screenrendering.key.vk == libtcod.KEY_ESCAPE:
             return (None, None)  #cancel if the player right-clicked or pressed Escape
 

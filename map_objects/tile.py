@@ -12,3 +12,11 @@ class Tile:
         self.block_sight = block_sight
 
         self.explored = False
+
+    def setWall(self):
+        self.blocked = True
+        self.block_sight = True
+
+    def setFloor(self):
+        self.blocked = False
+        self.block_sight = False

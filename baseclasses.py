@@ -90,11 +90,18 @@ class Object:
                 game_state.debug):
             #set the color and then draw the character that represents this object at its position
             libtcod.console_set_default_foreground(con, self.color)
-            libtcod.console_put_char(con, self.x, self.y, self.char, libtcod.BKGND_NONE)
+
+            x_offset = (gamemap.MAX_MAP_WIDTH - gamemap.MAP_WIDTH)/ 2
+            y_offset = (gamemap.MAX_MAP_HEIGHT - gamemap.MAP_HEIGHT) / 2
+
+            libtcod.console_put_char(con, self.x + x_offset, self.y + y_offset, self.char, libtcod.BKGND_NONE)
 
     def clear(self):
+        x_offset = (gamemap.MAX_MAP_WIDTH - gamemap.MAP_WIDTH)/ 2
+        y_offset = (gamemap.MAX_MAP_HEIGHT - gamemap.MAP_HEIGHT) / 2
+
         #erase the character that represents this object
-        libtcod.console_put_char(con, self.x, self.y, ' ', libtcod.BKGND_NONE)
+        libtcod.console_put_char(con, self.x + x_offset, self.y + y_offset, ' ', libtcod.BKGND_NONE)
 
     def move_astar(self, target):
         #Create a FOV map that has the dimensions of the map

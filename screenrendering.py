@@ -84,6 +84,12 @@ def get_names_under_mouse():
 
     (x, y) = (mouse.cx, mouse.cy)
 
+    x_offset = (gamemap.MAX_MAP_WIDTH - gamemap.MAP_WIDTH)/ 2
+    y_offset = (gamemap.MAX_MAP_HEIGHT - gamemap.MAP_HEIGHT) / 2
+
+    x -= x_offset
+    y -= y_offset
+    
     #create a list with the names of all objects at the mouse's coordinates and in FOV
     names = [obj.name for obj in game_state.objects
              if obj.x == x and obj.y == y and (libtcod.map_is_in_fov(baseclasses.fov_map, obj.x, obj.y) or game_state.debug)]
@@ -113,6 +119,9 @@ def render_all():
         fov_recompute = False
         libtcod.map_compute_fov(baseclasses.fov_map, pc.player.x, pc.player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
 
+        x_offset = (gamemap.MAX_MAP_WIDTH - gamemap.MAP_WIDTH)/ 2
+        y_offset = (gamemap.MAX_MAP_HEIGHT - gamemap.MAP_HEIGHT) / 2
+
         #go through all tiles, and set their background color according to the FOV
         for y in range(gamemap.MAP_HEIGHT):
             for x in range(gamemap.MAP_WIDTH):
@@ -122,15 +131,15 @@ def render_all():
                     #if it's not visible right now, the player can only see it if it's explored
                     if game_state.map[x][y].explored:
                         if wall:
-                            libtcod.console_set_char_background(baseclasses.con, x, y, color_dark_wall, libtcod.BKGND_SET)
+                            libtcod.console_set_char_background(baseclasses.con, x + x_offset, y + y_offset, color_dark_wall, libtcod.BKGND_SET)
                         else:
-                            libtcod.console_set_char_background(baseclasses.con, x, y, color_dark_ground, libtcod.BKGND_SET)
+                            libtcod.console_set_char_background(baseclasses.con, x + x_offset, y + y_offset, color_dark_ground, libtcod.BKGND_SET)
                 else:
                     #it's visible
                     if wall:
-                        libtcod.console_set_char_background(baseclasses.con, x, y, color_light_wall, libtcod.BKGND_SET )
+                        libtcod.console_set_char_background(baseclasses.con, x + x_offset, y + y_offset, color_light_wall, libtcod.BKGND_SET )
                     else:
-                        libtcod.console_set_char_background(baseclasses.con, x, y, color_light_ground, libtcod.BKGND_SET )
+                        libtcod.console_set_char_background(baseclasses.con, x + x_offset, y + y_offset, color_light_ground, libtcod.BKGND_SET )
                         #since it's visible, explore it
                     game_state.map[x][y].explored = True
 
