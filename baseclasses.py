@@ -50,6 +50,18 @@ class Object:
 
         self.questgiver = None
 
+        self.description = None
+
+    def examine(self):
+        detail = self.name.capitalize()
+        if (self.description != None):
+            detail += ' ' + self.description()
+
+        if (self.equipment != None):
+            detail += ' ' + self.equipment.equipment_description()
+
+        messageconsole.message(detail)
+
     def move(self, dx, dy):
         #move by the given amount, if the destination is not blocked
         if not is_blocked(Point(self.x + dx, self.y + dy)):

@@ -40,6 +40,9 @@ class Item:
         if (npc == pc.player):
             messageconsole.message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
 
+    def examine(self):
+        self.owner.examine()
+
     def use(self):
         #special case: if the object has the Equipment component, the "use" action is to equip/dequip
         if self.owner.equipment:
@@ -97,6 +100,21 @@ class Equipment:
             total += libtcod.random_get_int(0, 1, self.type_of_dice)
 
         return total
+
+    def damage_description(self):
+        base = 'Damage: ' + str(self.number_of_dice) + 'd' + str(self.type_of_dice)
+
+        if (self.bonus_damage):
+            base += ' +' + str(self.bonus_damage)
+
+        return base
+
+    def equipment_description(self):
+        desription = ""
+        if (self.number_of_dice):
+            description = self.damage_description()
+
+        return description
 
 def random_armour(point = None):
     item_chances = {}

@@ -133,7 +133,6 @@ class Questgiver:
         self.owner.color = libtcod.silver
 
     def return_to_giver(self):
-        print "return_to_giver"
         self.owner.color = libtcod.gold
         self.owner.always_visible = True
 

@@ -97,11 +97,12 @@ def handle_keys():
                         object.item.pick_up(pc.player)
                         break
 
-            if key_char == 'i':
-                #show the inventory; if an item is selected, use it
-                chosen_item = inventory_menu('Press the key next to an item to use it, or any other to cancel.\n')
-                if chosen_item is not None:
-                    chosen_item.use()
+            if key_char == 'c':
+                #show character information
+                level_up_xp = characterclass.LEVEL_UP_BASE + pc.player.level * characterclass.LEVEL_UP_FACTOR
+                msgbox('Character Information\n\nLevel: ' + str(pc.player.level) + '\nExperience: ' + str(pc.player.fighter.xp) +
+                       '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(pc.player.fighter.max_hp) +
+                       '\nAttack: ' + str(pc.player.fighter.power) + '\nDefense: ' + str(pc.player.fighter.defense), CHARACTER_SCREEN_WIDTH)
 
             if key_char == 'd':
                 #show the inventory; if an item is selected, drop it
@@ -109,12 +110,17 @@ def handle_keys():
                 if chosen_item is not None:
                     chosen_item.drop()
 
-            if key_char == 'c':
-                #show character information
-                level_up_xp = characterclass.LEVEL_UP_BASE + pc.player.level * characterclass.LEVEL_UP_FACTOR
-                msgbox('Character Information\n\nLevel: ' + str(pc.player.level) + '\nExperience: ' + str(pc.player.fighter.xp) +
-                       '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(pc.player.fighter.max_hp) +
-                       '\nAttack: ' + str(pc.player.fighter.power) + '\nDefense: ' + str(pc.player.fighter.defense), CHARACTER_SCREEN_WIDTH)
+            if key_char == 'e':
+                #show the inventory; if an item is selected, drop it
+                chosen_item = inventory_menu('Press the key next to an item to examine it, or any other to cancel.\n')
+                if chosen_item is not None:
+                    chosen_item.examine()
+
+            if key_char == 'i':
+                #show the inventory; if an item is selected, use it
+                chosen_item = inventory_menu('Press the key next to an item to use it, or any other to cancel.\n')
+                if chosen_item is not None:
+                    chosen_item.use()
 
             if key_char == 'q':
                 pc.player.list_quests()
