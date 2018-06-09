@@ -24,6 +24,10 @@ def bountyhunter(point = None):
     npc = baseclasses.Character(point, '?', 'Bounty Hunter', libtcod.gold,
                      blocks=True, fighter=None, ai=ai_component)
 
+    questgiver = characterclass.Questgiver()
+    questgiver.owner = npc
+    npc.questgiver = questgiver
+
     title = "Kill Gobbos"
     description = "Get rid of them. I don't care how."
 
@@ -32,9 +36,7 @@ def bountyhunter(point = None):
     q.kill_type = "goblin"
     q.return_to_quest_giver = True
 
-    questgiver = characterclass.Questgiver(q)
-    questgiver.owner = npc
-    npc.questgiver = questgiver
+    questgiver.add_quest(q)
 
     return npc
 
