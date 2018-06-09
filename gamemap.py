@@ -13,6 +13,7 @@ from map_objects.room import Room
 from map_objects.tile import Tile
 from map_objects.altbsptree import AltBSPTree
 from map_objects.bsptree import BSPTree
+from map_objects.cellularautomata import CellularAutomata
 from map_objects.mazewithrooms import MazeWithRooms
 from map_objects.map_utils import is_blocked
 
@@ -43,13 +44,14 @@ def make_bsp():
 
     print "Generating Map sized: " + str(MAP_WIDTH) + " x " + str(MAP_HEIGHT)
 
-    #generator = AltBSPTree()
-    #generator = BSPTree()
     if (dungeon_level <= 2):
         generator = AltBSPTree()
     elif (dungeon_level <= 4):
         generator = MazeWithRooms()
-        
+
+    #generator = BSPTree()
+    #generator = CellularAutomata()
+
     game_state.map = generator.generateLevel(MAP_WIDTH, MAP_HEIGHT)
 
     print "Map size: " + str(len(game_state.map)) + " x " + str(len(game_state.map[0]))
@@ -91,16 +93,17 @@ def popluate_map():
     for room in bsp_rooms:
         place_objects(room)
 
-#    num_to_select = 4                           # set the number to select here.
-#    list_of_random_items = random.sample(bsp_rooms, num_to_select)
+    if (len(bsp_rooms) > 4):
+        num_to_select = 4                           # set the number to select here.
+        list_of_random_items = random.sample(bsp_rooms, num_to_select)
 
-#    room = list_of_random_items[0]
-#    point = room.random_tile()
-#    npc = bestiary.goblin(point)
-#    npc.ai = ai.WanderingNPC(list_of_random_items, npc.ai)
-#    npc.ai.owner = npc
-#    bestiary.upgrade_npc(npc)
-#    game_state.objects.append(npc)
+        room = list_of_random_items[0]
+        point = room.random_tile()
+        npc = bestiary.goblin(point)
+        npc.ai = ai.WanderingNPC(list_of_random_items, npc.ai)
+        npc.ai.owner = npc
+        bestiary.upgrade_npc(npc)
+        game_state.objects.append(npc)
 
 def place_objects(room):
     #this is where we decide the chance of each npc or item appearing.
