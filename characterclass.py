@@ -97,15 +97,24 @@ class Fighter:
                                                 ['Agility (+1 defense, from ' + str(self.defense) + ')',libtcod.white]],
                                                 screenrendering.LEVEL_SCREEN_WIDTH)
 
-            if choice == 0:
-                self.base_max_hp += 20
-                self.hp += 20
-            elif choice == 1:
-                self.base_power += 1
-            elif choice == 2:
-                self.base_defense += 1
+            self.level_up_stats(choice)
 
-            self.hp = self.max_hp
+    def level_up_stats(self, choice = 0):
+        if choice == 0:
+            self.base_max_hp += 20
+            self.hp += 20
+        elif choice == 1:
+            self.base_power += 1
+        elif choice == 2:
+            self.base_defense += 1
+
+        self.hp = self.max_hp
+
+    def random_level_up(self, total_levels):
+        for x in range(total_levels):
+            print "added level for " + self.owner.name + " " + str(total_levels)
+            choice = libtcod.random_get_int(0, 0, 2)
+            self.level_up_stats(choice)
 
 class Questgiver:
     def __init__(self, quest = None):

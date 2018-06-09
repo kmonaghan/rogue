@@ -183,7 +183,7 @@ def next_level():
     total = 0
     for y in range(gamemap.MAP_HEIGHT):
         for x in range(gamemap.MAP_WIDTH):
-            if (game_state.map[x][y].isFloor() and game_state.map[x][y].explored:
+            if (game_state.map[x][y].isFloor() and game_state.map[x][y].explored):
                 total += 1
 
     xp = total / 10

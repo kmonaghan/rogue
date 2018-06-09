@@ -7,6 +7,50 @@ def check_quests_for_npc_death(npc):
     for quest in game_state.active_quests:
         quest.kill_count(npc)
 
+def kill_gobbos(kill = 5):
+    title = "Kill Gobbos"
+    description = "Get rid of them. I don't care how."
+
+    q = Quest(title, description, 100)
+    q.kill = kill
+    q.kill_type = "goblin"
+    q.return_to_quest_giver = True
+
+    return q
+
+def kill_orcs(kill = 5):
+    title = "Kill Orcs"
+    description = "Get rid of them. I don't care how."
+
+    q = Quest(title, description, 200)
+    q.kill = kill
+    q.kill_type = "orc"
+    q.return_to_quest_giver = True
+
+    return q
+
+def kill_trolls(kill = 5):
+    title = "Kill Trolls"
+    description = "Get rid of them. I don't care how."
+
+    q = Quest(title, description, 300)
+    q.kill = kill
+    q.kill_type = "troll"
+    q.return_to_quest_giver = True
+
+    return q
+
+def kill_warlord():
+    title = "Kill the Warlord"
+    description = "Time to take down the king of the hill. Or dungeon as it is in this case."
+
+    q = Quest(title, description, 500)
+    q.kill = 1
+    q.kill_type = "warlord"
+    q.return_to_quest_giver = True
+
+    return q
+
 class Quest:
     def __init__(self, title, description, xp, kill=0, kill_type=None):
         self.title = title
@@ -43,7 +87,6 @@ class Quest:
             self.kill_total = self.kill_total + 1
 
         if (self.kill == self.kill_total):
-            print "Completed kill " + npc.name
             messageconsole.message('Quest ' + self.title + ' completed!', libtcod.gold)
             self.completed = True
             if (self.return_to_quest_giver):

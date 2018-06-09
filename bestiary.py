@@ -28,16 +28,6 @@ def bountyhunter(point = None):
     questgiver.owner = npc
     npc.questgiver = questgiver
 
-    title = "Kill Gobbos"
-    description = "Get rid of them. I don't care how."
-
-    q = quest.Quest(title, description, 100)
-    q.kill = 5
-    q.kill_type = "goblin"
-    q.return_to_quest_giver = True
-
-    questgiver.add_quest(q)
-
     return npc
 
 def goblin(point = None):

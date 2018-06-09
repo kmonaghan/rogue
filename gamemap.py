@@ -7,6 +7,7 @@ import messageconsole
 import random
 import bestiary
 import ai
+import quest
 
 from map_objects.rect import Rect
 from map_objects.room import Room
@@ -86,8 +87,23 @@ def popluate_map():
 
     point = room.random_tile()
     npc = bestiary.bountyhunter(point)
-    game_state.objects.append(npc)
 
+    q = None
+
+    if (dungeon_level == 1):
+        q = quest.kill_gobbos()
+    elif (dungeon_level == 2):
+        q = quest.kill_gobbos()
+    elif (dungeon_level == 3):
+        q = quest.kill_orcs()
+    elif (dungeon_level == 4):
+        q = quest.kill_trolls()
+    elif (dungeon_level == 5):
+        q = quest.kill_warlord()
+
+    if (q != None):
+        npc.questgiver.add_quest(q)
+        game_state.objects.append(npc)
 
     #Add npcs and items
     for room in bsp_rooms:
@@ -143,6 +159,18 @@ def place_objects(room):
                 npc = bestiary.troll(point)
             elif choice == 'goblin':
                 npc = bestiary.goblin(point)
+
+            if (dungeon_level > 1):
+                add_levels = libtcod.random_get_int(0, -1, 1)
+
+                if (choice == 'goblin'):
+                    npc.fighter.random_level_up(dungeon_level + add_levels)
+
+                if ((dungeon_level > 2) and choice == 'orc'):
+                    npc.fighter.random_level_up(dungeon_level + add_levels - 1)
+
+                if ((dungeon_level > 3) and choice == 'troll'):
+                    npc.fighter.random_level_up(dungeon_level + add_levels - 3)
 
             game_state.objects.append(npc)
 
