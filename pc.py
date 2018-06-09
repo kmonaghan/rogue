@@ -11,7 +11,7 @@ def create_player():
 
     #create object representing the player
     fighter_component = characterclass.Fighter(hp=100, defense=10, power=2, xp=0, death_function=player_death)
-    player = baseclasses.Character(None, '@', 'player', libtcod.white, blocks=True, fighter=fighter_component)
+    player = baseclasses.Character(None, '@', 'player', libtcod.dark_green, blocks=True, fighter=fighter_component)
 
     player.level = 1
 

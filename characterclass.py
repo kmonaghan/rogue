@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 import equipment
+import game_state
 import messageconsole
 import pc
 import screenrendering
@@ -110,10 +111,30 @@ class Questgiver:
     def __init__(self, quest):
         self.owner = None
         self.quest = quest
+        self.quest.owner = self
+
+    def start_quest(self):
+        self.owner.char = "!"
+        self.owner.color = libtcod.silver
+
+    def return_to_giver(self):
+        print "return_to_giver"
+        self.owner.color = libtcod.gold
+        self.owner.always_visible = True
+
+    def completed_quest(self):
+        self.owner.char = "Q"
+        self.owner.color = libtcod.blue
+        self.owner.always_visible = False
+        game_state.active_quests.remove(self.quest)
 
     def talk(self, pc):
         if (self.quest.started == False):
             self.quest.start_quest(pc)
+        elif (self.quest.completed):
+            messageconsole.message('Well done!')
+            pc.completed_quest(self.quest)
+            self.completed_quest()
         else:
             messageconsole.message('Have you done it yet?')
 

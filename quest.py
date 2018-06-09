@@ -1,9 +1,11 @@
 import libtcodpy as libtcod
+import game_state
 import messageconsole
 import screenrendering
 
-def asdadasd():
-    print "asdasd"
+def check_quests_for_npc_death(npc):
+    for quest in game_state.active_quests:
+        quest.kill_count(npc)
 
 class Quest:
     def __init__(self, title, description, xp, kill=0, kill_type=None):
@@ -27,8 +29,9 @@ class Quest:
 
         if choice == 0:
             messageconsole.message('Quest ' + self.title + ' accepted!', libtcod.green)
-            pc.add_quest(self)
+            game_state.active_quests.append(self)
             self.started = True
+            self.owner.start_quest()
         elif choice == 1:
             return
 
@@ -39,8 +42,14 @@ class Quest:
         if (self.kill_type == npc.name):
             self.kill_total = self.kill_total + 1
 
+        print "Killed " + npc.name
+
         if (self.kill == self.kill_total):
+            print "Completed kill " + npc.name
             messageconsole.message('Quest ' + self.title + ' completed!', libtcod.gold)
             self.completed = True
-            if (self.return_to_quest_giver == False):
-                self.owner.complete_quest(self)
+            if (self.return_to_quest_giver):
+                print "return to owner"
+                self.owner.return_to_giver()
+            else:
+                pc.player.completed_quest(self)

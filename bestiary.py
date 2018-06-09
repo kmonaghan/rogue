@@ -21,7 +21,7 @@ def bountyhunter(point = None):
     #create a questgiver
 
     ai_component = ai.StrollingNPC()
-    npc = baseclasses.Character(point, '?', 'Bounty Hunter', libtcod.red,
+    npc = baseclasses.Character(point, '?', 'Bounty Hunter', libtcod.gold,
                      blocks=True, fighter=None, ai=ai_component)
 
     title = "Kill Gobbos"
@@ -30,6 +30,7 @@ def bountyhunter(point = None):
     q = quest.Quest(title, description, 100)
     q.kill = 5
     q.kill_type = "goblin"
+    q.return_to_quest_giver = True
 
     questgiver = characterclass.Questgiver(q)
     questgiver.owner = npc
@@ -136,7 +137,7 @@ def npc_death(npc):
     #attacked and doesn't move
     messageconsole.message('The ' + npc.name + ' is dead! You gain ' + str(npc.fighter.xp) + ' experience points.', libtcod.orange)
 
-    pc.player.check_quests_for_npc_death(npc)
+    quest.check_quests_for_npc_death(npc)
 
     npc.char = '%'
     npc.color = libtcod.dark_red

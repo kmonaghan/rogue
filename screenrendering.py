@@ -31,10 +31,16 @@ mouse = None
 fov_recompute = None
 panel = None
 
-color_dark_wall = libtcod.Color(0, 0, 100)
-color_light_wall = libtcod.Color(130, 110, 50)
-color_dark_ground = libtcod.Color(50, 50, 150)
-color_light_ground = libtcod.Color(200, 180, 50)
+#color_dark_wall = libtcod.Color(0, 0, 100)
+#color_light_wall = libtcod.Color(130, 110, 50)
+#color_dark_ground = libtcod.Color(50, 50, 150)
+#color_light_ground = libtcod.Color(200, 180, 50)
+
+color_dark_wall = libtcod.darkest_sepia
+color_light_wall = libtcod.dark_sepia
+color_dark_ground = libtcod.darker_sepia
+color_light_ground = libtcod.sepia
+
 
 def menu(header, options, width):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
@@ -89,7 +95,7 @@ def get_names_under_mouse():
 
     x -= x_offset
     y -= y_offset
-    
+
     #create a list with the names of all objects at the mouse's coordinates and in FOV
     names = [obj.name for obj in game_state.objects
              if obj.x == x and obj.y == y and (libtcod.map_is_in_fov(baseclasses.fov_map, obj.x, obj.y) or game_state.debug)]
