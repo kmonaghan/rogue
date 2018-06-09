@@ -20,3 +20,9 @@ class Tile:
     def setFloor(self):
         self.blocked = False
         self.block_sight = False
+
+    def isFloor(self):
+        return not (self.blocked and self.block_sight)
+
+    def isWall(self):
+        return (self.blocked and self.block_sight)

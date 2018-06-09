@@ -180,6 +180,16 @@ def new_game():
 
 def next_level():
     #advance to the next level
+    total = 0
+    for y in range(gamemap.MAP_HEIGHT):
+        for x in range(gamemap.MAP_WIDTH):
+            if (game_state.map[x][y].isFloor() and game_state.map[x][y].explored:
+                total += 1
+
+    xp = total / 10
+
+    pc.player.fighter.xp += xp
+
     messageconsole.message('You take a moment to rest, and recover your strength.', libtcod.light_violet)
     pc.player.fighter.heal(pc.player.fighter.max_hp / 2)  #heal the player by 50%
 
