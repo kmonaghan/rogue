@@ -122,13 +122,13 @@ class AltBSPTree:
 
 		return True
 
-		def vline(self, x, y1, y2):
-			if y1 > y2:
-				y1,y2 = y2,y1
+	def vline(self, x, y1, y2):
+		if y1 > y2:
+			y1,y2 = y2,y1
 
-			for y in range(y1,y2+1):
-				self.level[x][y].blocked = False
-				self.level[x][y].block_sight = False
+		for y in range(y1,y2+1):
+			self.level[x][y].blocked = False
+			self.level[x][y].block_sight = False
 
 	def vline_up(self, x, y):
 		while y >= 0 and self.level[x][y].blocked == True:
@@ -145,7 +145,7 @@ class AltBSPTree:
 	def hline(self, x1, y, x2):
 		if x1 > x2:
 			x1,x2 = x2,x1
-			
+
 		for x in range(x1,x2+1):
 			self.level[x][y].blocked = False
 			self.level[x][y].block_sight = False
