@@ -1,11 +1,18 @@
 import libtcodpy as libtcod
 import baseclasses
-import characterclass
+
 import messageconsole
-import ai
+
 import equipment
 import quest
 import pc
+
+from components.ai import BasicNPC
+from components.ai import StrollingNPC
+from components.ai import WarlordNPC
+
+from components.fighter import Fighter
+from components.questgiver import Questgiver
 
 from map_objects.point import Point
 
@@ -20,11 +27,11 @@ def upgrade_npc(npc):
 def bountyhunter(point = None):
     #create a questgiver
 
-    ai_component = ai.StrollingNPC()
+    ai_component = StrollingNPC()
     npc = baseclasses.Character(point, '?', 'Bounty Hunter', libtcod.gold,
                      blocks=True, fighter=None, ai=ai_component)
 
-    questgiver = characterclass.Questgiver()
+    questgiver = Questgiver()
     questgiver.owner = npc
     npc.questgiver = questgiver
 
@@ -32,8 +39,8 @@ def bountyhunter(point = None):
 
 def goblin(point = None):
     #create a goblin
-    fighter_component = characterclass.Fighter(hp=10, defense=7, power=3, xp=10, death_function=npc_death)
-    ai_component = ai.BasicNPC()
+    fighter_component = Fighter(hp=10, defense=7, power=3, xp=10, death_function=npc_death)
+    ai_component = BasicNPC()
 
     npc = baseclasses.Character(point, 'G', 'goblin', libtcod.desaturated_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
@@ -53,8 +60,8 @@ def goblin(point = None):
 
 def orc(point = None):
     #create an orc
-    fighter_component = characterclass.Fighter(hp=20, defense=10, power=4, xp=35, death_function=npc_death)
-    ai_component = ai.BasicNPC()
+    fighter_component = Fighter(hp=20, defense=10, power=4, xp=35, death_function=npc_death)
+    ai_component = BasicNPC()
 
     npc = baseclasses.Character(point, 'O', 'Orc', libtcod.light_green,
                                     blocks=True, fighter=fighter_component, ai=ai_component)
@@ -74,8 +81,8 @@ def orc(point = None):
 
 def troll(point = None):
     #create a troll
-    fighter_component = characterclass.Fighter(hp=30, defense=12, power=8, xp=100, death_function=npc_death)
-    ai_component = ai.BasicNPC()
+    fighter_component = Fighter(hp=30, defense=12, power=8, xp=100, death_function=npc_death)
+    ai_component = BasicNPC()
 
     npc = baseclasses.Character(point, 'T', 'troll', libtcod.darker_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
@@ -95,8 +102,8 @@ def troll(point = None):
 
 def warlord(point = None):
     #create a warlord
-    fighter_component = characterclass.Fighter(hp=50, defense=10, power=4, xp=100, death_function=warlord_death)
-    ai_component = ai.WarlordNPC()
+    fighter_component = Fighter(hp=50, defense=10, power=4, xp=100, death_function=warlord_death)
+    ai_component = WarlordNPC()
 
     npc = baseclasses.Character(point, 'W', 'Warlord', libtcod.black,
                                     blocks=True, fighter=fighter_component, ai=ai_component)

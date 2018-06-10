@@ -54,10 +54,10 @@ class Object:
 
     def examine(self):
         detail = self.name.capitalize()
-        if (self.description != None):
+        if self.description:
             detail += ' ' + self.description()
 
-        if (self.equipment != None):
+        if self.equipment:
             detail += ' ' + self.equipment.equipment_description()
 
         messageconsole.message(detail)
@@ -158,9 +158,12 @@ class Object:
         libtcod.path_delete(my_path)
 
 class Character(Object):
-    def __init__(self, point, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
+    def __init__(self, point, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None, level=None):
         super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear)
         self.inventory = []
+        self.level = level
+        if self.level:
+            self.level.owner = self
 
     def get_equipped_in_slot(self, slot):  #returns the equipment in a slot, or None if it's empty
         for obj in self.inventory:

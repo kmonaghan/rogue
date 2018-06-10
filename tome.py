@@ -4,7 +4,8 @@ import pc
 import bestiary
 import baseclasses
 import screenrendering
-import ai
+
+import components.ai 
 
 from map_objects.map_utils import is_blocked
 
@@ -110,7 +111,7 @@ def cast_confuse():
 
     #replace the npc's AI with a "confused" one; after some turns it will restore the old AI
     old_ai = npc.ai
-    npc.ai = ai.ConfusedNPC(old_ai)
+    npc.ai = ConfusedNPC(old_ai)
     npc.ai.owner = npc  #tell the new component who owns it
     messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
 

@@ -6,8 +6,9 @@ import characterclass
 import messageconsole
 import random
 import bestiary
-import ai
 import quest
+
+from components.ai import WanderingNPC
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -127,7 +128,7 @@ def popluate_map():
         room = list_of_random_items[0]
         point = room.random_tile()
         npc = bestiary.goblin(point)
-        npc.ai = ai.WanderingNPC(list_of_random_items, npc.ai)
+        npc.ai = WanderingNPC(list_of_random_items, npc.ai)
         npc.ai.owner = npc
         bestiary.upgrade_npc(npc)
         game_state.objects.append(npc)
