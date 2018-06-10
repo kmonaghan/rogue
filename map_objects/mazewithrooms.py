@@ -132,7 +132,8 @@ class MazeWithRooms:
 			for otherRoom in self.rooms:
 				if room.intersect(otherRoom):
 					failed = True
-					game_state.objects.remove(room.room_detail)
+					if (game_state.debug):
+						game_state.objects.remove(room.room_detail)
 					break
 
 			if not failed:
