@@ -25,6 +25,16 @@ class Room(Rect):
             self.room_detail = baseclasses.Object(Point(self.x1, self.y1), "R", name, libtcod.red, False, True)
             game_state.objects.append(self.room_detail)
 
+    def change_xy(self, x, y):
+        self.x1 = x
+        self.y1 = y
+        self.x2 = x + self.w
+        self.y2 = y + self.h
+
+        if (self.room_detail != None):
+            self.room_detail.x = x
+            self.room_detail.y = y
+
     def random_tile(self):
         point = None
         while (point == None):

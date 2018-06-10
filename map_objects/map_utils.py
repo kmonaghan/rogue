@@ -4,9 +4,9 @@ from map_objects.point import Point
 
 def is_blocked(point):
     #first test the map tile
-    if (game_state.debug):
-        print "Map size: " + str(len(game_state.map)) + " x " + str(len(game_state.map[0]))
-        print "Testing: " + point.describe()
+#    if (game_state.debug):
+#        print "Map size: " + str(len(game_state.map)) + " x " + str(len(game_state.map[0]))
+#        print "Testing: " + point.describe()
 
     if game_state.map[point.x][point.y].blocked:
         return True

@@ -13,6 +13,7 @@ import characterclass
 import game_state
 
 LIMIT_FPS = 20  #20 frames-per-second maximum
+CHARACTER_SCREEN_WIDTH = 30
 
 def player_move_or_attack(dx, dy):
     #the coordinates the player is moving to/attacking

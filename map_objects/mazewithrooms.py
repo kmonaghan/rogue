@@ -17,6 +17,7 @@ class MazeWithRooms:
 	def __init__(self):
 		self.level = []
 		self.rooms = []
+		self.prefabs = []
 
 		self.ROOM_MAX_SIZE = 10
 		self.ROOM_MIN_SIZE = 5
@@ -25,6 +26,9 @@ class MazeWithRooms:
 		self.connectionChance = 0.04
 		self.windingPercent = 0.1
 		self.allowDeadEnds = False
+
+	def add_prefab(self, prefab):
+		self.prefabs.append(prefab)
 
 	def generateLevel(self,mapWidth,mapHeight):
 		# The level dimensions must be odd
@@ -41,6 +45,9 @@ class MazeWithRooms:
 
 		self._currentRegion = -1 # the index of the current region in _regions
 
+		if (len(self.prefabs) > 0):
+			self.add_prefab_room(mapWidth,mapHeight)
+
 		self.addRooms(mapWidth,mapHeight)#?
 
 		# Fill in the empty space around the rooms with mazes
@@ -55,6 +62,10 @@ class MazeWithRooms:
 
 		if not self.allowDeadEnds:
 			self.removeDeadEnds(mapWidth,mapHeight)
+
+		if (len(self.prefabs) > 0):
+			for prefab in self.prefabs:
+				prefab.carve(self.level)
 
 		return self.level
 
@@ -112,6 +123,26 @@ class MazeWithRooms:
 				# No adjacent uncarved cells
 				cells.pop()
 				lastDirection = None
+
+	def add_prefab_room(self,mapWidth,mapHeight):
+		for prefab in self.prefabs:
+
+			x = (random.randint(0,mapWidth-prefab.room.w-1)/2)*2+1
+			y = (random.randint(0,mapHeight-prefab.room.h-1)/2)*2+1
+
+			prefab.room.change_xy(x,y)
+
+			failed = False
+			for otherRoom in self.rooms:
+				if prefab.room.intersect(otherRoom):
+					failed = True
+
+					break
+
+			if not failed:
+				self.rooms.append(prefab.room)
+				self.startRegion()
+				self.createRoom(prefab.room)
 
 	def addRooms(self,mapWidth,mapHeight):
 

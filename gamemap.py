@@ -9,14 +9,17 @@ import bestiary
 import ai
 import quest
 
+from map_objects.point import Point
 from map_objects.rect import Rect
 from map_objects.room import Room
 from map_objects.tile import Tile
 from map_objects.altbsptree import AltBSPTree
+from map_objects.basic import Basic
 from map_objects.bsptree import BSPTree
 from map_objects.cellularautomata import CellularAutomata
 from map_objects.mazewithrooms import MazeWithRooms
 from map_objects.map_utils import is_blocked
+import map_objects.prefab
 
 import game_state
 
@@ -47,12 +50,17 @@ def make_bsp():
 
     if (dungeon_level <= 2):
         generator = AltBSPTree()
-    elif (dungeon_level <= 4):
+    elif (dungeon_level <= 5):
         generator = MazeWithRooms()
 
     #generator = MazeWithRooms()
     #generator = BSPTree()
     #generator = CellularAutomata()
+    #generator = Basic()
+
+    if (dungeon_level == 5):
+        prefabbed = map_objects.prefab.Prefab(map_objects.prefab.boss_room())
+        generator.add_prefab(prefabbed)
 
     game_state.map = generator.generateLevel(MAP_WIDTH, MAP_HEIGHT)
 
@@ -60,6 +68,11 @@ def make_bsp():
     bsp_rooms = generator.rooms
 
     print "Number of rooms: " + str(len(bsp_rooms))
+
+    if (dungeon_level == 5):
+        warlord = bestiary.warlord(Point(prefabbed.room.x1+4,prefabbed.room.y1))
+        game_state.objects.append(warlord)
+        bsp_rooms.remove(prefabbed.room)
 
     popluate_map()
 
@@ -74,9 +87,6 @@ def popluate_map():
         stairs = baseclasses.Object(point, '<', 'stairs', libtcod.white, always_visible=True)
         game_state.objects.append(stairs)
         stairs.send_to_back()
-    else:
-        warlord = bestiary.warlord(point)
-        game_state.objects.append(warlord)
 
     #Random room for player start
     room = random.choice(bsp_rooms)
@@ -197,16 +207,3 @@ def place_objects(room):
             game_state.objects.append(item)
             item.send_to_back()  #items appear below other objects
             item.always_visible = True  #items are visible even out-of-FOV, if in an explored area
-
-def boss_room(point):
-    room_map = ["#########",
-                "###...###",
-                "##.....##",
-                "#.......#",
-                "#.#...#.#",
-                "#.......#",
-                "#.#...#.#",
-                "#.......#",
-                "#.#...#.#",
-                "#.......#",
-                "####.####"]
