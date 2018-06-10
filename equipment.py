@@ -6,6 +6,8 @@ import tome
 
 import game_state
 
+from equipment_slots import EquipmentSlots
+
 class Item:
     #an item that can be picked up and used.
     def __init__(self, use_function=None):
@@ -84,14 +86,16 @@ class Equipment:
         #equip object and show a message about it
         self.is_equipped = True
         if (self.owner.owner == pc.player):
-            messageconsole.message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green)
+            #messageconsole.message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green)
+            messageconsole.message('Equipped ' + self.owner.name + '.', libtcod.light_green)
 
     def dequip(self):
         #dequip object and show a message about it
         if not self.is_equipped: return
         self.is_equipped = False
         if (self.owner.owner == pc.player):
-            messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
+#            messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
+            messageconsole.message('Dequipped ' + self.owner.name + '.', libtcod.light_yellow)
 
     def damage(self):
         total = self.bonus_damage
@@ -243,49 +247,49 @@ def confusion_scroll(point = None):
 
 def shield(point = None):
     #create a shield
-    equipment_component = Equipment(slot='left hand', defense_bonus=1)
+    equipment_component = Equipment(EquipmentSlots.OFF_HAND, defense_bonus=1)
     item = baseclasses.Object(point, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
 
     return item
 
 def helmet(point = None):
     #create a helmet
-    equipment_component = Equipment(slot='head', defense_bonus=1)
+    equipment_component = Equipment(EquipmentSlots.HEAD, defense_bonus=1)
     item = baseclasses.Object(point, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
 
     return item
 
 def leathershirt(point = None):
     #create a chainmail
-    equipment_component = Equipment(slot='chest', defense_bonus=1)
+    equipment_component = Equipment(EquipmentSlots.CHEST, 1)
     item = baseclasses.Object(point, '=', 'leather shirt', libtcod.sky, gear=equipment_component)
 
     return item
 
 def scalemail(point = None):
     #create a chainmail
-    equipment_component = Equipment(slot='chest', defense_bonus=2)
+    equipment_component = Equipment(EquipmentSlots.CHEST, 2)
     item = baseclasses.Object(point, '=', 'scalemail', libtcod.sky, gear=equipment_component)
 
     return item
 
 def chainmail(point = None):
     #create a chainmail
-    equipment_component = Equipment(slot='chest', defense_bonus=3)
+    equipment_component = Equipment(EquipmentSlots.CHEST, 3)
     item = baseclasses.Object(point, '=', 'chainmail', libtcod.sky, gear=equipment_component)
 
     return item
 
 def breastplate(point = None):
     #create a breastplate
-    equipment_component = Equipment(slot='chest', defense_bonus=4)
+    equipment_component = Equipment(EquipmentSlots.CHEST, 4)
     item = baseclasses.Object(point, '=', 'breastplate', libtcod.sky, gear=equipment_component)
 
     return item
 
 def dagger(point = None):
     #create a sword
-    equipment_component = Equipment(slot='right hand', power_bonus=2)
+    equipment_component = Equipment(EquipmentSlots.MAIN_HAND, 2)
     equipment_component.type_of_dice = 4
     item = baseclasses.Object(point, '-', 'dagger', libtcod.sky, gear=equipment_component)
 
@@ -293,7 +297,7 @@ def dagger(point = None):
 
 def shortsword(point = None):
     #create a sword
-    equipment_component = Equipment(slot='right hand', power_bonus=3)
+    equipment_component = Equipment(EquipmentSlots.MAIN_HAND, 3)
     equipment_component.type_of_dice = 6
     item = baseclasses.Object(point, '/', 'short sword', libtcod.sky, gear=equipment_component)
 
@@ -301,7 +305,7 @@ def shortsword(point = None):
 
 def longsword(point = None):
     #create a sword
-    equipment_component = Equipment(slot='right hand', power_bonus=4)
+    equipment_component = Equipment(EquipmentSlots.MAIN_HAND, 4)
     equipment_component.type_of_dice = 8
     item = baseclasses.Object(point, '\\', 'long sword', libtcod.sky, gear=equipment_component)
 

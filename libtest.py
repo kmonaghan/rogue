@@ -12,6 +12,8 @@ import characterclass
 
 import game_state
 
+from equipment_slots import EquipmentSlots
+
 LIMIT_FPS = 20  #20 frames-per-second maximum
 CHARACTER_SCREEN_WIDTH = 30
 
@@ -47,7 +49,14 @@ def inventory_menu(header):
             text = item.name
             #show additional information, in case it's equipped
             if item.equipment and item.equipment.is_equipped:
-                text = text + ' (on ' + item.equipment.slot + ')'
+                if (item.equipment.slot == EquipmentSlots.MAIN_HAND):
+                    text = text + ' (held in right hand)'
+                elif (item.equipment.slot == EquipmentSlots.OFF_HAND):
+                    text = text + ' (held in left hand)'
+                elif (item.equipment.slot == EquipmentSlots.HEAD):
+                    text = text + ' (worn on head)'
+                elif (item.equipment.slot == EquipmentSlots.CHEST):
+                    text = text + ' (worn on chest)'
             options.append([text, item.color])
 
     index = screenrendering.menu(header, options, screenrendering.INVENTORY_WIDTH)

@@ -6,6 +6,8 @@ import pc
 import screenrendering
 import quest
 
+from equipment_slots import EquipmentSlots
+
 #experience and level-ups
 LEVEL_UP_BASE = 100
 LEVEL_UP_FACTOR = 150
@@ -49,7 +51,7 @@ class Fighter:
 
         if (hit > 0) or (multiplier == 2):
             #make the target take some damage
-            weapon = self.owner.get_equipped_in_slot("right hand")
+            weapon = self.owner.get_equipped_in_slot(EquipmentSlots.MAIN_HAND)
             damage = weapon.damage() * multiplier
 
             msg = self.owner.name.capitalize() + ' attacks ' + target.name + ' with ' + weapon.owner.name + ' for ' + str(damage) + ' hit points.'
