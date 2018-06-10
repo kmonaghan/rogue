@@ -50,6 +50,7 @@ def make_bsp():
     elif (dungeon_level <= 4):
         generator = MazeWithRooms()
 
+    #generator = MazeWithRooms()
     #generator = BSPTree()
     #generator = CellularAutomata()
 
@@ -164,10 +165,10 @@ def place_objects(room):
                 add_levels = libtcod.random_get_int(0, -1, 1)
 
                 if (choice == 'goblin'):
-                    npc.fighter.random_level_up(dungeon_level + add_levels)
+                    npc.fighter.random_level_up(dungeon_level + add_levels - 1)
 
                 if ((dungeon_level > 2) and choice == 'orc'):
-                    npc.fighter.random_level_up(dungeon_level + add_levels - 1)
+                    npc.fighter.random_level_up(dungeon_level + add_levels - 2)
 
                 if ((dungeon_level > 3) and choice == 'troll'):
                     npc.fighter.random_level_up(dungeon_level + add_levels - 3)
