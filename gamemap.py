@@ -178,13 +178,13 @@ def place_objects(room):
                 add_levels = libtcod.random_get_int(0, -1, 1)
 
                 if (choice == 'goblin'):
-                    npc.fighter.random_level_up(dungeon_level + add_levels - 1)
+                    npc.level.random_level_up(dungeon_level + add_levels - 1)
 
                 if ((dungeon_level > 2) and choice == 'orc'):
-                    npc.fighter.random_level_up(dungeon_level + add_levels - 2)
+                    npc.level.random_level_up(dungeon_level + add_levels - 2)
 
                 if ((dungeon_level > 3) and choice == 'troll'):
-                    npc.fighter.random_level_up(dungeon_level + add_levels - 3)
+                    npc.level.random_level_up(dungeon_level + add_levels - 3)
 
             game_state.objects.append(npc)
 

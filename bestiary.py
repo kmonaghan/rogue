@@ -1,8 +1,8 @@
 import libtcodpy as libtcod
 
-import messageconsole
-
 import equipment
+import game_state
+import messageconsole
 import quest
 
 from components.ai import BasicNPC
@@ -62,8 +62,6 @@ def create_player():
     #create object representing the player
     fighter_component = Fighter(hp=100, defense=10, power=2, xp=0, death_function=player_death)
     player = Character(None, '@', 'player', libtcod.dark_green, blocks=True, fighter=fighter_component)
-
-    player.level = 1
 
     #initial equipment: a dagger
     obj = equipment.dagger()

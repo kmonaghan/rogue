@@ -9,7 +9,6 @@ import math
 import screenrendering
 import messageconsole
 
-from components.level import Level
 from map_objects.point import Point
 from map_objects.map_utils import is_blocked
 

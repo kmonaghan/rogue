@@ -109,8 +109,8 @@ def handle_keys():
 
             if key_char == 'c':
                 #show character information
-                level_up_xp = characterclass.LEVEL_UP_BASE + game_state.player.level * characterclass.LEVEL_UP_FACTOR
-                msgbox('Character Information\n\nLevel: ' + str(game_state.player.level) + '\nExperience: ' + str(game_state.player.fighter.xp) +
+                level_up_xp = game_state.player.experience_to_next_level
+                msgbox('Character Information\n\nLevel: ' + str(game_state.player.level) + '\nExperience: ' + str(game_state.player.level.current_xp) +
                        '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(game_state.player.fighter.max_hp) +
                        '\nAttack: ' + str(game_state.player.fighter.power) + '\nDefense: ' + str(game_state.player.fighter.defense), CHARACTER_SCREEN_WIDTH)
 
@@ -198,7 +198,7 @@ def next_level():
 
     xp = total / 10
 
-    game_state.player.fighter.xp += xp
+    game_state.player.level.add_xp(xp)
 
     messageconsole.message('You take a moment to rest, and recover your strength.', libtcod.light_violet)
     game_state.player.fighter.heal(game_state.player.fighter.max_hp / 2)  #heal the player by 50%
@@ -222,9 +222,6 @@ def play_game():
         screenrendering.render_all()
 
         libtcod.console_flush()
-
-        #level up if needed
-        game_state.player.fighter.check_level_up()
 
         #erase all objects at their old locations, before they move
         for object in game_state.objects:

@@ -173,8 +173,8 @@ def render_all():
     render_bar(1, 1, BAR_WIDTH, 'HP', game_state.player.fighter.hp, game_state.player.fighter.max_hp,
                libtcod.light_red, libtcod.darker_red)
 
-    level_up_xp = characterclass.LEVEL_UP_BASE + game_state.player.level * characterclass.LEVEL_UP_FACTOR
-    render_bar(1, 3, BAR_WIDTH, 'XP', game_state.player.fighter.xp, level_up_xp,
+    level_up_xp = game_state.player.level.experience_to_next_level
+    render_bar(1, 3, BAR_WIDTH, 'XP', game_state.player.level.current_xp, level_up_xp,
                libtcod.light_green, libtcod.darker_green)
 
     libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(gamemap.dungeon_level))

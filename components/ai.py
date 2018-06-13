@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 
 import baseclasses
+import bestiary
 import game_state
 import messageconsole
 import tome

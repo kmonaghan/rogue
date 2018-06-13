@@ -13,6 +13,8 @@ class Character(Object):
         super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear)
         self.inventory = []
         self.level = Level()
+        if self.level:
+            self.level.owner = self
 
     def get_equipped_in_slot(self, slot):  #returns the equipment in a slot, or None if it's empty
         for obj in self.inventory:
@@ -53,4 +55,4 @@ class Character(Object):
 
     def completed_quest(self, quest):
         if (self.fighter is not None):
-            self.fighter.xp = self.fighter.xp + quest.xp
+            self.level.add_xp(quest.xp)

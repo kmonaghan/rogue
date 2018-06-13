@@ -7,10 +7,6 @@ import quest
 
 from equipment_slots import EquipmentSlots
 
-#experience and level-ups
-LEVEL_UP_BASE = 100
-LEVEL_UP_FACTOR = 150
-
 class Fighter:
     #combat-related properties and methods (npc, player, NPC).
     def __init__(self, hp, defense, power, xp, death_function=None):
@@ -73,46 +69,10 @@ class Fighter:
                     function(self.owner)
 
                 if self.owner != game_state.player:  #yield experience to the player
-                    game_state.player.fighter.xp += self.xp
+                    game_state.player.level.add_xp(self.xp)
 
     def heal(self, amount):
         #heal by the given amount, without going over the maximum
         self.hp += amount
         if self.hp > self.max_hp:
             self.hp = self.max_hp
-
-    def check_level_up(self):
-        #see if the player's experience is enough to level-up
-        level_up_xp = LEVEL_UP_BASE + self.owner.level * LEVEL_UP_FACTOR
-        if self.xp >= level_up_xp:
-            #it is! level up and ask to raise some stats
-            self.owner.level += 1
-            self.xp -= level_up_xp
-            messageconsole.message('Your battle skills grow stronger! You reached level ' + str(self.owner.level) + '!', libtcod.yellow)
-
-            choice = None
-            while choice == None:  #keep asking until a choice is made
-                choice = screenrendering.menu('Level up! Choose a stat to raise:\n',
-                                                [['Constitution (+20 HP, from ' + str(self.max_hp) + ')',libtcod.white],
-                                                ['Strength (+1 attack, from ' + str(self.power) + ')',libtcod.white],
-                                                ['Agility (+1 defense, from ' + str(self.defense) + ')',libtcod.white]],
-                                                screenrendering.LEVEL_SCREEN_WIDTH)
-
-            self.level_up_stats(choice)
-
-    def level_up_stats(self, choice = 0):
-        if choice == 0:
-            self.base_max_hp += 20
-            self.hp += 20
-        elif choice == 1:
-            self.base_power += 1
-        elif choice == 2:
-            self.base_defense += 1
-
-        self.hp = self.max_hp
-
-    def random_level_up(self, total_levels):
-        for x in range(total_levels):
-            print "added level for " + self.owner.name + " " + str(total_levels)
-            choice = libtcod.random_get_int(0, 0, 2)
-            self.level_up_stats(choice)
