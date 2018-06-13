@@ -1,9 +1,10 @@
 import libtcodpy as libtcod
-import messageconsole
-import baseclasses
-import tome
 
+import baseclasses
 import game_state
+import messageconsole
+import random_utils
+import tome
 
 from components.equipment import Equipment
 from components.item import Item
@@ -14,14 +15,14 @@ from equipment_slots import EquipmentSlots
 
 def random_armour(point = None):
     item_chances = {}
-    item_chances['shield'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
-    item_chances['helmet'] = baseclasses.from_dungeon_level([[30, 2], [15, 3], [10, 4]])
-    item_chances['leather shirt'] = baseclasses.from_dungeon_level([[40, 1], [20, 2], [15, 3]])
-    item_chances['scalemail'] = baseclasses.from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]])
-    item_chances['chainmail'] = baseclasses.from_dungeon_level([[40, 3], [30, 4]])
-    item_chances['breastplate'] = baseclasses.from_dungeon_level([[15, 4]])
+    item_chances['shield'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], game_state.dungeon_level)
+    item_chances['helmet'] = random_utils.from_dungeon_level([[30, 2], [15, 3], [10, 4]], game_state.dungeon_level)
+    item_chances['leather shirt'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], game_state.dungeon_level)
+    item_chances['scalemail'] = random_utils.from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]], game_state.dungeon_level)
+    item_chances['chainmail'] = random_utils.from_dungeon_level([[40, 3], [30, 4]], game_state.dungeon_level)
+    item_chances['breastplate'] = random_utils.from_dungeon_level([[15, 4]], game_state.dungeon_level)
 
-    choice = baseclasses.random_choice(item_chances)
+    choice = random_utils.random_choice(item_chances)
     if choice == 'shield':
         item = shield(point)
 
@@ -46,7 +47,7 @@ def random_potion(point = None):
     item_chances = {}
     item_chances['heal'] = 40
 
-    choice = baseclasses.random_choice(item_chances)
+    choice = random_utils.random_choice(item_chances)
     if choice == 'heal':
         #create a healing potion
         item_component = Item(use_function=tome.cast_heal)
@@ -60,7 +61,7 @@ def random_scroll(point = None):
     item_chances['fireball'] = 30
     item_chances['confuse'] = 30
 
-    choice = baseclasses.random_choice(item_chances)
+    choice = random_utils.random_choice(item_chances)
     if choice == 'lightning':
         item = lighting_scroll(point)
 
@@ -74,11 +75,11 @@ def random_scroll(point = None):
 
 def random_weapon(point = None):
     item_chances = {}
-    item_chances['dagger'] = baseclasses.from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]])
-    item_chances['short sword'] = baseclasses.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]])
-    item_chances['long sword'] = baseclasses.from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]])
+    item_chances['dagger'] = random_utils.from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]], game_state.dungeon_level)
+    item_chances['short sword'] = random_utils.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], game_state.dungeon_level)
+    item_chances['long sword'] = random_utils.from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], game_state.dungeon_level)
 
-    choice = baseclasses.random_choice(item_chances)
+    choice = random_utils.random_choice(item_chances)
     if choice == 'dagger':
         item = dagger(point)
 

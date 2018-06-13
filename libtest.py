@@ -170,7 +170,7 @@ def load_game():
     gamemap.stairs = game_state.objects[file['stairs_index']]  #same for the stairs
     messageconsole.game_msgs = file['game_msgs']
     baseclasses.game_status = file['game_status']
-    gamemap.dungeon_level = file['dungeon_level']
+    game_state.dungeon_level = file['dungeon_level']
     file.close()
 
     initialize_fov()
@@ -179,7 +179,7 @@ def new_game():
     game_state.player = bestiary.create_player()
 
     #generate map (at this point it's not drawn to the screen)
-    gamemap.dungeon_level = 1
+    game_state.dungeon_level = 1
     gamemap.make_bsp()
     screenrendering.initialize_fov()
 
@@ -203,7 +203,7 @@ def next_level():
     messageconsole.message('You take a moment to rest, and recover your strength.', libtcod.light_violet)
     game_state.player.fighter.heal(game_state.player.fighter.max_hp / 2)  #heal the player by 50%
 
-    gamemap.dungeon_level += 1
+    game_state.dungeon_level += 1
     messageconsole.message('After a rare moment of peace, you descend deeper into the heart of the dungeon...', libtcod.red)
 
     gamemap.make_bsp()

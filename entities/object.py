@@ -12,6 +12,8 @@ import messageconsole
 from map_objects.point import Point
 from map_objects.map_utils import is_blocked
 
+from render_order import RenderOrder
+
 import game_state
 
 class Object:
@@ -52,6 +54,8 @@ class Object:
         self.questgiver = None
 
         self.description = None
+
+        self.render_order = RenderOrder.ITEM
 
     def examine(self):
         detail = self.name.capitalize()

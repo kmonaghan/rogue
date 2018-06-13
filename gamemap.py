@@ -25,6 +25,7 @@ from map_objects.map_utils import is_blocked
 import map_objects.prefab
 
 import game_state
+import random_utils
 
 #size of the map
 MAP_WIDTH = 80
@@ -33,8 +34,6 @@ MAP_HEIGHT = 40
 MAX_MAP_WIDTH = 80
 MAX_MAP_HEIGHT = 40
 
-dungeon_level = 1
-
 stairs = None
 
 def make_bsp():
@@ -42,7 +41,7 @@ def make_bsp():
 
     game_state.objects = []
 
-    if (dungeon_level <= 2):
+    if (game_state.dungeon_level <= 2):
         MAP_HEIGHT = (MAX_MAP_HEIGHT / 3) * 2
         MAP_WIDTH = (MAX_MAP_WIDTH / 3) * 2
     else:
@@ -51,9 +50,9 @@ def make_bsp():
 
     print "Generating Map sized: " + str(MAP_WIDTH) + " x " + str(MAP_HEIGHT)
 
-    if (dungeon_level <= 2):
+    if (game_state.dungeon_level <= 2):
         generator = AltBSPTree()
-    elif (dungeon_level <= 5):
+    elif (game_state.dungeon_level <= 5):
         generator = MazeWithRooms()
 
     #generator = MazeWithRooms()
@@ -61,7 +60,7 @@ def make_bsp():
     #generator = CellularAutomata()
     #generator = Basic()
 
-    if (dungeon_level == 5):
+    if (game_state.dungeon_level == 5):
         prefabbed = map_objects.prefab.Prefab(map_objects.prefab.boss_room())
         generator.add_prefab(prefabbed)
 
@@ -72,7 +71,7 @@ def make_bsp():
 
     print "Number of rooms: " + str(len(bsp_rooms))
 
-    if (dungeon_level == 5):
+    if (game_state.dungeon_level == 5):
         warlord = bestiary.warlord(Point(prefabbed.room.x1+4,prefabbed.room.y1))
         game_state.objects.append(warlord)
         bsp_rooms.remove(prefabbed.room)
@@ -86,7 +85,7 @@ def popluate_map():
     bsp_rooms.remove(room)
     point = room.random_tile()
 
-    if (dungeon_level <= 4):
+    if (game_state.dungeon_level <= 4):
         stairs = Object(point, '<', 'stairs', libtcod.white, always_visible=True)
         game_state.objects.append(stairs)
         stairs.send_to_back()
@@ -104,15 +103,15 @@ def popluate_map():
 
     q = None
 
-    if (dungeon_level == 1):
+    if (game_state.dungeon_level == 1):
         q = quest.kill_gobbos()
-    elif (dungeon_level == 2):
+    elif (game_state.dungeon_level == 2):
         q = quest.kill_gobbos()
-    elif (dungeon_level == 3):
+    elif (game_state.dungeon_level == 3):
         q = quest.kill_orcs()
-    elif (dungeon_level == 4):
+    elif (game_state.dungeon_level == 4):
         q = quest.kill_trolls()
-    elif (dungeon_level == 5):
+    elif (game_state.dungeon_level == 5):
         q = quest.kill_warlord()
 
     if (q != None):
@@ -139,21 +138,21 @@ def place_objects(room):
     #this is where we decide the chance of each npc or item appearing.
 
     #maximum number of npcs per room
-    max_npcs = baseclasses.from_dungeon_level([[2, 1], [3, 3], [5, 4]])
+    max_npcs = random_utils.from_dungeon_level([[2, 1], [3, 3], [5, 4]], game_state.dungeon_level)
 
     #chance of each npc
     npc_chances = {}
-    npc_chances['goblin'] = baseclasses.from_dungeon_level([[95, 1], [30, 2], [15, 3], [10, 4], [5, 5]])
-    npc_chances['orc'] = baseclasses.from_dungeon_level([[4,1], [65, 2], [65, 3], [50, 4], [45, 5]])
-    npc_chances['troll'] = baseclasses.from_dungeon_level([[1,1], [5, 2], [20, 3], [40, 4], [60, 5]])
+    npc_chances['goblin'] = random_utils.from_dungeon_level([[95, 1], [30, 2], [15, 3], [10, 4], [5, 5]], game_state.dungeon_level)
+    npc_chances['orc'] = random_utils.from_dungeon_level([[4,1], [65, 2], [65, 3], [50, 4], [45, 5]], game_state.dungeon_level)
+    npc_chances['troll'] = random_utils.from_dungeon_level([[1,1], [5, 2], [20, 3], [40, 4], [60, 5]], game_state.dungeon_level)
 
     #maximum number of items per room
-    max_items = baseclasses.from_dungeon_level([[2, 1], [3, 4]])
+    max_items = random_utils.from_dungeon_level([[2, 1], [3, 4]], game_state.dungeon_level)
 
     #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
     item_chances = {}
     item_chances['potion'] = 25  #healing potion always shows up, even if all other items have 0 chance
-    item_chances['scroll'] = baseclasses.from_dungeon_level([[25, 2]])
+    item_chances['scroll'] = random_utils.from_dungeon_level([[25, 2]], game_state.dungeon_level)
     item_chances['weapon'] = 25
     item_chances['armour'] = 25
 
@@ -166,7 +165,7 @@ def place_objects(room):
 
         #only place it if the tile is not blocked
         if not is_blocked(point):
-            choice = baseclasses.random_choice(npc_chances)
+            choice = random_utils.random_choice(npc_chances)
             if choice == 'orc':
                 npc = bestiary.orc(point)
             elif choice == 'troll':
@@ -174,17 +173,17 @@ def place_objects(room):
             elif choice == 'goblin':
                 npc = bestiary.goblin(point)
 
-            if (dungeon_level > 1):
+            if (game_state.dungeon_level > 1):
                 add_levels = libtcod.random_get_int(0, -1, 1)
 
                 if (choice == 'goblin'):
-                    npc.level.random_level_up(dungeon_level + add_levels - 1)
+                    npc.level.random_level_up(game_state.dungeon_level + add_levels - 1)
 
-                if ((dungeon_level > 2) and choice == 'orc'):
-                    npc.level.random_level_up(dungeon_level + add_levels - 2)
+                if ((game_state.dungeon_level > 2) and choice == 'orc'):
+                    npc.level.random_level_up(game_state.dungeon_level + add_levels - 2)
 
-                if ((dungeon_level > 3) and choice == 'troll'):
-                    npc.level.random_level_up(dungeon_level + add_levels - 3)
+                if ((game_state.dungeon_level > 3) and choice == 'troll'):
+                    npc.level.random_level_up(game_state.dungeon_level + add_levels - 3)
 
             game_state.objects.append(npc)
 
@@ -197,7 +196,7 @@ def place_objects(room):
 
         #only place it if the tile is not blocked
         if not is_blocked(point):
-            choice = baseclasses.random_choice(item_chances)
+            choice = random_utils.random_choice(item_chances)
             if choice == 'potion':
                 item = equipment.random_potion(point)
             elif choice == 'scroll':

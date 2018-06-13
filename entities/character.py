@@ -3,10 +3,13 @@ __metaclass__ = type
 import libtcodpy as libtcod
 
 import game_state
+import screenrendering
 
 from entities.object import Object
 
 from components.level import Level
+
+from render_order import RenderOrder
 
 class Character(Object):
     def __init__(self, point, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None, level=None):
@@ -15,6 +18,8 @@ class Character(Object):
         self.level = Level()
         if self.level:
             self.level.owner = self
+
+        self.render_order = RenderOrder.ACTOR
 
     def get_equipped_in_slot(self, slot):  #returns the equipment in a slot, or None if it's empty
         for obj in self.inventory:

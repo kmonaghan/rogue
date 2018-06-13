@@ -177,7 +177,7 @@ def render_all():
     render_bar(1, 3, BAR_WIDTH, 'XP', game_state.player.level.current_xp, level_up_xp,
                libtcod.light_green, libtcod.darker_green)
 
-    libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(gamemap.dungeon_level))
+    libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(game_state.dungeon_level))
 
     #display names of objects under the mouse
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
