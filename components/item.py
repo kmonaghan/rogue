@@ -2,7 +2,6 @@ import libtcodpy as libtcod
 
 import game_state
 import messageconsole
-import pc
 
 from equipment_slots import EquipmentSlots
 
@@ -18,7 +17,7 @@ class Item:
         else:
             npc.add_to_inventory(self.owner)
             game_state.objects.remove(self.owner)
-            if (npc == pc.player):
+            if (npc == game_state.player):
                 messageconsole.message('You picked up a ' + self.owner.name + '!', libtcod.green)
 
             #special case: automatically equip, if the corresponding equipment slot is unused
@@ -37,7 +36,7 @@ class Item:
         npc.remove_from_inventory(self.owner)
         self.owner.x = npc.x
         self.owner.y = npc.y
-        if (npc == pc.player):
+        if (npc == game_state.player):
             messageconsole.message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
 
     def examine(self):
@@ -55,4 +54,4 @@ class Item:
             messageconsole.message('The ' + self.owner.name + ' cannot be used.')
         else:
             if self.use_function() != 'cancelled':
-                pc.player.inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason
+                game_state.player.inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason

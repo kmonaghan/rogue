@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
+
 import baseclasses
-import pc
+import game_state
 import messageconsole
 import tome
 
@@ -14,12 +15,12 @@ class BasicNPC:
         if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
 
             #move towards player if far away
-            if npc.distance_to(pc.player) >= 2:
-                npc.move_astar(pc.player)
+            if npc.distance_to(game_state.player) >= 2:
+                npc.move_astar(game_state.player)
 
             #close enough, attack! (if the player is still alive.)
-            elif pc.player.fighter.hp > 0:
-                npc.fighter.attack(pc.player)
+            elif game_state.player.fighter.hp > 0:
+                npc.fighter.attack(game_state.player)
 
 class WanderingNPC:
     #AI for a temporarily confused npc (reverts to previous AI after a while).
@@ -91,28 +92,28 @@ class WarlordNPC:
                     if (self.summoned_trolls == False):
                         self.summoned_trolls = True
                         messageconsole.message('Trolls! To me!', libtcod.red)
-                        tome.cast_summon_troll(npc)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.troll, 2)
 
                         return
                 elif (health < 60):
                     if (self.summoned_orcs == False):
                         self.summoned_orcs = True
                         messageconsole.message('Orcs! To me!', libtcod.red)
-                        tome.cast_summon_orc(npc)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.orc, 2)
 
                         return
                 elif (health < 80):
                     if (self.summoned_goblins == False):
                         self.summoned_goblins = True
                         messageconsole.message('Goblins! To me!', libtcod.red)
-                        tome.cast_summon_goblin(npc)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.goblin, 2)
 
                         return
 
             #move towards player if far away
-            if npc.distance_to(pc.player) >= 2:
-                npc.move_astar(pc.player)
+            if npc.distance_to(game_state.player) >= 2:
+                npc.move_astar(game_state.player)
 
             #close enough, attack! (if the player is still alive.)
-            elif pc.player.fighter.hp > 0:
-                npc.fighter.attack(pc.player)
+            elif game_state.player.fighter.hp > 0:
+                npc.fighter.attack(game_state.player)

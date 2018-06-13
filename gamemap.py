@@ -1,5 +1,4 @@
 import libtcodpy as libtcod
-import pc
 import baseclasses
 import equipment
 import characterclass
@@ -9,6 +8,8 @@ import bestiary
 import quest
 
 from components.ai import WanderingNPC
+
+from entities.object import Object
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -20,6 +21,7 @@ from map_objects.bsptree import BSPTree
 from map_objects.cellularautomata import CellularAutomata
 from map_objects.mazewithrooms import MazeWithRooms
 from map_objects.map_utils import is_blocked
+
 import map_objects.prefab
 
 import game_state
@@ -85,7 +87,7 @@ def popluate_map():
     point = room.random_tile()
 
     if (dungeon_level <= 4):
-        stairs = baseclasses.Object(point, '<', 'stairs', libtcod.white, always_visible=True)
+        stairs = Object(point, '<', 'stairs', libtcod.white, always_visible=True)
         game_state.objects.append(stairs)
         stairs.send_to_back()
 
@@ -93,9 +95,9 @@ def popluate_map():
     room = random.choice(bsp_rooms)
     bsp_rooms.remove(room)
     point = room.random_tile()
-    pc.player.x = point.x
-    pc.player.y = point.y
-    game_state.objects.append(pc.player)
+    game_state.player.x = point.x
+    game_state.player.y = point.y
+    game_state.objects.append(game_state.player)
 
     point = room.random_tile()
     npc = bestiary.bountyhunter(point)

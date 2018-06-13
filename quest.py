@@ -92,4 +92,4 @@ class Quest:
             if (self.return_to_quest_giver):
                 self.owner.return_to_giver()
             else:
-                pc.player.completed_quest(self)
+                game_state.player.completed_quest(self)

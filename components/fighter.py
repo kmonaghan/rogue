@@ -2,7 +2,6 @@ import libtcodpy as libtcod
 import equipment
 import game_state
 import messageconsole
-import pc
 import screenrendering
 import quest
 
@@ -73,8 +72,8 @@ class Fighter:
                 if function is not None:
                     function(self.owner)
 
-                if self.owner != pc.player:  #yield experience to the player
-                    pc.player.fighter.xp += self.xp
+                if self.owner != game_state.player:  #yield experience to the player
+                    game_state.player.fighter.xp += self.xp
 
     def heal(self, amount):
         #heal by the given amount, without going over the maximum

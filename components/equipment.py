@@ -2,7 +2,6 @@ import libtcodpy as libtcod
 
 import game_state
 import messageconsole
-import pc
 
 from equipment_slots import EquipmentSlots
 
@@ -32,7 +31,7 @@ class Equipment:
 
         #equip object and show a message about it
         self.is_equipped = True
-        if (self.owner.owner == pc.player):
+        if (self.owner.owner == game_state.player):
             #messageconsole.message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green)
             messageconsole.message('Equipped ' + self.owner.name + '.', libtcod.light_green)
 
@@ -40,7 +39,7 @@ class Equipment:
         #dequip object and show a message about it
         if not self.is_equipped: return
         self.is_equipped = False
-        if (self.owner.owner == pc.player):
+        if (self.owner.owner == game_state.player):
 #            messageconsole.message('Dequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_yellow)
             messageconsole.message('Dequipped ' + self.owner.name + '.', libtcod.light_yellow)
 

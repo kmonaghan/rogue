@@ -1,13 +1,13 @@
 import libtcodpy as libtcod
 import messageconsole
-import pc
 import bestiary
 import baseclasses
 import screenrendering
 
-import components.ai 
+import components.ai
 
 from map_objects.map_utils import is_blocked
+from map_objects.point import Point
 
 import game_state
 
@@ -26,9 +26,9 @@ def closest_npc(max_range):
     closest_dist = max_range + 1  #start with (slightly more than) maximum range
 
     for object in game_state.objects:
-        if object.fighter and not object == pc.player and libtcod.map_is_in_fov(baseclasses.fov_map, object.x, object.y):
+        if object.fighter and not object == game_state.player and libtcod.map_is_in_fov(baseclasses.fov_map, object.x, object.y):
             #calculate distance between this object and the player
-            dist = pc.player.distance_to(object)
+            dist = game_state.player.distance_to(object)
             if dist < closest_dist:  #it's closer, so remember it
                 closest_enemy = object
                 closest_dist = dist
@@ -55,7 +55,7 @@ def target_tile(max_range=None):
 
         #accept the target if the player clicked in FOV, and in case a range is specified, if it's in that range
         if (screenrendering.mouse.lbutton_pressed and libtcod.map_is_in_fov(baseclasses.fov_map, x, y) and
-                (max_range is None or pc.player.distance(x, y) <= max_range)):
+                (max_range is None or game_state.player.distance(x, y) <= max_range)):
             return (x, y)
 
 def target_npc(max_range=None):
@@ -67,17 +67,17 @@ def target_npc(max_range=None):
 
         #return the first clicked npc, otherwise continue looping
         for obj in game_state.objects:
-            if obj.x == x and obj.y == y and obj.fighter and obj != pc.player:
+            if obj.x == x and obj.y == y and obj.fighter and obj != game_state.player:
                 return obj
 
 def cast_heal():
     #heal the player
-    if pc.player.fighter.hp == pc.player.fighter.max_hp:
+    if game_state.player.fighter.hp == game_state.player.fighter.max_hp:
         messageconsole.message('You are already at full health.', libtcod.red)
         return 'cancelled'
 
     messageconsole.message('Your wounds start to feel better!', libtcod.light_violet)
-    pc.player.fighter.heal(HEAL_AMOUNT)
+    game_state.player.fighter.heal(HEAL_AMOUNT)
 
 def cast_lightning():
     #find closest enemy (inside a maximum range) and damage it
@@ -115,119 +115,41 @@ def cast_confuse():
     npc.ai.owner = npc  #tell the new component who owns it
     messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
 
-def cast_summon_goblin(pc):
-    dice = libtcod.random_get_int(0, 1, 6)
+def cast_summon_npc(point, ncp_type, number_of_npc=6):
+    dice = libtcod.random_get_int(0, 1, number_of_creatures)
 
-    print "Will generate goblins: " + str(dice)
+    print "Will generate " + str(dice) + " NPCs"
 
-    start_x = pc.x - 1
-    start_y = pc.y - 1
+    start_x = point.x - 1
+    start_y = point.y - 1
 
     for offset in range(0, 3):
         if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.goblin(start_x, start_y + offset)
+            npc = ncp_type(start_x, start_y + offset)
             game_state.objects.append(npc)
             dice -= 1
 
-        if dice < 1:
-            return
+            if dice < 1:
+                return
 
-    start_x = pc.x
+    start_x = point.x
 
     for offset in range(0, 3):
         if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.goblin(start_x, start_y + offset)
+            npc = ncp_type(start_x, start_y + offset)
             game_state.objects.append(npc)
             dice -=1
 
-        if dice < 1:
-            return
+            if dice < 1:
+                return
 
     start_x = pc.x + 1
 
     for offset in range(0, 3):
         if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.goblin(start_x, start_y + offset)
+            npc = ncp_type(start_x, start_y + offset)
             game_state.objects.append(npc)
             dice -= 1
 
-        if dice < 1:
-            return
-
-def cast_summon_orc(pc):
-    dice = libtcod.random_get_int(0, 1, 4)
-
-    print "Will generate orcs: " + str(dice)
-
-    start_x = pc.x - 1
-    start_y = pc.y - 1
-
-    for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.orc(start_x, start_y + offset)
-            game_state.objects.append(npc)
-            dice -= 1
-
-        if dice < 1:
-            return
-
-    start_x = pc.x
-
-    for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.orc(start_x, start_y + offset)
-            game_state.objects.append(npc)
-            dice -=1
-
-        if dice < 1:
-            return
-
-    start_x = pc.x + 1
-
-    for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.orc(start_x, start_y + offset)
-            game_state.objects.append(npc)
-            dice -= 1
-
-        if dice < 1:
-            return
-
-def cast_summon_troll(pc):
-    dice = libtcod.random_get_int(0, 1, 2)
-
-    print "Will generate trolls: " + str(dice)
-
-    start_x = pc.x - 1
-    start_y = pc.y - 1
-
-    for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.troll(start_x, start_y + offset)
-            game_state.objects.append(npc)
-            dice -= 1
-
-        if dice < 1:
-            return
-
-    start_x = pc.x
-
-    for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.troll(start_x, start_y + offset)
-            game_state.objects.append(npc)
-            dice -=1
-
-        if dice < 1:
-            return
-
-    start_x = pc.x + 1
-
-    for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = npc = bestiary.troll(start_x, start_y + offset)
-            game_state.objects.append(npc)
-            dice -= 1
-
-        if dice < 1:
-            return
+            if dice < 1:
+                return

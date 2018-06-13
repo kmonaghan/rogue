@@ -1,7 +1,6 @@
 import libtcodpy as libtcod
 import gamemap
 import baseclasses
-import pc
 import messageconsole
 import characterclass
 
@@ -123,7 +122,7 @@ def render_all():
     if fov_recompute:
         #recompute FOV if needed (the player moved or something)
         fov_recompute = False
-        libtcod.map_compute_fov(baseclasses.fov_map, pc.player.x, pc.player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
+        libtcod.map_compute_fov(baseclasses.fov_map, game_state.player.x, game_state.player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
 
         x_offset = (gamemap.MAX_MAP_WIDTH - gamemap.MAP_WIDTH)/ 2
         y_offset = (gamemap.MAX_MAP_HEIGHT - gamemap.MAP_HEIGHT) / 2
@@ -152,9 +151,9 @@ def render_all():
     #draw all objects in the list, except the player. we want it to
     #always appear over all other objects! so it's drawn later.
     for object in game_state.objects:
-        if object != pc.player:
+        if object != game_state.player:
             object.draw()
-    pc.player.draw()
+    game_state.player.draw()
 
     #blit the contents of "con" to the root console
     libtcod.console_blit(baseclasses.con, 0, 0, gamemap.MAX_MAP_WIDTH, gamemap.MAX_MAP_HEIGHT, 0, 0, 0)
@@ -171,11 +170,11 @@ def render_all():
         y += 1
 
     #show the player's stats
-    render_bar(1, 1, BAR_WIDTH, 'HP', pc.player.fighter.hp, pc.player.fighter.max_hp,
+    render_bar(1, 1, BAR_WIDTH, 'HP', game_state.player.fighter.hp, game_state.player.fighter.max_hp,
                libtcod.light_red, libtcod.darker_red)
 
-    level_up_xp = characterclass.LEVEL_UP_BASE + pc.player.level * characterclass.LEVEL_UP_FACTOR
-    render_bar(1, 3, BAR_WIDTH, 'XP', pc.player.fighter.xp, level_up_xp,
+    level_up_xp = characterclass.LEVEL_UP_BASE + game_state.player.level * characterclass.LEVEL_UP_FACTOR
+    render_bar(1, 3, BAR_WIDTH, 'XP', game_state.player.fighter.xp, level_up_xp,
                libtcod.light_green, libtcod.darker_green)
 
     libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level ' + str(gamemap.dungeon_level))

@@ -1,11 +1,9 @@
 import libtcodpy as libtcod
-import baseclasses
 
 import messageconsole
 
 import equipment
 import quest
-import pc
 
 from components.ai import BasicNPC
 from components.ai import StrollingNPC
@@ -13,6 +11,8 @@ from components.ai import WarlordNPC
 
 from components.fighter import Fighter
 from components.questgiver import Questgiver
+
+from entities.character import Character
 
 from map_objects.point import Point
 
@@ -28,7 +28,7 @@ def bountyhunter(point = None):
     #create a questgiver
 
     ai_component = StrollingNPC()
-    npc = baseclasses.Character(point, '?', 'Bounty Hunter', libtcod.gold,
+    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold,
                      blocks=True, fighter=None, ai=ai_component)
 
     questgiver = Questgiver()
@@ -42,7 +42,7 @@ def goblin(point = None):
     fighter_component = Fighter(hp=10, defense=7, power=3, xp=10, death_function=npc_death)
     ai_component = BasicNPC()
 
-    npc = baseclasses.Character(point, 'G', 'goblin', libtcod.desaturated_green,
+    npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
 
     dice = libtcod.random_get_int(0, 1, 100)
@@ -58,12 +58,27 @@ def goblin(point = None):
 
     return npc
 
+def create_player():
+    #create object representing the player
+    fighter_component = Fighter(hp=100, defense=10, power=2, xp=0, death_function=player_death)
+    player = Character(None, '@', 'player', libtcod.dark_green, blocks=True, fighter=fighter_component)
+
+    player.level = 1
+
+    #initial equipment: a dagger
+    obj = equipment.dagger()
+    player.add_to_inventory(obj)
+    obj.equipment.equip()
+    obj.always_visible = True
+
+    return player
+
 def orc(point = None):
     #create an orc
     fighter_component = Fighter(hp=20, defense=10, power=4, xp=35, death_function=npc_death)
     ai_component = BasicNPC()
 
-    npc = baseclasses.Character(point, 'O', 'Orc', libtcod.light_green,
+    npc = Character(point, 'O', 'Orc', libtcod.light_green,
                                     blocks=True, fighter=fighter_component, ai=ai_component)
 
     item = equipment.shortsword()
@@ -84,7 +99,7 @@ def troll(point = None):
     fighter_component = Fighter(hp=30, defense=12, power=8, xp=100, death_function=npc_death)
     ai_component = BasicNPC()
 
-    npc = baseclasses.Character(point, 'T', 'troll', libtcod.darker_green,
+    npc = Character(point, 'T', 'troll', libtcod.darker_green,
                      blocks=True, fighter=fighter_component, ai=ai_component)
 
     item = equipment.longsword()
@@ -105,7 +120,7 @@ def warlord(point = None):
     fighter_component = Fighter(hp=50, defense=10, power=4, xp=100, death_function=warlord_death)
     ai_component = WarlordNPC()
 
-    npc = baseclasses.Character(point, 'W', 'Warlord', libtcod.black,
+    npc = Character(point, 'W', 'Warlord', libtcod.black,
                                     blocks=True, fighter=fighter_component, ai=ai_component)
 
     item = equipment.longsword()
@@ -149,6 +164,15 @@ def npc_death(npc):
     for item in npc.inventory:
         if (item.lootable):
             item.item.drop()
+
+def player_death(player):
+    #the game ended!
+    messageconsole.message('You died!', libtcod.red)
+    game_state.game_status = 'dead'
+
+    #for added effect, transform the player into a corpse!
+    player.char = '%'
+    player.color = libtcod.dark_red
 
 def warlord_death(npc):
     #transform it into a nasty corpse! it doesn't block, can't be
