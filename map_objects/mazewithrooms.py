@@ -30,7 +30,10 @@ class MazeWithRooms:
 	def add_prefab(self, prefab):
 		self.prefabs.append(prefab)
 
-	def generateLevel(self,mapWidth,mapHeight):
+	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size):
+		self.ROOM_MAX_SIZE = room_max_size
+		self.ROOM_MIN_SIZE = room_min_size
+
 		# The level dimensions must be odd
 		self.level = [[Tile(True)
 			for y in range(mapHeight)]

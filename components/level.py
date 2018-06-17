@@ -1,8 +1,5 @@
 import libtcodpy as libtcod
 
-import messageconsole
-import screenrendering
-
 #experience and level-ups
 LEVEL_UP_BASE = 100
 LEVEL_UP_FACTOR = 150
@@ -30,20 +27,6 @@ class Level:
             return True
         else:
             return False
-
-    def level_up(self):
-        #it is! level up and ask to raise some stats
-        messageconsole.message('Your battle skills grow stronger! You reached level ' + str(self.current_level) + '!', libtcod.yellow)
-
-        choice = None
-        while choice == None:  #keep asking until a choice is made
-            choice = screenrendering.menu('Level up! Choose a stat to raise:\n',
-                                                [['Constitution (+20 HP, from ' + str(self.owner.fighter.max_hp) + ')',libtcod.white],
-                                                ['Strength (+1 attack, from ' + str(self.owner.fighter.power) + ')',libtcod.white],
-                                                ['Agility (+1 defense, from ' + str(self.owner.fighter.defense) + ')',libtcod.white]],
-                                                screenrendering.LEVEL_SCREEN_WIDTH)
-
-        self.level_up_stats(choice)
 
     def level_up_stats(self, choice = 0):
         if choice == 0:

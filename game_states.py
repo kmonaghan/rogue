@@ -10,3 +10,6 @@ class GameStates(Enum):
     TARGETING = 6
     LEVEL_UP = 7
     CHARACTER_SCREEN = 8
+    EXAMINE_INVENTORY = 9
+    SHOW_QUESTS = 10
+    QUEST_ONBOARDING = 11

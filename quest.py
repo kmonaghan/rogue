@@ -1,11 +1,15 @@
 import libtcodpy as libtcod
+
 import game_state
-import messageconsole
-import screenrendering
+
+from game_messages import Message
 
 def check_quests_for_npc_death(npc):
+    results = []
     for quest in game_state.active_quests:
-        quest.kill_count(npc)
+        results.append(quest.kill_count(npc))
+
+    return results
 
 def kill_gobbos(kill = 5):
     title = "Kill Gobbos"
@@ -63,33 +67,22 @@ class Quest:
         self.completed = False
         self.return_to_quest_giver = False
 
-    def start_quest(self, pc):
-        choice = None
-        while choice == None:  #keep asking until a choice is made
-            choice = screenrendering.menu(self.title + "\n" + self.description,
-                                            [['Accept Quest',libtcod.white],
-                                            ['Reject Quest',libtcod.white]],
-                                            screenrendering.LEVEL_SCREEN_WIDTH)
-
-        if choice == 0:
-            messageconsole.message('Quest ' + self.title + ' accepted!', libtcod.green)
-            game_state.active_quests.append(self)
-            self.started = True
-            self.owner.start_quest()
-        elif choice == 1:
-            return
-
     def kill_count(self, npc):
+        results = []
+
+        print "tsting kill condition: " + npc.name
         if (self.kill == 0):
             return
 
         if (self.kill_type == npc.name):
-            self.kill_total = self.kill_total + 1
+            print "add a kill"
+            self.kill_total += 1
 
         if (self.kill == self.kill_total):
-            messageconsole.message('Quest ' + self.title + ' completed!', libtcod.gold)
+            print "quest complete"
+            results.append({'message': Message('Quest ' + self.title + ' completed!', libtcod.gold)})
             self.completed = True
             if (self.return_to_quest_giver):
                 self.owner.return_to_giver()
-            else:
-                game_state.player.completed_quest(self)
+
+        return results

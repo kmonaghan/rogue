@@ -88,7 +88,7 @@ def popluate_map():
     if (game_state.dungeon_level <= 4):
         stairs = Object(point, '<', 'stairs', libtcod.white, always_visible=True)
         game_state.objects.append(stairs)
-        stairs.send_to_back()
+#        stairs.send_to_back()
 
     #Random room for player start
     room = random.choice(bsp_rooms)
@@ -207,5 +207,5 @@ def place_objects(room):
                 item = equipment.random_armour(point)
 
             game_state.objects.append(item)
-            item.send_to_back()  #items appear below other objects
+#           item.send_to_back()  #items appear below other objects
             item.always_visible = True  #items are visible even out-of-FOV, if in an explored area

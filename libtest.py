@@ -48,14 +48,14 @@ def inventory_menu(header):
         for item in game_state.player.inventory:
             text = item.name
             #show additional information, in case it's equipped
-            if item.equipment and item.equipment.is_equipped:
-                if (item.equipment.slot == EquipmentSlots.MAIN_HAND):
+            if item.equippable and item.equippable.is_equipped:
+                if (item.equippable.slot == EquipmentSlots.MAIN_HAND):
                     text = text + ' (held in right hand)'
-                elif (item.equipment.slot == EquipmentSlots.OFF_HAND):
+                elif (item.equippable.slot == EquipmentSlots.OFF_HAND):
                     text = text + ' (held in left hand)'
-                elif (item.equipment.slot == EquipmentSlots.HEAD):
+                elif (item.equippable.slot == EquipmentSlots.HEAD):
                     text = text + ' (worn on head)'
-                elif (item.equipment.slot == EquipmentSlots.CHEST):
+                elif (item.equippable.slot == EquipmentSlots.CHEST):
                     text = text + ' (worn on chest)'
             options.append([text, item.color])
 
@@ -76,7 +76,7 @@ def handle_keys():
     elif screenrendering.key.vk == libtcod.KEY_ESCAPE:
         return 'exit'  #exit game
 
-    if baseclasses.game_status == 'playing':
+    if game_state.game_status == 'playing':
         #movement keys
         if screenrendering.key.vk == libtcod.KEY_UP or screenrendering.key.vk == libtcod.KEY_KP8:
             player_move_or_attack(0, -1)
@@ -156,8 +156,8 @@ def save_game():
     file['objects'] = game_state.objects
     file['player_index'] = game_state.objects.index(game_state.player)  #index of player in objects list
     file['game_msgs'] = messageconsole.game_msgs
-    file['game_status'] = baseclasses.game_status
-    file['dungeon_level'] = gamemap.dungeon_level
+    file['game_status'] = game_state.game_status
+    file['dungeon_level'] = game_state.dungeon_level
     if (gamemap.stairs != None):
         file['stairs_index'] = game_state.objects.index(gamemap.stairs)  #same for the stairs
     file.close()
@@ -169,7 +169,7 @@ def load_game():
     game_state.player = game_state.objects[file['player_index']]  #get index of player in objects list and access it
     gamemap.stairs = game_state.objects[file['stairs_index']]  #same for the stairs
     messageconsole.game_msgs = file['game_msgs']
-    baseclasses.game_status = file['game_status']
+    game_state.game_status = file['game_status']
     game_state.dungeon_level = file['dungeon_level']
     file.close()
 
@@ -183,7 +183,7 @@ def new_game():
     gamemap.make_bsp()
     screenrendering.initialize_fov()
 
-    baseclasses.game_status = 'playing'
+    game_state.game_status = 'playing'
 
     #a warm welcoming message!
     messageconsole.message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', libtcod.red)
@@ -234,7 +234,7 @@ def play_game():
             break
 
         #let npcs take their turn
-        if baseclasses.game_status == 'playing' and player_action != 'didnt-take-turn':
+        if game_state.game_status == 'playing' and player_action != 'didnt-take-turn':
             for object in game_state.objects:
                 if object.ai:
                     object.ai.take_turn()

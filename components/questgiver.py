@@ -1,7 +1,8 @@
 import libtcodpy as libtcod
 
 import game_state
-import messageconsole
+
+from game_messages import Message
 
 class Questgiver:
     def __init__(self, quest = None):
@@ -33,19 +34,17 @@ class Questgiver:
         self.owner.always_visible = True
 
     def talk(self, pc):
+        results = []
         if (self.quest == None):
-            return
+            return results
 
         if (self.quest.started == False):
-            self.quest.start_quest(pc)
+            results.append({'quest': self.quest})
         elif (self.quest.completed):
-            messageconsole.message('Well done!')
-            messageconsole.message('You have earned ' + str(self.quest.xp) + 'XP')
-            pc.completed_quest(self.quest)
             self.completed_quest()
-        else:
-            messageconsole.message('Have you done it yet?')
 
-    def change_state(Self):
-            npc.char = '!'
-            npc.color = libtcod.silver
+            results.append({'message': Message('Well done!', libtcod.white), 'xp': self.xp})
+        else:
+            results.append({'message': Message('Have you done it yet?', libtcod.white)})
+
+        return results

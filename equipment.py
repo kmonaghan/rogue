@@ -6,7 +6,7 @@ import messageconsole
 import random_utils
 import tome
 
-from components.equipment import Equipment
+from components.equippable import Equippable
 from components.item import Item
 
 from entities.object import Object
@@ -99,21 +99,21 @@ def random_magic_weapon():
     if (dice <= 500):
         item.name = item.name + " of Stabby Stabby"
         item.color = libtcod.chartreuse
-        item.equipment.power_bonus = item.equipment.power_bonus * 1.25
+        item.equippable.power_bonus = item.equippable.power_bonus * 1.25
     elif (dice <= 750):
         item.name = item.name + " of YORE MA"
         item.color = libtcod.blue
-        item.equipment.power_bonus = item.equipment.power_bonus * 1.5
+        item.equippable.power_bonus = item.equippable.power_bonus * 1.5
     elif (dice <= 990):
         item.name = item.name + " of I'll FUCKING Have You"
         item.color = libtcod.purple
-        item.equipment.power_bonus = item.equipment.power_bonus * 2
+        item.equippable.power_bonus = item.equippable.power_bonus * 2
     else:
         item.name = item.name + " of Des and Troy"
         item.color = libtcod.crimson
-        item.equipment.power_bonus = item.equipment.power_bonus * 4
+        item.equippable.power_bonus = item.equippable.power_bonus * 4
 
-    item.equipment.number_of_dice = 2
+    item.equippable.number_of_dice = 2
 
     return item
 
@@ -140,66 +140,66 @@ def confusion_scroll(point = None):
 
 def shield(point = None):
     #create a shield
-    equipment_component = Equipment(EquipmentSlots.OFF_HAND, defense_bonus=1)
-    item = Object(point, '[', 'shield', libtcod.darker_orange, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.OFF_HAND, defense_bonus=1)
+    item = Object(point, '[', 'shield', libtcod.darker_orange, equippable=equippable_component)
 
     return item
 
 def helmet(point = None):
     #create a helmet
-    equipment_component = Equipment(EquipmentSlots.HEAD, defense_bonus=1)
-    item = Object(point, '^', 'helmet', libtcod.darker_orange, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.HEAD, defense_bonus=1)
+    item = Object(point, '^', 'helmet', libtcod.darker_orange, equippable=equippable_component)
 
     return item
 
 def leathershirt(point = None):
     #create a chainmail
-    equipment_component = Equipment(EquipmentSlots.CHEST, 1)
-    item = Object(point, '=', 'leather shirt', libtcod.sky, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=1)
+    item = Object(point, '=', 'leather shirt', libtcod.sky, equippable=equippable_component)
 
     return item
 
 def scalemail(point = None):
     #create a chainmail
-    equipment_component = Equipment(EquipmentSlots.CHEST, 2)
-    item = Object(point, '=', 'scalemail', libtcod.sky, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=2)
+    item = Object(point, '=', 'scalemail', libtcod.sky, equippable=equippable_component)
 
     return item
 
 def chainmail(point = None):
     #create a chainmail
-    equipment_component = Equipment(EquipmentSlots.CHEST, 3)
-    item = Object(point, '=', 'chainmail', libtcod.sky, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=3)
+    item = Object(point, '=', 'chainmail', libtcod.sky, equippable=equippable_component)
 
     return item
 
 def breastplate(point = None):
     #create a breastplate
-    equipment_component = Equipment(EquipmentSlots.CHEST, 4)
-    item = Object(point, '=', 'breastplate', libtcod.sky, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=4)
+    item = Object(point, '=', 'breastplate', libtcod.sky, equippable=equippable_component)
 
     return item
 
 def dagger(point = None):
     #create a sword
-    equipment_component = Equipment(EquipmentSlots.MAIN_HAND, 2)
-    equipment_component.type_of_dice = 4
-    item = Object(point, '-', 'dagger', libtcod.sky, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    equippable_component.type_of_dice = 4
+    item = Object(point, '-', 'dagger', libtcod.sky, equippable=equippable_component)
 
     return item
 
 def shortsword(point = None):
     #create a sword
-    equipment_component = Equipment(EquipmentSlots.MAIN_HAND, 3)
-    equipment_component.type_of_dice = 6
-    item = Object(point, '/', 'short sword', libtcod.sky, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=3)
+    equippable_component.type_of_dice = 6
+    item = Object(point, '/', 'short sword', libtcod.sky, equippable=equippable_component)
 
     return item
 
 def longsword(point = None):
     #create a sword
-    equipment_component = Equipment(EquipmentSlots.MAIN_HAND, 4)
-    equipment_component.type_of_dice = 8
-    item = Object(point, '\\', 'long sword', libtcod.sky, gear=equipment_component)
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=4)
+    equippable_component.type_of_dice = 8
+    item = Object(point, '\\', 'long sword', libtcod.sky, equippable=equippable_component)
 
     return item

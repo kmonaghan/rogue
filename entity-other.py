@@ -1,51 +1,55 @@
-__metaclass__ = type
-
 import libtcodpy as libtcod
 
-import equipment
 import math
 
 from components.item import Item
-from map_objects.point import Point
-from map_objects.map_utils import is_blocked
 
-from game_messages import Message
+from render_functions import RenderOrder
 
-from render_order import RenderOrder
 
-import game_state
-
-class Object:
-    #this is a generic object: the game_state.player, a npc, an item, the stairs...
-    #it's always represented by a character on screen.
-    def __init__(self, point, char, name, color, blocks=False, always_visible=False,
-                 fighter=None, ai=None, item=None, stairs=None, equippable=None):
-        self.point = point
-        if point is not None:
-            self.x = point.x
-            self.y = point.y
+class Entity:
+    """
+    A generic object to represent players, enemies, items, etc.
+    """
+    def __init__(self, x, y, char, color, name, blocks=False, render_order=RenderOrder.CORPSE, fighter=None, ai=None,
+                 item=None, inventory=None, stairs=None, level=None, equipment=None, equippable=None):
+        self.x = x
+        self.y = y
         self.char = char
-        self.name = name
         self.color = color
+        self.name = name
         self.blocks = blocks
-        self.always_visible = always_visible
+        self.render_order = render_order
         self.fighter = fighter
-        if self.fighter:  #let the fighter component know who owns it
+        self.ai = ai
+        self.item = item
+        self.inventory = inventory
+        self.stairs = stairs
+        self.level = level
+        self.equipment = equipment
+        self.equippable = equippable
+
+        if self.fighter:
             self.fighter.owner = self
 
-        self.ai = ai
-        if self.ai:  #let the AI component know who owns it
+        if self.ai:
             self.ai.owner = self
 
-        self.item = item
-        if self.item:  #let the Item component know who owns it
+        if self.item:
             self.item.owner = self
 
-        self.stairs = stairs
+        if self.inventory:
+            self.inventory.owner = self
+
         if self.stairs:
             self.stairs.owner = self
 
-        self.equippable = equippable
+        if self.level:
+            self.level.owner = self
+
+        if self.equipment:
+            self.equipment.owner = self
+
         if self.equippable:
             self.equippable.owner = self
 
@@ -54,32 +58,8 @@ class Object:
                 self.item = item
                 self.item.owner = self
 
-        self.lootable = True
-
-        self.questgiver = None
-
-        self.description = None
-
-        self.render_order = RenderOrder.ITEM
-
-    def examine(self):
-        print "examine (object)"
-        results = []
-
-        detail = self.name.capitalize()
-        if self.description:
-            detail += ' ' + self.description()
-
-        if self.equippable:
-            detail += ' ' + self.equippable.equipment_description()
-
-        results.append({'message': Message(detail, libtcod.gold)})
-
-        return results
-
     def move(self, dx, dy):
-        #move by the given amount, if the destination is not blocked
-        #if not is_blocked(Point(self.x + dx, self.y + dy)):
+        # Move the entity by a given amount
         self.x += dx
         self.y += dy
 
@@ -91,19 +71,17 @@ class Object:
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
 
-        if not (game_map.is_blocked(Point(self.x + dx, self.y + dy)) or
+        if not (game_map.is_blocked(self.x + dx, self.y + dy) or
                     get_blocking_entities_at_location(entities, self.x + dx, self.y + dy)):
             self.move(dx, dy)
 
+    def distance(self, x, y):
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+
     def distance_to(self, other):
-        #return the distance to another object
         dx = other.x - self.x
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)
-
-    def distance(self, x, y):
-        #return the distance to some coordinates
-        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def move_astar(self, target, entities, game_map):
         # Create a FOV map that has the dimensions of the map
@@ -147,6 +125,7 @@ class Object:
 
             # Delete the path to free memory
         libtcod.path_delete(my_path)
+
 
 def get_blocking_entities_at_location(entities, destination_x, destination_y):
     for entity in entities:

@@ -18,9 +18,10 @@ class AltBSPTree:
 		self.level = []
 		self.rooms = []
 
-	def generateLevel(self, mapWidth, mapHeight):
+	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size):
 		self.level = [[Tile(True) for y in range(mapHeight)] for x in range(mapWidth)]
 
+		self.MIN_SIZE = room_min_size
 		self.mapWidth = mapWidth
 		self.mapHeight = mapHeight
 

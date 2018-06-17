@@ -7,7 +7,6 @@ import game_state
 
 from entities.object import Object
 
-from map_objects.map_utils import is_blocked
 from map_objects.rect import Rect
 from map_objects.point import Point
 
@@ -37,13 +36,13 @@ class Room(Rect):
             self.room_detail.x = x
             self.room_detail.y = y
 
-    def random_tile(self):
+    def random_tile(self, map):
         point = None
         while (point == None):
             x = libtcod.random_get_int(None, self.x1, self.x2)
             y = libtcod.random_get_int(None, self.y1, self.y2)
 
-            if (is_blocked(Point(x,y)) == False):
+            if (map.is_blocked(Point(x,y)) == False):
                 point = Point(x,y)
 
         return point

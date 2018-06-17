@@ -1,40 +1,53 @@
 import libtcodpy as libtcod
 import equipment
 import game_state
-import messageconsole
 import screenrendering
 import quest
 
 from equipment_slots import EquipmentSlots
+from game_messages import Message
 
 class Fighter:
     #combat-related properties and methods (npc, player, NPC).
-    def __init__(self, hp, defense, power, xp, death_function=None):
+    def __init__(self, hp, defense, power, xp):
         self.base_max_hp = hp
         self.hp = hp
         self.base_defense = defense
         self.base_power = power
         self.xp = xp
-        self.death_function = death_function
         self.multiplier = 1
         self.owner = None
 
     @property
-    def power(self):  #return actual power, by summing up the bonuses from all equipped items
-        bonus = sum(equipment.power_bonus for equipment in self.owner.get_all_equipped())
-        return (self.base_power + bonus) * self.multiplier
+    def max_hp(self):
+        if self.owner and self.owner.equipment:
+            bonus = self.owner.equipment.max_hp_bonus
+        else:
+            bonus = 0
+
+        return self.base_max_hp + bonus
 
     @property
-    def defense(self):  #return actual defense, by summing up the bonuses from all equipped items
-        bonus = sum(equipment.defense_bonus for equipment in self.owner.get_all_equipped())
-        return (self.base_defense + bonus) * self.multiplier
+    def power(self):
+        if self.owner and self.owner.equipment:
+            bonus = self.owner.equipment.power_bonus
+        else:
+            bonus = 0
+
+        return self.base_power + bonus
 
     @property
-    def max_hp(self):  #return actual max_hp, by summing up the bonuses from all equipped items
-        bonus = sum(equipment.max_hp_bonus for equipment in self.owner.get_all_equipped())
-        return (self.base_max_hp + bonus) * self.multiplier
+    def defense(self):
+        if self.owner and self.owner.equipment:
+            bonus = self.owner.equipment.defense_bonus
+        else:
+            bonus = 0
+
+        return self.base_defense + bonus
 
     def attack(self, target):
+        results = []
+
         #a simple formula for attack damage
         total = libtcod.random_get_int(0, 1, 20)
         multiplier = 1;
@@ -46,30 +59,30 @@ class Fighter:
 
         if (hit > 0) or (multiplier == 2):
             #make the target take some damage
-            weapon = self.owner.get_equipped_in_slot(EquipmentSlots.MAIN_HAND)
-            damage = weapon.damage() * multiplier
+            weapon = self.owner.equipment.get_equipped_in_slot(EquipmentSlots.MAIN_HAND)
+            damage = weapon.equippable.damage() * multiplier
 
-            msg = self.owner.name.capitalize() + ' attacks ' + target.name + ' with ' + weapon.owner.name + ' for ' + str(damage) + ' hit points.'
+            msg = self.owner.name.capitalize() + ' attacks ' + target.name + ' with ' + weapon.name + ' for ' + str(damage) + ' hit points.'
             if (multiplier == 2):
-                msg = self.owner.name.capitalize() + ' smashes ' + target.name + ' with a massive blow from their ' + weapon.owner.name + ' for ' + str(damage) + ' hit points.'
-            messageconsole.message(msg)
-            target.fighter.take_damage(damage)
+                msg = self.owner.name.capitalize() + ' smashes ' + target.name + ' with a massive blow from their ' + weapon.name + ' for ' + str(damage) + ' hit points.'
+
+            results.append({'message': Message(msg, libtcod.white)})
+            results.extend(target.fighter.take_damage(damage))
         else:
-            messageconsole.message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
+            results.append({'message': Message('{0} attacks {1} but does no damage.'.format(
+                self.owner.name.capitalize(), target.name), libtcod.white)})
 
-    def take_damage(self, damage):
-        #apply damage if possible
-        if damage > 0:
-            self.hp -= damage
+        return results
 
-            #check for death. if there's a death function, call it
-            if self.hp <= 0:
-                function = self.death_function
-                if function is not None:
-                    function(self.owner)
+    def take_damage(self, amount):
+        results = []
 
-                if self.owner != game_state.player:  #yield experience to the player
-                    game_state.player.level.add_xp(self.xp)
+        self.hp -= amount
+
+        if self.hp <= 0:
+            results.append({'dead': self.owner, 'xp': self.xp})
+
+        return results
 
     def heal(self, amount):
         #heal by the given amount, without going over the maximum

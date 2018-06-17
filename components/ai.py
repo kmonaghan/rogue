@@ -2,26 +2,31 @@ import libtcodpy as libtcod
 
 import baseclasses
 import bestiary
-import game_state
-import messageconsole
 import tome
+
+from game_messages import Message
 
 from map_objects.point import Point
 
 class BasicNPC:
     #AI for a basic npc.
-    def take_turn(self):
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
-        if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
+        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
 
             #move towards player if far away
-            if npc.distance_to(game_state.player) >= 2:
-                npc.move_astar(game_state.player)
+            if npc.distance_to(target) >= 2:
+                npc.move_astar(target, entities, game_map)
 
             #close enough, attack! (if the player is still alive.)
-            elif game_state.player.fighter.hp > 0:
-                npc.fighter.attack(game_state.player)
+            elif target.fighter.hp > 0:
+                attack_results = npc.fighter.attack(target)
+                results.extend(attack_results)
+
+        return results
 
 class WanderingNPC:
     #AI for a temporarily confused npc (reverts to previous AI after a while).
@@ -31,7 +36,9 @@ class WanderingNPC:
         self.next_target()
 
     #AI for a basic npc.
-    def take_turn(self):
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
         if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
@@ -41,7 +48,9 @@ class WanderingNPC:
             if (npc.x == self.target.x) and (npc.y == self.target.y):
                 self.next_target()
 
-            npc.move_astar(self.target)
+            npc.move_astar(self.target, entities, game_map)
+
+        return results
 
     def next_target(self):
         room = self.rooms.pop(0)
@@ -54,7 +63,9 @@ class ConfusedNPC:
         self.old_ai = old_ai
         self.num_turns = num_turns
 
-    def take_turn(self):
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+
         if self.num_turns > 0:  #still confused...
             #move in a random direction, and decrease the number of turns confused
             self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
@@ -64,16 +75,23 @@ class ConfusedNPC:
             self.owner.ai = self.old_ai
             messageconsole.message('The ' + self.owner.name + ' is no longer confused!', libtcod.red)
 
+        return results
+
 class StrollingNPC:
     #AI for a temporarily confused npc (reverts to previous AI after a while).
     def __init__(self):
         self.moved = False
-    def take_turn(self):
+
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+
         if (self.moved == False):
             self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
             self.moved = True
         else:
             self.moved = False
+
+        return results
 
 class WarlordNPC:
     def __init__(self):
@@ -81,40 +99,46 @@ class WarlordNPC:
         self.summoned_orcs = False
         self.summoned_trolls = False
 
-    def take_turn(self):
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
-        if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
+        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
 
-            if (self.summoned_orcs == False) or (self.summoned_goblins == False):
+            if (self.summoned_orcs == False) or (self.summoned_goblins == False) or (self.summoned_trolls == False):
                 health = (npc.fighter.hp * 100.0) / npc.fighter.max_hp
 
                 if (health < 40):
                     if (self.summoned_trolls == False):
                         self.summoned_trolls = True
-                        messageconsole.message('Trolls! To me!', libtcod.red)
+                        results.append({'message': Message('Trolls! To me!', libtcod.red)})
                         tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.troll, 2)
 
-                        return
+                        return results
+
                 elif (health < 60):
                     if (self.summoned_orcs == False):
                         self.summoned_orcs = True
-                        messageconsole.message('Orcs! To me!', libtcod.red)
+                        results.append({'message': Message('Orcs! To me!', libtcod.red)})
                         tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.orc, 2)
 
-                        return
+                        return results
+
                 elif (health < 80):
                     if (self.summoned_goblins == False):
                         self.summoned_goblins = True
-                        messageconsole.message('Goblins! To me!', libtcod.red)
+                        results.append({'message': Message('Goblins! To me!', libtcod.red)})
                         tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.goblin, 2)
 
-                        return
+                        return results
 
             #move towards player if far away
-            if npc.distance_to(game_state.player) >= 2:
-                npc.move_astar(game_state.player)
+            if npc.distance_to(target) >= 2:
+                npc.move_astar(target, entities, game_map)
 
             #close enough, attack! (if the player is still alive.)
-            elif game_state.player.fighter.hp > 0:
-                npc.fighter.attack(game_state.player)
+            elif target.fighter.hp > 0:
+                attack_results = npc.fighter.attack(target)
+                results.extend(attack_results)
+
+            return results
