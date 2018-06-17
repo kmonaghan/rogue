@@ -24,7 +24,7 @@ from map_objects.mazewithrooms import MazeWithRooms
 
 import map_objects.prefab
 
-from entity import Entity
+from render_order import RenderOrder
 
 from game_messages import Message
 
@@ -61,16 +61,15 @@ class GameMap:
 
         print "Number of rooms: " + str(len(self.rooms))
 
-#        if (self.dungeon_level == 5):
-#            warlord = bestiary.warlord(Point(prefabbed.room.x1+4, prefabbed.room.y1))
-#            game_state.objects.append(warlord)
-#            self.rooms.remove(prefabbed.room)
-#        else:
-#            print "stairs go here"
-#            stairs_component = Stairs(self.dungeon_level + 1)
-#            down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, '>', libtcod.white, 'Stairs',
-#                                         render_order=RenderOrder.STAIRS, stairs=stairs_component)
-#            entities.append(down_stairs)
+        if (self.dungeon_level == 5):
+            warlord = bestiary.warlord(Point(prefabbed.room.x1+4, prefabbed.room.y1))
+            game_state.objects.append(warlord)
+            self.rooms.remove(prefabbed.room)
+        else:
+            stairs_component = Stairs(self.dungeon_level + 1)
+            room = self.rooms[-1]
+            down_stairs = Object(room.center(), '>', 'Stairs', libtcod.white, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+            entities.append(down_stairs)
 
         self.popluate_map(player, entities)
 
@@ -197,7 +196,6 @@ class GameMap:
         self.dungeon_level += 1
         entities = [player]
 
-        self.tiles = self.initialize_tiles()
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
                       constants['map_width'], constants['map_height'], player, entities)
 

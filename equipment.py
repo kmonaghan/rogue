@@ -12,6 +12,7 @@ from components.item import Item
 from entities.object import Object
 
 from equipment_slots import EquipmentSlots
+from render_order import RenderOrder
 
 def random_armour(point = None):
     item_chances = {}
@@ -141,42 +142,42 @@ def confusion_scroll(point = None):
 def shield(point = None):
     #create a shield
     equippable_component = Equippable(EquipmentSlots.OFF_HAND, defense_bonus=1)
-    item = Object(point, '[', 'shield', libtcod.darker_orange, equippable=equippable_component)
+    item = Object(point, '[', 'shield', libtcod.darker_orange, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def helmet(point = None):
     #create a helmet
     equippable_component = Equippable(EquipmentSlots.HEAD, defense_bonus=1)
-    item = Object(point, '^', 'helmet', libtcod.darker_orange, equippable=equippable_component)
+    item = Object(point, '^', 'helmet', libtcod.darker_orange, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def leathershirt(point = None):
     #create a chainmail
     equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=1)
-    item = Object(point, '=', 'leather shirt', libtcod.sky, equippable=equippable_component)
+    item = Object(point, '=', 'leather shirt', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def scalemail(point = None):
     #create a chainmail
     equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=2)
-    item = Object(point, '=', 'scalemail', libtcod.sky, equippable=equippable_component)
+    item = Object(point, '=', 'scalemail', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def chainmail(point = None):
     #create a chainmail
     equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=3)
-    item = Object(point, '=', 'chainmail', libtcod.sky, equippable=equippable_component)
+    item = Object(point, '=', 'chainmail', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def breastplate(point = None):
     #create a breastplate
     equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=4)
-    item = Object(point, '=', 'breastplate', libtcod.sky, equippable=equippable_component)
+    item = Object(point, '=', 'breastplate', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
@@ -184,7 +185,7 @@ def dagger(point = None):
     #create a sword
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
     equippable_component.type_of_dice = 4
-    item = Object(point, '-', 'dagger', libtcod.sky, equippable=equippable_component)
+    item = Object(point, '-', 'dagger', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
@@ -192,7 +193,7 @@ def shortsword(point = None):
     #create a sword
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=3)
     equippable_component.type_of_dice = 6
-    item = Object(point, '/', 'short sword', libtcod.sky, equippable=equippable_component)
+    item = Object(point, '/', 'short sword', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
@@ -200,6 +201,6 @@ def longsword(point = None):
     #create a sword
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=4)
     equippable_component.type_of_dice = 8
-    item = Object(point, '\\', 'long sword', libtcod.sky, equippable=equippable_component)
+    item = Object(point, '\\', 'long sword', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item

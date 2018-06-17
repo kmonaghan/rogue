@@ -19,7 +19,7 @@ class Object:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
-                 fighter=None, ai=None, item=None, stairs=None, equippable=None):
+                 fighter=None, ai=None, item=None, stairs=None, equippable=None, render_order=RenderOrder.CORPSE):
         self.point = point
         if point is not None:
             self.x = point.x
@@ -60,7 +60,7 @@ class Object:
 
         self.description = None
 
-        self.render_order = RenderOrder.ITEM
+        self.render_order = render_order
 
     def examine(self):
         print "examine (object)"
