@@ -25,6 +25,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
     previous_game_state = game_state
 
     targeting_item = None
+    quest_request = None
 
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
@@ -35,7 +36,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
         render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log,
                    constants['screen_width'], constants['screen_height'], constants['bar_width'],
-                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state)
+                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, quest_request)
 
         fov_recompute = False
 
@@ -59,6 +60,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
         quest_list = action.get('quest_list')
+        quest_response = action.get('quest_response')
 
         left_click = mouse_action.get('left_click')
         right_click = mouse_action.get('right_click')
@@ -116,6 +118,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             previous_game_state = game_state
             game_state = GameStates.SHOW_QUESTS
 
+        if quest_response:
+            quest_request.owner.start_quest()
+            message_log.add_message(Message('Started quest: ' + quest_request.title, libtcod.yellow))
+            quest_request = None
+            game_state = previous_game_state
+
         if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
                 player.inventory.items):
             item = player.inventory.items[inventory_index]
@@ -169,6 +177,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 game_state = previous_game_state
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
+            elif game_state == GameStates.QUEST_ONBOARDING:
+                player_turn_results.append({'quest_cancelled': True})
             else:
                 save_game(player, entities, game_map, message_log, game_state)
 
@@ -187,7 +197,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             targeting = player_turn_result.get('targeting')
             targeting_cancelled = player_turn_result.get('targeting_cancelled')
             xp = player_turn_result.get('xp')
-            quest = player_turn_result.get('quest')
+            quest_onboarding = player_turn_result.get('quest_onboarding')
+            quest_cancelled = player_turn_result.get('quest_cancelled')
 
             if message:
                 message_log.add_message(message)
@@ -195,8 +206,8 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             if dead_entity:
                 quest_result = check_quests_for_npc_death(dead_entity)
 
-                if (len(quest_result)):
-                    message = message + quest_result
+                #if (len(quest_result)):
+                #    message_log.add_message(quest_result)
 
                 if dead_entity == player:
                     message, game_state = player_death(dead_entity)
@@ -255,8 +266,15 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     previous_game_state = game_state
                     game_state = GameStates.LEVEL_UP
 
-            if quest:
-                print "Do something with quests"
+            if quest_onboarding:
+                previous_game_state = GameStates.PLAYERS_TURN
+                game_state = GameStates.QUEST_ONBOARDING
+
+                quest_request = quest_onboarding
+                print "Do something with quest: " + quest_onboarding.title
+
+            if quest_cancelled:
+                game_state = previous_game_state
 
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:

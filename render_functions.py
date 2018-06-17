@@ -35,7 +35,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 
 
 def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
-               bar_width, panel_height, panel_y, mouse, colors, game_state):
+               bar_width, panel_height, panel_y, mouse, colors, game_state, quest_request = None):
     if fov_recompute:
     # Draw all the tiles in the game map
         for y in range(game_map.height):
@@ -100,7 +100,7 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
         inventory_menu(con, inventory_title, player, 50, screen_width, screen_height)
 
     elif game_state == GameStates.QUEST_ONBOARDING:
-        inventory_menu(con, 'Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)
+        quest_menu(con, '', quest_request, 50, screen_width, screen_height)
 
     elif game_state == GameStates.SHOW_QUESTS:
         quest_list_menu(con, 'Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)

@@ -54,7 +54,7 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
 
 def quest_menu(con, header, quest, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
-    header = self.title + "\n" + self.description
+    header = quest.title + "\n" + quest.description
     options = ['Let\'s go do it!',
                 'Not right now']
 

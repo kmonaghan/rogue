@@ -86,3 +86,7 @@ class Quest:
                 self.owner.return_to_giver()
 
         return results
+
+    def start_quest(self):
+        self.started = True
+        game_state.active_quests.append(self)

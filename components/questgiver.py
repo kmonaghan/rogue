@@ -28,6 +28,7 @@ class Questgiver:
     def start_quest(self):
         self.owner.char = "!"
         self.owner.color = libtcod.silver
+        self.quest.start_quest()
 
     def return_to_giver(self):
         self.owner.color = libtcod.gold
@@ -39,11 +40,11 @@ class Questgiver:
             return results
 
         if (self.quest.started == False):
-            results.append({'quest': self.quest})
+            results.append({'quest_onboarding': self.quest})
         elif (self.quest.completed):
-            self.completed_quest()
+            results.append({'message': Message('Well done!', libtcod.gold), 'xp': self.quest.xp})
 
-            results.append({'message': Message('Well done!', libtcod.white), 'xp': self.xp})
+            self.completed_quest()
         else:
             results.append({'message': Message('Have you done it yet?', libtcod.white)})
 

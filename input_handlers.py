@@ -172,9 +172,12 @@ def handle_quests_onboarding(key):
         key_char = chr(key.c)
 
         if key_char == 'a':
-            return {'quest': 'accept'}
+            return {'quest_response': 'accept'}
         elif key_char == 'b':
-            return {'quest': 'reject'}
+            return {'quest_response': 'reject'}
+        elif key.vk == libtcod.KEY_ESCAPE:
+            # Exit the menu
+            return {'exit': True}
 
     return {}
 
