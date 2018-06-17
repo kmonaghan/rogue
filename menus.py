@@ -19,7 +19,8 @@ def menu(con, header, options, width, screen_width, screen_height):
     # print all the options
     y = header_height
     letter_index = ord('a')
-    for option_text in options:
+    for option_text, color in options:
+        libtcod.console_set_default_foreground(window, color)
         text = '(' + chr(letter_index) + ') ' + option_text
         libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
         y += 1
@@ -40,23 +41,23 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
 
         for item in player.inventory.items:
             if player.equipment.main_hand == item:
-                options.append('{0} (carried in main hand)'.format(item.name))
+                options.append(['{0} (carried in main hand)'.format(item.name), item.color])
             elif player.equipment.off_hand == item:
-                options.append('{0} (carreid in off hand)'.format(item.name))
+                options.append(['{0} (carreid in off hand)'.format(item.name), item.color])
             elif player.equipment.chest == item:
-                options.append('{0} (worn on chest)'.format(item.name))
+                options.append(['{0} (worn on chest)'.format(item.name), item.color])
             elif player.equipment.head == item:
-                options.append('{0} (worn on head)'.format(item.name))
+                options.append(['{0} (worn on head)'.format(item.name), item.color])
             else:
-                options.append(item.name)
+                options.append([item.name, item.color])
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
 def quest_menu(con, header, quest, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
     header = quest.title + "\n" + quest.description
-    options = ['Let\'s go do it!',
-                'Not right now']
+    options = [['Let\'s go do it!', libtcod.white],
+                ['Not right now', libtcod.white]]
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
@@ -68,7 +69,7 @@ def quest_list_menu(con, header, player, inventory_width, screen_width, screen_h
         options = []
 
         for quest in game_state.active_quests:
-            options.append(quest.title)
+            options.append([quest.title, libtcod.white])
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
@@ -81,13 +82,13 @@ def main_menu(con, background_image, screen_width, screen_height):
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), libtcod.BKGND_NONE, libtcod.CENTER,
                              'By Karl Monaghan')
 
-    menu(con, '', ['Play a new game', 'Continue last game', 'Quit'], 24, screen_width, screen_height)
+    menu(con, '', [['Play a new game', libtcod.white], ['Continue last game', libtcod.white], ['Quit', libtcod.white]], 24, screen_width, screen_height)
 
 
 def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
-    options = ['Constitution (+20 HP, from {0})'.format(player.fighter.max_hp),
-               'Strength (+1 attack, from {0})'.format(player.fighter.power),
-               'Agility (+1 defense, from {0})'.format(player.fighter.defense)]
+    options = [['Constitution (+20 HP, from {0})'.format(player.fighter.max_hp), libtcod.white],
+               ['Strength (+1 attack, from {0})'.format(player.fighter.power), libtcod.white],
+               ['Agility (+1 defense, from {0})'.format(player.fighter.defense), libtcod.white]]
 
     menu(con, header, options, menu_width, screen_width, screen_height)
 
