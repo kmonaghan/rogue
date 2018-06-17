@@ -63,11 +63,19 @@ def create_player():
     #create object representing the player
     fighter_component = Fighter(hp=100, defense=10, power=2, xp=0)
 
+    if (game_state.debug == True):
+        fighter_component.hp = 1000
+        fighter_component.base_defense = 200
+        fighter_component.base_power = 200
+
     player = Character(None, '@', 'player', libtcod.dark_green, blocks=True,
                        fighter=fighter_component)
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
+    if (game_state.debug == True):
+        dagger.number_of_dice = 100
+
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
 

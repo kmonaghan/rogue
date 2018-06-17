@@ -20,9 +20,7 @@ def npc_death(npc, entities):
     npc.render_order = RenderOrder.CORPSE
 
     for item in npc.inventory.items:
-        print "checking: " + item.name
         if (item.lootable):
-            print "dropping"
             npc.inventory.drop_item(item)
             entities.append(item)
 

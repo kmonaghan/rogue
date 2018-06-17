@@ -1,5 +1,7 @@
 import libtcodpy as libtcod
 
+from game_state import debug
+
 from enum import Enum
 
 from game_states import GameStates
@@ -38,7 +40,7 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
     # Draw all the tiles in the game map
         for y in range(game_map.height):
             for x in range(game_map.width):
-                visible = libtcod.map_is_in_fov(fov_map, x, y)
+                visible = libtcod.map_is_in_fov(fov_map, x, y) or debug
                 wall = game_map.map[x][y].block_sight
 
                 if visible:
@@ -116,7 +118,7 @@ def clear_all(con, entities):
 
 
 def draw_entity(con, entity, fov_map, game_map):
-    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.map[entity.x][entity.y].explored):
+    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.map[entity.x][entity.y].explored) or debug:
         libtcod.console_set_default_foreground(con, entity.color)
         libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
 
