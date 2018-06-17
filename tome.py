@@ -9,6 +9,8 @@ import components.ai
 from map_objects.map_utils import is_blocked
 from map_objects.point import Point
 
+from game_messages import Message
+
 import game_state
 
 #spell values
@@ -70,16 +72,27 @@ def target_npc(max_range=None):
             if obj.x == x and obj.y == y and obj.fighter and obj != game_state.player:
                 return obj
 
-def cast_heal():
+def cast_heal(caster = None):
+
     #heal the player
-    if game_state.player.fighter.hp == game_state.player.fighter.max_hp:
-        messageconsole.message('You are already at full health.', libtcod.red)
-        return 'cancelled'
+#    if game_state.player.fighter.hp == game_state.player.fighter.max_hp:
+#        messageconsole.message('You are already at full health.', libtcod.red)
+#        return 'cancelled'
 
-    messageconsole.message('Your wounds start to feel better!', libtcod.light_violet)
-    game_state.player.fighter.heal(HEAL_AMOUNT)
+#    messageconsole.message('Your wounds start to feel better!', libtcod.light_violet)
+#    game_state.player.fighter.heal(HEAL_AMOUNT)
 
-def cast_lightning():
+    results = []
+
+    if caster.fighter.hp == caster.fighter.max_hp:
+        results.append({'consumed': False, 'message': Message('You are already at full health', libtcod.yellow)})
+    else:
+        caster.fighter.heal(HEAL_AMOUNT)
+        results.append({'consumed': True, 'message': Message('Your wounds start to feel better!', libtcod.green)})
+
+    return results
+
+def cast_lightning(caster = None):
     #find closest enemy (inside a maximum range) and damage it
     npc = closest_npc(LIGHTNING_RANGE)
     if npc is None:  #no enemy found within maximum range
@@ -91,7 +104,7 @@ def cast_lightning():
             + str(LIGHTNING_DAMAGE) + ' hit points.', libtcod.light_blue)
     npc.fighter.take_damage(LIGHTNING_DAMAGE)
 
-def cast_fireball():
+def cast_fireball(caster = None):
     #ask the player for a target tile to throw a fireball at
     messageconsole.message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan)
     (x, y) = target_tile()

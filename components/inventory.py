@@ -42,13 +42,14 @@ class Inventory:
             if item_component.targeting and not (kwargs.get('target_x') or kwargs.get('target_y')):
                 results.append({'targeting': item_entity})
             else:
-                print "else this?"
     #            kwargs = {**item_component.function_kwargs, **kwargs}
     #            item_use_results = item_component.use_function(self.owner, **kwargs)
 
-    #            for item_use_result in item_use_results:
-    #                if item_use_result.get('consumed'):
-    #                    self.remove_item(item_entity)
+                item_use_results = item_component.use_function(self.owner)
+
+                for item_use_result in item_use_results:
+                    if item_use_result.get('consumed'):
+                        self.remove_item(item_entity)
 
                 results.extend(item_use_results)
 
