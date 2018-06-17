@@ -6,7 +6,7 @@ from game_states import GameStates
 
 from render_functions import RenderOrder
 
-def npc_death(npc):
+def npc_death(npc, entities):
     #transform it into a nasty corpse! it doesn't block, can't be
     #attacked and doesn't move
     death_message = Message('{0} is dead!'.format(npc.name.capitalize()), libtcod.orange)
@@ -20,8 +20,11 @@ def npc_death(npc):
     npc.render_order = RenderOrder.CORPSE
 
     for item in npc.inventory.items:
+        print "checking: " + item.name
         if (item.lootable):
+            print "dropping"
             npc.inventory.drop_item(item)
+            entities.append(item)
 
     return death_message
 
@@ -32,6 +35,6 @@ def player_death(player):
 
     return Message('You died!', libtcod.red), GameStates.PLAYER_DEAD
 
-def warlord_death(npc):
+def warlord_death(npc, entities):
 
-    return npc_death(npc)
+    return npc_death(npc, entities)

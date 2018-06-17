@@ -201,7 +201,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 if dead_entity == player:
                     message, game_state = player_death(dead_entity)
                 else:
-                    message = npc_death(dead_entity)
+                    message = npc_death(dead_entity, entities)
 
                 message_log.add_message(message)
 
