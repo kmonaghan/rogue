@@ -16,6 +16,8 @@ from entities.character import Character
 
 from map_objects.point import Point
 
+from species import Species
+
 def upgrade_npc(npc):
     npc.color = libtcod.silver
     npc.fighter.multiplier = 1.5
@@ -44,7 +46,7 @@ def goblin(point = None):
     ai_component = BasicNPC()
 
     npc = Character(point, 'G', 'goblin', libtcod.desaturated_green, blocks=True,
-                    fighter=fighter_component, ai=ai_component)
+                    fighter=fighter_component, ai=ai_component, species=Species.GOBLIN)
 
     dagger = equipment.dagger()
     dagger.lootable = False
@@ -87,7 +89,7 @@ def orc(point = None):
     ai_component = BasicNPC()
 
     npc = Character(point, 'O', 'Orc', libtcod.light_green, blocks=True,
-                    fighter=fighter_component, ai=ai_component)
+                    fighter=fighter_component, ai=ai_component, species=Species.ORC)
 
     item = equipment.shortsword()
     item.lootable = False
@@ -108,7 +110,7 @@ def troll(point = None):
     ai_component = BasicNPC()
 
     npc = Character(point, 'T', 'troll', libtcod.darker_green, blocks=True,
-                    fighter=fighter_component, ai=ai_component)
+                    fighter=fighter_component, ai=ai_component, species=Species.TROLL)
 
     item = equipment.longsword()
     item.lootable = False

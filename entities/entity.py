@@ -15,7 +15,7 @@ from render_order import RenderOrder
 
 import game_state
 
-class Object:
+class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
@@ -29,6 +29,7 @@ class Object:
         self.color = color
         self.blocks = blocks
         self.always_visible = always_visible
+
         self.fighter = fighter
         if self.fighter:  #let the fighter component know who owns it
             self.fighter.owner = self
@@ -63,7 +64,6 @@ class Object:
         self.render_order = render_order
 
     def examine(self):
-        print "examine (object)"
         results = []
 
         detail = self.name.capitalize()

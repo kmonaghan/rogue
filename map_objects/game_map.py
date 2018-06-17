@@ -10,7 +10,7 @@ import random_utils
 from components.ai import WanderingNPC
 from components.stairs import Stairs
 
-from entities.object import Object
+from entities.entity import Entity
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -68,7 +68,7 @@ class GameMap:
         else:
             stairs_component = Stairs(self.dungeon_level + 1)
             room = self.rooms[-1]
-            down_stairs = Object(room.center(), '>', 'Stairs', libtcod.white, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+            down_stairs = Entity(room.center(), '>', 'Stairs', libtcod.white, render_order=RenderOrder.STAIRS, stairs=stairs_component)
             entities.append(down_stairs)
 
         self.popluate_map(player, entities)
@@ -190,7 +190,7 @@ class GameMap:
                     item = equipment.random_armour(point)
 
                 entities.append(item)
-                item.always_visible = True  #items are visible even out-of-FOV, if in an explored area
+                #item.always_visible = True  #items are visible even out-of-FOV, if in an explored area
 
     def next_floor(self, player, message_log, constants):
         self.dungeon_level += 1

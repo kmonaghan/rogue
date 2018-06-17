@@ -3,6 +3,7 @@ import libtcodpy as libtcod
 import game_state
 
 from game_messages import Message
+from species import Species
 
 def check_quests_for_npc_death(npc):
     results = []
@@ -17,7 +18,7 @@ def kill_gobbos(kill = 5):
 
     q = Quest(title, description, 100)
     q.kill = kill
-    q.kill_type = "goblin"
+    q.kill_type = Species.GOBLIN
     q.return_to_quest_giver = True
 
     return q
@@ -28,7 +29,7 @@ def kill_orcs(kill = 5):
 
     q = Quest(title, description, 200)
     q.kill = kill
-    q.kill_type = "orc"
+    q.kill_type = Species.ORC
     q.return_to_quest_giver = True
 
     return q
@@ -39,7 +40,7 @@ def kill_trolls(kill = 5):
 
     q = Quest(title, description, 300)
     q.kill = kill
-    q.kill_type = "troll"
+    q.kill_type = Species.TROLL
     q.return_to_quest_giver = True
 
     return q
@@ -70,12 +71,12 @@ class Quest:
     def kill_count(self, npc):
         results = []
 
-        print "tsting kill condition: " + npc.name
+        #print "tsting kill condition: " + npc.name
         if (self.kill == 0):
             return
 
-        if (self.kill_type == npc.name):
-            print "add a kill"
+        if (self.kill_type == npc.species):
+            #print "add a kill"
             self.kill_total += 1
 
         if (self.kill == self.kill_total):

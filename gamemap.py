@@ -9,7 +9,7 @@ import quest
 
 from components.ai import WanderingNPC
 
-from entities.object import Object
+from entities.entity import Entity
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -86,7 +86,7 @@ def popluate_map():
     point = room.random_tile()
 
     if (game_state.dungeon_level <= 4):
-        stairs = Object(point, '<', 'stairs', libtcod.white, always_visible=True)
+        stairs = Entity(point, '<', 'stairs', libtcod.white, always_visible=True)
         game_state.objects.append(stairs)
 #        stairs.send_to_back()
 

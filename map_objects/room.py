@@ -5,7 +5,7 @@ import libtcodpy as libtcod
 import baseclasses
 import game_state
 
-from entities.object import Object
+from entities.entity import Entity
 
 from map_objects.rect import Rect
 from map_objects.point import Point
@@ -23,7 +23,7 @@ class Room(Rect):
 
         if (game_state.debug):
             name = self.describe()
-            self.room_detail = Object(Point(self.x1, self.y1), "R", name, libtcod.red, False, True)
+            self.room_detail = Entity(Point(self.x1, self.y1), "R", name, libtcod.red, False, True)
             game_state.objects.append(self.room_detail)
 
     def change_xy(self, x, y):

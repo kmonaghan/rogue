@@ -5,16 +5,17 @@ import libtcodpy as libtcod
 import game_state
 import screenrendering
 
-from entities.object import Object
+from entities.entity import Entity
 
 from components.equipment import Equipment
 from components.inventory import Inventory
 from components.level import Level
 
 from render_order import RenderOrder
+from species import Species
 
-class Character(Object):
-    def __init__(self, point, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None):
+class Character(Entity):
+    def __init__(self, point, char, name, color, blocks=False, always_visible=False, fighter=None, ai=None, item=None, gear=None, species=Species.NONDESCRIPT):
         super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear)
 
         self.inventory = Inventory(26)
@@ -27,3 +28,5 @@ class Character(Object):
         self.equipment.owner = self
 
         self.render_order = RenderOrder.ACTOR
+
+        self.species = species
