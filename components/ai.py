@@ -41,7 +41,7 @@ class WanderingNPC:
 
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
-        if libtcod.map_is_in_fov(baseclasses.fov_map, npc.x, npc.y):
+        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
             self.owner.ai = self.old_ai
 
         else:
