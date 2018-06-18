@@ -142,6 +142,8 @@ class GameMap:
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, 0, max_npcs)
 
+        libtcod.namegen_parse('data/names.txt')
+
         for i in range(num_npcs):
             #choose random spot for this npc
             point = room.random_tile(self)
@@ -168,7 +170,10 @@ class GameMap:
                     if ((self.dungeon_level > 3) and choice == 'troll'):
                         npc.level.random_level_up(self.dungeon_level + add_levels - 3)
 
+                npc.name = libtcod.namegen_generate(npc.name)
                 entities.append(npc)
+
+        libtcod.namegen_destroy()
 
         #choose random number of items
         num_items = libtcod.random_get_int(0, 0, max_items)
