@@ -88,7 +88,7 @@ def orc(point = None):
     fighter_component = Fighter(hp=20, defense=10, power=4, xp=35)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'O', 'Orc', libtcod.light_green, blocks=True,
+    npc = Character(point, 'O', 'orc', libtcod.light_green, blocks=True,
                     fighter=fighter_component, ai=ai_component, species=Species.ORC)
 
     item = equipment.shortsword()
