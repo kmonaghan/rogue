@@ -62,8 +62,8 @@ class GameMap:
         print "Number of rooms: " + str(len(self.rooms))
 
         if (self.dungeon_level == 5):
-            warlord = bestiary.warlord(Point(prefabbed.room.x1+4, prefabbed.room.y1))
-            game_state.objects.append(warlord)
+            warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
+            entities.append(warlord)
             self.rooms.remove(prefabbed.room)
         else:
             stairs_component = Stairs(self.dungeon_level + 1)
@@ -80,6 +80,8 @@ class GameMap:
         point = room.random_tile(self)
         player.x = point.x
         player.y = point.y
+
+        return
 
         point = room.random_tile(self)
         npc = bestiary.bountyhunter(point)

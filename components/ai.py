@@ -112,7 +112,7 @@ class WarlordNPC:
                     if (self.summoned_trolls == False):
                         self.summoned_trolls = True
                         results.append({'message': Message('Trolls! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.troll, 2)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.troll, game_map, entities, 2)
 
                         return results
 
@@ -120,7 +120,7 @@ class WarlordNPC:
                     if (self.summoned_orcs == False):
                         self.summoned_orcs = True
                         results.append({'message': Message('Orcs! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.orc, 2)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.orc, game_map, entities, 4)
 
                         return results
 
@@ -128,7 +128,7 @@ class WarlordNPC:
                     if (self.summoned_goblins == False):
                         self.summoned_goblins = True
                         results.append({'message': Message('Goblins! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), beastiary.goblin, 2)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.goblin, game_map, entities, 6)
 
                         return results
 
@@ -141,4 +141,4 @@ class WarlordNPC:
                 attack_results = npc.fighter.attack(target)
                 results.extend(attack_results)
 
-            return results
+        return results

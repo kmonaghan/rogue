@@ -130,8 +130,8 @@ def warlord(point = None):
     ai_component = WarlordNPC()
 
     npc = Character(point, 'W', 'Warlord', libtcod.black, blocks=True,
-                    fighter=fighter_component, ai=ai_component)
-
+                    fighter=fighter_component, ai=ai_component, species=Species.ORC)
+    
     item = equipment.longsword()
     item.name = item.name + " of I'll FUCKING Have You"
     item.color = libtcod.purple
@@ -142,14 +142,14 @@ def warlord(point = None):
     shield = equipment.shield()
     shield.name = shield.name + " of Hide and Seek"
     shield.color = libtcod.purple
-    shield.equipment.power_bonus = item.equippable.defense_bonus * 2
+    shield.equippable.power_bonus = item.equippable.defense_bonus * 2
     npc.inventory.add_item(shield)
     npc.equipment.toggle_equip(shield)
 
     breastplate = equipment.breastplate()
     breastplate.name = breastplate.name + " of Rebounding"
     breastplate.color = libtcod.purple
-    breastplate.equipment.power_bonus = item.equippable.defense_bonus * 2
+    breastplate.equippable.power_bonus = item.equippable.defense_bonus * 2
     npc.inventory.add_item(breastplate)
     npc.equipment.toggle_equip(breastplate)
 

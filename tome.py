@@ -128,8 +128,8 @@ def cast_confuse():
     npc.ai.owner = npc  #tell the new component who owns it
     messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
 
-def cast_summon_npc(point, ncp_type, number_of_npc=6):
-    dice = libtcod.random_get_int(0, 1, number_of_creatures)
+def cast_summon_npc(point, ncp_type, game_map, entities, number_of_npc=6):
+    dice = libtcod.random_get_int(0, 1, number_of_npc)
 
     print "Will generate " + str(dice) + " NPCs"
 
@@ -137,9 +137,9 @@ def cast_summon_npc(point, ncp_type, number_of_npc=6):
     start_y = point.y - 1
 
     for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = ncp_type(start_x, start_y + offset)
-            game_state.objects.append(npc)
+        if (game_map.is_blocked(Point(start_x, start_y + offset)) == False):
+            npc = ncp_type(Point(start_x, start_y + offset))
+            entities.append(npc)
             dice -= 1
 
             if dice < 1:
@@ -148,9 +148,9 @@ def cast_summon_npc(point, ncp_type, number_of_npc=6):
     start_x = point.x
 
     for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = ncp_type(start_x, start_y + offset)
-            game_state.objects.append(npc)
+        if (game_map.is_blocked(Point(start_x, start_y + offset)) == False):
+            npc = ncp_type(Point(start_x, start_y + offset))
+            entities.append(npc)
             dice -=1
 
             if dice < 1:
@@ -159,9 +159,9 @@ def cast_summon_npc(point, ncp_type, number_of_npc=6):
     start_x = pc.x + 1
 
     for offset in range(0, 3):
-        if (is_blocked(Point(start_x, start_y + offset)) == False):
-            npc = ncp_type(start_x, start_y + offset)
-            game_state.objects.append(npc)
+        if (game_map.is_blocked(Point(start_x, start_y + offset)) == False):
+            npc = ncp_type(Point(start_x, start_y + offset))
+            entities.append(npc)
             dice -= 1
 
             if dice < 1:
