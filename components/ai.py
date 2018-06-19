@@ -1,6 +1,5 @@
 import libtcodpy as libtcod
 
-import baseclasses
 import bestiary
 import tome
 
@@ -86,8 +85,9 @@ class StrollingNPC:
         results = []
 
         if (self.moved == False):
-            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
-            self.moved = True
+            dx = libtcod.random_get_int(0, -1, 1)
+            dy = libtcod.random_get_int(0, -1, 1)
+            self.moved = self.owner.attempt_move(self.owner.x + dx, self.owner.y + dy, game_map, entities)
         else:
             self.moved = False
 

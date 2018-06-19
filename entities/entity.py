@@ -91,9 +91,15 @@ class Entity:
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
 
-        if not (game_map.is_blocked(Point(self.x + dx, self.y + dy)) or
-                    get_blocking_entities_at_location(entities, self.x + dx, self.y + dy)):
-            self.move(dx, dy)
+        self.attempt_move(target_x, target_y, game_map, entities)
+
+    def attempt_move(self, target_x, target_y, game_map, entities):
+        if not (game_map.is_blocked(Point(target_x, target_y)) or
+                get_blocking_entities_at_location(entities, target_x, target_y)):
+            self.move(target_x - self.x, target_y - self.y)
+            return True
+
+        return False
 
     def distance_to(self, other):
         #return the distance to another object

@@ -31,8 +31,7 @@ def bountyhunter(point = None):
     #create a questgiver
 
     ai_component = StrollingNPC()
-    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, blocks=True)
-                     #blocks=True, fighter=None, ai=ai_component)
+    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, blocks=True, ai=ai_component)
 
     questgiver = Questgiver()
     questgiver.owner = npc
