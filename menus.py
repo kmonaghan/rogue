@@ -35,7 +35,7 @@ def menu(con, header, options, width, screen_width, screen_height):
 def inventory_menu(con, header, player, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
     if len(player.inventory.items) == 0:
-        options = ['Inventory is empty.']
+        options = [['Inventory is empty.', libtcod.white]]
     else:
         options = []
 
@@ -64,7 +64,7 @@ def quest_menu(con, header, quest, inventory_width, screen_width, screen_height)
 def quest_list_menu(con, header, player, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
     if len(game_state.active_quests) == 0:
-        options = ['No active quests.']
+        options = [['No active quests.', libtcod.white]]
     else:
         options = []
 
