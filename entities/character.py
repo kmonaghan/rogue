@@ -30,3 +30,15 @@ class Character(Entity):
         self.render_order = RenderOrder.ACTOR
 
         self.species = species
+
+    def describe(self):
+        desc = self.name.capitalize()
+
+        if (self.species == Species.GOBLIN):
+            desc += "(Goblin)"
+        elif (self.species == Species.ORC):
+            desc += "(Orc)"
+        elif (self.species == Species.TROLL):
+            desc += "(Troll)"
+
+        return desc

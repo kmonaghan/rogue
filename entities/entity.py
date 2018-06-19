@@ -160,6 +160,9 @@ class Entity:
 
         return self.color
 
+    def describe(self):
+        return self.name.capitalize()
+
 def get_blocking_entities_at_location(entities, destination_x, destination_y):
     for entity in entities:
         if entity.blocks and entity.x == destination_x and entity.y == destination_y:
