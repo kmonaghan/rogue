@@ -89,3 +89,14 @@ class Fighter:
         self.hp += amount
         if self.hp > self.max_hp:
             self.hp = self.max_hp
+
+    def display_color(self):
+        healthpercent = (self.hp * 100) / self.max_hp
+        if (healthpercent <=20):
+            return libtcod.red
+        elif (healthpercent <=60):
+            return libtcod.orange
+        elif (healthpercent <=80):
+            return libtcod.yellow
+
+        return libtcod.green
