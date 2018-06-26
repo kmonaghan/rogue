@@ -81,8 +81,6 @@ class GameMap:
         player.x = point.x
         player.y = point.y
 
-        return
-
         point = room.random_tile(self)
         npc = bestiary.bountyhunter(point)
 
@@ -100,12 +98,17 @@ class GameMap:
             q = quest.kill_warlord()
 
         if (q != None):
+            if (self.dungeon_level == 1):
+                q2 = quest.Quest('Kill the leader', 'Cut the head off and no more problem', 100)
+                q2.npc = bestiary.warlord(Point(0,0))
+                q.next_quest = q2
             npc.questgiver.add_quest(q)
             entities.append(npc)
 
         #Add npcs and items
         for room in self.rooms:
-            self.place_entities(room, entities)
+            self.place_npc(room, entities)
+            self.place_object(room, entities)
 
         if (len(self.rooms) > 4):
             num_to_select = 4                           # set the number to select here.
@@ -119,7 +122,7 @@ class GameMap:
             bestiary.upgrade_npc(npc)
             entities.append(npc)
 
-    def place_entities(self, room, entities):
+    def place_npc(self, room, entities):
         #this is where we decide the chance of each npc or item appearing.
 
         #maximum number of npcs per room
@@ -130,16 +133,6 @@ class GameMap:
         npc_chances['goblin'] = random_utils.from_dungeon_level([[95, 1], [30, 2], [15, 3], [10, 4], [5, 5]], self.dungeon_level)
         npc_chances['orc'] = random_utils.from_dungeon_level([[4,1], [65, 2], [65, 3], [50, 4], [45, 5]], self.dungeon_level)
         npc_chances['troll'] = random_utils.from_dungeon_level([[1,1], [5, 2], [20, 3], [40, 4], [60, 5]], self.dungeon_level)
-
-        #maximum number of items per room
-        max_items = random_utils.from_dungeon_level([[2, 1], [3, 4]], self.dungeon_level)
-
-        #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
-        item_chances = {}
-        item_chances['potion'] = 25  #healing potion always shows up, even if all other items have 0 chance
-        item_chances['scroll'] = random_utils.from_dungeon_level([[25, 2]], self.dungeon_level)
-        item_chances['weapon'] = 25
-        item_chances['armour'] = 25
 
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, 0, max_npcs)
@@ -176,6 +169,17 @@ class GameMap:
                 entities.append(npc)
 
         libtcod.namegen_destroy()
+
+    def place_object(self, room, entities):
+        #maximum number of items per room
+        max_items = random_utils.from_dungeon_level([[2, 1], [3, 4]], self.dungeon_level)
+
+        #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
+        item_chances = {}
+        item_chances['potion'] = 25  #healing potion always shows up, even if all other items have 0 chance
+        item_chances['scroll'] = random_utils.from_dungeon_level([[25, 2]], self.dungeon_level)
+        item_chances['weapon'] = 25
+        item_chances['armour'] = 25
 
         #choose random number of items
         num_items = libtcod.random_get_int(0, 0, max_items)

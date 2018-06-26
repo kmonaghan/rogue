@@ -19,16 +19,25 @@ class Questgiver:
             self.quest = quest
 
     def completed_quest(self):
+        results = []
         self.owner.char = "Q"
         self.owner.color = libtcod.blue
         self.owner.always_visible = False
         game_state.active_quests.remove(self.quest)
-        self.quest = None
+        self.quest = self.quest.next_quest
 
-    def start_quest(self):
+        if (self.quest):
+            self.quest.owner = self
+            self.owner.char = "?"
+            self.owner.color = libtcod.gold
+            results.append({'quest_onboarding': self.quest})
+
+        return results
+
+    def start_quest(self, game_map, entities):
         self.owner.char = "!"
         self.owner.color = libtcod.silver
-        self.quest.start_quest()
+        self.quest.start_quest(game_map, entities)
 
     def return_to_giver(self):
         self.owner.color = libtcod.gold
@@ -44,7 +53,9 @@ class Questgiver:
         elif (self.quest.completed):
             results.append({'message': Message('Well done!', libtcod.gold), 'xp': self.quest.xp})
 
-            self.completed_quest()
+            complete_result = self.completed_quest()
+
+            results.extend(complete_result)
         else:
             results.append({'message': Message('Have you done it yet?', libtcod.white)})
 

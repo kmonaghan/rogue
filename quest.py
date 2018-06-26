@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 
 import game_state
+from random import choice
 
 from game_messages import Message
 from species import Species
@@ -67,6 +68,8 @@ class Quest:
         self.kill_total = 0
         self.completed = False
         self.return_to_quest_giver = False
+        self.next_quest = None
+        self.npc = None
 
     def kill_count(self, npc):
         results = []
@@ -88,6 +91,13 @@ class Quest:
 
         return results
 
-    def start_quest(self):
+    def start_quest(self, game_map, entities):
         self.started = True
         game_state.active_quests.append(self)
+
+        if (self.npc):
+            room = choice(game_map.rooms)
+            aPoint = room.center()
+            self.npc.x = aPoint.x
+            self.npc.y = aPoint.y
+            entities.append(self.npc)            

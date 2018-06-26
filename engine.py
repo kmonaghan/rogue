@@ -119,7 +119,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             game_state = GameStates.SHOW_QUESTS
 
         if quest_response:
-            quest_request.owner.start_quest()
+            quest_request.owner.start_quest(game_map, entities)
             message_log.add_message(Message('Started quest: ' + quest_request.title, libtcod.yellow))
             quest_request = None
             game_state = previous_game_state
