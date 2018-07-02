@@ -34,10 +34,14 @@ class GameMap:
         self.height = height
         self.map = None
         self.rooms = None
-
+        self.npcs = []
+        self.entities = []
+        self.down_stairs = None
         self.dungeon_level = dungeon_level
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+        self.entities = [player]
+
         print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
 
         if (self.dungeon_level <= 2):
@@ -63,19 +67,21 @@ class GameMap:
 
         if (self.dungeon_level == 5):
             warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
-            entities.append(warlord)
+            self.add_npc_to_map(warlord)
             self.rooms.remove(prefabbed.room)
         else:
+            print "adding stairs"
             stairs_component = Stairs(self.dungeon_level + 1)
             room = self.rooms[-1]
-            down_stairs = Entity(room.center(), '>', 'Stairs', libtcod.white, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-            entities.append(down_stairs)
+            self.down_stairs = Entity(room.center(), '>', 'Stairs', libtcod.red, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+            self.entities.append(self.down_stairs)
 
-        self.popluate_map(player, entities)
+        self.popluate_map(player)
 
-    def popluate_map(self, player, entities):
+    def popluate_map(self, player):
         #Random room for player start
         room = choice(self.rooms)
+        room = self.rooms[-1]
         self.rooms.remove(room)
         point = room.random_tile(self)
         player.x = point.x
@@ -103,12 +109,12 @@ class GameMap:
                 q2.npc = bestiary.warlord(Point(0,0))
                 q.next_quest = q2
             npc.questgiver.add_quest(q)
-            entities.append(npc)
+            self.add_npc_to_map(npc)
 
         #Add npcs and items
-        for room in self.rooms:
-            self.place_npc(room, entities)
-            self.place_object(room, entities)
+#        for room in self.rooms:
+#            self.place_npc(room)
+#            self.place_object(room)
 
         if (len(self.rooms) > 4):
             num_to_select = 4                           # set the number to select here.
@@ -120,9 +126,13 @@ class GameMap:
             npc.ai = WanderingNPC(list_of_random_items, npc.ai)
             npc.ai.owner = npc
             bestiary.upgrade_npc(npc)
-            entities.append(npc)
+            self.add_npc_to_map(npc)
 
-    def place_npc(self, room, entities):
+        point = self.rooms[2].random_tile(self)
+        necro = bestiary.necromancer(point)
+        self.add_npc_to_map(necro)
+
+    def place_npc(self, room):
         #this is where we decide the chance of each npc or item appearing.
 
         #maximum number of npcs per room
@@ -166,11 +176,11 @@ class GameMap:
                         npc.level.random_level_up(self.dungeon_level + add_levels - 3)
 
                 npc.name = libtcod.namegen_generate(npc.name)
-                entities.append(npc)
+                self.add_npc_to_map(npc)
 
         libtcod.namegen_destroy()
 
-    def place_object(self, room, entities):
+    def place_object(self, room):
         #maximum number of items per room
         max_items = random_utils.from_dungeon_level([[2, 1], [3, 4]], self.dungeon_level)
 
@@ -200,21 +210,20 @@ class GameMap:
                 elif choice == 'armour':
                     item = equipment.random_armour(point)
 
-                entities.append(item)
+                self.entities.append(item)
                 #item.always_visible = True  #items are visible even out-of-FOV, if in an explored area
 
     def next_floor(self, player, message_log, constants):
         self.dungeon_level += 1
-        entities = [player]
 
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, entities)
+                      constants['map_width'], constants['map_height'], player)
 
         player.fighter.heal(player.fighter.max_hp // 2)
 
         message_log.add_message(Message('You take a moment to rest, and recover your strength.', libtcod.light_violet))
 
-        return entities
+        return self.entities
 
     def is_blocked(self, point):
         #first test the map tile
@@ -231,3 +240,11 @@ class GameMap:
                 return True
 
         return False
+
+    def add_npc_to_map(self, npc):
+        self.npcs.append(npc)
+        self.entities.append(npc)
+
+    def remove_npc_from_map(self, npc):
+        self.npcs.remove(npc)
+        self.entities.remove(npc)

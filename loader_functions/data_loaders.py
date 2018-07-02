@@ -3,7 +3,7 @@ import os
 import shelve
 
 
-def save_game(player, entities, game_map, message_log, game_state):
+def save_game(player, game_map, message_log, game_state):
     print "This would save"
 #    with shelve.open('savegame.dat', 'n') as data_file:
 #        data_file['player_index'] = entities.index(player)

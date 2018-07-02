@@ -9,7 +9,7 @@ from map_objects.point import Point
 
 class BasicNPC:
     #AI for a basic npc.
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map):
         results = []
 
         #a basic npc takes its turn. if you can see it, it can see you
@@ -18,7 +18,7 @@ class BasicNPC:
 
             #move towards player if far away
             if npc.distance_to(target) >= 2:
-                npc.move_astar(target, entities, game_map)
+                npc.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
             elif target.fighter.hp > 0:
@@ -35,7 +35,7 @@ class WanderingNPC:
         self.next_target()
 
     #AI for a basic npc.
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map):
         results = []
 
         #a basic npc takes its turn. if you can see it, it can see you
@@ -47,7 +47,7 @@ class WanderingNPC:
             if (npc.x == self.target.x) and (npc.y == self.target.y):
                 self.next_target()
 
-            npc.move_astar(self.target, entities, game_map)
+            npc.move_astar(self.target, game_map)
 
         return results
 
@@ -62,7 +62,7 @@ class ConfusedNPC:
         self.old_ai = old_ai
         self.num_turns = num_turns
 
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map):
         results = []
 
         if self.num_turns > 0:  #still confused...
@@ -81,13 +81,13 @@ class StrollingNPC:
     def __init__(self):
         self.moved = False
 
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map):
         results = []
 
         if (self.moved == False):
             dx = libtcod.random_get_int(0, -1, 1)
             dy = libtcod.random_get_int(0, -1, 1)
-            self.moved = self.owner.attempt_move(self.owner.x + dx, self.owner.y + dy, game_map, entities)
+            self.moved = self.owner.attempt_move(self.owner.x + dx, self.owner.y + dy, game_map)
         else:
             self.moved = False
 
@@ -99,7 +99,7 @@ class WarlordNPC:
         self.summoned_orcs = False
         self.summoned_trolls = False
 
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(self, target, fov_map, game_map):
         results = []
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
@@ -112,7 +112,7 @@ class WarlordNPC:
                     if (self.summoned_trolls == False):
                         self.summoned_trolls = True
                         results.append({'message': Message('Trolls! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.troll, game_map, entities, 2)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.troll, game_map, 2)
 
                         return results
 
@@ -120,7 +120,7 @@ class WarlordNPC:
                     if (self.summoned_orcs == False):
                         self.summoned_orcs = True
                         results.append({'message': Message('Orcs! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.orc, game_map, entities, 4)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.orc, game_map, 4)
 
                         return results
 
@@ -128,17 +128,41 @@ class WarlordNPC:
                     if (self.summoned_goblins == False):
                         self.summoned_goblins = True
                         results.append({'message': Message('Goblins! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.goblin, game_map, entities, 6)
+                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.goblin, game_map, 6)
 
                         return results
 
             #move towards player if far away
             if npc.distance_to(target) >= 2:
-                npc.move_astar(target, entities, game_map)
+                npc.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
             elif target.fighter.hp > 0:
                 attack_results = npc.fighter.attack(target)
                 results.extend(attack_results)
+
+        return results
+
+class NecromancerNPC:
+    def __init__(self):
+        self.ritual_cast = False
+        self.ritual_started = False
+        self.ritual_turns = 50
+
+    def take_turn(self, target, fov_map, game_map):
+        results = []
+
+        npc = self.owner
+        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
+            if not self.ritual_started:
+                self.ritual_started = True
+
+        if self.ritual_started and (self.ritual_turns > 0):
+             self.ritual_turns -= 1
+
+        if not self.ritual_cast and (self.ritual_turns == 0):
+            tome.resurrect_all_npc(bestiary.skeleton, game_map, target)
+            results.append({'message': Message('Rise and serve me again, now and forever!', libtcod.red)})
+            self.ritual_cast = True
 
         return results

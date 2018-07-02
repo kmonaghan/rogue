@@ -34,10 +34,10 @@ class Questgiver:
 
         return results
 
-    def start_quest(self, game_map, entities):
+    def start_quest(self, game_map):
         self.owner.char = "!"
         self.owner.color = libtcod.silver
-        self.quest.start_quest(game_map, entities)
+        self.quest.start_quest(game_map)
 
     def return_to_giver(self):
         self.owner.color = libtcod.gold

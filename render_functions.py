@@ -34,7 +34,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
                              '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
+def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
                bar_width, panel_height, panel_y, mouse, colors, game_state, quest_request = None):
     if fov_recompute:
     # Draw all the tiles in the game map
@@ -56,7 +56,7 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
                     else:
                         libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
 
-    entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
+    entities_in_render_order = sorted(game_map.entities, key=lambda x: x.render_order.value)
 
     # Draw all entities in the list
     for entity in entities_in_render_order:
@@ -85,7 +85,7 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
     libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-                             get_names_under_mouse(mouse, entities, fov_map))
+                             get_names_under_mouse(mouse, game_map.entities, fov_map))
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 

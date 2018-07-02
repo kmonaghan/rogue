@@ -128,7 +128,7 @@ def cast_confuse():
     npc.ai.owner = npc  #tell the new component who owns it
     messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
 
-def cast_summon_npc(point, ncp_type, game_map, entities, number_of_npc=6):
+def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
     dice = libtcod.random_get_int(0, 1, number_of_npc)
 
     print "Will generate " + str(dice) + " NPCs"
@@ -139,7 +139,7 @@ def cast_summon_npc(point, ncp_type, game_map, entities, number_of_npc=6):
     for offset in range(0, 3):
         if (game_map.is_blocked(Point(start_x, start_y + offset)) == False):
             npc = ncp_type(Point(start_x, start_y + offset))
-            entities.append(npc)
+            game_map.add_npc_to_map(npc)
             dice -= 1
 
             if dice < 1:
@@ -150,7 +150,7 @@ def cast_summon_npc(point, ncp_type, game_map, entities, number_of_npc=6):
     for offset in range(0, 3):
         if (game_map.is_blocked(Point(start_x, start_y + offset)) == False):
             npc = ncp_type(Point(start_x, start_y + offset))
-            entities.append(npc)
+            game_map.add_npc_to_map(npc)
             dice -=1
 
             if dice < 1:
@@ -161,8 +161,16 @@ def cast_summon_npc(point, ncp_type, game_map, entities, number_of_npc=6):
     for offset in range(0, 3):
         if (game_map.is_blocked(Point(start_x, start_y + offset)) == False):
             npc = ncp_type(Point(start_x, start_y + offset))
-            entities.append(npc)
+            game_map.add_npc_to_map(npc)
             dice -= 1
 
             if dice < 1:
                 return
+
+def resurrect_all_npc(npc_type, game_map, target):
+    for entity in game_map.npcs:
+        if entity.char == '%':
+            npc = npc_type(old_npc = entity)
+            game_map.remove_npc_from_map(entity)
+            game_map.add_npc_to_map(npc)
+    return

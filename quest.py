@@ -91,7 +91,7 @@ class Quest:
 
         return results
 
-    def start_quest(self, game_map, entities):
+    def start_quest(self, game_map):
         self.started = True
         game_state.active_quests.append(self)
 
@@ -100,4 +100,4 @@ class Quest:
             aPoint = room.center()
             self.npc.x = aPoint.x
             self.npc.y = aPoint.y
-            entities.append(self.npc)            
+            game_map.add_npc_to_map(self.npc)

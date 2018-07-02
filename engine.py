@@ -13,7 +13,7 @@ from render_functions import clear_all, render_all
 from map_objects.point import Point
 from quest import check_quests_for_npc_death
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel, constants):
+def play_game(player, game_map, message_log, game_state, con, panel, constants):
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -34,7 +34,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
                           constants['fov_algorithm'])
 
-        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log,
+        render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log,
                    constants['screen_width'], constants['screen_height'], constants['bar_width'],
                    constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, quest_request)
 
@@ -42,7 +42,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
         libtcod.console_flush()
 
-        clear_all(con, entities)
+        clear_all(con, game_map.entities)
 
         action = handle_keys(key, game_state)
         mouse_action = handle_mouse(mouse)
@@ -73,7 +73,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             destination_y = player.y + dy
 
             if not game_map.is_blocked(Point(destination_x, destination_y)):
-                target = get_blocking_entities_at_location(entities, destination_x, destination_y)
+                target = get_blocking_entities_at_location(game_map.entities, destination_x, destination_y)
 
                 if target:
                     if target.questgiver:
@@ -93,7 +93,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             game_state = GameStates.ENEMY_TURN
 
         elif pickup and game_state == GameStates.PLAYERS_TURN:
-            for entity in entities:
+            for entity in game_map.entities:
                 if entity.item and entity.x == player.x and entity.y == player.y:
                     pickup_results = player.inventory.add_item(entity)
                     player_turn_results.extend(pickup_results)
@@ -119,7 +119,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             game_state = GameStates.SHOW_QUESTS
 
         if quest_response:
-            quest_request.owner.start_quest(game_map, entities)
+            quest_request.owner.start_quest(game_map)
             message_log.add_message(Message('Started quest: ' + quest_request.title, libtcod.yellow))
             quest_request = None
             game_state = previous_game_state
@@ -129,21 +129,22 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             item = player.inventory.items[inventory_index]
 
             if game_state == GameStates.SHOW_INVENTORY:
-                player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
+                player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map))
             elif game_state == GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
             elif game_state == GameStates.EXAMINE_INVENTORY:
                 player_turn_results.extend(player.inventory.examine_item(item))
 
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
-            for entity in entities:
-                if entity.stairs and entity.x == player.x and entity.y == player.y:
-                    entities = game_map.next_floor(player, message_log, constants)
-                    fov_map = initialize_fov(game_map)
-                    fov_recompute = True
-                    libtcod.console_clear(con)
+#            for entity in game_map.entities:
+#                if entity.stairs and entity.x == player.x and entity.y == player.y:
+            if game_map.down_stairs.x == player.x and game_map.down_stairs.y == player.y:
+                game_map.next_floor(player, message_log, constants)
+                fov_map = initialize_fov(game_map)
+                fov_recompute = True
+                libtcod.console_clear(con)
 
-                    break
+                break
             else:
                 message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
 
@@ -166,7 +167,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             if left_click:
                 target_x, target_y = left_click
 
-                item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map,
+                item_use_results = player.inventory.use(targeting_item, entities=game_map.entities, fov_map=fov_map,
                                                         target_x=target_x, target_y=target_y)
                 player_turn_results.extend(item_use_results)
             elif right_click:
@@ -180,7 +181,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
             elif game_state == GameStates.QUEST_ONBOARDING:
                 player_turn_results.append({'quest_cancelled': True})
             else:
-                save_game(player, entities, game_map, message_log, game_state)
+                save_game(player, game_map, message_log, game_state)
 
                 return True
 
@@ -212,12 +213,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 if dead_entity == player:
                     message, game_state = player_death(dead_entity)
                 else:
-                    message = npc_death(dead_entity, entities)
+                    message = npc_death(dead_entity, game_map.entities)
 
                 message_log.add_message(message)
 
             if item_added:
-                entities.remove(item_added)
+                game_map.entities.remove(item_added)
 
                 game_state = GameStates.ENEMY_TURN
 
@@ -225,7 +226,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 game_state = GameStates.ENEMY_TURN
 
             if item_dropped:
-                entities.append(item_dropped)
+                game_map.entities.append(item_dropped)
 
                 game_state = GameStates.ENEMY_TURN
 
@@ -277,9 +278,9 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 game_state = previous_game_state
 
         if game_state == GameStates.ENEMY_TURN:
-            for entity in entities:
+            for entity in game_map.entities:
                 if entity.ai:
-                    enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
+                    enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
 
                     for enemy_turn_result in enemy_turn_results:
                         message = enemy_turn_result.get('message')
@@ -316,7 +317,6 @@ def main():
     panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
 
     player = None
-    entities = []
     game_map = None
     message_log = None
     game_state = None
@@ -365,7 +365,7 @@ def main():
 
         else:
             libtcod.console_clear(con)
-            play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
+            play_game(player, game_map, message_log, game_state, con, panel, constants)
 
             show_main_menu = True
 
