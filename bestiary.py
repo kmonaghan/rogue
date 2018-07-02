@@ -8,6 +8,7 @@ import quest
 from components.ai import BasicNPC
 from components.ai import StrollingNPC
 from components.ai import WarlordNPC
+from components.ai import NecromancerNPC
 
 from components.fighter import Fighter
 from components.questgiver import Questgiver
@@ -131,7 +132,7 @@ def warlord(point = None):
 
     npc = Character(point, 'W', 'Warlord', libtcod.black, blocks=True,
                     fighter=fighter_component, ai=ai_component, species=Species.ORC)
-    
+
     item = equipment.longsword()
     item.name = item.name + " of I'll FUCKING Have You"
     item.color = libtcod.purple
@@ -152,5 +153,47 @@ def warlord(point = None):
     breastplate.equippable.power_bonus = item.equippable.defense_bonus * 2
     npc.inventory.add_item(breastplate)
     npc.equipment.toggle_equip(breastplate)
+
+    return npc
+
+def skeleton(point = None, old_npc = None):
+    fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
+    ai_component = BasicNPC()
+
+    npc = Character(point, 'S', 'skeleton', libtcod.darker_green, blocks=True,
+                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT)
+
+    if old_npc:
+        npc.species = old_npc.species
+        npc.x = old_npc.x
+        npc.y = old_npc.y
+        npc.name = 'Skeletal ' + old_npc.name
+
+    item = equipment.longsword()
+    item.lootable = False
+
+    npc.inventory.add_item(item)
+    npc.equipment.toggle_equip(item)
+
+    return npc
+
+def necromancer(point = None):
+    #create a troll
+    fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
+    ai_component = NecromancerNPC()
+
+    npc = Character(point, 'N', 'necromancer', libtcod.darker_green, blocks=True,
+                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT)
+
+    item = equipment.longsword()
+    item.lootable = False
+
+    npc.inventory.add_item(item)
+    npc.equipment.toggle_equip(item)
+
+#    dice = libtcod.random_get_int(0, 1, 100)
+
+#    if (dice >= 98):
+#        upgrade_npc(npc)
 
     return npc
