@@ -43,6 +43,7 @@ class GameMap:
         self.entities = [player]
 
         print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
+        print "Dungeon level = " + str(self.dungeon_level)
 
         if (self.dungeon_level <= 2):
             generator = AltBSPTree()
@@ -216,6 +217,12 @@ class GameMap:
     def next_floor(self, player, message_log, constants):
         self.dungeon_level += 1
 
+        self.map = None
+        self.rooms = None
+        self.npcs = []
+        self.entities = []
+        self.down_stairs = None
+        
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
                       constants['map_width'], constants['map_height'], player)
 

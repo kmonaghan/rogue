@@ -136,15 +136,15 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 player_turn_results.extend(player.inventory.examine_item(item))
 
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
-#            for entity in game_map.entities:
-#                if entity.stairs and entity.x == player.x and entity.y == player.y:
-            if game_map.down_stairs.x == player.x and game_map.down_stairs.y == player.y:
-                game_map.next_floor(player, message_log, constants)
-                fov_map = initialize_fov(game_map)
-                fov_recompute = True
-                libtcod.console_clear(con)
+            #for entity in game_map.entities:
+            #    if entity.stairs and entity.x == player.x and entity.y == player.y:
+            if (game_map.down_stairs.x == player.x) and (game_map.down_stairs.y == player.y):
+                    game_map.next_floor(player, message_log, constants)
+                    fov_map = initialize_fov(game_map)
+                    fov_recompute = True
+                    libtcod.console_clear(con)
 
-                break
+                #    break
             else:
                 message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
 
