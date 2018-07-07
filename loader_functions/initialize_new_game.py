@@ -2,10 +2,6 @@ import libtcodpy as libtcod
 
 from bestiary import create_player
 
-from entity import Entity
-
-from equipment_slots import EquipmentSlots
-
 from game_messages import MessageLog
 
 from game_states import GameStates
@@ -78,24 +74,16 @@ def get_constants():
 
 def get_game_variables(constants):
     player = create_player()
-    entities = [player]
 
-#    if (game_state.dungeon_level <= 2):
-#        map_height = (constants['map_height'] / 3) * 2
-#        map_width = (constants['map_width'] / 3) * 2
-#    else:
-#        map_height = constants['map_height']
-#        map_width = constants['map_width']
+    message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 
     map_height = constants['map_height']
     map_width = constants['map_width']
 
-    game_map = GameMap(map_width, map_height)
-    game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      map_width, map_height, player)
+    game_map = GameMap()
 
-    message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
+    game_map.next_floor(player, message_log, constants)
 
     game_state = GameStates.PLAYERS_TURN
 
-    return player, entities, game_map, message_log, game_state
+    return player, game_map, message_log, game_state

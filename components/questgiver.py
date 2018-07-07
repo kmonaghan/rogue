@@ -1,7 +1,5 @@
 import libtcodpy as libtcod
 
-import game_state
-
 from game_messages import Message
 
 class Questgiver:
@@ -23,7 +21,6 @@ class Questgiver:
         self.owner.char = "Q"
         self.owner.color = libtcod.blue
         self.owner.always_visible = False
-        game_state.active_quests.remove(self.quest)
         self.quest = self.quest.next_quest
 
         if (self.quest):

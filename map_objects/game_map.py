@@ -29,9 +29,9 @@ from render_order import RenderOrder
 from game_messages import Message
 
 class GameMap:
-    def __init__(self, width, height, dungeon_level=1):
-        self.width = width
-        self.height = height
+    def __init__(self, dungeon_level=0):
+        self.width = 40
+        self.height = 40
         self.map = None
         self.rooms = None
         self.npcs = []
@@ -39,8 +39,11 @@ class GameMap:
         self.down_stairs = None
         self.dungeon_level = dungeon_level
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player):
+    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
         self.entities = [player]
+
+        self.width = map_width
+        self.height = map_height
 
         print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
         print "Dungeon level = " + str(self.dungeon_level)
@@ -59,7 +62,7 @@ class GameMap:
             prefabbed = map_objects.prefab.Prefab(map_objects.prefab.boss_room())
             generator.add_prefab(prefabbed)
 
-        self.map = generator.generateLevel(map_width, map_height, max_rooms, room_min_size, room_max_size)
+        self.map = generator.generateLevel(map_width, map_height, max_rooms, room_min_size, room_max_size, offset)
 
         print "Map size: " + str(len(self.map)) + " x " + str(len(self.map[0]))
         self.rooms = generator.rooms
@@ -113,9 +116,9 @@ class GameMap:
             self.add_npc_to_map(npc)
 
         #Add npcs and items
-#        for room in self.rooms:
-#            self.place_npc(room)
-#            self.place_object(room)
+        for room in self.rooms:
+            self.place_npc(room)
+            self.place_object(room)
 
         if (len(self.rooms) > 4):
             num_to_select = 4                           # set the number to select here.
@@ -222,13 +225,18 @@ class GameMap:
         self.npcs = []
         self.entities = []
         self.down_stairs = None
-        
+
+        offset = 0
+        if (self.dungeon_level <= 2):
+            offset = 10
+
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player)
+                      constants['map_width'], constants['map_height'], player, offset)
 
-        player.fighter.heal(player.fighter.max_hp // 2)
+        if (self.dungeon_level > 1):
+            player.fighter.heal(player.fighter.max_hp // 2)
 
-        message_log.add_message(Message('You take a moment to rest, and recover your strength.', libtcod.light_violet))
+            message_log.add_message(Message('You take a moment to rest and recover your strength.', libtcod.light_violet))
 
         return self.entities
 
@@ -255,3 +263,10 @@ class GameMap:
     def remove_npc_from_map(self, npc):
         self.npcs.remove(npc)
         self.entities.remove(npc)
+
+    def get_blocking_entities_at_location(self, destination_x, destination_y):
+        for entity in self.entities:
+            if entity.blocks and entity.x == destination_x and entity.y == destination_y:
+                return entity
+
+        return None

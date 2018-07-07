@@ -5,7 +5,8 @@ import random
 from map_objects.leaf import Leaf
 from map_objects.point import Point
 from map_objects.room import Room
-from map_objects.tile import Tile
+from map_objects.wall import Wall
+from map_objects.floor import Floor
 
 class AltBSPTree:
 	def __init__(self):
@@ -17,16 +18,18 @@ class AltBSPTree:
 		self.mapHeight = 0
 		self.level = []
 		self.rooms = []
+		self.offset = 0
 
-	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size):
-		self.level = [[Tile(True) for y in range(mapHeight)] for x in range(mapWidth)]
+	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset=0):
+		self.level = [[Wall() for y in range(mapHeight)] for x in range(mapWidth)]
 
 		self.MIN_SIZE = room_min_size
 		self.mapWidth = mapWidth
 		self.mapHeight = mapHeight
+		self.offset = offset
 
         #New root node
-		self.bsp = libtcod.bsp_new_with_size(0, 0, self.mapWidth, self.mapHeight)
+		self.bsp = libtcod.bsp_new_with_size(self.offset / 2, self.offset / 2, self.mapWidth - self.offset, self.mapHeight - self.offset)
 
         #Split into nodes
 		libtcod.bsp_split_recursive(self.bsp, 0, self.DEPTH, self.MIN_SIZE + 1, self.MIN_SIZE + 1, 1.5, 1.5)
@@ -66,8 +69,7 @@ class AltBSPTree:
 			#Dig room
 			for x in range(minx, maxx + 1):
 				for y in range(miny, maxy + 1):
-					self.level[x][y].blocked = False
-					self.level[x][y].block_sight = False
+					self.level[x][y] = Floor()
 
 			self.rooms.append(room)
 
@@ -128,19 +130,16 @@ class AltBSPTree:
 			y1,y2 = y2,y1
 
 		for y in range(y1,y2+1):
-			self.level[x][y].blocked = False
-			self.level[x][y].block_sight = False
+			self.level[x][y] = Floor()
 
 	def vline_up(self, x, y):
 		while y >= 0 and self.level[x][y].blocked == True:
-			self.level[x][y].blocked = False
-			self.level[x][y].block_sight = False
+			self.level[x][y] = Floor()
 			y -= 1
 
 	def vline_down(self, x, y):
 		while y < self.mapHeight and self.level[x][y].blocked == True:
-			self.level[x][y].blocked = False
-			self.level[x][y].block_sight = False
+			self.level[x][y] = Floor()
 			y += 1
 
 	def hline(self, x1, y, x2):
@@ -148,17 +147,14 @@ class AltBSPTree:
 			x1,x2 = x2,x1
 
 		for x in range(x1,x2+1):
-			self.level[x][y].blocked = False
-			self.level[x][y].block_sight = False
+			self.level[x][y] = Floor()
 
 	def hline_left(self, x, y):
 		while x >= 0 and self.level[x][y].blocked == True:
-			self.level[x][y].blocked = False
-			self.level[x][y].block_sight = False
+			self.level[x][y] = Floor()
 			x -= 1
 
 	def hline_right(self, x, y):
 		while x < self.mapWidth and self.level[x][y].blocked == True:
-			self.level[x][y].blocked = False
-			self.level[x][y].block_sight = False
+			self.level[x][y] = Floor()
 			x += 1

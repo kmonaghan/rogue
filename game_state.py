@@ -6,4 +6,4 @@ dungeon_level = 1
 
 game_status = 'playing'
 
-debug = True
+debug = False

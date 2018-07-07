@@ -6,7 +6,8 @@ import game_state
 from map_objects.point import Point
 from map_objects.rect import Rect
 from map_objects.room import Room
-from map_objects.tile import Tile
+from map_objects.wall import Wall
+from map_objects.floor import Floor
 
 class MazeWithRooms:
 	'''
@@ -30,12 +31,12 @@ class MazeWithRooms:
 	def add_prefab(self, prefab):
 		self.prefabs.append(prefab)
 
-	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size):
+	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset=0):
 		self.ROOM_MAX_SIZE = room_max_size
 		self.ROOM_MIN_SIZE = room_min_size
 
 		# The level dimensions must be odd
-		self.level = [[Tile(True)
+		self.level = [[Wall()
 			for y in range(mapHeight)]
 				for x in range(mapWidth)]
 
@@ -315,7 +316,7 @@ class MazeWithRooms:
 						if exits > 1: continue
 
 						done = False
-						self.level[x][y].setWall()
+						self.level[x][y] = Wall()
 
 	def canCarve(self,pos,dir,mapWidth,mapHeight):
 		'''

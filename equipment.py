@@ -1,6 +1,5 @@
 import libtcodpy as libtcod
 
-import baseclasses
 import game_state
 import messageconsole
 import random_utils

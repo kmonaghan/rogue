@@ -1,7 +1,6 @@
 import libtcodpy as libtcod
 
 from death_functions import player_death, npc_death
-from entity import get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
 from game_states import GameStates
@@ -73,7 +72,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             destination_y = player.y + dy
 
             if not game_map.is_blocked(Point(destination_x, destination_y)):
-                target = get_blocking_entities_at_location(game_map.entities, destination_x, destination_y)
+                target = game_map.get_blocking_entities_at_location(destination_x, destination_y)
 
                 if target:
                     if target.questgiver:
@@ -350,7 +349,7 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state = get_game_variables(constants)
+                player, game_map, message_log, game_state = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
 
                 show_main_menu = False

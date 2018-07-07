@@ -2,7 +2,6 @@ import libtcodpy as libtcod
 import messageconsole
 import bestiary
 import baseclasses
-import screenrendering
 
 import components.ai
 
@@ -38,13 +37,13 @@ def closest_npc(max_range):
 
 def target_tile(max_range=None):
     #return the position of a tile left-clicked in player's FOV (optionally in a range), or (None,None) if right-clicked.
-    while True:
+#    while True:
         #render the screen. this erases the inventory and shows the names of objects under the mouse.
-        libtcod.console_flush()
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, screenrendering.key, screenrendering.mouse)
-        screenrendering.render_all()
+#        libtcod.console_flush()
+#        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, screenrendering.key, screenrendering.mouse)
+#        screenrendering.render_all()
 
-        (x, y) = (screenrendering.mouse.cx, screenrendering.mouse.cy)
+#        (x, y) = (screenrendering.mouse.cx, screenrendering.mouse.cy)
 
         #x_offset = (gamemap.MAX_MAP_WIDTH - gamemap.MAP_WIDTH)/ 2
         #y_offset = (gamemap.MAX_MAP_HEIGHT - gamemap.MAP_HEIGHT) / 2
@@ -52,14 +51,16 @@ def target_tile(max_range=None):
         #x -= x_offset
         #y -= y_offset
 
-        if screenrendering.mouse.rbutton_pressed or screenrendering.key.vk == libtcod.KEY_ESCAPE:
-            return (None, None)  #cancel if the player right-clicked or pressed Escape
+#        if screenrendering.mouse.rbutton_pressed or screenrendering.key.vk == libtcod.KEY_ESCAPE:
+#            return (None, None)  #cancel if the player right-clicked or pressed Escape
 
         #accept the target if the player clicked in FOV, and in case a range is specified, if it's in that range
-        if (screenrendering.mouse.lbutton_pressed and libtcod.map_is_in_fov(baseclasses.fov_map, x, y) and
-                (max_range is None or game_state.player.distance(x, y) <= max_range)):
-            return (x, y)
+#        if (screenrendering.mouse.lbutton_pressed and libtcod.map_is_in_fov(baseclasses.fov_map, x, y) and
+#                (max_range is None or game_state.player.distance(x, y) <= max_range)):
+#            return (x, y)
 
+    print "traget_Tile"
+    
 def target_npc(max_range=None):
     #returns a clicked npc inside FOV up to a range, or None if right-clicked
     while True:

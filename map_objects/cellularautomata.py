@@ -1,7 +1,8 @@
 import random
 from math import sqrt
 
-from map_objects.tile import Tile
+from map_objects.wall import Wall
+from map_objects.floor import Floor
 
 class CellularAutomata:
 	'''
@@ -24,11 +25,11 @@ class CellularAutomata:
 		self.smoothEdges = False
 		self.smoothing =  1
 
-	def generateLevel(self, mapWidth, mapHeight):
+	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size):
 		# Creates an empty 2D array or clears existing array
 		self.caves = []
 
-		self.level = [[Tile(True)
+		self.level = [[Wall()
 			for y in range(mapHeight)]
 				for x in range(mapWidth)]
 
@@ -49,7 +50,7 @@ class CellularAutomata:
 			for x in range (1,mapWidth-1):
 				#print("(",x,y,") = ",self.level[x][y])
 				if random.random() >= self.wallProbability:
-					self.level[x][y].setWall()
+					self.level[x][y] = Wall()
 
 	def createCaves(self,mapWidth,mapHeight):
 		# ==== Create distinct caves ====
@@ -79,7 +80,7 @@ class CellularAutomata:
 					for y in range (1,mapHeight-1):
 						updated_level[x][y] = self.level[x][y]
 						if (self.level[x][y].blocked) and (self.getAdjacentWallsSimple(x,y) <= self.smoothing):
-							updated_level[x][y].setFloor()
+							updated_level[x][y] = Floor()
 
 			self.level = updated_level
 

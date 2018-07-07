@@ -2,9 +2,6 @@ __metaclass__ = type
 
 import libtcodpy as libtcod
 
-import game_state
-import screenrendering
-
 from entities.entity import Entity
 
 from components.equipment import Equipment

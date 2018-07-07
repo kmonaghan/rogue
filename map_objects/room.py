@@ -2,7 +2,6 @@ __metaclass__ = type
 
 import libtcodpy as libtcod
 
-import baseclasses
 import game_state
 
 from entities.entity import Entity

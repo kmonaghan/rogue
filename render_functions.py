@@ -13,10 +13,10 @@ def get_names_under_mouse(mouse, entities, fov_map):
     (x, y) = (mouse.cx, mouse.cy)
 
     names = [entity.describe() for entity in entities
-             if entity.x == x and entity.y == y and libtcod.map_is_in_fov(fov_map, entity.x, entity.y)]
+             if entity.x == x and entity.y == y and (libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or debug)]
     names = ', '.join(names)
 
-    return names
+    return str(x) + ',' + str(y) + ' ' + names
 
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
@@ -41,20 +41,13 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
         for y in range(game_map.height):
             for x in range(game_map.width):
                 visible = libtcod.map_is_in_fov(fov_map, x, y) or debug
-                wall = game_map.map[x][y].block_sight
 
                 if visible:
-                    if wall:
-                        libtcod.console_set_char_background(con, x, y, colors.get('light_wall'), libtcod.BKGND_SET)
-                    else:
-                        libtcod.console_set_char_background(con, x, y, colors.get('light_ground'), libtcod.BKGND_SET)
+                    libtcod.console_set_char_background(con, x, y, game_map.map[x][y].fov_color, libtcod.BKGND_SET)
 
                     game_map.map[x][y].explored = True
                 elif game_map.map[x][y].explored:
-                    if wall:
-                        libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
-                    else:
-                        libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
+                    libtcod.console_set_char_background(con, x, y, game_map.map[x][y].out_of_fov_color, libtcod.BKGND_SET)
 
     entities_in_render_order = sorted(game_map.entities, key=lambda x: x.render_order.value)
 

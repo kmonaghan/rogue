@@ -1,7 +1,6 @@
 import libtcodpy as libtcod
 import equipment
 import game_state
-import screenrendering
 import quest
 
 from equipment_slots import EquipmentSlots

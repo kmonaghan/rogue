@@ -95,7 +95,7 @@ class Entity:
 
     def attempt_move(self, target_x, target_y, game_map):
         if not (game_map.is_blocked(Point(target_x, target_y)) or
-                get_blocking_entities_at_location(game_map.entities, target_x, target_y)):
+                game_map.get_blocking_entities_at_location(target_x, target_y)):
             self.move(target_x - self.x, target_y - self.y)
             return True
 
@@ -162,10 +162,3 @@ class Entity:
 
     def describe(self):
         return self.name.capitalize()
-
-def get_blocking_entities_at_location(entities, destination_x, destination_y):
-    for entity in entities:
-        if entity.blocks and entity.x == destination_x and entity.y == destination_y:
-            return entity
-
-    return None
