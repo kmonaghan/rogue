@@ -5,3 +5,4 @@ class Species(Enum):
     GOBLIN = 1
     ORC = 2
     TROLL = 3
+    ANIMAL = 4

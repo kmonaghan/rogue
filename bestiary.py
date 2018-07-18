@@ -32,7 +32,7 @@ def bountyhunter(point = None):
     #create a questgiver
 
     ai_component = StrollingNPC()
-    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, blocks=True, ai=ai_component)
+    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold,  ai=ai_component)
 
     questgiver = Questgiver()
     questgiver.owner = npc
@@ -45,7 +45,7 @@ def goblin(point = None):
     fighter_component = Fighter(hp=10, defense=7, power=3, xp=10)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'G', 'goblin', libtcod.desaturated_green, blocks=True,
+    npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
                     fighter=fighter_component, ai=ai_component, species=Species.GOBLIN)
 
     dagger = equipment.dagger()
@@ -70,7 +70,7 @@ def create_player():
         fighter_component.base_defense = 200
         fighter_component.base_power = 200
 
-    player = Character(None, '@', 'player', libtcod.dark_green, blocks=True,
+    player = Character(None, '@', 'player', libtcod.dark_green,
                        fighter=fighter_component)
 
     #initial equipment: a dagger
@@ -88,7 +88,7 @@ def orc(point = None):
     fighter_component = Fighter(hp=20, defense=10, power=4, xp=35)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'O', 'orc', libtcod.light_green, blocks=True,
+    npc = Character(point, 'O', 'orc', libtcod.light_green,
                     fighter=fighter_component, ai=ai_component, species=Species.ORC)
 
     item = equipment.shortsword()
@@ -109,7 +109,7 @@ def troll(point = None):
     fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'T', 'troll', libtcod.darker_green, blocks=True,
+    npc = Character(point, 'T', 'troll', libtcod.darker_green,
                     fighter=fighter_component, ai=ai_component, species=Species.TROLL)
 
     item = equipment.longsword()
@@ -130,7 +130,7 @@ def warlord(point = None):
     fighter_component = Fighter(hp=50, defense=10, power=4, xp=100)
     ai_component = WarlordNPC()
 
-    npc = Character(point, 'W', 'Warlord', libtcod.black, blocks=True,
+    npc = Character(point, 'W', 'Warlord', libtcod.black,
                     fighter=fighter_component, ai=ai_component, species=Species.ORC)
 
     item = equipment.longsword()
@@ -160,7 +160,7 @@ def skeleton(point = None, old_npc = None):
     fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'S', 'skeleton', libtcod.darker_green, blocks=True,
+    npc = Character(point, 'S', 'skeleton', libtcod.darker_green,
                     fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT)
 
     if old_npc:
@@ -178,11 +178,11 @@ def skeleton(point = None, old_npc = None):
     return npc
 
 def necromancer(point = None):
-    #create a troll
+    #create a necromancer
     fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
     ai_component = NecromancerNPC()
 
-    npc = Character(point, 'N', 'necromancer', libtcod.darker_green, blocks=True,
+    npc = Character(point, 'N', 'necromancer', libtcod.darker_green,
                     fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT)
 
     item = equipment.longsword()
@@ -197,3 +197,21 @@ def necromancer(point = None):
 #        upgrade_npc(npc)
 
     return npc
+
+def rat(point = None):
+    fighter_component = Fighter(hp=2, defense=1, power=1, xp=1)
+    ai_component = BasicNPC()
+
+    npc = Character(point, 'R', 'rat', libtcod.darker_gray,
+                        fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
+
+    return NPC
+
+def snake(point = None):
+    fighter_component = Fighter(hp=2, defense=1, power=1, xp=1)
+    ai_component = BasicNPC()
+
+    npc = Character(point, 'S', 'snake', libtcod.darker_gray,
+                        fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
+
+    return NPC
