@@ -61,10 +61,10 @@ class CellularAutomata:
 
 			# if the cell's neighboring walls > self.neighbors, set it to 1
 			if self.getAdjacentWalls(tileX,tileY) > self.neighbors:
-				self.level[tileX][tileY].setWall()
+				self.level[tileX][tileY] = Wall()
 			# or set it to 0
 			elif self.getAdjacentWalls(tileX,tileY) < self.neighbors:
-				self.level[tileX][tileY].setFloor()
+				self.level[tileX][tileY] = Floor()
 
 		# ==== Clean Up Map ====
 		self.cleanUpMap(mapWidth,mapHeight)
@@ -136,7 +136,7 @@ class CellularAutomata:
 				drunkardX += dx
 				drunkardY += dy
 				if self.level[drunkardX][drunkardY].blocked:
-					self.level[drunkardX][drunkardY].setFloor()
+					self.level[drunkardX][drunkardY] = Floor()
 
 	def getAdjacentWallsSimple(self, x, y): # finds the walls in four directions
 		wallCounter = 0
@@ -171,7 +171,7 @@ class CellularAutomata:
 
 		for set in self.caves:
 			for tile in set:
-				self.level[tile[0]][tile[1]].setFloor()
+				self.level[tile[0]][tile[1]] = Floor()
 
 	def floodFill(self,x,y):
 		'''
@@ -188,7 +188,7 @@ class CellularAutomata:
 			if tile not in cave:
 				cave.add(tile)
 
-				self.level[tile[0]][tile[1]].setWall()
+				self.level[tile[0]][tile[1]] = Wall()
 
 				#check adjacent cells
 				x = tile[0]

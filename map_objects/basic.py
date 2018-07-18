@@ -2,7 +2,8 @@ import random
 import game_state
 
 from map_objects.room import Room
-from map_objects.tile import Tile
+from map_objects.floor import Floor
+from map_objects.Wall import Wall
 
 class Basic:
 	def __init__(self):
@@ -25,7 +26,7 @@ class Basic:
 			self.rooms.append(prefab.room)
 
 	def carve(self,x,y):
-		self.level[x][y].setFloor()
+		self.level[x][y] = Floor()
 
 	def createRoom(self, room):
 		print room.describe()

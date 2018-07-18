@@ -46,6 +46,6 @@ class Prefab:
         for xoffset in range(0, self.room.w):
             for yoffset in range(0, self.room.h):
                 if (self.layout[xoffset][yoffset] == "#"):
-                    map[self.room.x1 + xoffset][self.room.y1 + yoffset].setWall()
+                    map[self.room.x1 + xoffset][self.room.y1 + yoffset] = Wall()
                 else:
-                    map[self.room.x1 + xoffset][self.room.y1 + yoffset].setFloor()
+                    map[self.room.x1 + xoffset][self.room.y1 + yoffset] = Floor()

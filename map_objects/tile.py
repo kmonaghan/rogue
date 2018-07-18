@@ -1,5 +1,7 @@
 __metaclass__ = type
 
+import libtcodpy as libtcod
+
 class Tile:
     """
     A tile on a map. It may or may not be blocked, and may or may not block sight.
@@ -16,14 +18,6 @@ class Tile:
         self.explored = False
         self.fov_color = libtcod.dark_sepia
         self.out_of_fov_color = libtcod.darkest_sepia
-
-    def setWall(self):
-        self.blocked = True
-        self.block_sight = True
-
-    def setFloor(self):
-        self.blocked = False
-        self.block_sight = False
 
     def isFloor(self):
         return not (self.blocked and self.block_sight)

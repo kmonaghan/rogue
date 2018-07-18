@@ -292,7 +292,7 @@ class MazeWithRooms:
 				self.carve(x,y)
 
 	def addJunction(self,pos):
-		self.level[pos[0]][pos[1]].setFloor()
+		self.level[pos[0]][pos[1]] = Floor()
 
 	def removeDeadEnds(self,mapWidth,mapHeight):
 		done = False
@@ -346,5 +346,5 @@ class MazeWithRooms:
 		self._currentRegion += 1
 
 	def carve(self,x,y):
-		self.level[x][y].setFloor()
+		self.level[x][y] = Floor()
 		self._regions[x][y] = self._currentRegion
