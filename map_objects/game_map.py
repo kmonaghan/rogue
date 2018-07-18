@@ -132,9 +132,9 @@ class GameMap:
             bestiary.upgrade_npc(npc)
             self.add_npc_to_map(npc)
 
-        point = self.rooms[2].random_tile(self)
-        necro = bestiary.necromancer(point)
-        self.add_npc_to_map(necro)
+#        point = self.rooms[2].random_tile(self)
+#        necro = bestiary.necromancer(point)
+#        self.add_npc_to_map(necro)
 
     def place_npc(self, room):
         #this is where we decide the chance of each npc or item appearing.
@@ -270,3 +270,9 @@ class GameMap:
                 return entity
 
         return None
+
+    def check_for_stairs(self, x, y):
+        if (self.down_stairs):
+            if (self.down_stairs.x == x) and (self.down_stairs.y == y):
+                return True
+        return False
