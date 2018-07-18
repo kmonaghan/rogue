@@ -3,7 +3,7 @@ import game_state
 
 from map_objects.room import Room
 from map_objects.floor import Floor
-from map_objects.Wall import Wall
+from map_objects.wall import Wall
 
 class Basic:
 	def __init__(self):
