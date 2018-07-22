@@ -36,7 +36,7 @@ class Basic:
 				self.carve(x,y)
 
 	def generateLevel(self,mapWidth,mapHeight):
-		self.level = [[Tile(True)
+		self.level = [[Wall()
 			for y in range(mapHeight)]
 				for x in range(mapWidth)]
 
