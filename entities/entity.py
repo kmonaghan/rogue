@@ -162,3 +162,8 @@ class Entity:
 
     def describe(self):
         return self.name.capitalize()
+
+    def setAI(self, ai):
+        self.ai = ai
+        if self.ai:  #let the AI component know who owns it
+            self.ai.owner = self

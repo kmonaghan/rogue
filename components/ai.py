@@ -78,11 +78,15 @@ class ConfusedNPC:
 
 class StrollingNPC:
     #AI for a temporarily confused npc (reverts to previous AI after a while).
-    def __init__(self):
+    def __init__(self, attacked_ai = None):
         self.moved = False
+        self.attacked_ai = attacked_ai
 
     def take_turn(self, target, fov_map, game_map):
         results = []
+        if (self.attacked_ai and self.owner.fighter.hp < self.owner.fighter.base_max_hp):
+            self.owner.setAI(self.attacked_ai)
+            return self.owner.ai.take_turn(target, fov_map, game_map)
 
         if (self.moved == False):
             dx = libtcod.random_get_int(0, -1, 1)
