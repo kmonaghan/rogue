@@ -1,3 +1,5 @@
+import libtcodpy as libtcod
+
 import random
 from math import sqrt
 
@@ -15,18 +17,24 @@ class CellularAutomata:
 		self.level = []
 		self.rooms = []
 
-		self.iterations = 750
-		self.neighbors = 5 # number of neighboring walls for this cell to become a wall
-		self.wallProbability = 0.45 # the initial probability of a cell becoming a wall, recommended to be between .35 and .55
+		self.iterations = 2
+		self.neighbors = 4 # number of neighboring walls for this cell to become a wall
+		self.wallProbability = 0.4 # the initial probability of a cell becoming a wall, recommended to be between .35 and .55
 
 		self.ROOM_MIN_SIZE = 16 # size in total number of cells, not dimensions
 		self.ROOM_MAX_SIZE = 500 # size in total number of cells, not dimensions
 
-		self.smoothEdges = False
+		self.smoothEdges = True
 		self.smoothing =  1
 
-	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size):
+		self.deathLimit = 3
+		self.birthLimit = 4
+
+	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset):
 		# Creates an empty 2D array or clears existing array
+		self.ROOM_MIN_SIZE = room_min_size
+		self.ROOM_MAX_SIZE = room_max_size
+
 		self.caves = []
 
 		self.level = [[Wall()
@@ -46,43 +54,44 @@ class CellularAutomata:
 		return self.level
 
 	def randomFillMap(self,mapWidth,mapHeight):
-		for y in range (1,mapHeight-1):
-			for x in range (1,mapWidth-1):
-				#print("(",x,y,") = ",self.level[x][y])
+		for y in range (0,mapHeight): #(1,mapHeight-1):
+			for x in range (0,mapWidth): #(1,mapWidth-1):
 				if random.random() >= self.wallProbability:
-					self.level[x][y] = Wall()
+					self.level[x][y] = Floor()
 
 	def createCaves(self,mapWidth,mapHeight):
-		# ==== Create distinct caves ====
 		for i in xrange (0,self.iterations):
-			# Pick a random point with a buffer around the edges of the map
-			tileX = random.randint(1,mapWidth-2) #(2,mapWidth-3)
-			tileY = random.randint(1,mapHeight-2) #(2,mapHeight-3)
+			map = [[Wall()
+					for y in range(mapHeight)]
+						for x in range(mapWidth)]
 
-			# if the cell's neighboring walls > self.neighbors, set it to 1
-			if self.getAdjacentWalls(tileX,tileY) > self.neighbors:
-				self.level[tileX][tileY] = Wall()
-			# or set it to 0
-			elif self.getAdjacentWalls(tileX,tileY) < self.neighbors:
-				self.level[tileX][tileY] = Floor()
+			for y in range (1,mapHeight-1):
+				for x in range (1,mapWidth-1):
+					nbs = self.getAdjacentWalls(x,y)
+	            	#The new value is based on our simulation rules
+	            	#First, if a cell is alive but has too few neighbours, kill it.
+					if self.level[x][y].isWall():
+						if nbs < self.deathLimit:
+							map[x][y] = Floor()
+						else:
+							map[x][y] = Wall()
+	            	#Otherwise, if the cell is dead now, check if it has the right number of neighbours to be 'born'
+					else:
+						if nbs > self.birthLimit:
+							map[x][y] = Wall()
+						else:
+							map[x][y] = Floor()
 
-		# ==== Clean Up Map ====
-		self.cleanUpMap(mapWidth,mapHeight)
+			self.level = map
 
 	def cleanUpMap(self,mapWidth,mapHeight):
 		if (self.smoothEdges):
-			updated_level = [[Tile(True)
-				for y in range(mapHeight)]
-					for x in range(mapWidth)]
 			for i in xrange (0,5):
 				# Look at each cell individually and check for smoothness
 				for x in range(1,mapWidth-1):
 					for y in range (1,mapHeight-1):
-						updated_level[x][y] = self.level[x][y]
-						if (self.level[x][y].blocked) and (self.getAdjacentWallsSimple(x,y) <= self.smoothing):
-							updated_level[x][y] = Floor()
-
-			self.level = updated_level
+						if (self.level[x][y].isWall()) and (self.getAdjacentWallsSimple(x,y) <= self.smoothing):
+							self.level[x][y] = Floor()
 
 	def createTunnel(self,point1,point2,currentCave,mapWidth,mapHeight):
 		# run a heavily weighted random Walk
@@ -135,19 +144,19 @@ class CellularAutomata:
 			if (0 < drunkardX+dx < mapWidth-1) and (0 < drunkardY+dy < mapHeight-1):
 				drunkardX += dx
 				drunkardY += dy
-				if self.level[drunkardX][drunkardY].blocked:
+				if self.level[drunkardX][drunkardY].isWall():
 					self.level[drunkardX][drunkardY] = Floor()
 
 	def getAdjacentWallsSimple(self, x, y): # finds the walls in four directions
 		wallCounter = 0
 		#print("(",x,",",y,") = ",self.level[x][y])
-		if (self.level[x][y-1] == 1): # Check north
+		if (self.level[x][y-1].isWall()): # Check north
 			wallCounter += 1
-		if (self.level[x][y+1] == 1): # Check south
+		if (self.level[x][y+1].isWall()): # Check south
 			wallCounter += 1
-		if (self.level[x-1][y] == 1): # Check west
+		if (self.level[x-1][y].isWall()): # Check west
 			wallCounter += 1
-		if (self.level[x+1][y] == 1): # Check east
+		if (self.level[x+1][y].isWall()): # Check east
 			wallCounter += 1
 
 		return wallCounter
@@ -157,7 +166,7 @@ class CellularAutomata:
 		wallCounter = 0
 		for x in range (tileX-1, tileX+2):
 			for y in range (tileY-1, tileY+2):
-				if (self.level[x][y] == 1):
+				if (self.level[x][y].isWall()):
 					if (x != tileX) or (y != tileY): # exclude (tileX,tileY)
 						wallCounter += 1
 		return wallCounter
@@ -166,12 +175,13 @@ class CellularAutomata:
 		# locate all the caves within self.level and store them in self.caves
 		for x in range (0,mapWidth):
 			for y in range (0,mapHeight):
-				if not self.level[x][y].blocked:
+				if self.level[x][y].isFloor():
 					self.floodFill(x,y)
 
 		for set in self.caves:
 			for tile in set:
-				self.level[tile[0]][tile[1]] = Floor()
+				floor = Floor()
+				self.level[tile[0]][tile[1]] = floor
 
 	def floodFill(self,x,y):
 		'''
@@ -199,8 +209,7 @@ class CellularAutomata:
 				west = (x-1,y)
 
 				for direction in [north,south,east,west]:
-
-					if not self.level[direction[0]][direction[1]].blocked:
+					if not self.level[direction[0]][direction[1]].isWall():
 						if direction not in toBeFilled and direction not in cave:
 							toBeFilled.add(direction)
 

@@ -1,5 +1,5 @@
 import libtcodpy as libtcod
-from random import choice, sample
+from random import choice, sample, randint
 
 import bestiary
 import equipment
@@ -48,7 +48,9 @@ class GameMap:
         print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
         print "Dungeon level = " + str(self.dungeon_level)
 
-        if (self.dungeon_level <= 2):
+        if (self.dungeon_level == 1):
+            generator = CellularAutomata()
+        elif (self.dungeon_level <= 2):
             generator = AltBSPTree()
         elif (self.dungeon_level <= 5):
             generator = MazeWithRooms()
@@ -69,6 +71,38 @@ class GameMap:
 
         print "Number of rooms: " + str(len(self.rooms))
 
+        if (self.dungeon_level > 1):
+            self.popluate_map(player)
+        else:
+            self.populate_cavern(player)
+
+    def populate_cavern(self, player):
+        player.x = 10
+        player.y = 10
+
+        npc = bestiary.bountyhunter(Point(player.x, player.y))
+
+        q = quest.kill_vermin()
+
+        npc.questgiver.add_quest(q)
+        self.add_npc_to_map(npc)
+
+        max_npcs = 30
+        #choose random number of npcs
+        num_npcs = libtcod.random_get_int(0, 0, max_npcs)
+
+        for i in range(num_npcs/2):
+            point = self.random_open_cell()
+            npc = bestiary.snake(point)
+            self.add_npc_to_map(npc)
+
+        for i in range(num_npcs/2):
+            point = self.random_open_cell()
+            npc = bestiary.rat(point)
+            self.add_npc_to_map(npc)
+
+
+    def popluate_map(self, player):
         if (self.dungeon_level == 5):
             warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
             self.add_npc_to_map(warlord)
@@ -80,9 +114,6 @@ class GameMap:
             self.down_stairs = Entity(room.center(), '>', 'Stairs', libtcod.red, render_order=RenderOrder.STAIRS, stairs=stairs_component)
             self.entities.append(self.down_stairs)
 
-        self.popluate_map(player)
-
-    def popluate_map(self, player):
         #Random room for player start
         room = choice(self.rooms)
         room = self.rooms[-1]
@@ -96,9 +127,7 @@ class GameMap:
 
         q = None
 
-        if (self.dungeon_level == 1):
-            q = quest.kill_gobbos()
-        elif (self.dungeon_level == 2):
+        if (self.dungeon_level == 2):
             q = quest.kill_gobbos()
         elif (self.dungeon_level == 3):
             q = quest.kill_orcs()
@@ -110,8 +139,13 @@ class GameMap:
         if (q != None):
             if (self.dungeon_level == 1):
                 q2 = quest.Quest('Kill the leader', 'Cut the head off and no more problem', 100)
+                q2.npc = bestiary.goblin(Point(0,0))
+                q.next_quest = q2
+            elif (self.dungeon_level == 2):
+                q2 = quest.Quest('Kill the leader', 'Cut the head off and no more problem', 100)
                 q2.npc = bestiary.warlord(Point(0,0))
                 q.next_quest = q2
+
             npc.questgiver.add_quest(q)
             self.add_npc_to_map(npc)
 
@@ -276,3 +310,12 @@ class GameMap:
             if (self.down_stairs.x == x) and (self.down_stairs.y == y):
                 return True
         return False
+
+    def random_open_cell(self):
+        tileX = randint(1,self.width - 2) #(2,mapWidth-3)
+        tileY = randint(1,self.height - 2) #(2,mapHeight-3)
+        point = Point(tileX, tileY)
+        if not self.is_blocked(point):
+            return point
+        else:
+            return self.random_open_cell()

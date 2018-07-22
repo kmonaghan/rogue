@@ -14,3 +14,12 @@ Map algos:
 http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
 https://github.com/AtTheMatinee/dungeon-generation/blob/master/dungeonGenerationAlgorithms.py
 https://www.gamasutra.com/blogs/AAdonaac/20150903/252889/Procedural_Dungeon_Generation_Algorithm.php
+https://www.gridsagegames.com/blog/2014/06/mapgen-cellular-automata/
+https://jeremykun.com/2012/07/29/the-cellular-automaton-method-for-cave-generation/
+http://www.roguebasin.com/index.php?title=Cellular_Automata_Method_for_Generating_Random_Cave-Like_Levels
+http://www.evilscience.co.uk/a-c-algorithm-to-build-roguelike-cave-systems-part-1/
+
+Other Roguelikes:
+https://github.com/Maugrift/GeneriCrawl See for nice FOV
+
+https://www.reddit.com/r/roguelikedev/wiki/faq_friday
