@@ -200,18 +200,18 @@ def necromancer(point = None):
 
 def rat(point = None):
     fighter_component = Fighter(hp=2, defense=1, power=1, xp=1)
-    ai_component = BasicNPC()
+    ai_component = StrollingNPC()
 
     npc = Character(point, 'R', 'rat', libtcod.darker_gray,
                         fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
 
-    return NPC
+    return npc
 
 def snake(point = None):
     fighter_component = Fighter(hp=2, defense=1, power=1, xp=1)
-    ai_component = BasicNPC()
+    ai_component = StrollingNPC()
 
     npc = Character(point, 'S', 'snake', libtcod.darker_gray,
                         fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
 
-    return NPC
+    return npc
