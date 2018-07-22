@@ -3,8 +3,10 @@ import libtcodpy as libtcod
 import random
 from math import sqrt
 
-from map_objects.wall import Wall
 from map_objects.floor import Floor
+from map_objects.room import Room
+from map_objects.point import Point
+from map_objects.wall import Wall
 
 class CellularAutomata:
 	'''
@@ -19,7 +21,7 @@ class CellularAutomata:
 
 		self.iterations = 2
 		self.neighbors = 4 # number of neighboring walls for this cell to become a wall
-		self.wallProbability = 0.4 # the initial probability of a cell becoming a wall, recommended to be between .35 and .55
+		self.wallProbability = 0.43 # the initial probability of a cell becoming a wall, recommended to be between .35 and .55
 
 		self.ROOM_MIN_SIZE = 16 # size in total number of cells, not dimensions
 		self.ROOM_MAX_SIZE = 500 # size in total number of cells, not dimensions
@@ -50,6 +52,8 @@ class CellularAutomata:
 		self.connectCaves(mapWidth,mapHeight)
 
 		self.cleanUpMap(mapWidth,mapHeight)
+
+		self.createRoomsFromCaves()
 
 		return self.level
 
@@ -271,3 +275,36 @@ class CellularAutomata:
 		if end in connectedRegion: return True
 
 		else: return False
+
+	def createRoomsFromCaves(self):
+		for set in self.caves:
+			topcorner = None
+			widestPoint = None
+			deepestPoint = None
+
+			for tile in set:
+			#	print "tile: " + str(tile[0]) + "," + str(tile[1])
+			#	self.level[tile[0]][tile[1]].fov_color = libtcod.green
+				if topcorner:
+					if (tile[0] < topcorner.x):
+						topcorner.x = tile[0]
+					if (tile[1] < topcorner.y):
+						topcorner.y = tile[1]
+					if (tile[0] > widestPoint.x):
+						widestPoint.x = tile[0]
+					if (tile[1] > deepestPoint.y):
+						deepestPoint.y = tile[1]
+				else:
+					topcorner = Point(tile[0], tile[1])
+					widestPoint = Point(tile[0], tile[1])
+					deepestPoint = Point(tile[0], tile[1])
+
+			room = Room(topcorner.x, topcorner.y, widestPoint.x - topcorner.x, deepestPoint.y - topcorner.y)
+			# locate all the caves within self.level and store them in self.caves
+			#for x in range (topcorner.x, room.w):
+			#	for y in range (topcorner.y, room.h):
+			#		self.level[x][y].fov_color = libtcod.red
+
+			print room.describe()
+
+			self.rooms.append(room)

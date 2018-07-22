@@ -28,6 +28,8 @@ from render_order import RenderOrder
 
 from game_messages import Message
 
+from species import Species
+
 class GameMap:
     def __init__(self, dungeon_level=0):
         self.width = 40
@@ -60,7 +62,7 @@ class GameMap:
         #generator = CellularAutomata()
         #generator = Basic()
 
-        if (self.dungeon_level == 5):
+        if (self.dungeon_level == 6):
             prefabbed = map_objects.prefab.Prefab(map_objects.prefab.boss_room())
             generator.add_prefab(prefabbed)
 
@@ -76,20 +78,35 @@ class GameMap:
         else:
             self.populate_cavern(player)
 
-    def populate_cavern(self, player):
-        player.x = 10
-        player.y = 10
+        if (game_state.debug):
+            for room in self.rooms:
+                self.add_npc_to_map(room.room_detail)
 
-        npc = bestiary.bountyhunter(Point(player.x, player.y))
+    def populate_cavern(self, player):
+        #Random room for player start
+        room = choice(self.rooms)
+        self.rooms.remove(room)
+        point = room.random_tile(self)
+        player.x = point.x
+        player.y = point.y
+
+        npc = bestiary.bountyhunter(room.random_tile(self))
 
         q = quest.kill_vermin()
+
+        q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100)
+        q2.npc = bestiary.goblin(Point(0,0))
+        q2.kill = 1
+        q2.kill_type = Species.GOBLIN
+
+        q.next_quest = q2
 
         npc.questgiver.add_quest(q)
         self.add_npc_to_map(npc)
 
-        max_npcs = 30
+        max_npcs = 45
         #choose random number of npcs
-        num_npcs = libtcod.random_get_int(0, 0, max_npcs)
+        num_npcs = libtcod.random_get_int(0, max_npcs/4, max_npcs)
 
         for i in range(num_npcs/2):
             point = self.random_open_cell()
@@ -101,22 +118,26 @@ class GameMap:
             npc = bestiary.rat(point)
             self.add_npc_to_map(npc)
 
+        stairs_component = Stairs(self.dungeon_level + 1)
+        room = self.rooms[-1]
+        self.rooms.remove(room)
+        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.entities.append(self.down_stairs)
 
     def popluate_map(self, player):
-        if (self.dungeon_level == 5):
+        if (self.dungeon_level == 6):
             warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
             self.add_npc_to_map(warlord)
             self.rooms.remove(prefabbed.room)
         else:
-            print "adding stairs"
             stairs_component = Stairs(self.dungeon_level + 1)
             room = self.rooms[-1]
-            self.down_stairs = Entity(room.center(), '>', 'Stairs', libtcod.red, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+            self.rooms.remove(room)
+            self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
             self.entities.append(self.down_stairs)
 
         #Random room for player start
         room = choice(self.rooms)
-        room = self.rooms[-1]
         self.rooms.remove(room)
         point = room.random_tile(self)
         player.x = point.x
@@ -133,15 +154,15 @@ class GameMap:
             q = quest.kill_orcs()
         elif (self.dungeon_level == 4):
             q = quest.kill_trolls()
-        elif (self.dungeon_level == 5):
+        elif (self.dungeon_level == 6):
             q = quest.kill_warlord()
 
         if (q != None):
-            if (self.dungeon_level == 1):
+            if (self.dungeon_level == 2):
                 q2 = quest.Quest('Kill the leader', 'Cut the head off and no more problem', 100)
                 q2.npc = bestiary.goblin(Point(0,0))
                 q.next_quest = q2
-            elif (self.dungeon_level == 2):
+            elif (self.dungeon_level == 3):
                 q2 = quest.Quest('Kill the leader', 'Cut the head off and no more problem', 100)
                 q2.npc = bestiary.warlord(Point(0,0))
                 q.next_quest = q2
@@ -174,13 +195,13 @@ class GameMap:
         #this is where we decide the chance of each npc or item appearing.
 
         #maximum number of npcs per room
-        max_npcs = random_utils.from_dungeon_level([[2, 1], [3, 3], [5, 4]], self.dungeon_level)
+        max_npcs = random_utils.from_dungeon_level([[2, 2], [3, 4], [5, 5]], self.dungeon_level)
 
         #chance of each npc
         npc_chances = {}
-        npc_chances['goblin'] = random_utils.from_dungeon_level([[95, 1], [30, 2], [15, 3], [10, 4], [5, 5]], self.dungeon_level)
-        npc_chances['orc'] = random_utils.from_dungeon_level([[4,1], [65, 2], [65, 3], [50, 4], [45, 5]], self.dungeon_level)
-        npc_chances['troll'] = random_utils.from_dungeon_level([[1,1], [5, 2], [20, 3], [40, 4], [60, 5]], self.dungeon_level)
+        npc_chances['goblin'] = random_utils.from_dungeon_level([[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances['orc'] = random_utils.from_dungeon_level([[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances['troll'] = random_utils.from_dungeon_level([[1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, 0, max_npcs)
@@ -276,10 +297,6 @@ class GameMap:
 
     def is_blocked(self, point):
         #first test the map tile
-    #    if (game_state.debug):
-    #        print "Map size: " + str(len(game_state.map)) + " x " + str(len(game_state.map[0]))
-    #        print "Testing: " + point.describe()
-
         if self.map[point.x][point.y].blocked:
             return True
 
