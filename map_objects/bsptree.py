@@ -2,7 +2,8 @@ import random
 
 from map_objects.leaf import Leaf
 from map_objects.point import Point
-from map_objects.tile import Tile
+from map_objects.floor import Floor
+from map_objects.wall import Wall
 
 class BSPTree:
 	def __init__(self):
@@ -15,7 +16,7 @@ class BSPTree:
 
 	def generateLevel(self, mapWidth, mapHeight):
 		# Creates an empty 2D array or clears existing array
-		self.level = [[Tile(True)
+		self.level = [[Wall()
 			for y in range(mapHeight)]
 				for x in range(mapWidth)]
 
