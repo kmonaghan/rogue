@@ -203,3 +203,11 @@ def longsword(point = None):
     item = Entity(point, '\\', 'long sword', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
+
+def teeth(point = None):
+    #create a sword
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+    equippable_component.type_of_dice = 2
+    item = Entity(point, '"', 'teeth', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
+
+    return item

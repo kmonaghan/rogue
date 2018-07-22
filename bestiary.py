@@ -199,19 +199,31 @@ def necromancer(point = None):
     return npc
 
 def rat(point = None):
-    fighter_component = Fighter(hp=2, defense=1, power=1, xp=1)
-    ai_component = StrollingNPC()
+    fighter_component = Fighter(hp=4, defense=1, power=1, xp=1)
+    ai_component = StrollingNPC(BasicNPC())
 
     npc = Character(point, 'R', 'rat', libtcod.darker_gray,
                         fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
 
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    npc.inventory.add_item(teeth)
+    npc.equipment.toggle_equip(teeth)
+
     return npc
 
 def snake(point = None):
-    fighter_component = Fighter(hp=2, defense=1, power=1, xp=1)
-    ai_component = StrollingNPC()
+    fighter_component = Fighter(hp=5, defense=1, power=1, xp=1)
+    ai_component = StrollingNPC(BasicNPC())
 
     npc = Character(point, 'S', 'snake', libtcod.darker_gray,
                         fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    npc.inventory.add_item(teeth)
+    npc.equipment.toggle_equip(teeth)
 
     return npc
