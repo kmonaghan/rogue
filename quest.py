@@ -13,6 +13,17 @@ def check_quests_for_npc_death(npc):
 
     return results
 
+def kill_vermin(kill = 10):
+    title = "Kill Vermin"
+    description = "These caves are riddled with rats and snakes. Clear them out."
+
+    q = Quest(title, description, 100)
+    q.kill = kill
+    q.kill_type = Species.ANIMAL
+    q.return_to_quest_giver = True
+
+    return q
+
 def kill_gobbos(kill = 5):
     title = "Kill Gobbos"
     description = "Get rid of them. I don't care how."
