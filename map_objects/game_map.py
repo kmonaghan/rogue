@@ -40,12 +40,17 @@ class GameMap:
         self.entities = []
         self.down_stairs = None
         self.dungeon_level = dungeon_level
+        self.entity_map = None
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
         self.entities = [player]
 
         self.width = map_width
         self.height = map_height
+
+        self.entity_map = [[[]
+			for y in range(self.height)]
+				for x in range(self.width)]
 
         print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
         print "Dungeon level = " + str(self.dungeon_level)
@@ -78,9 +83,9 @@ class GameMap:
         else:
             self.populate_cavern(player)
 
-        if (game_state.debug):
-            for room in self.rooms:
-                self.add_npc_to_map(room.room_detail)
+    #    if (game_state.debug):
+    #        for room in self.rooms:
+    #            self.add_npc_to_map(room.room_detail)
 
     def populate_cavern(self, player):
         #Random room for player start
@@ -116,6 +121,11 @@ class GameMap:
         for i in range(num_npcs/2):
             point = self.random_open_cell()
             npc = bestiary.rat(point)
+            self.add_npc_to_map(npc)
+
+        for i in range(10):
+            point = self.random_open_cell()
+            npc = bestiary.snake_egg(point)
             self.add_npc_to_map(npc)
 
         stairs_component = Stairs(self.dungeon_level + 1)
@@ -336,3 +346,51 @@ class GameMap:
             return point
         else:
             return self.random_open_cell()
+
+    def add_to_map_state(self, entity):
+        self.entity_map[entity.x][entity.y].append(entity)
+        #print "added " + entity.describe()
+
+    def remove_from_map_state(self, entity):
+        try:
+            self.entity_map[entity.x][entity.y].remove(entity)
+        except ValueError:
+            pass
+        #print "removed " + entity.describe()
+
+    def find_closest(self, point, species, max_distance=3):
+        npc = None
+
+        start_x = point.x - max_distance - 1
+        start_y = point.y - max_distance - 1
+
+        if (start_x < 0):
+            start_x = 0
+
+        if (start_y < 0):
+            start_y = 0
+
+        dist = max_distance + 2
+
+        for x in range(start_x, start_x + max_distance + 1):
+            for y in range(start_y, start_y + max_distance + 1):
+                #print "checking " + str(x) + ", " + str(y)
+                if (len(self.entity_map[x][y])):
+                    for entity in self.entity_map[x][y]:
+                        print "checking: " + entity.describe()
+                        if entity.species and (entity.species == species):
+                            entity_distance = abs(x - point.x)
+                            if (entity_distance < dist):
+                                print "FOUND!"
+                                npc = entity
+                #else:
+                #    print "no entites at " + str(x) + ", " + str(y)
+
+        return npc
+
+    def update_entity_map(self):
+        self.entity_map = [[[]
+                            for y in range(self.height)]
+        				                for x in range(self.width)]
+        for entity in self.entities:
+            self.entity_map[entity.x][entity.y].append(entity)

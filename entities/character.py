@@ -39,3 +39,12 @@ class Character(Entity):
             desc += "(Troll)"
 
         return desc
+
+    def isDead(self):
+        print "am ded?"
+        if (self.fighter):
+            if (self.fighter.hp > 0):
+                return False
+
+        print "not ded"
+        return True

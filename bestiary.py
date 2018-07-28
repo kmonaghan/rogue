@@ -9,6 +9,8 @@ from components.ai import BasicNPC
 from components.ai import StrollingNPC
 from components.ai import WarlordNPC
 from components.ai import NecromancerNPC
+from components.ai import Hunter
+from components.ai import Hatching
 
 from components.fighter import Fighter
 from components.questgiver import Questgiver
@@ -32,7 +34,7 @@ def bountyhunter(point = None):
     #create a questgiver
 
     ai_component = StrollingNPC()
-    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold,  ai=ai_component)
+    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold,  ai=ai_component, species=Species.NONDESCRIPT)
 
     questgiver = Questgiver()
     questgiver.owner = npc
@@ -198,12 +200,21 @@ def necromancer(point = None):
 
     return npc
 
+def rat_nest(point = None):
+    fighter_component = Fighter(hp=4, defense=1, power=1, xp=2)
+    #ai_component = StrollingNPC(BasicNPC())
+
+    npc = Character(point, 'N', "Rat's nest", libtcod.darker_gray,
+                        fighter=none, ai=none, species=Species.ANIMAL)
+
+    return npc
+
 def rat(point = None):
-    fighter_component = Fighter(hp=4, defense=1, power=1, xp=1)
-    ai_component = StrollingNPC(BasicNPC())
+    fighter_component = Fighter(hp=4, defense=1, power=1, xp=2)
+    ai_component = Hunter(attacked_ai = BasicNPC(), hunting = Species.EGG)
 
     npc = Character(point, 'R', 'rat', libtcod.darker_gray,
-                        fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
+                        fighter=fighter_component, ai=ai_component, species=Species.RAT)
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -214,16 +225,25 @@ def rat(point = None):
     return npc
 
 def snake(point = None):
-    fighter_component = Fighter(hp=5, defense=1, power=1, xp=1)
-    ai_component = StrollingNPC(BasicNPC())
+    fighter_component = Fighter(hp=5, defense=1, power=1, xp=2)
+    ai_component = Hunter(attacked_ai = BasicNPC(), hunting = Species.RAT)
 
     npc = Character(point, 'S', 'snake', libtcod.darker_gray,
-                        fighter=fighter_component, ai=ai_component, species=Species.ANIMAL)
+                        fighter=fighter_component, ai=ai_component, species=Species.SNAKE)
 
     teeth = equipment.teeth()
     teeth.lootable = False
 
     npc.inventory.add_item(teeth)
     npc.equipment.toggle_equip(teeth)
+
+    return npc
+
+def snake_egg(point = None):
+    fighter_component = Fighter(hp=2, defense=3, power=0, xp=0)
+    ai_component = Hatching(snake())
+
+    npc = Character(point, 'E', 'snake egg', libtcod.white,
+                        fighter=fighter_component, ai=ai_component, species=Species.EGG)
 
     return npc

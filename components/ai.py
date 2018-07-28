@@ -1,7 +1,11 @@
+__metaclass__ = type
+
 import libtcodpy as libtcod
 
 import bestiary
 import tome
+
+from random import randint
 
 from game_messages import Message
 
@@ -84,9 +88,9 @@ class StrollingNPC:
 
     def take_turn(self, target, fov_map, game_map):
         results = []
-        if (self.attacked_ai and self.owner.fighter.hp < self.owner.fighter.base_max_hp):
-            self.owner.setAI(self.attacked_ai)
-            return self.owner.ai.take_turn(target, fov_map, game_map)
+        #if (self.attacked_ai and self.owner.fighter.hp < self.owner.fighter.base_max_hp):
+        #    self.owner.setAI(self.attacked_ai)
+        #    return self.owner.ai.take_turn(target, fov_map, game_map)
 
         if (self.moved == False):
             dx = libtcod.random_get_int(0, -1, 1)
@@ -168,5 +172,63 @@ class NecromancerNPC:
             tome.resurrect_all_npc(bestiary.skeleton, game_map, target)
             results.append({'message': Message('Rise and serve me again, now and forever!', libtcod.red)})
             self.ritual_cast = True
+
+        return results
+
+class Hunter(StrollingNPC):
+    def __init__(self, attacked_ai = None, hunting = None):
+        super(Hunter, self).__init__(attacked_ai = attacked_ai)
+        self.hunting = hunting
+
+    def take_turn(self, target, fov_map, game_map):
+        results = []
+
+        npc = self.owner
+
+        target = game_map.find_closest(Point(npc.x, npc.y), self.hunting)
+
+        if (target):
+            print "We have a TARGET! " + target.describe()
+            dist = npc.distance_to(target)
+
+            if dist > 1:
+                print "moving closer to " + target.describe()
+                npc.move_astar(target, game_map)
+                return results
+
+            #close enough, attack!
+            #elif (entity.fighter.hp > 0):
+            elif not target.isDead():
+                print "ATTACK! " + target.describe()
+                attack_results = npc.fighter.attack(target)
+                dead_entity = None
+                for turn_result in attack_results:
+                    dead_entity = turn_result.get('dead')
+
+                if (dead_entity):
+                    print "is DED!"
+                    results.append({'entity_dead': target, 'killer': npc})
+
+                return results
+
+        return super(Hunter, self).take_turn(target, fov_map, game_map)
+
+class Hatching:
+    def __init__(self, hatches):
+        self.incubate = randint(10, 20)
+        self.hatches = hatches
+
+    def take_turn(self, target, fov_map, game_map):
+        results = []
+
+        self.incubate -= 1
+
+        if (self.incubate < 1):
+            npc = self.owner
+
+            game_map.remove_npc_from_map(npc)
+            self.hatches.x = npc.x
+            self.hatches.y = npc.y
+            game_map.add_npc_to_map(self.hatches)
 
         return results

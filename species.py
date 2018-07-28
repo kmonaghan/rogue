@@ -6,3 +6,6 @@ class Species(Enum):
     ORC = 2
     TROLL = 3
     ANIMAL = 4
+    RAT = 5
+    SNAKE = 6
+    EGG = 7

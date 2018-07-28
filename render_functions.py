@@ -105,17 +105,21 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
         character_screen(player, 30, 10, screen_width, screen_height)
 
 
-def clear_all(con, entities):
-    for entity in entities:
-        clear_entity(con, entity)
+def clear_all(con, game_map):
+    for entity in game_map.entities:
+        clear_entity(con, entity, game_map)
 
 
 def draw_entity(con, entity, fov_map, game_map):
+    #game_map.add_to_map_state(entity)
+
     if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.map[entity.x][entity.y].explored) or entity.always_visible or debug:
         libtcod.console_set_default_foreground(con, entity.display_color())
         libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
 
 
-def clear_entity(con, entity):
+def clear_entity(con, entity, game_map):
+    #game_map.remove_from_map_state(entity)
+
     # erase the character that represents this object
     libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)
