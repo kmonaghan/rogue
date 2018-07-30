@@ -312,8 +312,8 @@ class GameMap:
             return True
 
         #now check for any blocking objects
-        for object in game_state.objects:
-            if object.blocks and object.x == point.x and object.y == point.y:
+        for entity in self.entity_map[point.x][point.y]
+            if entity.blocks:
                 return True
 
         return False

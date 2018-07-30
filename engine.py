@@ -44,7 +44,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
         clear_all(con, game_map)
 
         game_map.update_entity_map()
-        
+
         action = handle_keys(key, game_state)
         mouse_action = handle_mouse(mouse)
 
@@ -94,8 +94,8 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             game_state = GameStates.ENEMY_TURN
 
         elif pickup and game_state == GameStates.PLAYERS_TURN:
-            for entity in game_map.entities:
-                if entity.item and entity.x == player.x and entity.y == player.y:
+            for entity in game_map.entity_map[player.x][player.y]:
+                if entity.item:
                     pickup_results = player.inventory.add_item(entity)
                     player_turn_results.extend(pickup_results)
 
