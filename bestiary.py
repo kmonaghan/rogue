@@ -2,7 +2,6 @@ import libtcodpy as libtcod
 
 import equipment
 import game_state
-import messageconsole
 import quest
 
 from components.ai import BasicNPC

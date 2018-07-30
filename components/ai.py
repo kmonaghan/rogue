@@ -76,7 +76,7 @@ class ConfusedNPC:
 
         else:  #restore the previous AI (this one will be deleted because it's not referenced anymore)
             self.owner.ai = self.old_ai
-            messageconsole.message('The ' + self.owner.name + ' is no longer confused!', libtcod.red)
+            #messageconsole.message('The ' + self.owner.name + ' is no longer confused!', libtcod.red)
 
         return results
 

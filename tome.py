@@ -1,7 +1,6 @@
 import libtcodpy as libtcod
-import messageconsole
+
 import bestiary
-import baseclasses
 
 import components.ai
 
@@ -23,15 +22,15 @@ FIREBALL_DAMAGE = 25
 def closest_npc(max_range):
     #find closest enemy, up to a maximum range, and in the player's FOV
     closest_enemy = None
-    closest_dist = max_range + 1  #start with (slightly more than) maximum range
-
-    for object in game_state.objects:
-        if object.fighter and not object == game_state.player and libtcod.map_is_in_fov(baseclasses.fov_map, object.x, object.y):
-            #calculate distance between this object and the player
-            dist = game_state.player.distance_to(object)
-            if dist < closest_dist:  #it's closer, so remember it
-                closest_enemy = object
-                closest_dist = dist
+#    closest_dist = max_range + 1  #start with (slightly more than) maximum range
+#
+#    for object in game_state.objects:
+#        if object.fighter and not object == game_state.player and libtcod.map_is_in_fov(baseclasses.fov_map, object.x, object.y):
+#            #calculate distance between this object and the player
+#            dist = game_state.player.distance_to(object)
+#            if dist < closest_dist:  #it's closer, so remember it
+#                closest_enemy = object
+#                closest_dist = dist
     return closest_enemy
 
 def target_tile(max_range=None):
@@ -76,10 +75,10 @@ def cast_heal(caster = None):
 
     #heal the player
 #    if game_state.player.fighter.hp == game_state.player.fighter.max_hp:
-#        messageconsole.message('You are already at full health.', libtcod.red)
+#        #messageconsole.message('You are already at full health.', libtcod.red)
 #        return 'cancelled'
 
-#    messageconsole.message('Your wounds start to feel better!', libtcod.light_violet)
+#    #messageconsole.message('Your wounds start to feel better!', libtcod.light_violet)
 #    game_state.player.fighter.heal(HEAL_AMOUNT)
 
     results = []
@@ -96,29 +95,29 @@ def cast_lightning(caster = None):
     #find closest enemy (inside a maximum range) and damage it
     npc = closest_npc(LIGHTNING_RANGE)
     if npc is None:  #no enemy found within maximum range
-        messageconsole.message('No enemy is close enough to strike.', libtcod.red)
+        #messageconsole.message('No enemy is close enough to strike.', libtcod.red)
         return 'cancelled'
 
     #zap it!
-    messageconsole.message('A lighting bolt strikes the ' + npc.name + ' with a loud thunder! The damage is '
-            + str(LIGHTNING_DAMAGE) + ' hit points.', libtcod.light_blue)
+    #messageconsole.message('A lighting bolt strikes the ' + npc.name + ' with a loud thunder! The damage is '
+    #        + str(LIGHTNING_DAMAGE) + ' hit points.', libtcod.light_blue)
     npc.fighter.take_damage(LIGHTNING_DAMAGE)
 
 def cast_fireball(caster = None):
     #ask the player for a target tile to throw a fireball at
-    messageconsole.message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan)
+    #messageconsole.message('Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan)
     (x, y) = target_tile()
     if x is None: return 'cancelled'
-    messageconsole.message('The fireball explodes, burning everything within ' + str(FIREBALL_RADIUS) + ' tiles!', libtcod.orange)
+    #messageconsole.message('The fireball explodes, burning everything within ' + str(FIREBALL_RADIUS) + ' tiles!', libtcod.orange)
 
     for obj in game_state.objects:  #damage every fighter in range, including the player
         if obj.distance(x, y) <= FIREBALL_RADIUS and obj.fighter:
-            messageconsole.message('The ' + obj.name + ' gets burned for ' + str(FIREBALL_DAMAGE) + ' hit points.', libtcod.orange)
+            #messageconsole.message('The ' + obj.name + ' gets burned for ' + str(FIREBALL_DAMAGE) + ' hit points.', libtcod.orange)
             obj.fighter.take_damage(FIREBALL_DAMAGE)
 
 def cast_confuse():
     #ask the player for a target to confuse
-    messageconsole.message('Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan)
+    #messageconsole.message('Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan)
     npc = target_npc(CONFUSE_RANGE)
     if npc is None: return 'cancelled'
 
@@ -126,7 +125,7 @@ def cast_confuse():
     old_ai = npc.ai
     npc.ai = ConfusedNPC(old_ai)
     npc.ai.owner = npc  #tell the new component who owns it
-    messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
+    #messageconsole.message('The eyes of the ' + npc.name + ' look vacant, as he starts to stumble around!', libtcod.light_green)
 
 def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
     dice = libtcod.random_get_int(0, 1, number_of_npc)
