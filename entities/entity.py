@@ -7,7 +7,6 @@ import math
 
 from components.item import Item
 from map_objects.point import Point
-from map_objects.map_utils import is_blocked
 
 from game_messages import Message
 

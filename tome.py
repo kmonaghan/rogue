@@ -5,7 +5,6 @@ import baseclasses
 
 import components.ai
 
-from map_objects.map_utils import is_blocked
 from map_objects.point import Point
 
 from game_messages import Message
@@ -60,7 +59,7 @@ def target_tile(max_range=None):
 #            return (x, y)
 
     print "traget_Tile"
-    
+
 def target_npc(max_range=None):
     #returns a clicked npc inside FOV up to a range, or None if right-clicked
     while True:
