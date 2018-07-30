@@ -11,6 +11,7 @@ from components.ai import WanderingNPC
 from components.stairs import Stairs
 
 from entities.entity import Entity
+from entities.character import Character
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -378,7 +379,7 @@ class GameMap:
                 if (len(self.entity_map[x][y])):
                     for entity in self.entity_map[x][y]:
                         print "checking: " + entity.describe()
-                        if entity.species and (entity.species == species):
+                        if (type(entity) is Character) and (entity.species == species):
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
                                 print "FOUND!"
