@@ -22,11 +22,11 @@ class SingleRoom:
 
         self.level = [[Wall() for y in range(mapHeight)] for x in range(mapWidth)]
 
-        room = Room(10,10,30,30)
+        room = Room(0,0,10,10)
 
         #Dig room
-        for x in range(10, 30):
-            for y in range(10, 30):
+        for x in range(room.x1, room.w):
+            for y in range(room.y1, room.h):
                 self.level[x][y] = Floor()
 
         self.rooms.append(room)
