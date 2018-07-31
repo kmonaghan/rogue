@@ -53,8 +53,8 @@ class GameMap:
 			for y in range(self.height)]
 				for x in range(self.width)]
 
-        print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
-        print "Dungeon level = " + str(self.dungeon_level)
+        #print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
+        #print "Dungeon level = " + str(self.dungeon_level)
 
         if (self.dungeon_level == 1):
             generator = CellularAutomata()
@@ -74,10 +74,10 @@ class GameMap:
 
         self.map = generator.generateLevel(map_width, map_height, max_rooms, room_min_size, room_max_size, offset)
 
-        print "Map size: " + str(len(self.map)) + " x " + str(len(self.map[0]))
+        #print "Map size: " + str(len(self.map)) + " x " + str(len(self.map[0]))
         self.rooms = generator.rooms
 
-        print "Number of rooms: " + str(len(self.rooms))
+        #print "Number of rooms: " + str(len(self.rooms))
 
         if (self.dungeon_level > 1):
             self.popluate_map(player)
@@ -110,16 +110,16 @@ class GameMap:
         npc.questgiver.add_quest(q)
         self.add_npc_to_map(npc)
 
-        max_npcs = 45
+        max_npcs = 40
         #choose random number of npcs
-        num_npcs = libtcod.random_get_int(0, max_npcs/4, max_npcs)
+        num_npcs = libtcod.random_get_int(0, int(max_npcs/4), max_npcs)
 
-        for i in range(num_npcs/2):
+        for i in range(int(num_npcs/2)):
             point = self.random_open_cell()
             npc = bestiary.snake(point)
             self.add_npc_to_map(npc)
 
-        for i in range(num_npcs/2):
+        for i in range(int(num_npcs/2)):
             point = self.random_open_cell()
             npc = bestiary.rat(point)
             self.add_npc_to_map(npc)
@@ -312,7 +312,7 @@ class GameMap:
             return True
 
         #now check for any blocking objects
-        for entity in self.entity_map[point.x][point.y]
+        for entity in self.entity_map[point.x][point.y]:
             if entity.blocks:
                 return True
 
@@ -350,14 +350,14 @@ class GameMap:
 
     def add_to_map_state(self, entity):
         self.entity_map[entity.x][entity.y].append(entity)
-        #print "added " + entity.describe()
+        ##print "added " + entity.describe()
 
     def remove_from_map_state(self, entity):
         try:
             self.entity_map[entity.x][entity.y].remove(entity)
         except ValueError:
             pass
-        #print "removed " + entity.describe()
+        ##print "removed " + entity.describe()
 
     def find_closest(self, point, species, max_distance=3):
         npc = None
@@ -375,17 +375,17 @@ class GameMap:
 
         for x in range(start_x, start_x + max_distance + 1):
             for y in range(start_y, start_y + max_distance + 1):
-                #print "checking " + str(x) + ", " + str(y)
+                ##print "checking " + str(x) + ", " + str(y)
                 if (len(self.entity_map[x][y])):
                     for entity in self.entity_map[x][y]:
-                        print "checking: " + entity.describe()
+                        #print "checking: " + entity.describe()
                         if (type(entity) is Character) and (entity.species == species):
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
-                                print "FOUND!"
+                                #print "FOUND!"
                                 npc = entity
                 #else:
-                #    print "no entites at " + str(x) + ", " + str(y)
+                #    #print "no entites at " + str(x) + ", " + str(y)
 
         return npc
 

@@ -39,6 +39,6 @@ class Level:
 
     def random_level_up(self, total_levels):
         for x in range(total_levels):
-            print "Adding levels for " + self.owner.name + ": " + str(total_levels)
+            #print "Adding levels for " + self.owner.name + ": " + str(total_levels)
             choice = libtcod.random_get_int(0, 0, 2)
             self.level_up_stats(choice)

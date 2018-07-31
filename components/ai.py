@@ -185,28 +185,27 @@ class Hunter(StrollingNPC):
 
         npc = self.owner
 
+        ##print "Searching for a TARGET! "
+
         target = game_map.find_closest(Point(npc.x, npc.y), self.hunting)
 
         if (target):
-            print "We have a TARGET! " + target.describe()
             dist = npc.distance_to(target)
+            #print "We have a TARGET! " + target.describe() + " current distance: " + str(dist)
 
             if dist > 1:
-                print "moving closer to " + target.describe()
+                #print "moving closer to " + target.describe() + " at (" + str(target.x) + "," + str(target.y) +")"
                 npc.move_astar(target, game_map)
                 return results
-
-            #close enough, attack!
-            #elif (entity.fighter.hp > 0):
             elif not target.isDead():
-                print "ATTACK! " + target.describe()
+                #print "ATTACK! " + target.describe()
                 attack_results = npc.fighter.attack(target)
                 dead_entity = None
                 for turn_result in attack_results:
                     dead_entity = turn_result.get('dead')
 
                 if (dead_entity):
-                    print "is DED!"
+                    #print "is DED!"
                     results.append({'entity_dead': target, 'killer': npc})
 
                 return results
@@ -221,7 +220,7 @@ class Hatching:
     def take_turn(self, target, fov_map, game_map):
         results = []
 
-        self.incubate -= 1
+        #self.incubate -= 1
 
         if (self.incubate < 1):
             npc = self.owner

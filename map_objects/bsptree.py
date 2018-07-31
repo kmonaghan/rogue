@@ -35,7 +35,7 @@ class BSPTree:
 					(l.height > self.MAX_LEAF_SIZE) or
 					(random.random() > 0.8)):
 						if (l.splitLeaf()): #try to split the leaf
-							print "Split the leaf"
+							#print "Split the leaf"
 							self._leafs.append(l.child_1)
 							self._leafs.append(l.child_2)
 							splitSuccessfully = True
@@ -58,7 +58,7 @@ class BSPTree:
 		point1 = room1.center()
 		point2 = room2.center()
 
-		print "Room centers " + point1.describe() + ' and ' + point2.describe()
+		#print "Room centers " + point1.describe() + ' and ' + point2.describe()
 
 		# 50% chance that a tunnel will start horizontally
 		if random.randint(0,1) == 1:

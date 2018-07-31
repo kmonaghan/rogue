@@ -4,7 +4,7 @@ import shelve
 
 
 def save_game(player, game_map, message_log, game_state):
-    print "This would save"
+    #print "This would save"
 #    with shelve.open('savegame.dat', 'n') as data_file:
 #        data_file['player_index'] = entities.index(player)
 #        data_file['entities'] = entities
@@ -13,7 +13,7 @@ def save_game(player, game_map, message_log, game_state):
 #        data_file['game_state'] = game_state
 
     #f.close()
-
+    print ("save_game")
 
 def load_game():
     if not os.path.isfile('savegame.dat'):

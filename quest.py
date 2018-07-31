@@ -85,16 +85,16 @@ class Quest:
     def kill_count(self, npc):
         results = []
 
-        #print "tsting kill condition: " + npc.name
+        ##print "tsting kill condition: " + npc.name
         if (self.kill == 0):
             return
 
         if (self.kill_type == npc.species):
-            #print "add a kill"
+            ##print "add a kill"
             self.kill_total += 1
 
         if (self.kill == self.kill_total):
-            print "quest complete"
+            #print "quest complete"
             results.append({'message': Message('Quest ' + self.title + ' completed!', libtcod.gold)})
             self.completed = True
             if (self.return_to_quest_giver):

@@ -75,5 +75,5 @@ class Inventory:
 
     def examine_item(self, item):
         results = []
-        print "examine_item"
+        #print "examine_item"
         return item.examine()

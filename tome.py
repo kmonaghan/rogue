@@ -57,7 +57,7 @@ def target_tile(max_range=None):
 #                (max_range is None or game_state.player.distance(x, y) <= max_range)):
 #            return (x, y)
 
-    print "traget_Tile"
+    print ("Target Tile")
 
 def target_npc(max_range=None):
     #returns a clicked npc inside FOV up to a range, or None if right-clicked
@@ -130,7 +130,7 @@ def cast_confuse():
 def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
     dice = libtcod.random_get_int(0, 1, number_of_npc)
 
-    print "Will generate " + str(dice) + " NPCs"
+    #print "Will generate " + str(dice) + " NPCs"
 
     start_x = point.x - 1
     start_y = point.y - 1

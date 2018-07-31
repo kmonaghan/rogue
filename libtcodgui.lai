@@ -5,27 +5,27 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libtcodgui.0.dylib'
+dlname='libtcodgui.1.dylib'
 
 # Names of this library.
-library_names='libtcodgui.0.dylib libtcodgui.dylib'
+library_names='libtcodgui.1.dylib libtcodgui.dylib'
 
 # The name of the static archive.
 old_library='libtcodgui.a'
 
 # Linker flags that cannot go in dependency_libs.
-inherited_linker_flags='  -pthread'
+inherited_linker_flags=' '
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/usr/local/lib /usr/local/lib/libtcodxx.la /usr/local/lib/libtcod.la -lSDL2 -lz'
+dependency_libs=' -L/usr/local/lib /usr/local/lib/libtcod.la -lSDL2 -lz'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
 
 # Version information for libtcodgui.
-current=0
+current=1
 age=0
-revision=0
+revision=7
 
 # Is this an already installed library?
 installed=yes

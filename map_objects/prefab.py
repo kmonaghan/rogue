@@ -40,7 +40,7 @@ class Prefab:
         self.room = Room(0,0,x,y)
 
         if (game_state.debug):
-            print "Prefabbed " + self.room.describe()
+            print ("Prefabbed " + self.room.describe())
 
     def carve(self, map):
         for xoffset in range(0, self.room.w):

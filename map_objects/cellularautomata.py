@@ -64,7 +64,7 @@ class CellularAutomata:
 					self.level[x][y] = Floor()
 
 	def createCaves(self,mapWidth,mapHeight):
-		for i in xrange (0,self.iterations):
+		for i in range (0,self.iterations):
 			map = [[Wall()
 					for y in range(mapHeight)]
 						for x in range(mapWidth)]
@@ -90,7 +90,7 @@ class CellularAutomata:
 
 	def cleanUpMap(self,mapWidth,mapHeight):
 		if (self.smoothEdges):
-			for i in xrange (0,5):
+			for i in range (0,5):
 				# Look at each cell individually and check for smoothness
 				for x in range(1,mapWidth-1):
 					for y in range (1,mapHeight-1):
@@ -232,7 +232,7 @@ class CellularAutomata:
 					for nextPoint in nextCave: break # get an element from cave1
 					# compare distance of point1 to old and new point2
 					newDistance = self.distanceFormula(point1,nextPoint)
-					if (newDistance < distance) or distance == None:
+					if (distance == None) or (newDistance < distance):
 						point2 = nextPoint
 						distance = newDistance
 
@@ -283,7 +283,7 @@ class CellularAutomata:
 			deepestPoint = None
 
 			for tile in set:
-			#	print "tile: " + str(tile[0]) + "," + str(tile[1])
+			#	#print "tile: " + str(tile[0]) + "," + str(tile[1])
 			#	self.level[tile[0]][tile[1]].fov_color = libtcod.green
 				if topcorner:
 					if (tile[0] < topcorner.x):
@@ -305,6 +305,6 @@ class CellularAutomata:
 			#	for y in range (topcorner.y, room.h):
 			#		self.level[x][y].fov_color = libtcod.red
 
-			print room.describe()
+			print (room.describe())
 
 			self.rooms.append(room)

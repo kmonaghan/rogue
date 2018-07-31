@@ -272,7 +272,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 game_state = GameStates.QUEST_ONBOARDING
 
                 quest_request = quest_onboarding
-                print "Do something with quest: " + quest_onboarding.title
+                #print "Do something with quest: " + quest_onboarding.title
 
             if quest_cancelled:
                 game_state = previous_game_state
@@ -283,7 +283,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                     enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
 
                     for enemy_turn_result in enemy_turn_results:
-                        #print "result: " + enemy_turn_result
+                        ##print "result: " + enemy_turn_result
                         message = enemy_turn_result.get('message')
                         dead_entity = enemy_turn_result.get('dead')
                         killed_entity = enemy_turn_result.get('entity_dead')

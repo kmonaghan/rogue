@@ -41,10 +41,10 @@ class Character(Entity):
         return desc
 
     def isDead(self):
-        print "am ded?"
+        #print "am ded?"
         if (self.fighter):
             if (self.fighter.hp > 0):
                 return False
 
-        print "not ded"
+        #print "not ded"
         return True

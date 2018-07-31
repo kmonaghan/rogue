@@ -2,7 +2,7 @@ __metaclass__ = type
 
 import libtcodpy as libtcod
 
-from tile import Tile
+from map_objects.tile import Tile
 
 class Wall(Tile):
     """

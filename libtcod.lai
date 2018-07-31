@@ -5,16 +5,16 @@
 # It is necessary for linking the library.
 
 # The name that we can dlopen(3).
-dlname='libtcod.0.dylib'
+dlname='libtcod.1.dylib'
 
 # Names of this library.
-library_names='libtcod.0.dylib libtcod.dylib'
+library_names='libtcod.1.dylib libtcod.dylib'
 
 # The name of the static archive.
 old_library='libtcod.a'
 
 # Linker flags that cannot go in dependency_libs.
-inherited_linker_flags='  -pthread'
+inherited_linker_flags=' '
 
 # Libraries that this one depends upon.
 dependency_libs=' -L/usr/local/lib -lSDL2 -lz'
@@ -23,9 +23,9 @@ dependency_libs=' -L/usr/local/lib -lSDL2 -lz'
 weak_library_names=''
 
 # Version information for libtcod.
-current=0
+current=1
 age=0
-revision=0
+revision=7
 
 # Is this an already installed library?
 installed=yes

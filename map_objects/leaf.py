@@ -82,8 +82,8 @@ class Leaf: # used for the BSP tree algorithm
 			self.room = Room(x,y,w,h)
 
 			if (game_state.debug):
-				print self.describe()
-				print self.room.describe()
+				print (self.describe())
+				print (self.room.describe())
 
 			bspTree.createRoom(self.room)
 

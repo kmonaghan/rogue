@@ -29,7 +29,7 @@ class Basic:
 		self.level[x][y] = Floor()
 
 	def createRoom(self, room):
-		print room.describe()
+		print (room.describe())
 		# set all tiles within a rectangle to 0
 		for x in range(room.x1, room.x2):
 			for y in range(room.y1, room.y2):

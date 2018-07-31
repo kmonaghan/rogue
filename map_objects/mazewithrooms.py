@@ -184,11 +184,11 @@ class MazeWithRooms:
 		west = (-1,0)
 
 		connectorRegions = [[ None
-			for y in xrange(mapHeight)]
-				for x in xrange(mapWidth)]
+			for y in range(mapHeight)]
+				for x in range(mapWidth)]
 
-		for x in xrange(1,mapWidth-1):
-			for y in xrange(1,mapHeight-1):
+		for x in range(1,mapWidth-1):
+			for y in range(1,mapHeight-1):
 				if self.level[x][y].blocked == False: continue
 
 				# count the number of different regions the wall tile is touching
@@ -207,8 +207,8 @@ class MazeWithRooms:
 
 		# make a list of all of the connectors
 		connectors = set()
-		for x in xrange(0,mapWidth):
-			for y in xrange(0,mapHeight):
+		for x in range(0,mapWidth):
+			for y in range(0,mapHeight):
 				if connectorRegions[x][y]:
 					connectorPosition = (x,y)
 					connectors.add(connectorPosition)
@@ -216,7 +216,7 @@ class MazeWithRooms:
 		# keep track of the regions that have been merged.
 		merged = {}
 		openRegions = set()
-		for i in xrange(self._currentRegion+1):
+		for i in range(self._currentRegion+1):
 			merged[i] = i
 			openRegions.add(i)
 
@@ -249,7 +249,7 @@ class MazeWithRooms:
 			previously been merged with the ones we are
 			connecting now.
 			'''
-			for i in xrange(self._currentRegion+1):
+			for i in range(self._currentRegion+1):
 				if merged[i] in sources:
 					merged[i] = dest
 
@@ -285,7 +285,7 @@ class MazeWithRooms:
 			connectors.difference_update(toBeRemoved)
 
 	def createRoom(self, room):
-		print room.describe()
+		print (room.describe())
 		# set all tiles within a rectangle to 0
 		for x in range(room.x1, room.x2):
 			for y in range(room.y1, room.y2):
@@ -305,8 +305,8 @@ class MazeWithRooms:
 		while not done:
 			done = True
 
-			for y in xrange(1,mapHeight):
-				for x in xrange(1,mapWidth):
+			for y in range(1,mapHeight):
+				for x in range(1,mapWidth):
 					if not self.level[x][y].blocked:
 
 						exits = 0
