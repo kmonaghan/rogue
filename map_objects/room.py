@@ -40,7 +40,7 @@ class Room(Rect):
             x = libtcod.random_get_int(None, self.x1, self.x2)
             y = libtcod.random_get_int(None, self.y1, self.y2)
 
-            if (map.is_blocked(Point(x,y)) == False):
+            if not map.is_blocked(Point(x,y)):
                 point = Point(x,y)
 
         return point
