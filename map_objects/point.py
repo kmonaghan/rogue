@@ -6,3 +6,9 @@ class Point:
 
     def describe(self):
         return str(self.x) + ', ' + str(self.y)
+
+    def distance_to(self, other):
+        #return the distance to another point
+        dx = other.x - self.x
+        dy = other.y - self.y
+        return math.sqrt(dx ** 2 + dy ** 2)
