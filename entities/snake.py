@@ -17,7 +17,7 @@ from species import Species
 class Snake(Animal):
     def __init__(self, point = None):
         char = 'S'
-        name = "Snake"
+        name = 'Snake'
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
@@ -48,10 +48,12 @@ class Snake(Animal):
 
             game_map.add_npc_to_map(egg)
 
+            print("Laid an egg at: " + Point(self.x, self.y).describe())
+
 class SnakeEgg(Animal):
     def __init__(self, point):
         char = 'E'
-        name = "Snake Egg"
+        name = 'Snake Egg'
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
