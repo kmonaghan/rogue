@@ -22,6 +22,7 @@ from map_objects.basic import Basic
 from map_objects.bsptree import BSPTree
 from map_objects.cellularautomata import CellularAutomata
 from map_objects.mazewithrooms import MazeWithRooms
+from map_objects.singleroom import SingleRoom
 
 import map_objects.prefab
 
@@ -55,8 +56,9 @@ class GameMap:
 
         #print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
         #print "Dungeon level = " + str(self.dungeon_level)
-
-        if (self.dungeon_level == 1):
+        if (game_state.debug):
+            generator = SingleRoom()
+        elif (self.dungeon_level == 1):
             generator = CellularAutomata()
         elif (self.dungeon_level <= 2):
             generator = AltBSPTree()
@@ -79,7 +81,9 @@ class GameMap:
 
         #print "Number of rooms: " + str(len(self.rooms))
 
-        if (self.dungeon_level > 1):
+        if (game_state.debug):
+            self.test_popluate_map(player)
+        elif (self.dungeon_level > 1):
             self.popluate_map(player)
         else:
             self.populate_cavern(player)
@@ -87,6 +91,26 @@ class GameMap:
     #    if (game_state.debug):
     #        for room in self.rooms:
     #            self.add_npc_to_map(room.room_detail)
+
+    def test_popluate_map(self, player):
+        room = choice(self.rooms)
+        point = room.random_tile(self)
+        player.x = point.x
+        player.y = point.y
+
+        stairs_component = Stairs(self.dungeon_level + 1)
+        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.entities.append(self.down_stairs)
+
+        for i in range(1):
+            point = self.random_open_cell()
+            npc = bestiary.rat(point)
+            self.add_npc_to_map(npc)
+
+        for i in range(10):
+            point = self.random_open_cell()
+            npc = bestiary.snake_egg(point)
+            self.add_npc_to_map(npc)
 
     def populate_cavern(self, player):
         #Random room for player start
@@ -312,9 +336,9 @@ class GameMap:
             return True
 
         #now check for any blocking objects
-        for entity in self.entity_map[point.x][point.y]:
-            if entity.blocks:
-                return True
+        #for entity in self.entity_map[point.x][point.y]:
+        #    if entity.blocks:
+        #        return True
 
         return False
 
