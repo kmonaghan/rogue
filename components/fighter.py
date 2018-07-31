@@ -66,20 +66,22 @@ class Fighter:
                 msg = self.owner.name.capitalize() + ' smashes ' + target.name + ' with a massive blow from their ' + weapon.name + ' for ' + str(damage) + ' hit points.'
 
             results.append({'message': Message(msg, libtcod.white)})
-            results.extend(target.fighter.take_damage(damage))
+            results.extend(target.fighter.take_damage(damage, self.owner))
         else:
             results.append({'message': Message('{0} attacks {1} but does no damage.'.format(
                 self.owner.name.capitalize(), target.name), libtcod.white)})
 
         return results
 
-    def take_damage(self, amount):
+    def take_damage(self, amount, npc = None):
         results = []
 
         self.hp -= amount
 
         if self.hp <= 0:
             results.append({'dead': self.owner, 'xp': self.xp})
+
+        self.owner.hasBeenAttacked(npc)
 
         return results
 

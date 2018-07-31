@@ -2,7 +2,11 @@ __metaclass__ = type
 
 import libtcodpy as libtcod
 
+import game_state
+
 from entities.entity import Entity
+
+import equipment
 
 from components.equipment import Equipment
 from components.inventory import Inventory
@@ -38,6 +42,9 @@ class Character(Entity):
         elif (self.species == Species.TROLL):
             desc += "(Troll)"
 
+        if (game_state.debug == True):
+            desc += " (" + str(self.x) + ", " + str(self.y) +")"
+
         return desc
 
     def isDead(self):
@@ -50,4 +57,16 @@ class Character(Entity):
         return True
 
     def onKill(self, npc, game_map):
-        print("Override this")
+        print("Override onKill")
+
+    def hasBeenAttacked(self, npc):
+        print("Override hasBeenAttacked")
+
+    def upgradeNPC(npc):
+        self.color = libtcod.silver
+        self.fighter.multiplier = 1.5
+        self.fighter.xp = npc.fighter.xp * 1.5
+        item = equipment.random_magic_weapon()
+
+        self.inventory.add_item(item)
+        self.equipment.toggle_equip(item)
