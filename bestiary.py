@@ -207,18 +207,3 @@ def rat_nest(point = None):
                         fighter=none, ai=none, species=Species.ANIMAL)
 
     return npc
-
-def rat(point = None):
-    fighter_component = Fighter(hp=4, defense=1, power=1, xp=2)
-    ai_component = Hunter(attacked_ai = BasicNPC(), hunting = Species.EGG)
-
-    npc = Character(point, 'R', 'rat', libtcod.darker_gray,
-                        fighter=fighter_component, ai=ai_component, species=Species.RAT)
-
-    teeth = equipment.teeth()
-    teeth.lootable = False
-
-    npc.inventory.add_item(teeth)
-    npc.equipment.toggle_equip(teeth)
-
-    return npc

@@ -12,6 +12,7 @@ from components.stairs import Stairs
 
 from entities.entity import Entity
 from entities.character import Character
+from entities.rat import Rat
 from entities.snake import Snake, SnakeEgg
 
 from map_objects.point import Point
@@ -103,12 +104,17 @@ class GameMap:
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.entities.append(self.down_stairs)
 
-        for i in range(1):
+        for i in range(5):
             point = self.random_open_cell()
-            npc = bestiary.rat(point)
+            npc = Snake(point)
             self.add_npc_to_map(npc)
 
         for i in range(10):
+            point = self.random_open_cell()
+            npc = Rat(point)
+            self.add_npc_to_map(npc)
+
+        for i in range(2):
             point = self.random_open_cell()
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
@@ -138,22 +144,22 @@ class GameMap:
         max_npcs = 40
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, int(max_npcs/4), max_npcs)
-        '''
+
         for i in range(int(num_npcs/2)):
             point = self.random_open_cell()
-            npc = bestiary.snake(point)
+            npc = Snake(point)
             self.add_npc_to_map(npc)
 
         for i in range(int(num_npcs/2)):
             point = self.random_open_cell()
-            npc = bestiary.rat(point)
+            npc = Rat(point)
             self.add_npc_to_map(npc)
 
         for i in range(10):
             point = self.random_open_cell()
-            npc = bestiary.snake_egg(point)
+            npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
-        '''
+
         stairs_component = Stairs(self.dungeon_level + 1)
         room = self.rooms[-1]
         self.rooms.remove(room)
@@ -384,11 +390,11 @@ class GameMap:
             pass
         ##print "removed " + entity.describe()
 
-    def find_closest(self, point, species, max_distance=3):
+    def find_closest(self, point, species, max_distance=2):
         npc = None
 
-        start_x = point.x - max_distance - 1
-        start_y = point.y - max_distance - 1
+        start_x = point.x - max_distance
+        start_y = point.y - max_distance
 
         if (start_x < 0):
             start_x = 0
@@ -396,18 +402,22 @@ class GameMap:
         if (start_y < 0):
             start_y = 0
 
-        dist = max_distance + 2
+        dist = max_distance + 1
 
-        for x in range(start_x, start_x + max_distance + 1):
-            for y in range(start_y, start_y + max_distance + 1):
-                ##print "checking " + str(x) + ", " + str(y)
+        #print("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
+        for x in range(start_x, start_x + (max_distance * 2) + 1):
+            for y in range(start_y, start_y + (max_distance * 2) + 1):
+                #print ("checking " + str(x) + ", " + str(y))
+                self.map[x][y].color = libtcod.red
                 if (len(self.entity_map[x][y])):
                     for entity in self.entity_map[x][y]:
-                        #print "checking: " + entity.describe()
-                        if (type(entity) is Character) and (entity.species == species):
+                        if (point.x == x) and (point.y == y):
+                            continue
+                        #print ("checking: " + entity.describe())
+                        if isinstance(entity, Character) and (entity.species == species) and not entity.isDead():
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
-                                #print "FOUND!"
+                                #print("FOUND!")
                                 npc = entity
                 #else:
                 #    #print "no entites at " + str(x) + ", " + str(y)
