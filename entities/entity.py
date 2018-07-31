@@ -82,6 +82,8 @@ class Entity:
         self.x += dx
         self.y += dy
 
+        self.point = Point(self.x, self.y)
+
     def move_towards(self, target_x, target_y, game_map):
         dx = target_x - self.x
         dy = target_y - self.y
