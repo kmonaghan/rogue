@@ -12,6 +12,7 @@ from components.stairs import Stairs
 
 from entities.entity import Entity
 from entities.character import Character
+from entities.snake import Snake, SnakeEgg
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -109,7 +110,7 @@ class GameMap:
 
         for i in range(10):
             point = self.random_open_cell()
-            npc = bestiary.snake_egg(point)
+            npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
 
     def populate_cavern(self, player):
@@ -137,7 +138,7 @@ class GameMap:
         max_npcs = 40
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, int(max_npcs/4), max_npcs)
-
+        '''
         for i in range(int(num_npcs/2)):
             point = self.random_open_cell()
             npc = bestiary.snake(point)
@@ -152,7 +153,7 @@ class GameMap:
             point = self.random_open_cell()
             npc = bestiary.snake_egg(point)
             self.add_npc_to_map(npc)
-
+        '''
         stairs_component = Stairs(self.dungeon_level + 1)
         room = self.rooms[-1]
         self.rooms.remove(room)

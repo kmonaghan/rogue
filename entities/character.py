@@ -48,3 +48,6 @@ class Character(Entity):
 
         #print "not ded"
         return True
+
+    def onKill(self, npc, game_map):
+        print("Override this")

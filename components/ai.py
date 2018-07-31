@@ -214,13 +214,13 @@ class Hunter(StrollingNPC):
 
 class Hatching:
     def __init__(self, hatches):
-        self.incubate = randint(10, 20)
+        self.incubate = randint(5, 15)
         self.hatches = hatches
 
     def take_turn(self, target, fov_map, game_map):
         results = []
 
-        #self.incubate -= 1
+        self.incubate -= 1
 
         if (self.incubate < 1):
             npc = self.owner

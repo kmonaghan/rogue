@@ -222,27 +222,3 @@ def rat(point = None):
     npc.equipment.toggle_equip(teeth)
 
     return npc
-
-def snake(point = None):
-    fighter_component = Fighter(hp=5, defense=1, power=1, xp=2)
-    ai_component = Hunter(attacked_ai = BasicNPC(), hunting = Species.RAT)
-
-    npc = Character(point, 'S', 'snake', libtcod.darker_gray,
-                        fighter=fighter_component, ai=ai_component, species=Species.SNAKE)
-
-    teeth = equipment.teeth()
-    teeth.lootable = False
-
-    npc.inventory.add_item(teeth)
-    npc.equipment.toggle_equip(teeth)
-
-    return npc
-
-def snake_egg(point = None):
-    fighter_component = Fighter(hp=2, defense=3, power=0, xp=0)
-    ai_component = Hatching(snake())
-
-    npc = Character(point, 'E', 'snake egg', libtcod.white,
-                        fighter=fighter_component, ai=ai_component, species=Species.EGG)
-
-    return npc
