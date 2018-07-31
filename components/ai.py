@@ -185,20 +185,20 @@ class Hunter(StrollingNPC):
 
         npc = self.owner
 
-        ##print "Searching for a TARGET! "
+        #print ("Searching for a TARGET!")
 
         target = game_map.find_closest(Point(npc.x, npc.y), self.hunting)
 
         if (target):
-            dist = npc.distance_to(target)
-            #print "We have a TARGET! " + target.describe() + " current distance: " + str(dist)
+            dist = max(abs(target.x - npc.x), abs(target.y - npc.y))
+            #print("We have a TARGET! " + target.describe() + " current distance: " + str(dist))
 
             if dist > 1:
-                #print "moving closer to " + target.describe() + " at (" + str(target.x) + "," + str(target.y) +")"
+                #print("Moving closer to " + target.describe() + " at (" + str(target.x) + "," + str(target.y) +")")
                 npc.move_astar(target, game_map)
                 return results
-            elif not target.isDead():
-                #print "ATTACK! " + target.describe()
+            elif not target.isDead() and (dist == 1):
+                print("ATTACK! " + target.describe() + " by " + npc.describe())
                 attack_results = npc.fighter.attack(target)
                 dead_entity = None
                 for turn_result in attack_results:
