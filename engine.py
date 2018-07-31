@@ -283,7 +283,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                     enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
 
                     for enemy_turn_result in enemy_turn_results:
-                        ##print "result: " + enemy_turn_result
                         message = enemy_turn_result.get('message')
                         dead_entity = enemy_turn_result.get('dead')
                         killed_entity = enemy_turn_result.get('entity_dead')
@@ -293,6 +292,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
                         if killed_entity:
                             npc_death(killed_entity, game_map.entities)
+                            entity.onKill(killed_entity, game_map)
 
                         if dead_entity:
                             if dead_entity == player:
@@ -307,6 +307,8 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
                     if game_state == GameStates.PLAYER_DEAD:
                         break
+
+                game_map.update_entity_map()
             else:
                 game_state = GameStates.PLAYERS_TURN
 

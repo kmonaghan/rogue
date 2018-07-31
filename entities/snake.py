@@ -59,6 +59,6 @@ class SnakeEgg(Animal):
         ai = Hatching(Snake())
         item = None
         gear = None
-        species = Species.SNAKE
+        species = Species.EGG
 
         super(SnakeEgg, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
