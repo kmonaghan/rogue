@@ -97,8 +97,8 @@ class GameMap:
     def test_popluate_map(self, player):
         room = choice(self.rooms)
         point = room.random_tile(self)
-        player.x = point.x
-        player.y = point.y
+        player.x = 0
+        player.y = 0
 
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
@@ -118,6 +118,16 @@ class GameMap:
             point = self.random_open_cell()
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
+
+
+        potion = equipment.healing_potion(Point(1,1))
+        self.add_npc_to_map(potion)
+        scroll1 = equipment.lighting_scroll(Point(1,2))
+        self.add_npc_to_map(scroll1)
+        scroll2 = equipment.fireball_scroll(Point(1,3))
+        self.add_npc_to_map(scroll2)
+        scroll3 = equipment.confusion_scroll(Point(1,4))
+        self.add_npc_to_map(scroll3)
 
     def populate_cavern(self, player):
         #Random room for player start

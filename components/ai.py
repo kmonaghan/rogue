@@ -61,22 +61,24 @@ class WanderingNPC:
         self.rooms.append(room)
 
 class ConfusedNPC:
-    #AI for a temporarily confused npc (reverts to previous AI after a while).
-    def __init__(self, old_ai, num_turns=10): #tome.CONFUSE_NUM_TURNS):
-        self.old_ai = old_ai
-        self.num_turns = num_turns
+    def __init__(self, previous_ai, number_of_turns=10):
+        self.previous_ai = previous_ai
+        self.number_of_turns = number_of_turns
 
     def take_turn(self, target, fov_map, game_map):
         results = []
 
-        if self.num_turns > 0:  #still confused...
-            #move in a random direction, and decrease the number of turns confused
-            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
-            self.num_turns -= 1
+        if self.number_of_turns > 0:
+            random_x = self.owner.x + randint(0, 2) - 1
+            random_y = self.owner.y + randint(0, 2) - 1
 
-        else:  #restore the previous AI (this one will be deleted because it's not referenced anymore)
-            self.owner.ai = self.old_ai
-            #messageconsole.message('The ' + self.owner.name + ' is no longer confused!', libtcod.red)
+            if random_x != self.owner.x and random_y != self.owner.y:
+                self.owner.move_towards(random_x, random_y, game_map)
+
+            self.number_of_turns -= 1
+        else:
+            self.owner.ai = self.previous_ai
+            results.append({'message': Message('The {0} is no longer confused!'.format(self.owner.name), libtcod.red)})
 
         return results
 

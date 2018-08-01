@@ -1,9 +1,5 @@
 import libtcodpy as libtcod
 
-import game_state
-
-from equipment_slots import EquipmentSlots
-
 class Item:
     #an item that can be picked up and used.
     def __init__(self, use_function=None, targeting=False, targeting_message=None, **kwargs):

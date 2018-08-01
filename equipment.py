@@ -9,6 +9,10 @@ from components.item import Item
 
 from entities.entity import Entity
 
+from game_messages import Message
+
+from item_functions import cast_confuse, cast_fireball, cast_lightning, heal
+
 from equipment_slots import EquipmentSlots
 from render_order import RenderOrder
 
@@ -49,8 +53,9 @@ def random_potion(point = None):
     choice = random_utils.random_choice(item_chances)
     if choice == 'heal':
         #create a healing potion
-        item_component = Item(use_function=tome.cast_heal)
-        item = Entity(point, '!', 'healing potion', libtcod.violet, item=item_component)
+        #item_component = Item(use_function=tome.cast_heal)
+        #item = Entity(point, '!', 'healing potion', libtcod.violet, item=item_component)
+        item = healing_potion()
 
     return item
 
@@ -116,24 +121,38 @@ def random_magic_weapon():
 
     return item
 
+def healing_potion(point = None):
+    item_component = Item(use_function=heal, amount=4)
+
+    item = Entity(point, '!', 'Healing Potion', libtcod.violet, render_order=RenderOrder.ITEM,
+                    item=item_component)
+
+    return item
+
 def lighting_scroll(point = None):
     #create a lightning bolt scroll
-    item_component = Item(use_function=tome.cast_lightning)
-    item = Entity(point, '#', 'scroll of lightning bolt', libtcod.light_yellow, item=item_component)
+    item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
+    item = Entity(point, '#', 'Lightning Scroll', libtcod.yellow, render_order=RenderOrder.ITEM,
+                    item=item_component)
 
     return item
 
 def fireball_scroll(point = None):
     #create a fireball scroll
-    item_component = Item(use_function=tome.cast_fireball)
-    item = Entity(point, '#', 'scroll of fireball', libtcod.light_yellow, item=item_component)
+    item_component = Item(use_function=cast_fireball, targeting=True, targeting_message=Message(
+                        'Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan),
+                                          damage=12, radius=3)
+    item = Entity(point, '#', 'Fireball Scroll', libtcod.light_yellow, render_order=RenderOrder.ITEM,
+                                  item=item_component)
 
     return item
 
 def confusion_scroll(point = None):
     #create a confuse scroll
-    item_component = Item(use_function=tome.cast_confuse)
-    item = Entity(point, '#', 'scroll of confusion', libtcod.light_yellow, item=item_component)
+    item_component = Item(use_function=cast_confuse, targeting=True, targeting_message=Message(
+                        'Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan))
+    item = Entity(point, '#', 'Confusion Scroll', libtcod.light_pink, render_order=RenderOrder.ITEM,
+                    item=item_component)
 
     return item
 
