@@ -32,7 +32,7 @@ def upgrade_npc(npc):
 def bountyhunter(point = None):
     #create a questgiver
 
-    ai_component = StrollingNPC()
+    ai_component = StrollingNPC(tethered = point)
     npc = Character(point, '?', 'Bounty Hunter', libtcod.gold,  ai=ai_component, species=Species.NONDESCRIPT)
 
     questgiver = Questgiver()

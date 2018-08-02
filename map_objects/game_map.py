@@ -7,7 +7,7 @@ import game_state
 import quest
 import random_utils
 
-from components.ai import WanderingNPC
+from components.ai import PatrollingNPC
 from components.stairs import Stairs
 
 from entities.entity import Entity
@@ -104,6 +104,11 @@ class GameMap:
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.entities.append(self.down_stairs)
 
+        npc = bestiary.bountyhunter(room.random_tile(self))
+        self.add_npc_to_map(npc)
+        
+        '''
+        #Snakes and Rats
         for i in range(5):
             point = self.random_open_cell()
             npc = Snake(point)
@@ -118,8 +123,10 @@ class GameMap:
             point = self.random_open_cell()
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
+        '''
 
-
+        '''
+        #Potions and scrolls
         potion = equipment.healing_potion(Point(1,1))
         self.add_npc_to_map(potion)
         scroll1 = equipment.lighting_scroll(Point(1,2))
@@ -128,6 +135,7 @@ class GameMap:
         self.add_npc_to_map(scroll2)
         scroll3 = equipment.confusion_scroll(Point(1,4))
         self.add_npc_to_map(scroll3)
+        '''
 
     def populate_cavern(self, player):
         #Random room for player start
@@ -234,7 +242,7 @@ class GameMap:
             room = list_of_random_items[0]
             point = room.random_tile(self)
             npc = bestiary.goblin(point)
-            npc.ai = WanderingNPC(list_of_random_items, npc.ai)
+            npc.ai = PatrollingNPC(list_of_random_items, npc.ai)
             npc.ai.owner = npc
             bestiary.upgrade_npc(npc)
             self.add_npc_to_map(npc)

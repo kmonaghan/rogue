@@ -31,7 +31,7 @@ class BasicNPC:
 
         return results
 
-class WanderingNPC:
+class PatrollingNPC:
     #AI for a temporarily confused npc (reverts to previous AI after a while).
     def __init__(self, rooms, old_ai):
         self.rooms = rooms
@@ -84,17 +84,22 @@ class ConfusedNPC:
 
 class StrollingNPC:
     #AI for a temporarily confused npc (reverts to previous AI after a while).
-    def __init__(self, attacked_ai = None):
+    def __init__(self, attacked_ai = None, tethered = None, tethered_distance = 4):
         self.moved = False
         self.attacked_ai = attacked_ai
+        self.tethered = tethered
+        self.tethered_distance = tethered_distance
 
     def take_turn(self, target, fov_map, game_map):
         results = []
-        #if (self.attacked_ai and self.owner.fighter.hp < self.owner.fighter.base_max_hp):
-        #    self.owner.setAI(self.attacked_ai)
-        #    return self.owner.ai.take_turn(target, fov_map, game_map)
 
         if (self.moved == False):
+            if self.tethered:
+                if (self.owner.point.distance_to(self.tethered) > self.tethered_distance):
+                    print("too far from tethered point")
+                    self.owner.move_towards(self.tethered.x, self.tethered.y, game_map)
+                    return results
+
             dx = libtcod.random_get_int(0, -1, 1)
             dy = libtcod.random_get_int(0, -1, 1)
             self.moved = self.owner.attempt_move(self.owner.x + dx, self.owner.y + dy, game_map)

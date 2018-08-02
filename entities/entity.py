@@ -19,7 +19,7 @@ class Entity:
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
                  fighter=None, ai=None, item=None, stairs=None, equippable=None, render_order=RenderOrder.CORPSE):
-        self.point = point
+
         if point is not None:
             self.x = point.x
             self.y = point.y
@@ -62,6 +62,10 @@ class Entity:
 
         self.render_order = render_order
 
+    @property
+    def point(self):
+        return Point(self.x,self.y)
+
     def examine(self):
         results = []
 
@@ -81,8 +85,6 @@ class Entity:
         #if not is_blocked(Point(self.x + dx, self.y + dy)):
         self.x += dx
         self.y += dy
-
-        self.point = Point(self.x, self.y)
 
     def move_towards(self, target_x, target_y, game_map):
         dx = target_x - self.x

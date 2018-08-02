@@ -1,3 +1,4 @@
+from math import sqrt
 class Point:
     #a rectangle on the map. used to characterize a room.
     def __init__(self, x, y):
@@ -11,4 +12,7 @@ class Point:
         #return the distance to another point
         dx = other.x - self.x
         dy = other.y - self.y
-        return math.sqrt(dx ** 2 + dy ** 2)
+        return sqrt(dx ** 2 + dy ** 2)
+
+    def compare(self, other):
+        return ((self.x == other.x) and (self.y == other.y))
