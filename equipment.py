@@ -11,7 +11,7 @@ from entities.entity import Entity
 
 from game_messages import Message
 
-from item_functions import cast_confuse, cast_fireball, cast_lightning, heal
+from tome import cast_confuse, cast_fireball, cast_lightning, heal
 
 from equipment_slots import EquipmentSlots
 from render_order import RenderOrder
