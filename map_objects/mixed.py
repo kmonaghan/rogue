@@ -1,8 +1,14 @@
 import libtcodpy as libtcod
 
+from random import randint
+
 from map_objects.levelmap import LevelMap
 from map_objects.altbsptree import AltBSPTree
 from map_objects.cellularautomata import CellularAutomata
+
+from map_objects.point import Point
+from map_objects.floor import Floor
+from map_objects.wall import Wall
 
 class Mixed(LevelMap):
     def __init__(self):
@@ -38,4 +44,50 @@ class Mixed(LevelMap):
             room.change_xy(room.x1 + third, room.y1)
             self.caves.append(room)
 
+        self.linkMaps()
+
         return self.level
+
+    def linkMaps(self):
+        target_x = int(self.width / 3)
+
+        x = 0
+
+        closest_room = None
+        closest_cave = None
+
+        for room in self.rooms:
+            if ((room.x1 + room.w) > x):
+                closest_room = room
+
+        x = self.width
+
+        for room in self.caves:
+            if ((room.x1 + room.w) < x):
+                closest_cave = room
+        if (closest_room and closest_cave):
+            self.createHall(closest_room, closest_cave)
+
+    def createHall(self, room1, room2):
+        # connect two rooms by hallways
+        point1 = room1.center()
+        point2 = room2.center()
+
+        #print "Room centers " + point1.describe() + ' and ' + point2.describe()
+
+        # 50% chance that a tunnel will start horizontally
+        if randint(0,1) == 1:
+            self.createHorTunnel(point1.x, point2.x, point1.y)
+            self.createVirTunnel(point1.y, point2.y, point2.x)
+
+        else: # else it starts virtically
+            self.createVirTunnel(point1.y, point2.y, point1.x)
+            self.createHorTunnel(point1.x, point2.x, point2.y)
+
+    def createHorTunnel(self, x1, x2, y):
+        for x in range(min(x1,x2),max(x1,x2)+1):
+            self.level[x][y] = Floor()
+
+    def createVirTunnel(self, y1, y2, x):
+        for y in range(min(y1,y2),max(y1,y2)+1):
+            self.level[x][y] = Floor()
