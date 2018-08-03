@@ -238,3 +238,20 @@ class Hatching:
             game_map.add_npc_to_map(self.hatches)
 
         return results
+
+class SpawnNPC:
+    def __init__(self, spawn):
+        self.spawn = spawn
+        self.turns_since_last_spawn = 0
+
+    def take_turn(self, target, fov_map, game_map):
+        results = []
+
+        if ((randint(0, 10) + self.turns_since_last_spawn) > 12):
+            spawner = self.owner
+            npc = self.spawn(self.owner.point)
+            self.turns_since_last_spawn = 0
+            game_map.add_npc_to_map(npc)
+
+
+        return results

@@ -4,6 +4,7 @@ import equipment
 
 from components.ai import BasicNPC
 from components.ai import Hunter
+from components.ai import SpawnNPC
 
 from components.fighter import Fighter
 
@@ -27,6 +28,29 @@ class Rat(Animal):
         species = Species.RAT
 
         super(Rat, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
+
+        teeth = equipment.teeth()
+        teeth.lootable = False
+
+        self.inventory.add_item(teeth)
+        self.equipment.toggle_equip(teeth)
+
+        self.egg_generation = 0
+
+class RatNest(Animal):
+    def __init__(self, point = None):
+        char = 'N'
+        name = 'Rat Nest'
+        color = libtcod.darker_gray
+        always_visible = False
+        blocks = True
+        fighter = Fighter(hp=4, defense=1, power=0, xp=2)
+        ai = SpawnNPC(Rat)
+        item = None
+        gear = None
+        species = Species.RAT
+
+        super(RatNest, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
 
         teeth = equipment.teeth()
         teeth.lootable = False

@@ -12,7 +12,7 @@ from components.stairs import Stairs
 
 from entities.entity import Entity
 from entities.character import Character
-from entities.rat import Rat
+from entities.rat import Rat, RatNest
 from entities.snake import Snake, SnakeEgg
 
 from map_objects.point import Point
@@ -93,9 +93,9 @@ class GameMap:
         else:
             self.populate_cavern(player)
 
-    #    if (game_state.debug):
-    #        for room in self.rooms:
-    #            self.add_npc_to_map(room.room_detail)
+        if (game_state.debug):
+            for room in self.rooms:
+                self.add_npc_to_map(room.room_detail)
 
     def test_popluate_map(self, player):
         room = choice(self.rooms)
@@ -108,8 +108,20 @@ class GameMap:
         self.entities.append(self.down_stairs)
 
         npc = bestiary.bountyhunter(room.random_tile(self))
+
+        q = quest.kill_vermin()
+
+        q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100)
+        q2.npc = bestiary.goblin(Point(0,0))
+        q2.kill = 1
+        q2.kill_type = Species.GOBLIN
+
+        q.next_quest = q2
+
+        npc.questgiver.add_quest(q)
         self.add_npc_to_map(npc)
 
+        self.add_npc_to_map(npc)
 
         #Snakes and Rats
         for i in range(5):
@@ -127,6 +139,10 @@ class GameMap:
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
 
+        for i in range(2):
+            point = self.random_open_cell(start_x=25)
+            npc = RatNest(point)
+            self.add_npc_to_map(npc)
 
         '''
         #Potions and scrolls
@@ -363,11 +379,6 @@ class GameMap:
         if self.map[point.x][point.y].blocked:
             return True
 
-        #now check for any blocking objects
-        #for entity in self.entity_map[point.x][point.y]:
-        #    if entity.blocks:
-        #        return True
-
         return False
 
     def add_npc_to_map(self, npc):
@@ -379,9 +390,10 @@ class GameMap:
         self.entities.remove(npc)
 
     def get_blocking_entities_at_location(self, destination_x, destination_y):
-        for entity in self.entities:
-            if entity.blocks and entity.x == destination_x and entity.y == destination_y:
-                return entity
+        if (len(self.entity_map[destination_x][destination_y])):
+            for entity in self.entity_map[destination_x][destination_y]:
+                if entity.blocks:
+                    return entity
 
         return None
 
