@@ -39,6 +39,8 @@ class CellularAutomata:
 
 		self.caves = []
 
+		print("cell mapWidth: " + str(mapWidth))
+
 		self.level = [[Wall()
 			for y in range(mapHeight)]
 				for x in range(mapWidth)]

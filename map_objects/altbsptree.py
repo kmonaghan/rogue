@@ -2,37 +2,29 @@ import libtcodpy as libtcod
 
 import random
 
+from map_objects.levelmap import LevelMap
 from map_objects.leaf import Leaf
 from map_objects.point import Point
 from map_objects.room import Room
 from map_objects.wall import Wall
 from map_objects.floor import Floor
 
-class AltBSPTree:
+class AltBSPTree(LevelMap):
 	def __init__(self):
+		super(AltBSPTree, self).__init__()
 		self.bsp = None
 		self.DEPTH = 10
-		self.MIN_SIZE = 5
+		self.ROOM_MIN_SIZE = 5
 		self.FULL_ROOMS = False
-		self.mapWidth = 0
-		self.mapHeight = 0
-		self.level = []
-		self.rooms = []
-		self.offset = 0
 
 	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset=0):
-		self.level = [[Wall() for y in range(mapHeight)] for x in range(mapWidth)]
-
-		self.MIN_SIZE = room_min_size
-		self.mapWidth = mapWidth
-		self.mapHeight = mapHeight
-		self.offset = offset
+		super(AltBSPTree, self).generateLevel(mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset)
 
         #New root node
-		self.bsp = libtcod.bsp_new_with_size(self.offset / 2, self.offset / 2, self.mapWidth - self.offset, self.mapHeight - self.offset)
+		self.bsp = libtcod.bsp_new_with_size(int(self.offset / 2), int(self.offset / 2), self.width - self.offset, self.height - self.offset)
 
         #Split into nodes
-		libtcod.bsp_split_recursive(self.bsp, 0, self.DEPTH, self.MIN_SIZE + 1, self.MIN_SIZE + 1, 1.5, 1.5)
+		libtcod.bsp_split_recursive(self.bsp, 0, self.DEPTH, self.ROOM_MIN_SIZE + 1, self.ROOM_MIN_SIZE + 1, 1.5, 1.5)
 
         #Traverse the nodes and create rooms
 		libtcod.bsp_traverse_inverted_level_order(self.bsp, self.traverse_node)
@@ -47,17 +39,17 @@ class AltBSPTree:
 			miny = node.y + 1
 			maxy = node.y + node.h - 1
 
-			if maxx == self.mapWidth - 1:
+			if maxx == self.width - 1:
 				maxx -= 1
-			if maxy == self.mapHeight - 1:
+			if maxy == self.height - 1:
 				maxy -= 1
 
 			#If it's False the rooms sizes are random, else the rooms are filled to the node's size
 			if self.FULL_ROOMS == False:
-				minx = libtcod.random_get_int(None, minx, maxx - self.MIN_SIZE + 1)
-				miny = libtcod.random_get_int(None, miny, maxy - self.MIN_SIZE + 1)
-				maxx = libtcod.random_get_int(None, minx + self.MIN_SIZE - 2, maxx)
-				maxy = libtcod.random_get_int(None, miny + self.MIN_SIZE - 2, maxy)
+				minx = libtcod.random_get_int(None, minx, maxx - self.ROOM_MIN_SIZE + 1)
+				miny = libtcod.random_get_int(None, miny, maxy - self.ROOM_MIN_SIZE + 1)
+				maxx = libtcod.random_get_int(None, minx + self.ROOM_MIN_SIZE - 2, maxx)
+				maxy = libtcod.random_get_int(None, miny + self.ROOM_MIN_SIZE - 2, maxy)
 
 			node.x = minx
 			node.y = miny
@@ -97,7 +89,7 @@ class AltBSPTree:
 					x = libtcod.random_get_int(None, minx, maxx)
 
 					# catch out-of-bounds attempts
-					while x > self.mapWidth - 1:
+					while x > self.width - 1:
 						x -= 1
 
 					self.vline_down(x, right.y)
@@ -117,7 +109,7 @@ class AltBSPTree:
 					y = libtcod.random_get_int(None, miny, maxy)
 
 					# catch out-of-bounds attempts
-					while y > self.mapHeight - 1:
+					while y > self.height - 1:
 						y -= 1
 
 					self.hline_left(right.x - 1, y)
@@ -138,7 +130,7 @@ class AltBSPTree:
 			y -= 1
 
 	def vline_down(self, x, y):
-		while y < self.mapHeight and self.level[x][y].blocked == True:
+		while y < self.height and self.level[x][y].blocked == True:
 			self.level[x][y] = Floor()
 			y += 1
 
@@ -155,6 +147,6 @@ class AltBSPTree:
 			x -= 1
 
 	def hline_right(self, x, y):
-		while x < self.mapWidth and self.level[x][y].blocked == True:
+		while x < self.width and self.level[x][y].blocked == True:
 			self.level[x][y] = Floor()
 			x += 1

@@ -26,6 +26,8 @@ from map_objects.cellularautomata import CellularAutomata
 from map_objects.mazewithrooms import MazeWithRooms
 from map_objects.singleroom import SingleRoom
 
+from map_objects.mixed import Mixed
+
 import map_objects.prefab
 
 from render_order import RenderOrder
@@ -59,7 +61,8 @@ class GameMap:
         #print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
         #print "Dungeon level = " + str(self.dungeon_level)
         if (game_state.debug):
-            generator = SingleRoom()
+            #generator = SingleRoom()
+            generator = Mixed()
         elif (self.dungeon_level == 1):
             generator = CellularAutomata()
         elif (self.dungeon_level <= 2):
@@ -97,8 +100,8 @@ class GameMap:
     def test_popluate_map(self, player):
         room = choice(self.rooms)
         point = room.random_tile(self)
-        player.x = 0
-        player.y = 0
+        player.x = point.x
+        player.y = point.y
 
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
@@ -106,24 +109,24 @@ class GameMap:
 
         npc = bestiary.bountyhunter(room.random_tile(self))
         self.add_npc_to_map(npc)
-        
-        '''
+
+
         #Snakes and Rats
         for i in range(5):
-            point = self.random_open_cell()
+            point = self.random_open_cell(start_x=25)
             npc = Snake(point)
             self.add_npc_to_map(npc)
 
         for i in range(10):
-            point = self.random_open_cell()
+            point = self.random_open_cell(start_x=25)
             npc = Rat(point)
             self.add_npc_to_map(npc)
 
         for i in range(2):
-            point = self.random_open_cell()
+            point = self.random_open_cell(start_x=25)
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
-        '''
+
 
         '''
         #Potions and scrolls
@@ -388,14 +391,14 @@ class GameMap:
                 return True
         return False
 
-    def random_open_cell(self):
-        tileX = randint(1,self.width - 2) #(2,mapWidth-3)
-        tileY = randint(1,self.height - 2) #(2,mapHeight-3)
+    def random_open_cell(self, start_x = 1, start_y = 1):
+        tileX = randint(start_x,self.width - 2) #(2,mapWidth-3)
+        tileY = randint(start_y,self.height - 2) #(2,mapHeight-3)
         point = Point(tileX, tileY)
         if not self.is_blocked(point):
             return point
         else:
-            return self.random_open_cell()
+            return self.random_open_cell(start_x, start_y)
 
     def add_to_map_state(self, entity):
         self.entity_map[entity.x][entity.y].append(entity)
@@ -420,13 +423,21 @@ class GameMap:
         if (start_y < 0):
             start_y = 0
 
+        end_x = start_x + (max_distance * 2) + 1
+        if (end_x > self.width):
+            end_x = self.width
+
+        end_y = start_y + (max_distance * 2) + 1
+        if (end_y > self.height):
+            end_y = self.height
+
         dist = max_distance + 1
 
         #print("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
-        for x in range(start_x, start_x + (max_distance * 2) + 1):
-            for y in range(start_y, start_y + (max_distance * 2) + 1):
+        for x in range(start_x, end_x):
+            for y in range(start_y, end_y):
                 #print ("checking " + str(x) + ", " + str(y))
-                self.map[x][y].color = libtcod.red
+
                 if (len(self.entity_map[x][y])):
                     for entity in self.entity_map[x][y]:
                         if (point.x == x) and (point.y == y):
