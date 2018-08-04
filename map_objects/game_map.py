@@ -98,14 +98,10 @@ class GameMap:
                 self.add_npc_to_map(room.room_detail)
 
     def test_popluate_map(self, player):
-        room = choice(self.rooms)
+        room = self.rooms[0]
         point = room.random_tile(self)
         player.x = point.x
         player.y = point.y
-
-        stairs_component = Stairs(self.dungeon_level + 1)
-        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-        self.entities.append(self.down_stairs)
 
         npc = bestiary.bountyhunter(room.random_tile(self))
 
@@ -121,26 +117,29 @@ class GameMap:
         npc.questgiver.add_quest(q)
         self.add_npc_to_map(npc)
 
-        self.add_npc_to_map(npc)
+        room = self.rooms[-1]
+        stairs_component = Stairs(self.dungeon_level + 1)
+        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.entities.append(self.down_stairs)
 
         #Snakes and Rats
         for i in range(5):
-            point = self.random_open_cell(start_x=25)
+            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
             npc = Snake(point)
             self.add_npc_to_map(npc)
 
-        for i in range(10):
-            point = self.random_open_cell(start_x=25)
+        for i in range(15):
+            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
             npc = Rat(point)
             self.add_npc_to_map(npc)
 
-        for i in range(2):
-            point = self.random_open_cell(start_x=25)
+        for i in range(5):
+            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
 
-        for i in range(2):
-            point = self.random_open_cell(start_x=25)
+        for i in range(3):
+            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
             npc = RatNest(point)
             self.add_npc_to_map(npc)
 
@@ -293,7 +292,7 @@ class GameMap:
 
             #only place it if the tile is not blocked
             if not self.is_blocked(point):
-                choice = random_utils.random_choice(npc_chances)
+                choice = random_utils.random_choice_from_dict(npc_chances)
                 if choice == 'orc':
                     npc = bestiary.orc(point)
                 elif choice == 'troll':
@@ -338,7 +337,7 @@ class GameMap:
 
             #only place it if the tile is not blocked
             if not self.is_blocked(point):
-                choice = random_utils.random_choice(item_chances)
+                choice = random_utils.random_choice_from_dict(item_chances)
                 if choice == 'potion':
                     item = equipment.random_potion(point)
                 elif choice == 'scroll':
@@ -403,9 +402,15 @@ class GameMap:
                 return True
         return False
 
-    def random_open_cell(self, start_x = 1, start_y = 1):
-        tileX = randint(start_x,self.width - 2) #(2,mapWidth-3)
-        tileY = randint(start_y,self.height - 2) #(2,mapHeight-3)
+    def random_open_cell(self, start_x = 1, start_y = 1, end_x = -1, end_y = -1):
+        if (end_x == -1):
+            end_x = self.width - 2
+
+        if (end_y == -1):
+            end_y = self.height - 2
+        tileX = randint(start_x, end_x)
+        tileY = randint(start_y, end_y)
+
         point = Point(tileX, tileY)
         if not self.is_blocked(point):
             return point
