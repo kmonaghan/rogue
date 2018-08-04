@@ -19,7 +19,7 @@ def kill_vermin(kill = 10):
 
     q = Quest(title, description, 100)
     q.kill = kill
-    q.kill_type = Species.ANIMAL
+    q.kill_type = Species.RAT
     q.return_to_quest_giver = True
 
     return q
