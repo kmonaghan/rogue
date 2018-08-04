@@ -26,8 +26,19 @@ class LevelMap:
         self.ROOM_MAX_SIZE = room_max_size
 
         self.offset = offset
-        
+
         self.level = [[Wall() for y in range(self.height)]
                     for x in range(self.width)]
 
         return self.level
+
+    def digRoom(self, room):
+        minx = room.x1
+        maxx = room.x1 + room.w + 1
+
+        miny = room.y1
+        maxy = room.y1 + room.h + 1
+
+        for x in range(minx, maxx):
+            for y in range(miny, maxy):
+                self.level[x][y] = Floor()
