@@ -27,7 +27,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
     quest_request = None
 
     while not libtcod.console_is_window_closed():
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+        #libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
@@ -39,11 +39,14 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         fov_recompute = False
 
-        libtcod.console_flush()
+        #libtcod.console_flush()
 
         clear_all(con, game_map)
 
         game_map.update_entity_map()
+
+        libtcod.console_flush()
+        libtcod.sys_wait_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse, True)
 
         action = handle_keys(key, game_state)
         mouse_action = handle_mouse(mouse)
