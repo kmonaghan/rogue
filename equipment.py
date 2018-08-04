@@ -25,7 +25,7 @@ def random_armour(point = None):
     item_chances['chainmail'] = random_utils.from_dungeon_level([[40, 3], [30, 4]], game_state.dungeon_level)
     item_chances['breastplate'] = random_utils.from_dungeon_level([[15, 4]], game_state.dungeon_level)
 
-    choice = random_utils.random_choice(item_chances)
+    choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'shield':
         item = shield(point)
 
@@ -50,7 +50,7 @@ def random_potion(point = None):
     item_chances = {}
     item_chances['heal'] = 40
 
-    choice = random_utils.random_choice(item_chances)
+    choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'heal':
         #create a healing potion
         #item_component = Item(use_function=tome.cast_heal)
@@ -65,7 +65,7 @@ def random_scroll(point = None):
     item_chances['fireball'] = 30
     item_chances['confuse'] = 30
 
-    choice = random_utils.random_choice(item_chances)
+    choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'lightning':
         item = lighting_scroll(point)
 
@@ -83,7 +83,7 @@ def random_weapon(point = None):
     item_chances['short sword'] = random_utils.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], game_state.dungeon_level)
     item_chances['long sword'] = random_utils.from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], game_state.dungeon_level)
 
-    choice = random_utils.random_choice(item_chances)
+    choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'dagger':
         item = dagger(point)
 
