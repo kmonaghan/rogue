@@ -198,12 +198,3 @@ def necromancer(point = None):
 #        upgrade_npc(npc)
 
     return npc
-
-def rat_nest(point = None):
-    fighter_component = Fighter(hp=4, defense=1, power=1, xp=2)
-    #ai_component = StrollingNPC(BasicNPC())
-
-    npc = Character(point, 'N', "Rat's nest", libtcod.darker_gray,
-                        fighter=none, ai=none, species=Species.ANIMAL)
-
-    return npc
