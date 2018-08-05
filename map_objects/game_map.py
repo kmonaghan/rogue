@@ -38,70 +38,71 @@ from species import Species
 
 class GameMap:
     def __init__(self, dungeon_level=0):
-        self.width = 40
-        self.height = 40
-        self.map = None
-        self.rooms = None
-        self.npcs = []
         self.entities = []
         self.down_stairs = None
         self.dungeon_level = dungeon_level
         self.entity_map = None
+        self.levels = []
+        self.generator = None
+
+    @property
+    def map(self):
+        return self.generator.level
+
+    @property
+    def width(self):
+        return self.generator.width
+
+    @property
+    def height(self):
+        return self.generator.height
+
+    @property
+    def rooms(self):
+        return self.generator.rooms
 
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
         self.entities = [player]
-
-        self.width = map_width
-        self.height = map_height
-
-        self.entity_map = [[[]
-			for y in range(self.height)]
-				for x in range(self.width)]
 
         #print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
         #print "Dungeon level = " + str(self.dungeon_level)
         if (game_state.debug):
             #generator = SingleRoom()
-            generator = Mixed()
+            self.generator = Mixed()
         elif (self.dungeon_level == 1):
-            generator = CellularAutomata()
+            self.generator = Mixed()
         elif (self.dungeon_level <= 2):
-            generator = AltBSPTree()
+            self.generator = AltBSPTree()
         elif (self.dungeon_level <= 5):
-            generator = MazeWithRooms()
-
-        #generator = MazeWithRooms()
-        #generator = BSPTree()
-        #generator = CellularAutomata()
-        #generator = Basic()
+            self.generator = MazeWithRooms()
 
         if (self.dungeon_level == 6):
             prefabbed = map_objects.prefab.Prefab(map_objects.prefab.boss_room())
-            generator.add_prefab(prefabbed)
+            self.generator.add_prefab(prefabbed)
 
-        self.map = generator.generateLevel(map_width, map_height, max_rooms, room_min_size, room_max_size, offset)
-
-        #print "Map size: " + str(len(self.map)) + " x " + str(len(self.map[0]))
-        self.rooms = generator.rooms
-
-        #print "Number of rooms: " + str(len(self.rooms))
+        self.generator.generateLevel(map_width, map_height, max_rooms, room_min_size, room_max_size, offset)
 
         if (game_state.debug):
             self.test_popluate_map(player)
+        elif (self.dungeon_level == 1):
+            self.level_one(player)
         elif (self.dungeon_level > 1):
             self.popluate_map(player)
         else:
             self.populate_cavern(player)
 
         if (game_state.debug):
-            for room in self.rooms:
+            for room in self.generator.rooms:
                 self.add_npc_to_map(room.room_detail)
 
-        #    for room in generator.caves:
-        #        self.add_npc_to_map(room.room_detail)
-
     def test_popluate_map(self, player):
-        room = self.rooms[0]
+        room = self.generator.rooms[0]
+        point = room.random_tile(self)
+        player.x = point.x
+        player.y = point.y
+
+    def level_one(self, player):
+        room = self.generator.rooms[0]
         point = room.random_tile(self)
         player.x = point.x
         player.y = point.y
@@ -120,34 +121,34 @@ class GameMap:
         npc.questgiver.add_quest(q)
         self.add_npc_to_map(npc)
 
-        room = self.rooms[-1]
+        room = self.generator.rooms[-1]
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.entities.append(self.down_stairs)
 
         #Snakes and Rats
         for i in range(5):
-            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
+            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = Snake(point)
             self.add_npc_to_map(npc)
 
         for i in range(20):
-            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
+            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = Rat(point)
             self.add_npc_to_map(npc)
 
         for i in range(5):
-            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
+            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
 
         for i in range(3):
-            point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
+            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = RatNest(point)
             self.add_npc_to_map(npc)
 
-        num_rooms = len(self.rooms)
-        for room in self.rooms[1:num_rooms]:
+        num_rooms = len(self.generator.rooms)
+        for room in self.generator.rooms[1:num_rooms]:
             num_npcs = 2
 
             for i in range(num_npcs):
@@ -167,8 +168,8 @@ class GameMap:
 
     def populate_cavern(self, player):
         #Random room for player start
-        room = choice(self.rooms)
-        self.rooms.remove(room)
+        room = choice(self.generator.rooms)
+        self.generator.rooms.remove(room)
         point = room.random_tile(self)
         player.x = point.x
         player.y = point.y
@@ -207,8 +208,8 @@ class GameMap:
             self.add_npc_to_map(npc)
 
         stairs_component = Stairs(self.dungeon_level + 1)
-        room = self.rooms[-1]
-        self.rooms.remove(room)
+        room = self.generator.rooms[-1]
+        #self.rooms.remove(room)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.entities.append(self.down_stairs)
 
@@ -216,17 +217,17 @@ class GameMap:
         if (self.dungeon_level == 6):
             warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
             self.add_npc_to_map(warlord)
-            self.rooms.remove(prefabbed.room)
+            self.generator.rooms.remove(prefabbed.room)
         else:
             stairs_component = Stairs(self.dungeon_level + 1)
-            room = self.rooms[-1]
-            self.rooms.remove(room)
+            room = self.generator.rooms[-1]
+            self.generator.rooms.remove(room)
             self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
             self.entities.append(self.down_stairs)
 
         #Random room for player start
-        room = choice(self.rooms)
-        self.rooms.remove(room)
+        room = choice(self.generator.rooms)
+        self.generator.rooms.remove(room)
         point = room.random_tile(self)
         player.x = point.x
         player.y = point.y
@@ -259,13 +260,13 @@ class GameMap:
             self.add_npc_to_map(npc)
 
         #Add npcs and items
-        for room in self.rooms:
+        for room in self.generator.rooms:
             self.place_npc(room)
             self.place_object(room)
 
-        if (len(self.rooms) > 4):
+        if (len(self.generator.rooms) > 4):
             num_to_select = 4                           # set the number to select here.
-            list_of_random_items = sample(self.rooms, num_to_select)
+            list_of_random_items = sample(self.generator.rooms, num_to_select)
 
             room = list_of_random_items[0]
             point = room.random_tile(self)
@@ -275,7 +276,7 @@ class GameMap:
             bestiary.upgrade_npc(npc)
             self.add_npc_to_map(npc)
 
-#        point = self.rooms[2].random_tile(self)
+#        point = self.generator.rooms[2].random_tile(self)
 #        necro = bestiary.necromancer(point)
 #        self.add_npc_to_map(necro)
 
@@ -363,9 +364,6 @@ class GameMap:
     def next_floor(self, player, message_log, constants):
         self.dungeon_level += 1
 
-        self.map = None
-        self.rooms = None
-        self.npcs = []
         self.entities = []
         self.down_stairs = None
 
@@ -385,17 +383,15 @@ class GameMap:
 
     def is_blocked(self, point):
         #first test the map tile
-        if self.map[point.x][point.y].blocked:
+        if self.generator.level[point.x][point.y].blocked:
             return True
 
         return False
 
     def add_npc_to_map(self, npc):
-        self.npcs.append(npc)
         self.entities.append(npc)
 
     def remove_npc_from_map(self, npc):
-        self.npcs.remove(npc)
         self.entities.remove(npc)
 
     def get_blocking_entities_at_location(self, destination_x, destination_y):
@@ -414,10 +410,10 @@ class GameMap:
 
     def random_open_cell(self, start_x = 1, start_y = 1, end_x = -1, end_y = -1):
         if (end_x == -1):
-            end_x = self.width - 2
+            end_x = self.generator.width - 2
 
         if (end_y == -1):
-            end_y = self.height - 2
+            end_y = self.generator.height - 2
 
         tileX = randint(start_x, end_x)
         tileY = randint(start_y, end_y)
@@ -427,17 +423,6 @@ class GameMap:
             return point
         else:
             return self.random_open_cell(start_x, start_y, end_x, end_y)
-
-    def add_to_map_state(self, entity):
-        self.entity_map[entity.x][entity.y].append(entity)
-        ##print "added " + entity.describe()
-
-    def remove_from_map_state(self, entity):
-        try:
-            self.entity_map[entity.x][entity.y].remove(entity)
-        except ValueError:
-            pass
-        ##print "removed " + entity.describe()
 
     def find_closest(self, point, species, max_distance=2):
         npc = None
@@ -452,12 +437,12 @@ class GameMap:
             start_y = 0
 
         end_x = start_x + (max_distance * 2) + 1
-        if (end_x > self.width):
-            end_x = self.width
+        if (end_x > self.generator.width):
+            end_x = self.generator.width
 
         end_y = start_y + (max_distance * 2) + 1
-        if (end_y > self.height):
-            end_y = self.height
+        if (end_y > self.generator.height):
+            end_y = self.generator.height
 
         dist = max_distance + 1
 
@@ -483,7 +468,7 @@ class GameMap:
 
     def update_entity_map(self):
         self.entity_map = [[[]
-                            for y in range(self.height)]
-        				                for x in range(self.width)]
+                            for y in range(self.generator.height)]
+        				                for x in range(self.generator.width)]
         for entity in self.entities:
             self.entity_map[entity.x][entity.y].append(entity)
