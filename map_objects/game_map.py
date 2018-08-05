@@ -146,6 +146,13 @@ class GameMap:
             npc = RatNest(point)
             self.add_npc_to_map(npc)
 
+        num_rooms = len(self.rooms)
+        for room in self.rooms[1:num_rooms]:
+            num_npcs = 2
+
+            for i in range(num_npcs):
+                npc = bestiary.goblin(room.random_tile(self))
+                self.add_npc_to_map(npc)
         '''
         #Potions and scrolls
         potion = equipment.healing_potion(Point(1,1))
