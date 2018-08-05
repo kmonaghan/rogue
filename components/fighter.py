@@ -100,4 +100,4 @@ class Fighter:
         elif (healthpercent <=80):
             return libtcod.yellow
 
-        return libtcod.green
+        return self.owner.color
