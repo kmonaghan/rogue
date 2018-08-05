@@ -97,6 +97,9 @@ class GameMap:
             for room in self.rooms:
                 self.add_npc_to_map(room.room_detail)
 
+        #    for room in generator.caves:
+        #        self.add_npc_to_map(room.room_detail)
+
     def test_popluate_map(self, player):
         room = self.rooms[0]
         point = room.random_tile(self)
@@ -128,7 +131,7 @@ class GameMap:
             npc = Snake(point)
             self.add_npc_to_map(npc)
 
-        for i in range(15):
+        for i in range(20):
             point = self.random_open_cell(start_x=5, end_x = int(self.width - (self.width / 3)))
             npc = Rat(point)
             self.add_npc_to_map(npc)
@@ -408,6 +411,7 @@ class GameMap:
 
         if (end_y == -1):
             end_y = self.height - 2
+
         tileX = randint(start_x, end_x)
         tileY = randint(start_y, end_y)
 
@@ -415,7 +419,7 @@ class GameMap:
         if not self.is_blocked(point):
             return point
         else:
-            return self.random_open_cell(start_x, start_y)
+            return self.random_open_cell(start_x, start_y, end_x, end_y)
 
     def add_to_map_state(self, entity):
         self.entity_map[entity.x][entity.y].append(entity)

@@ -7,16 +7,7 @@ from map_objects.wall import Wall
 
 class LevelMap:
     def __init__(self):
-        self.width = 0
-        self.height = 0
-
-        self.offset = 0
-
-        self.level = []
-        self.rooms = []
-
-        self.ROOM_MIN_SIZE = 16 # size in total number of cells, not dimensions
-        self.ROOM_MAX_SIZE = 500 # size in total number of cells, not dimensions
+        self.resetMap()
 
     def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset):
         self.width = mapWidth
@@ -42,3 +33,37 @@ class LevelMap:
         for x in range(minx, maxx):
             for y in range(miny, maxy):
                 self.level[x][y] = Floor()
+
+    def checkAvailablePath(self, start, target):
+        # Create a FOV map that has the dimensions of the map
+        fov = libtcod.map_new(self.width, self.height)
+
+        for y1 in range(self.height):
+            for x1 in range(self.width):
+                libtcod.map_set_properties(fov, x1, y1, not self.level[x1][y1].block_sight,
+                                           not self.level[x1][y1].blocked)
+
+        # Allocate a A* path
+        # The 1.41 is the normal diagonal cost of moving, it can be set as 0.0 if diagonal moves are prohibited
+        my_path = libtcod.path_new_using_map(fov, 1.41)
+
+        # Compute the path between self's coordinates and the target's coordinates
+        libtcod.path_compute(my_path, start.x, start.y, target.x, target.y)
+
+        has_path = not libtcod.path_is_empty(my_path)
+
+        libtcod.path_delete(my_path)
+
+        return has_path
+
+    def resetMap(self):
+        self.width = 0
+        self.height = 0
+
+        self.offset = 0
+
+        self.level = []
+        self.rooms = []
+
+        self.ROOM_MIN_SIZE = 16 # size in total number of cells, not dimensions
+        self.ROOM_MAX_SIZE = 500 # size in total number of cells, not dimensions

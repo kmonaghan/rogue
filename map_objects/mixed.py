@@ -43,7 +43,7 @@ class Mixed(LevelMap):
                 self.level[x][y] = cavern.level[x - (entrance.w + 1)][y]
 
         for room in cavern.rooms:
-            room.change_xy(room.x1 + third, room.y1)
+            room.change_xy(room.x1 + (entrance.w + 1), room.y1)
             self.caves.append(room)
 
         self.linkMaps()
@@ -62,6 +62,13 @@ class Mixed(LevelMap):
 
         if (closest_cave):
             self.createHall(entrance, closest_cave)
+
+        last_room = self.rooms[-1]
+
+        if not self.checkAvailablePath(entrance.center(), last_room.center()):
+            print("no available path so need to regenerate map")
+            self.resetMap()
+            return self.generateLevel(mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset)
 
         return self.level
 
@@ -107,9 +114,13 @@ class Mixed(LevelMap):
     def createHorTunnel(self, x1, x2, y):
         for x in range(min(x1,x2),max(x1,x2)+1):
             self.level[x][y] = Floor()
-            self.level[x][y].fov_color = libtcod.red
+            #self.level[x][y].fov_color = libtcod.red
 
     def createVirTunnel(self, y1, y2, x):
         for y in range(min(y1,y2),max(y1,y2)+1):
             self.level[x][y] = Floor()
-            self.level[x][y].fov_color = libtcod.red
+            #self.level[x][y].fov_color = libtcod.red
+
+    def resetMap(self):
+        super(Mixed, self).resetMap()
+        self.caves = []
