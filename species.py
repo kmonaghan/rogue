@@ -9,3 +9,4 @@ class Species(Enum):
     RAT = 5
     SNAKE = 6
     EGG = 7
+    RATNEST = 8

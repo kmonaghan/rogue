@@ -1,5 +1,7 @@
 import libtcodpy as libtcod
 
+from random import randint
+
 import equipment
 
 from components.ai import BasicNPC
@@ -41,14 +43,14 @@ class RatNest(Animal):
     def __init__(self, point = None):
         char = 'N'
         name = 'Rat Nest'
-        color = libtcod.darker_gray
+        color = libtcod.red
         always_visible = False
         blocks = True
         fighter = Fighter(hp=4, defense=1, power=0, xp=2)
         ai = SpawnNPC(Rat)
         item = None
         gear = None
-        species = Species.RAT
+        species = Species.RATNEST
 
         super(RatNest, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
 
@@ -59,3 +61,7 @@ class RatNest(Animal):
         self.equipment.toggle_equip(teeth)
 
         self.egg_generation = 0
+
+    def hasBeenAttacked(self, npc):
+        print("Override hasBeenAttacked")
+        

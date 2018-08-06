@@ -252,6 +252,9 @@ class SpawnNPC:
             npc = self.spawn(self.owner.point)
             self.turns_since_last_spawn = 0
             game_map.add_npc_to_map(npc)
+            #print("Spawned " + npc.name)
+        else:
+            self.turns_since_last_spawn += 1
 
 
         return results
