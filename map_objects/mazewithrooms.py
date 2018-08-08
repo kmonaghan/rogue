@@ -1,7 +1,7 @@
 import random
 from math import sqrt
 
-import game_state
+from map_objects.levelmap import LevelMap
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -9,19 +9,15 @@ from map_objects.room import Room
 from map_objects.wall import Wall
 from map_objects.floor import Floor
 
-class MazeWithRooms:
+class MazeWithRooms(LevelMap):
 	'''
 	Python implimentation of the rooms and mazes algorithm found at
 	http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
 	by Bob Nystrom
 	'''
 	def __init__(self):
-		self.level = []
-		self.rooms = []
+		super(MazeWithRooms, self).__init__()
 		self.prefabs = []
-
-		self.ROOM_MAX_SIZE = 10
-		self.ROOM_MIN_SIZE = 5
 
 		self.buildRoomAttempts = 200
 		self.connectionChance = 0.04
@@ -32,40 +28,42 @@ class MazeWithRooms:
 		self.prefabs.append(prefab)
 
 	def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset=0):
+		super(MazeWithRooms, self).generateLevel(mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset)
+
 		self.ROOM_MAX_SIZE = room_max_size
 		self.ROOM_MIN_SIZE = room_min_size
 
 		# The level dimensions must be odd
 		self.level = [[Wall()
-			for y in range(mapHeight)]
-				for x in range(mapWidth)]
+			for y in range(self.height)]
+				for x in range(self.width)]
 
-		if (mapWidth % 2 == 0): mapWidth -= 1
-		if (mapHeight % 2 == 0): mapHeight -= 1
+		if (self.width % 2 == 0): self.width -= 1
+		if (self.height % 2 == 0): self.height -= 1
 
 		self._regions = [[ None
-			for y in range(mapHeight)]
-				for x in range(mapWidth)]
+			for y in range(self.height)]
+				for x in range(self.width)]
 
 		self._currentRegion = -1 # the index of the current region in _regions
 
 		if (len(self.prefabs) > 0):
-			self.add_prefab_room(mapWidth,mapHeight)
+			self.add_prefab_room()
 
-		self.addRooms(mapWidth,mapHeight)#?
+		self.addRooms()
 
 		# Fill in the empty space around the rooms with mazes
-		for y in range (1,mapHeight,2):
-			for x in range(1,mapWidth,2):
+		for y in range (1,self.height,2):
+			for x in range(1,self.width,2):
 				if not self.level[x][y].blocked:
 					continue
 				start = (x,y)
-				self.growMaze(start,mapWidth,mapHeight)
+				self.growMaze(start)
 
-		self.connectRegions(mapWidth,mapHeight)
+		self.connectRegions()
 
 		if not self.allowDeadEnds:
-			self.removeDeadEnds(mapWidth,mapHeight)
+			self.removeDeadEnds()
 
 		if (len(self.prefabs) > 0):
 			for prefab in self.prefabs:
@@ -73,7 +71,7 @@ class MazeWithRooms:
 
 		return self.level
 
-	def growMaze(self,start,mapWidth,mapHeight):
+	def growMaze(self,start):
 		north = (0,-1)
 		south = (0,1)
 		east = (1,0)
@@ -100,7 +98,7 @@ class MazeWithRooms:
 			west = (-1,0)
 			'''
 			for direction in [north,south,east,west]:
-				if self.canCarve(cell,direction,mapWidth,mapHeight):
+				if self.canCarve(cell,direction):
 					unmadeCells.add(direction)
 
 			if (unmadeCells):
@@ -128,11 +126,11 @@ class MazeWithRooms:
 				cells.pop()
 				lastDirection = None
 
-	def add_prefab_room(self,mapWidth,mapHeight):
+	def add_prefab_room(self):
 		for prefab in self.prefabs:
 
-			x = (random.randint(0,mapWidth-prefab.room.w-1)/2)*2+1
-			y = (random.randint(0,mapHeight-prefab.room.h-1)/2)*2+1
+			x = int((random.randint(0,self.width-prefab.room.w-1)/2)*2+1)
+			y = int((random.randint(0,self.height-prefab.room.h-1)/2)*2+1)
 
 			prefab.room.change_xy(x,y)
 
@@ -148,7 +146,7 @@ class MazeWithRooms:
 				self.startRegion()
 				self.createRoom(prefab.room)
 
-	def addRooms(self,mapWidth,mapHeight):
+	def addRooms(self):
 
 		for i in range(self.buildRoomAttempts):
 
@@ -158,8 +156,8 @@ class MazeWithRooms:
 			'''
 			roomWidth = random.randint(int(self.ROOM_MIN_SIZE/2),int(self.ROOM_MAX_SIZE/2))*2+1
 			roomHeight = random.randint(int(self.ROOM_MIN_SIZE/2),int(self.ROOM_MAX_SIZE/2))*2+1
-			x = (random.randint(0,mapWidth-roomWidth-1)/2)*2+1
-			y = (random.randint(0,mapHeight-roomHeight-1)/2)*2+1
+			x = int((random.randint(0,self.width-roomWidth-1)/2)*2+1)
+			y = int((random.randint(0,self.height-roomHeight-1)/2)*2+1)
 
 			room = Room(x,y,roomWidth,roomHeight)
 			# check for overlap with previous rooms
@@ -167,8 +165,7 @@ class MazeWithRooms:
 			for otherRoom in self.rooms:
 				if room.intersect(otherRoom):
 					failed = True
-					if (game_state.debug):
-						game_state.objects.remove(room.room_detail)
+
 					break
 
 			if not failed:
@@ -176,7 +173,7 @@ class MazeWithRooms:
 				self.startRegion()
 				self.createRoom(room)
 
-	def connectRegions(self,mapWidth,mapHeight):
+	def connectRegions(self):
 		# Find all of the tiles that can connect two regions
 		north = (0,-1)
 		south = (0,1)
@@ -184,11 +181,11 @@ class MazeWithRooms:
 		west = (-1,0)
 
 		connectorRegions = [[ None
-			for y in range(mapHeight)]
-				for x in range(mapWidth)]
+			for y in range(self.height)]
+				for x in range(self.width)]
 
-		for x in range(1,mapWidth-1):
-			for y in range(1,mapHeight-1):
+		for x in range(1,self.width-1):
+			for y in range(1,self.height-1):
 				if self.level[x][y].blocked == False: continue
 
 				# count the number of different regions the wall tile is touching
@@ -207,8 +204,8 @@ class MazeWithRooms:
 
 		# make a list of all of the connectors
 		connectors = set()
-		for x in range(0,mapWidth):
-			for y in range(0,mapHeight):
+		for x in range(0,self.width):
+			for y in range(0,self.height):
 				if connectorRegions[x][y]:
 					connectorPosition = (x,y)
 					connectors.add(connectorPosition)
@@ -294,7 +291,7 @@ class MazeWithRooms:
 	def addJunction(self,pos):
 		self.level[pos[0]][pos[1]] = Floor()
 
-	def removeDeadEnds(self,mapWidth,mapHeight):
+	def removeDeadEnds(self):
 		done = False
 
 		north = (0,-1)
@@ -305,8 +302,8 @@ class MazeWithRooms:
 		while not done:
 			done = True
 
-			for y in range(1,mapHeight):
-				for x in range(1,mapWidth):
+			for y in range(1,self.height):
+				for x in range(1,self.width):
 					if not self.level[x][y].blocked:
 
 						exits = 0
@@ -318,7 +315,7 @@ class MazeWithRooms:
 						done = False
 						self.level[x][y] = Wall()
 
-	def canCarve(self,pos,dir,mapWidth,mapHeight):
+	def canCarve(self,pos,dir):
 		'''
 		gets whether an opening can be carved at the location
 		adjacent to the cell at (pos) in the (dir) direction.
@@ -328,7 +325,7 @@ class MazeWithRooms:
 		x = pos[0]+dir[0]*3
 		y = pos[1]+dir[1]*3
 
-		if not (0 < x < mapWidth) or not (0 < y < mapHeight):
+		if not (0 < x < self.width) or not (0 < y < self.height):
 			return False
 
 		x = pos[0]+dir[0]*2
