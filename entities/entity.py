@@ -20,6 +20,8 @@ class Entity:
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
                  fighter=None, ai=None, item=None, stairs=None, equippable=None, render_order=RenderOrder.CORPSE):
 
+        self.x = None
+        self.y = None
         if point is not None:
             self.x = point.x
             self.y = point.y
