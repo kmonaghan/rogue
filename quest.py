@@ -24,6 +24,17 @@ def kill_vermin(kill = 10):
 
     return q
 
+def kill_rats_nests(kill = 3):
+    title = "Kill Vermin"
+    description = "These caves are riddled with rats. Get rid of thier nests."
+
+    q = Quest(title, description, 100)
+    q.kill = kill
+    q.kill_type = Species.RATNEST
+    q.return_to_quest_giver = True
+
+    return q
+
 def kill_gobbos(kill = 5):
     title = "Kill Gobbos"
     description = "Get rid of them. I don't care how."

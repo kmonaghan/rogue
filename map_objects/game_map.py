@@ -96,10 +96,7 @@ class GameMap:
                 self.add_npc_to_map(room.room_detail)
 
     def test_popluate_map(self, player):
-        room = self.generator.rooms[0]
-        point = room.random_tile(self)
-        player.x = point.x
-        player.y = point.y
+        self.level_one(player)
 
     def level_one(self, player):
         room = self.generator.rooms[0]
@@ -109,7 +106,7 @@ class GameMap:
 
         npc = bestiary.bountyhunter(room.random_tile(self))
 
-        q = quest.kill_vermin()
+        q = quest.kill_rats_nests()
 
         q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100)
         q2.npc = bestiary.goblin(Point(0,0))
@@ -127,23 +124,23 @@ class GameMap:
         self.entities.append(self.down_stairs)
 
         #Snakes and Rats
-        for i in range(5):
-            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
+        for i in range(10):
+            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = Snake(point)
             self.add_npc_to_map(npc)
 
-        for i in range(20):
-            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
+        for i in range(15):
+            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = Rat(point)
             self.add_npc_to_map(npc)
 
         for i in range(5):
-            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
+            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
 
-        for i in range(3):
-            point = self.random_open_cell(start_x=5, end_x = int(self.generator.width - (self.generator.width / 3)))
+        for i in range(5):
+            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = RatNest(point)
             self.add_npc_to_map(npc)
 

@@ -57,10 +57,13 @@ class SnakeEgg(Animal):
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        fighter = Fighter(hp=2, defense=3, power=0, xp=0)
+        fighter = Fighter(hp=2, defense=4, power=0, xp=0)
         ai = Hatching(Snake())
         item = None
         gear = None
         species = Species.EGG
 
         super(SnakeEgg, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
+
+    def hasBeenAttacked(self, npc):
+        print("Override hasBeenAttacked")
