@@ -247,7 +247,7 @@ class SpawnNPC:
     def take_turn(self, target, fov_map, game_map):
         results = []
 
-        if ((randint(0, 10) + self.turns_since_last_spawn) > 12):
+        if ((randint(0, 10) + self.turns_since_last_spawn) > 14):
             spawner = self.owner
             npc = self.spawn(self.owner.point)
             self.turns_since_last_spawn = 0
