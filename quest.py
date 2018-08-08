@@ -80,7 +80,7 @@ def kill_warlord():
     return q
 
 class Quest:
-    def __init__(self, title, description, xp, kill=0, kill_type=None):
+    def __init__(self, title, description, xp, kill=0, kill_type=None, start_func = None):
         self.title = title
         self.description = description
         self.xp = xp
@@ -92,6 +92,7 @@ class Quest:
         self.return_to_quest_giver = False
         self.next_quest = None
         self.npc = None
+        self.start_func = start_func
 
     def kill_count(self, npc):
         results = []
@@ -116,6 +117,9 @@ class Quest:
     def start_quest(self, game_map):
         self.started = True
         game_state.active_quests.append(self)
+
+        if (self.start_func):
+            self.start_func()
 
         if (self.npc):
             room = choice(game_map.rooms)
