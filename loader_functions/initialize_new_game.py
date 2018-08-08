@@ -82,7 +82,7 @@ def get_game_variables(constants):
 
     game_map = GameMap()
 
-    game_map.next_floor(player, message_log, constants)
+    game_map.create_floor(player, message_log, constants)
 
     game_state = GameStates.PLAYERS_TURN
 

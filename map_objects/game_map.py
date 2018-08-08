@@ -37,12 +37,13 @@ from game_messages import Message
 from species import Species
 
 class GameMap:
-    def __init__(self, dungeon_level=0):
+    def __init__(self, dungeon_level=1):
         self.entities = []
         self.down_stairs = None
+        self.up_stairs = None
         self.dungeon_level = dungeon_level
         self.entity_map = None
-        self.levels = []
+        self.levels = [{},{},{},{},{},{}]
         self.generator = None
 
     @property
@@ -66,10 +67,7 @@ class GameMap:
 
         #print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
         #print "Dungeon level = " + str(self.dungeon_level)
-        if (game_state.debug):
-            #generator = SingleRoom()
-            self.generator = Mixed()
-        elif (self.dungeon_level == 1):
+        if (self.dungeon_level == 1):
             self.generator = Mixed()
         elif (self.dungeon_level <= 2):
             self.generator = AltBSPTree()
@@ -82,14 +80,10 @@ class GameMap:
 
         self.generator.generateLevel(map_width, map_height, max_rooms, room_min_size, room_max_size, offset)
 
-        if (game_state.debug):
-            self.test_popluate_map(player)
-        elif (self.dungeon_level == 1):
+        if (self.dungeon_level == 1):
             self.level_one(player)
         elif (self.dungeon_level > 1):
             self.popluate_map(player)
-        else:
-            self.populate_cavern(player)
 
         if (game_state.debug):
             for room in self.generator.rooms:
@@ -107,9 +101,7 @@ class GameMap:
         npc = bestiary.bountyhunter(room.random_tile(self))
 
         q = quest.kill_rats_nests()
-
-        q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100)
-        q2.npc = bestiary.goblin(Point(0,0))
+        q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100, start_func=self.level_one_goblin)
         q2.kill = 1
         q2.kill_type = Species.GOBLIN
 
@@ -163,53 +155,6 @@ class GameMap:
         self.add_npc_to_map(scroll3)
         '''
 
-    def populate_cavern(self, player):
-        #Random room for player start
-        room = choice(self.generator.rooms)
-        self.generator.rooms.remove(room)
-        point = room.random_tile(self)
-        player.x = point.x
-        player.y = point.y
-
-        npc = bestiary.bountyhunter(room.random_tile(self))
-
-        q = quest.kill_vermin()
-
-        q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100)
-        q2.npc = bestiary.goblin(Point(0,0))
-        q2.kill = 1
-        q2.kill_type = Species.GOBLIN
-
-        q.next_quest = q2
-
-        npc.questgiver.add_quest(q)
-        self.add_npc_to_map(npc)
-
-        max_npcs = 40
-        #choose random number of npcs
-        num_npcs = libtcod.random_get_int(0, int(max_npcs/4), max_npcs)
-
-        for i in range(int(num_npcs/2)):
-            point = self.random_open_cell()
-            npc = Snake(point)
-            self.add_npc_to_map(npc)
-
-        for i in range(int(num_npcs/2)):
-            point = self.random_open_cell()
-            npc = Rat(point)
-            self.add_npc_to_map(npc)
-
-        for i in range(10):
-            point = self.random_open_cell()
-            npc = SnakeEgg(point)
-            self.add_npc_to_map(npc)
-
-        stairs_component = Stairs(self.dungeon_level + 1)
-        room = self.generator.rooms[-1]
-        #self.rooms.remove(room)
-        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-        self.entities.append(self.down_stairs)
-
     def popluate_map(self, player):
         if (self.dungeon_level == 6):
             warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
@@ -228,6 +173,10 @@ class GameMap:
         point = room.random_tile(self)
         player.x = point.x
         player.y = point.y
+
+        stairs_component = Stairs(self.dungeon_level - 1)
+        self.up_stairs = Entity(player.point, '<', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.entities.append(self.up_stairs)
 
         point = room.random_tile(self)
         npc = bestiary.bountyhunter(point)
@@ -358,11 +307,10 @@ class GameMap:
                 self.entities.append(item)
                 #item.always_visible = True  #items are visible even out-of-FOV, if in an explored area
 
-    def next_floor(self, player, message_log, constants):
-        self.dungeon_level += 1
-
-        self.entities = []
+    def create_floor(self, player, message_log, constants):
+        self.entities = [player]
         self.down_stairs = None
+        self.up_stairs = None
 
         offset = 0
         if (self.dungeon_level <= 2):
@@ -371,10 +319,34 @@ class GameMap:
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
                       constants['map_width'], constants['map_height'], player, offset)
 
-        if (self.dungeon_level > 1):
-            player.fighter.heal(player.fighter.max_hp // 2)
+        return self.entities
 
-            message_log.add_message(Message('You take a moment to rest and recover your strength.', libtcod.light_violet))
+    def next_floor(self, player, message_log, constants):
+        if (self.dungeon_level != 0):
+            print("unloading map")
+            self.unload_map()
+
+        if (player.x == self.down_stairs.x) and (player.y == self.down_stairs.y):
+            print("going down stairs")
+            self.dungeon_level += 1
+        else:
+            print("going up stairs")
+            self.dungeon_level -= 1
+
+        if (len(self.levels[self.dungeon_level - 1])):
+            print("loading a map")
+            self.load_map()
+            player.x = self.down_stairs.x
+            player.y = self.down_stairs.y
+        else:
+            print("creating a new map")
+
+            self.create_floor(player, message_log, constants)
+
+            if (self.dungeon_level > 1):
+                player.fighter.heal(player.fighter.max_hp // 2)
+
+                message_log.add_message(Message('You take a moment to rest and recover your strength.', libtcod.light_violet))
 
         return self.entities
 
@@ -403,6 +375,11 @@ class GameMap:
         if (self.down_stairs):
             if (self.down_stairs.x == x) and (self.down_stairs.y == y):
                 return True
+
+        if (self.up_stairs):
+            if (self.up_stairs.x == x) and (self.up_stairs.y == y):
+                return True
+
         return False
 
     def random_open_cell(self, start_x = 1, start_y = 1, end_x = -1, end_y = -1):
@@ -469,3 +446,30 @@ class GameMap:
         				                for x in range(self.generator.width)]
         for entity in self.entities:
             self.entity_map[entity.x][entity.y].append(entity)
+
+    def load_map(self):
+        lmap = self.levels[self.dungeon_level - 1]
+        self.entities = lmap["entities"]
+        self.down_stairs = lmap["down_stairs"]
+        self.up_stairs = lmap["up_stairs"]
+        self.dungeon_level = lmap["dungeon_level"]
+        self.entity_map = lmap["entity_map"]
+        self.generator = lmap["generator"]
+
+    def unload_map(self):
+        print("unloading: " + str(self.dungeon_level))
+        umap = {}
+        umap["entities"] = self.entities
+        umap["down_stairs"] = self.down_stairs
+        umap["up_stairs"] = self.up_stairs
+        umap["dungeon_level"] = self.dungeon_level
+        umap["entity_map"] = self.entity_map
+        umap["generator"] = self.generator
+
+        self.levels[self.dungeon_level - 1] = umap
+
+    def level_one_goblin(self):
+        print("calling level_one_goblin from quest")
+        point = self.random_open_cell(start_x=int(self.generator.width - ((self.generator.width / 3) * 2)), end_x = int(self.generator.width - (self.generator.width / 3)))
+        npc = bestiary.goblin(point)
+        self.add_npc_to_map(npc)
