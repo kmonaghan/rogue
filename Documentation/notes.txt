@@ -18,6 +18,7 @@ https://www.gridsagegames.com/blog/2014/06/mapgen-cellular-automata/
 https://jeremykun.com/2012/07/29/the-cellular-automaton-method-for-cave-generation/
 http://www.roguebasin.com/index.php?title=Cellular_Automata_Method_for_Generating_Random_Cave-Like_Levels
 http://www.evilscience.co.uk/a-c-algorithm-to-build-roguelike-cave-systems-part-1/
+https://whatjaysaid.wordpress.com/2016/01/15/1228
 
 Other Roguelikes:
 https://github.com/Maugrift/GeneriCrawl See for nice FOV

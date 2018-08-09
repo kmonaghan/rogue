@@ -126,13 +126,16 @@ class GameMap:
             npc = Rat(point)
             self.add_npc_to_map(npc)
 
-        for i in range(5):
+        for i in range(6):
             point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = SnakeEgg(point)
             self.add_npc_to_map(npc)
 
-        for i in range(5):
-            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
+        alcoves = self.generator.findAlcoves()
+
+        for i in range(6):
+            point = choice(alcoves)
+            alcoves.remove(point)
             npc = RatNest(point)
             self.add_npc_to_map(npc)
 

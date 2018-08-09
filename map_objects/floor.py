@@ -4,13 +4,13 @@ import libtcodpy as libtcod
 
 from map_objects.tile import Tile
 
-class Floor(Tile):
+class Ground(Tile):
     """
     A Floor on a map. It may or may not be blocked, and may or may not block sight.
     """
 
     def __init__(self, blocked=False, block_sight=False):
-        super(Floor, self).__init__(blocked, block_sight)
+        super(Ground, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.sepia
         self.out_of_fov_color = libtcod.darker_sepia
@@ -20,3 +20,14 @@ class Floor(Tile):
 
     def isWall(self):
         return False
+
+class Floor(Ground):
+    """
+    A Floor on a map. It may or may not be blocked, and may or may not block sight.
+    """
+
+    def __init__(self, blocked=False, block_sight=False):
+        super(Ground, self).__init__(blocked, block_sight)
+
+        self.fov_color = libtcod.grey
+        self.out_of_fov_color = libtcod.darker_grey

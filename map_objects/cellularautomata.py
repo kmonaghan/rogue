@@ -3,7 +3,7 @@ import libtcodpy as libtcod
 import random
 from math import sqrt
 
-from map_objects.floor import Floor
+from map_objects.floor import Ground
 from map_objects.room import Room
 from map_objects.point import Point
 from map_objects.wall import Wall
@@ -63,7 +63,7 @@ class CellularAutomata:
 		for y in range (0,mapHeight): #(1,mapHeight-1):
 			for x in range (0,mapWidth): #(1,mapWidth-1):
 				if random.random() >= self.wallProbability:
-					self.level[x][y] = Floor()
+					self.level[x][y] = Ground()
 
 	def createCaves(self,mapWidth,mapHeight):
 		for i in range (0,self.iterations):
@@ -78,7 +78,7 @@ class CellularAutomata:
 	            	#First, if a cell is alive but has too few neighbours, kill it.
 					if self.level[x][y].isWall():
 						if nbs < self.deathLimit:
-							map[x][y] = Floor()
+							map[x][y] = Ground()
 						else:
 							map[x][y] = Wall()
 	            	#Otherwise, if the cell is dead now, check if it has the right number of neighbours to be 'born'
@@ -86,7 +86,7 @@ class CellularAutomata:
 						if nbs > self.birthLimit:
 							map[x][y] = Wall()
 						else:
-							map[x][y] = Floor()
+							map[x][y] = Ground()
 
 			self.level = map
 
@@ -97,7 +97,7 @@ class CellularAutomata:
 				for x in range(1,mapWidth-1):
 					for y in range (1,mapHeight-1):
 						if (self.level[x][y].isWall()) and (self.getAdjacentWallsSimple(x,y) <= self.smoothing):
-							self.level[x][y] = Floor()
+							self.level[x][y] = Ground()
 
 	def createTunnel(self,point1,point2,currentCave,mapWidth,mapHeight):
 		# run a heavily weighted random Walk
@@ -151,7 +151,7 @@ class CellularAutomata:
 				drunkardX += dx
 				drunkardY += dy
 				if self.level[drunkardX][drunkardY].isWall():
-					self.level[drunkardX][drunkardY] = Floor()
+					self.level[drunkardX][drunkardY] = Ground()
 
 	def getAdjacentWallsSimple(self, x, y): # finds the walls in four directions
 		wallCounter = 0
@@ -186,7 +186,7 @@ class CellularAutomata:
 
 		for set in self.caves:
 			for tile in set:
-				floor = Floor()
+				floor = Ground()
 				self.level[tile[0]][tile[1]] = floor
 
 	def floodFill(self,x,y):

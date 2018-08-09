@@ -67,3 +67,26 @@ class LevelMap:
 
         self.ROOM_MIN_SIZE = 16 # size in total number of cells, not dimensions
         self.ROOM_MAX_SIZE = 500 # size in total number of cells, not dimensions
+
+    def getAdjacentWallsSimple(self, x, y): # finds the walls in four directions
+        wallCounter = 0
+        #print("(",x,",",y,") = ",self.level[x][y])
+        if (self.level[x][y-1].isWall()): # Check north
+            wallCounter += 1
+        if (self.level[x][y+1].isWall()): # Check south
+            wallCounter += 1
+        if (self.level[x-1][y].isWall()): # Check west
+            wallCounter += 1
+        if (self.level[x+1][y].isWall()): # Check east
+            wallCounter += 1
+
+        return wallCounter
+
+    def getAdjacentWalls(self, tileX, tileY): # finds the walls in 8 directions
+        wallCounter = 0
+        for x in range (tileX-1, tileX+2):
+            for y in range (tileY-1, tileY+2):
+                if (self.level[x][y].isWall()):
+                    if (x != tileX) or (y != tileY): # exclude (tileX,tileY)
+                        wallCounter += 1
+        return wallCounter

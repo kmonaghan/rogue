@@ -7,6 +7,7 @@ from map_objects.altbsptree import AltBSPTree
 from map_objects.cellularautomata import CellularAutomata
 
 from map_objects.floor import Floor
+from map_objects.floor import Ground
 from map_objects.point import Point
 from map_objects.room import Room
 from map_objects.wall import Wall
@@ -15,6 +16,8 @@ class Mixed(LevelMap):
     def __init__(self):
         super(Mixed, self).__init__()
         self.caves = []
+        self.cavern = None
+        self.mines = None
 
     def generateLevel(self, mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset):
         super(Mixed, self).generateLevel(mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset)
@@ -24,25 +27,25 @@ class Mixed(LevelMap):
         y = randint(1, self.height - 10)
         entrance = Room(0, y, 5, 5)
 
-        mines = AltBSPTree()
-        mines.generateLevel(third, self.height, max_rooms, room_min_size, room_max_size, offset)
+        self.mines = AltBSPTree()
+        self.mines.generateLevel(third, self.height, max_rooms, room_min_size, room_max_size, offset)
 
-        cavern = CellularAutomata()
-        cavern.generateLevel(self.width - third, self.height, max_rooms, room_min_size, room_max_size, offset)
+        self.cavern = CellularAutomata()
+        self.cavern.generateLevel(self.width - third, self.height, max_rooms, room_min_size, room_max_size, offset)
 
         for x in range(self.width - third, self.width):
             for y in range(0, self.height):
-                self.level[x][y] = mines.level[x - (self.width - third)][y]
+                self.level[x][y] = self.mines.level[x - (self.width - third)][y]
 
-        for room in mines.rooms:
+        for room in self.mines.rooms:
             room.change_xy(room.x1 + (self.width - third), room.y1)
             self.rooms.append(room)
 
         for x in range((entrance.w + 1), self.width - third):
             for y in range(0, self.height):
-                self.level[x][y] = cavern.level[x - (entrance.w + 1)][y]
+                self.level[x][y] = self.cavern.level[x - (entrance.w + 1)][y]
 
-        for room in cavern.rooms:
+        for room in self.cavern.rooms:
             room.change_xy(room.x1 + (entrance.w + 1), room.y1)
             self.caves.append(room)
 
@@ -69,6 +72,8 @@ class Mixed(LevelMap):
             print("no available path so need to regenerate map")
             self.resetMap()
             return self.generateLevel(mapWidth, mapHeight, max_rooms, room_min_size, room_max_size, offset)
+
+        self.cleanUp()
 
         return self.level
 
@@ -113,14 +118,37 @@ class Mixed(LevelMap):
 
     def createHorTunnel(self, x1, x2, y):
         for x in range(min(x1,x2),max(x1,x2)+1):
-            self.level[x][y] = Floor()
-            #self.level[x][y].fov_color = libtcod.red
+            if(self.level[x][y].isWall()):
+                self.level[x][y] = Floor()
 
     def createVirTunnel(self, y1, y2, x):
         for y in range(min(y1,y2),max(y1,y2)+1):
-            self.level[x][y] = Floor()
-            #self.level[x][y].fov_color = libtcod.red
+            if(self.level[x][y].isWall()):
+                self.level[x][y] = Floor()
 
     def resetMap(self):
         super(Mixed, self).resetMap()
         self.caves = []
+
+    def findAlcoves(self):
+        alcoves = []
+
+        third = int(self.width / 3)
+
+        for x in range(6, self.width - third - 1):
+            for y in range(1, self.height - 1):
+                if (self.level[x][y].isFloor()):
+                    print("checking " + str(x) + "," + str(y))
+                    if (self.getAdjacentWallsSimple(x,y) == 3):
+                        print("found alcove")
+                        alcoves.append(Point(x,y))
+
+        return alcoves
+
+    def cleanUp(self):
+        third = int(self.width / 3)
+
+        for x in range(6, self.width - third - 1):
+            for y in range(1, self.height - 1):
+                if (self.level[x][y].isFloor()):
+                    self.level[x][y] = Ground()
