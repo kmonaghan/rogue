@@ -1,12 +1,12 @@
-from enum import Enum
+from enum import Enum, auto
 
 class Species(Enum):
-    NONDESCRIPT = 0
-    GOBLIN = 1
-    ORC = 2
-    TROLL = 3
-    ANIMAL = 4
-    RAT = 5
-    SNAKE = 6
-    EGG = 7
-    RATNEST = 8
+    NONDESCRIPT = auto()
+    GOBLIN = auto()
+    ORC = auto()
+    TROLL = auto()
+    ANIMAL = auto()
+    RAT = auto()
+    SNAKE = auto()
+    EGG = auto()
+    RATNEST = auto()
