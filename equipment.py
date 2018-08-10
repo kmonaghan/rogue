@@ -220,9 +220,17 @@ def longsword(point = None):
     return item
 
 def teeth(point = None):
-    #create a sword
+    #create teeth for animals
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
     equippable_component.type_of_dice = 2
     item = Entity(point, '"', 'teeth', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
+
+    return item
+
+def claw(point = None):
+    #create claw for animals
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+    equippable_component.type_of_dice = 4
+    item = Entity(point, ',', 'claw', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
