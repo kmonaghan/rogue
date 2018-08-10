@@ -299,13 +299,13 @@ class GameMap:
             if not self.is_blocked(point):
                 choice = random_utils.random_choice_from_dict(item_chances)
                 if choice == 'potion':
-                    item = equipment.random_potion(point)
+                    item = equipment.random_potion(point, self.dungeon_level)
                 elif choice == 'scroll':
-                    item = equipment.random_scroll(point)
+                    item = equipment.random_scroll(point, self.dungeon_level)
                 elif choice == 'weapon':
-                    item = equipment.random_weapon(point)
+                    item = equipment.random_weapon(point, self.dungeon_level)
                 elif choice == 'armour':
-                    item = equipment.random_armour(point)
+                    item = equipment.random_armour(point, self.dungeon_level)
 
                 self.entities.append(item)
                 #item.always_visible = True  #items are visible even out-of-FOV, if in an explored area

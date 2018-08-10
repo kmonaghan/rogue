@@ -16,14 +16,14 @@ from tome import cast_confuse, cast_fireball, cast_lightning, heal
 from equipment_slots import EquipmentSlots
 from render_order import RenderOrder
 
-def random_armour(point = None):
+def random_armour(point = None, dungeon_level = 1):
     item_chances = {}
-    item_chances['shield'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], game_state.dungeon_level)
-    item_chances['helmet'] = random_utils.from_dungeon_level([[30, 2], [15, 3], [10, 4]], game_state.dungeon_level)
-    item_chances['leather shirt'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], game_state.dungeon_level)
-    item_chances['scalemail'] = random_utils.from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]], game_state.dungeon_level)
-    item_chances['chainmail'] = random_utils.from_dungeon_level([[40, 3], [30, 4]], game_state.dungeon_level)
-    item_chances['breastplate'] = random_utils.from_dungeon_level([[15, 4]], game_state.dungeon_level)
+    item_chances['shield'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
+    item_chances['helmet'] = random_utils.from_dungeon_level([[30, 2], [15, 3], [10, 4]], dungeon_level)
+    item_chances['leather shirt'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
+    item_chances['scalemail'] = random_utils.from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]], dungeon_level)
+    item_chances['chainmail'] = random_utils.from_dungeon_level([[40, 3], [30, 4]], dungeon_level)
+    item_chances['breastplate'] = random_utils.from_dungeon_level([[15, 4]], dungeon_level)
 
     choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'shield':
@@ -46,20 +46,17 @@ def random_armour(point = None):
 
     return item
 
-def random_potion(point = None):
+def random_potion(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['heal'] = 40
 
     choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'heal':
-        #create a healing potion
-        #item_component = Item(use_function=tome.cast_heal)
-        #item = Entity(point, '!', 'healing potion', libtcod.violet, item=item_component)
         item = healing_potion()
 
     return item
 
-def random_scroll(point = None):
+def random_scroll(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['lightning'] = 40
     item_chances['fireball'] = 30
@@ -77,11 +74,11 @@ def random_scroll(point = None):
 
     return item
 
-def random_weapon(point = None):
+def random_weapon(point = None, dungeon_level = 1):
     item_chances = {}
-    item_chances['dagger'] = random_utils.from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]], game_state.dungeon_level)
-    item_chances['short sword'] = random_utils.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], game_state.dungeon_level)
-    item_chances['long sword'] = random_utils.from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], game_state.dungeon_level)
+    item_chances['dagger'] = random_utils.from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]], dungeon_level)
+    item_chances['short sword'] = random_utils.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], dungeon_level)
+    item_chances['long sword'] = random_utils.from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
 
     choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'dagger':
