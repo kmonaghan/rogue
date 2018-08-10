@@ -32,7 +32,6 @@ class BasicNPC:
         return results
 
 class PatrollingNPC:
-    #AI for a temporarily confused npc (reverts to previous AI after a while).
     def __init__(self, rooms, old_ai):
         self.rooms = rooms
         self.old_ai = old_ai
@@ -83,7 +82,6 @@ class ConfusedNPC:
         return results
 
 class StrollingNPC:
-    #AI for a temporarily confused npc (reverts to previous AI after a while).
     def __init__(self, attacked_ai = None, tethered = None, tethered_distance = 4):
         self.moved = False
         self.attacked_ai = attacked_ai

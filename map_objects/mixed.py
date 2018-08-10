@@ -138,7 +138,7 @@ class Mixed(LevelMap):
         for x in range(6, self.width - third - 1):
             for y in range(1, self.height - 1):
                 if (self.level[x][y].isFloor()):
-                    print("checking " + str(x) + "," + str(y))
+                    #print("checking " + str(x) + "," + str(y))
                     if (self.getAdjacentWallsSimple(x,y) == 3):
                         print("found alcove")
                         alcoves.append(Point(x,y))
