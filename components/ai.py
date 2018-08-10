@@ -246,13 +246,12 @@ class SpawnNPC:
         results = []
 
         if ((randint(0, 10) + self.turns_since_last_spawn) > 14):
-            spawner = self.owner
             npc = self.spawn(self.owner.point)
-            self.turns_since_last_spawn = 0
-            game_map.add_npc_to_map(npc)
-            #print("Spawned " + npc.name)
+            if (game_map.find_closest(self.owner.point, npc.species, 1) == None):
+                self.turns_since_last_spawn = 0
+                game_map.add_npc_to_map(npc)
+                print("Spawned " + npc.name)
         else:
             self.turns_since_last_spawn += 1
-
 
         return results
