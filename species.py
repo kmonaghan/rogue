@@ -10,3 +10,4 @@ class Species(Enum):
     SNAKE = auto()
     EGG = auto()
     RATNEST = auto()
+    INANIMATE = auto()

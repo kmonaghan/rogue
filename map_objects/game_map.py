@@ -12,6 +12,7 @@ from components.stairs import Stairs
 
 from entities.entity import Entity
 from entities.character import Character
+from entities.chest import Chest
 from entities.rat import Rat, RatNest
 from entities.snake import Snake, SnakeEgg
 
@@ -137,6 +138,10 @@ class GameMap:
             npc = RatNest(point)
             self.add_npc_to_map(npc)
 
+        point = choice(alcoves)
+        chest = Chest(point)
+        self.add_npc_to_map(chest)
+
         num_rooms = len(self.generator.rooms)
         for room in self.generator.rooms[1:num_rooms]:
             num_npcs = libtcod.random_get_int(0, 0, 2)
@@ -148,6 +153,10 @@ class GameMap:
                 npc.level.random_level_up(add_levels)
 
                 self.add_npc_to_map(npc)
+
+        room = choice(self.generator.rooms[1:num_rooms])
+        chest2 = Chest(room.random_tile(self))
+        self.add_npc_to_map(chest2)
         '''
         #Potions and scrolls
         potion = equipment.healing_potion(Point(1,1))
