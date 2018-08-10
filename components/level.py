@@ -38,7 +38,12 @@ class Level:
         self.owner.fighter.hp = self.owner.fighter.max_hp
 
     def random_level_up(self, total_levels):
+        #print("leveling up by: " + str(total_levels))
+        if (total_levels < 1):
+            return
+
         for x in range(total_levels):
             #print "Adding levels for " + self.owner.name + ": " + str(total_levels)
             choice = libtcod.random_get_int(0, 0, 2)
             self.level_up_stats(choice)
+            self.current_level += 1

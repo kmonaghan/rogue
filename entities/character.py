@@ -42,6 +42,9 @@ class Character(Entity):
         elif (self.species == Species.TROLL):
             desc += "(Troll)"
 
+        if (self.level):
+            desc += " (Level " + str(self.level.current_level) + ")"
+
         if (game_state.debug == True):
             desc += " (" + str(self.x) + ", " + str(self.y) +")"
 
