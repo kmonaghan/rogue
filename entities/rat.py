@@ -40,7 +40,7 @@ class Rat(Animal):
         self.egg_generation = 0
 
 class RatNest(Animal):
-    def __init__(self, point = None):
+    def __init__(self, point = None, dungeon_level = 1):
         char = 'N'
         name = 'Rat Nest'
         color = libtcod.red
@@ -54,14 +54,17 @@ class RatNest(Animal):
 
         super(RatNest, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
 
-        teeth = equipment.teeth()
-        teeth.lootable = False
+        potion = equipment.random_potion(dungeon_level = dungeon_level)
+        potion.lootable = True
 
-        self.inventory.add_item(teeth)
-        self.equipment.toggle_equip(teeth)
+        self.inventory.add_item(potion)
 
         self.egg_generation = 0
 
     def hasBeenAttacked(self, npc):
         print("Override hasBeenAttacked")
-        
+        spawn = randint(1, 10)
+
+        if (spawn > 8):
+            #npc = Rat(self.point)
+            print("Would spawn rat")
