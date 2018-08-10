@@ -79,7 +79,21 @@ class Fighter:
         self.hp -= amount
 
         if self.hp <= 0:
-            results.append({'dead': self.owner, 'xp': self.xp})
+            earned_xp = self.xp
+
+            if (npc):
+                level_difference = self.owner.level.current_level - npc.level.current_level
+
+                if (level_difference < -4):
+                    earned_xp = 0
+                elif (level_difference < 0):
+                    earned_xp = int(earned_xp * ((5 - abs(level_difference)) / 5))
+                elif (level_difference > 0):
+                    earned_xp = int(earned_xp * (1 + ((5 - abs(level_difference)) / 5)))
+
+                print ("base xp: " + str(self.xp) + ", earned XP " + str(earned_xp))
+
+            results.append({'dead': self.owner, 'xp': earned_xp})
 
         self.owner.hasBeenAttacked(npc)
 
