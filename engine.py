@@ -10,7 +10,7 @@ from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 from map_objects.point import Point
-from quest import check_quests_for_npc_death
+from quest import check_quests_for_npc_death, check_quest_for_location
 
 def play_game(player, game_map, message_log, game_state, con, panel, constants):
     fov_recompute = True
@@ -88,6 +88,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                         player_turn_results.extend(attack_results)
                 else:
                     player.move(dx, dy)
+                    check_quest_for_location(player.point)
 
                     fov_recompute = True
 

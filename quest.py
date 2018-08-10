@@ -9,7 +9,20 @@ from species import Species
 def check_quests_for_npc_death(npc):
     results = []
     for quest in game_state.active_quests:
-        results.append(quest.kill_count(npc))
+        if (quest.kill > 0):
+            results.append(quest.kill_count(npc))
+
+    return results
+
+def check_quest_for_location(point):
+    results = []
+
+    for quest in game_state.active_quests:
+        if (quest.map_point):
+            if (point.x == quest.map_point.x) and (point.y == quest.map_point.y):
+                #TODO: do something with a location quest
+                print("TODO: do something with a location quest")
+                results.append({'message': Message('Quest completed!', libtcod.gold)})
 
     return results
 
@@ -80,7 +93,7 @@ def kill_warlord():
     return q
 
 class Quest:
-    def __init__(self, title, description, xp, kill=0, kill_type=None, start_func = None):
+    def __init__(self, title, description, xp, kill=0, kill_type=None, start_func = None, map_point = None):
         self.title = title
         self.description = description
         self.xp = xp
@@ -93,6 +106,7 @@ class Quest:
         self.next_quest = None
         self.npc = None
         self.start_func = start_func
+        self.map_point = map_point
 
     def kill_count(self, npc):
         results = []

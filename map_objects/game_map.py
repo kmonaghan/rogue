@@ -93,6 +93,11 @@ class GameMap:
         self.level_one(player)
 
     def level_one(self, player):
+        room = self.generator.rooms[-1]
+        stairs_component = Stairs(self.dungeon_level + 1)
+        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.entities.append(self.down_stairs)
+
         room = self.generator.rooms[0]
         point = room.random_tile(self)
         player.x = point.x
@@ -107,23 +112,16 @@ class GameMap:
 
         q.next_quest = q2
 
+        q3 = quest.Quest('Go down', 'Find the stairs down', 100, map_point = self.down_stairs)
+        q2.next_quest = q3
+
         npc.questgiver.add_quest(q)
         self.add_npc_to_map(npc)
-
-        room = self.generator.rooms[-1]
-        stairs_component = Stairs(self.dungeon_level + 1)
-        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-        self.entities.append(self.down_stairs)
 
         #Snakes and Rats
         for i in range(10):
             point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = Snake(point)
-            self.add_npc_to_map(npc)
-
-        for i in range(15):
-            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
-            npc = Rat(point)
             self.add_npc_to_map(npc)
 
         for i in range(6):
@@ -141,10 +139,14 @@ class GameMap:
 
         num_rooms = len(self.generator.rooms)
         for room in self.generator.rooms[1:num_rooms]:
-            num_npcs = 2
+            num_npcs = libtcod.random_get_int(0, 0, 2)
 
             for i in range(num_npcs):
                 npc = bestiary.goblin(room.random_tile(self))
+
+                add_levels = self.dungeon_level + libtcod.random_get_int(0, -1, 1)
+                npc.level.random_level_up(add_levels)
+
                 self.add_npc_to_map(npc)
         '''
         #Potions and scrolls
@@ -475,4 +477,8 @@ class GameMap:
         print("calling level_one_goblin from quest")
         point = self.random_open_cell(start_x=int(self.generator.width - ((self.generator.width / 3) * 2)), end_x = int(self.generator.width - (self.generator.width / 3)))
         npc = bestiary.goblin(point)
+
+        add_levels = libtcod.random_get_int(0, -1, 1)
+        npc.level.random_level_up(self.dungeon_level + add_levels)
+
         self.add_npc_to_map(npc)
