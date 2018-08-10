@@ -52,7 +52,7 @@ def random_potion(point = None, dungeon_level = 1):
 
     choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'heal':
-        item = healing_potion()
+        item = healing_potion(point)
 
     return item
 
