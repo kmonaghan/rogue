@@ -217,7 +217,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 if dead_entity == player:
                     message, game_state = player_death(dead_entity)
                 else:
-                    message = npc_death(dead_entity, game_map.entities)
+                    message = npc_death(dead_entity, game_map)
 
                 message_log.add_message(message)
 
@@ -230,7 +230,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 game_state = GameStates.ENEMY_TURN
 
             if item_dropped:
-                game_map.entities.append(item_dropped)
+                game_map.add_entity_to_map(item_dropped)
 
                 game_state = GameStates.ENEMY_TURN
 
@@ -295,14 +295,14 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             message_log.add_message(message)
 
                         if killed_entity:
-                            npc_death(killed_entity, game_map.entities)
+                            npc_death(killed_entity, game_map)
                             entity.onKill(killed_entity, game_map)
 
                         if dead_entity:
                             if dead_entity == player:
                                 message, game_state = player_death(dead_entity)
                             else:
-                                message = npc_death(dead_entity)
+                                message = npc_death(dead_entity, game_map)
 
                             message_log.add_message(message)
 

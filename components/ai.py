@@ -233,7 +233,7 @@ class Hatching:
             game_map.remove_npc_from_map(npc)
             self.hatches.x = npc.x
             self.hatches.y = npc.y
-            game_map.add_npc_to_map(self.hatches)
+            game_map.add_entity_to_map(self.hatches)
 
         return results
 
@@ -249,7 +249,7 @@ class SpawnNPC:
             npc = self.spawn(self.owner.point)
             if (game_map.find_closest(self.owner.point, npc.species, 1) == None):
                 self.turns_since_last_spawn = 0
-                game_map.add_npc_to_map(npc)
+                game_map.add_entity_to_map(npc)
                 print("Spawned " + npc.name)
         else:
             self.turns_since_last_spawn += 1

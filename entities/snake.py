@@ -46,7 +46,7 @@ class Snake(Animal):
 
             egg = SnakeEgg(Point(self.x, self.y))
 
-            game_map.add_npc_to_map(egg)
+            game_map.add_entity_to_map(egg)
 
             print("Laid an egg at: " + Point(self.x, self.y).describe())
 

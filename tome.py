@@ -20,6 +20,7 @@ FIREBALL_DAMAGE = 25
 def heal(*args, **kwargs):
     entity = args[0]
     amount = kwargs.get('amount')
+    target = kwargs.get('target')
 
     results = []
 
@@ -119,17 +120,21 @@ def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
     start_x = point.x - 1
     start_y = point.y - 1
 
+    offset = 3
+
     if (start_x < 0):
         start_x = 0
+        offset = 2
 
     if (start_y < 0):
         start_y = 0
+        offset = 2
 
-    for x in range(start_x, start_x + 3):
-        for y in range(start_y, start_y + 3):
+    for x in range(start_x, start_x + offset):
+        for y in range(start_y, start_y + offset):
             if not game_map.is_blocked(Point(x, y)):
                 npc = ncp_type(Point(x, y))
-                game_map.add_npc_to_map(npc)
+                game_map.add_entity_to_map(npc)
                 dice -= 1
 
                 if dice < 1:
@@ -140,5 +145,5 @@ def resurrect_all_npc(npc_type, game_map, target):
         if entity.char == '%':
             npc = npc_type(old_npc = entity)
             game_map.remove_npc_from_map(entity)
-            game_map.add_npc_to_map(npc)
+            game_map.add_entity_to_map(npc)
     return

@@ -92,8 +92,8 @@ def random_weapon(point = None, dungeon_level = 1):
 
     return item
 
-def random_magic_weapon():
-    item = random_weapon(None)
+def random_magic_weapon(dungeon_level = 1):
+    item = random_weapon(None, dungeon_level)
 
     dice = libtcod.random_get_int(0, 1, 1000)
 

@@ -24,17 +24,19 @@ class Chest(Character):
         super(Chest, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
 
         #TODO: Generate random loot in chest
-        potion = equipment.random_potion()
+        potion = equipment.random_potion(dungeon_level=dungeon_level)
         potion.lootable = True
-
-        weapon = equipment.random_magic_weapon()
-        weapon.lootable = True
-
-        #print("Chest weapon: " + weapon.name)
 
         scroll = equipment.random_scroll(dungeon_level=dungeon_level)
         scroll.lootable = True
 
+        weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
+        weapon.lootable = True
+
+        armour = equipment.random_armour(dungeon_level=dungeon_level)
+        armour.lootable = True
+
         self.inventory.add_item(potion)
-        self.inventory.add_item(weapon)
         self.inventory.add_item(scroll)
+        self.inventory.add_item(weapon)
+        self.inventory.add_item(armour)
