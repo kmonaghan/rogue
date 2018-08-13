@@ -18,18 +18,15 @@ from entities.snake import Snake, SnakeEgg
 
 from map_objects.point import Point
 from map_objects.rect import Rect
-from map_objects.room import Room
 from map_objects.tile import Tile
-from map_objects.altbsptree import AltBSPTree
-from map_objects.basic import Basic
-from map_objects.bsptree import BSPTree
-from map_objects.cellularautomata import CellularAutomata
-from map_objects.mazewithrooms import MazeWithRooms
-from map_objects.singleroom import SingleRoom
+from map_objects.floor import Floor
+from map_objects.floor import Ground
+from map_objects.wall import Wall
 
-from map_objects.mixed import Mixed
 
-import map_objects.prefab
+#import map_objects.prefab
+
+from map_objects.dungeonGenerator import *
 
 from render_order import RenderOrder
 
@@ -47,9 +44,9 @@ class GameMap:
         self.levels = [{},{},{},{},{},{}]
         self.generator = None
 
-    @property
-    def map(self):
-        return self.generator.level
+#    @property
+#    def map(self):
+#        return self.generator.level
 
     @property
     def width(self):
@@ -66,32 +63,51 @@ class GameMap:
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
         self.entities = [player]
 
-        #print "Generating Map sized: " + str(map_width) + " x " + str(map_height)
-        #print "Dungeon level = " + str(self.dungeon_level)
-        if (self.dungeon_level == 1):
-            self.generator = Mixed()
-        elif (self.dungeon_level <= 2):
-            self.generator = AltBSPTree()
-        elif (self.dungeon_level <= 5):
-            self.generator = MazeWithRooms()
+        self.generator = dungeonGenerator(map_height, map_width)
+        self.generator.placeRandomRooms(5, 11, 2, 4, 500)
+        self.generator.generateCorridors()
+        self.generator.connectAllRooms(30)
+        self.generator.pruneDeadends(20)
+        self.generator.placeWalls()
 
-        if (self.dungeon_level == 6):
-            prefabbed = map_objects.prefab.Prefab(map_objects.prefab.boss_room())
-            self.generator.add_prefab(prefabbed)
+        print ("map: " + str(self.generator.width) + "," + str(self.generator.height))
+        '''
+        EMPTY = 0
+        FLOOR = 1
+        CORRIDOR = 2
+        DOOR = 3
+        DEADEND = 4
+        WALL = 5
+        OBSTACLE = 6
+        CAVE = 7
+        '''
 
-        self.generator.generateLevel(map_width, map_height, max_rooms, room_min_size, room_max_size, offset)
+        self.map = [[Wall() for y in range(self.generator.height)]
+                        for x in range(self.generator.width)]
 
-        if (self.dungeon_level == 1):
-            self.level_one(player)
-        elif (self.dungeon_level > 1):
-            self.popluate_map(player)
+        for x in range(self.generator.width):
+            for y in range(self.generator.height):
+                if self.generator.grid[x][y] == DOOR:
+                    self.map[x][y] = Floor()
+                elif self.generator.grid[x][y] == FLOOR:
+                    self.map[x][y] = Floor()
+                elif self.generator.grid[x][y] == CORRIDOR:
+                    self.map[x][y] = Ground()
+                else:
+                    self.map[x][y] = Wall()
 
-        if (game_state.debug):
-            for room in self.generator.rooms:
-                self.add_entity_to_map(room.room_detail)
+        self.test_popluate_map(player)
 
     def test_popluate_map(self, player):
-        self.level_one(player)
+        #room = self.generator.rooms[-1]
+        #stairs_component = Stairs(self.dungeon_level + 1)
+        #self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        #self.add_entity_to_map(self.down_stairs)
+
+        room = self.generator.rooms[0]
+        point = room.random_tile(self)
+        player.x = point.x
+        player.y = point.y
 
     def level_one(self, player):
         room = self.generator.rooms[-1]
@@ -326,12 +342,8 @@ class GameMap:
         self.down_stairs = None
         self.up_stairs = None
 
-        offset = 0
-        if (self.dungeon_level <= 2):
-            offset = 10
-
         self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player, offset)
+                      constants['map_width'], constants['map_height'], player)
 
         return self.entities
 
@@ -366,7 +378,7 @@ class GameMap:
 
     def is_blocked(self, point):
         #first test the map tile
-        if self.generator.level[point.x][point.y].blocked:
+        if self.map[point.x][point.y].blocked:
             return True
 
         return False

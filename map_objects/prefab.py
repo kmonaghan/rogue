@@ -1,5 +1,5 @@
 import game_state
-
+'''
 from map_objects.room import Room
 
 def boss_room():
@@ -49,3 +49,4 @@ class Prefab:
                     map[self.room.x1 + xoffset][self.room.y1 + yoffset] = Wall()
                 else:
                     map[self.room.x1 + xoffset][self.room.y1 + yoffset] = Floor()
+'''
