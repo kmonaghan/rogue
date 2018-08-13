@@ -88,7 +88,7 @@ class GameMap:
 
         if (game_state.debug):
             for room in self.generator.rooms:
-                self.add_npc_to_map(room.room_detail)
+                self.add_entity_to_map(room.room_detail)
 
     def test_popluate_map(self, player):
         self.level_one(player)
@@ -97,7 +97,7 @@ class GameMap:
         room = self.generator.rooms[-1]
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-        self.entities.append(self.down_stairs)
+        self.add_entity_to_map(self.down_stairs)
 
         room = self.generator.rooms[0]
         point = room.random_tile(self)
@@ -117,18 +117,18 @@ class GameMap:
         q2.next_quest = q3
 
         npc.questgiver.add_quest(q)
-        self.add_npc_to_map(npc)
+        self.add_entity_to_map(npc)
 
         #Snakes and Rats
         for i in range(10):
             point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = Snake(point)
-            self.add_npc_to_map(npc)
+            self.add_entity_to_map(npc)
 
         for i in range(6):
             point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
             npc = SnakeEgg(point)
-            self.add_npc_to_map(npc)
+            self.add_entity_to_map(npc)
 
         alcoves = self.generator.findAlcoves()
 
@@ -136,11 +136,11 @@ class GameMap:
             point = choice(alcoves)
             alcoves.remove(point)
             npc = RatNest(point)
-            self.add_npc_to_map(npc)
+            self.add_entity_to_map(npc)
 
         point = choice(alcoves)
         chest = Chest(point)
-        self.add_npc_to_map(chest)
+        self.add_entity_to_map(chest)
 
         num_rooms = len(self.generator.rooms)
         for room in self.generator.rooms[1:num_rooms]:
@@ -152,34 +152,34 @@ class GameMap:
                 add_levels = self.dungeon_level + libtcod.random_get_int(0, -1, 1)
                 npc.level.random_level_up(add_levels)
 
-                self.add_npc_to_map(npc)
+                self.add_entity_to_map(npc)
 
         room = choice(self.generator.rooms[1:num_rooms])
         chest2 = Chest(room.random_tile(self))
-        self.add_npc_to_map(chest2)
+        self.add_entity_to_map(chest2)
         '''
         #Potions and scrolls
         potion = equipment.healing_potion(Point(1,1))
-        self.add_npc_to_map(potion)
+        self.add_entity_to_map(potion)
         scroll1 = equipment.lighting_scroll(Point(1,2))
-        self.add_npc_to_map(scroll1)
+        self.add_entity_to_map(scroll1)
         scroll2 = equipment.fireball_scroll(Point(1,3))
-        self.add_npc_to_map(scroll2)
+        self.add_entity_to_map(scroll2)
         scroll3 = equipment.confusion_scroll(Point(1,4))
-        self.add_npc_to_map(scroll3)
+        self.add_entity_to_map(scroll3)
         '''
 
     def popluate_map(self, player):
         if (self.dungeon_level == 6):
             warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
-            self.add_npc_to_map(warlord)
+            self.add_entity_to_map(warlord)
             self.generator.rooms.remove(prefabbed.room)
         else:
             stairs_component = Stairs(self.dungeon_level + 1)
             room = self.generator.rooms[-1]
             self.generator.rooms.remove(room)
             self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-            self.entities.append(self.down_stairs)
+            self.add_entity_to_map(self.down_stairs)
 
         #Random room for player start
         room = choice(self.generator.rooms)
@@ -190,7 +190,7 @@ class GameMap:
 
         stairs_component = Stairs(self.dungeon_level - 1)
         self.up_stairs = Entity(player.point, '<', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-        self.entities.append(self.up_stairs)
+        self.add_entity_to_map(self.up_stairs)
 
         point = room.random_tile(self)
         npc = bestiary.bountyhunter(point)
@@ -217,7 +217,7 @@ class GameMap:
                 q.next_quest = q2
 
             npc.questgiver.add_quest(q)
-            self.add_npc_to_map(npc)
+            self.add_entity_to_map(npc)
 
         #Add npcs and items
         for room in self.generator.rooms:
@@ -234,11 +234,11 @@ class GameMap:
             npc.ai = PatrollingNPC(list_of_random_items, npc.ai)
             npc.ai.owner = npc
             bestiary.upgrade_npc(npc)
-            self.add_npc_to_map(npc)
+            self.add_entity_to_map(npc)
 
 #        point = self.generator.rooms[2].random_tile(self)
 #        necro = bestiary.necromancer(point)
-#        self.add_npc_to_map(necro)
+#        self.add_entity_to_map(necro)
 
     def place_npc(self, room):
         #this is where we decide the chance of each npc or item appearing.
@@ -284,7 +284,7 @@ class GameMap:
                         npc.level.random_level_up(self.dungeon_level + add_levels - 3)
 
                 npc.name = libtcod.namegen_generate(npc.name)
-                self.add_npc_to_map(npc)
+                self.add_entity_to_map(npc)
 
         libtcod.namegen_destroy()
 
@@ -318,7 +318,7 @@ class GameMap:
                 elif choice == 'armour':
                     item = equipment.random_armour(point, self.dungeon_level)
 
-                self.entities.append(item)
+                self.add_entity_to_map(item)
                 #item.always_visible = True  #items are visible even out-of-FOV, if in an explored area
 
     def create_floor(self, player, message_log, constants):
@@ -371,8 +371,8 @@ class GameMap:
 
         return False
 
-    def add_npc_to_map(self, npc):
-        self.entities.append(npc)
+    def add_entity_to_map(self, npc):
+        self.add_entity_to_map(npc)
 
     def remove_npc_from_map(self, npc):
         self.entities.remove(npc)
@@ -490,4 +490,4 @@ class GameMap:
         add_levels = libtcod.random_get_int(0, -1, 1)
         npc.level.random_level_up(self.dungeon_level + add_levels)
 
-        self.add_npc_to_map(npc)
+        self.add_entity_to_map(npc)
