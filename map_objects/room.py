@@ -18,11 +18,8 @@ class Room(Rect):
 
         self.layout = None
 
-        self.room_detail = None
-
-        if (game_state.debug):
-            name = self.describe()
-            self.room_detail = Entity(Point(self.x1, self.y1), "R", name, libtcod.red, False, True)
+        name = self.describe()
+        self.room_detail = Entity(Point(self.x1, self.y1), "R", name, libtcod.red, False, True)
 
     def change_xy(self, x, y):
         self.x1 = x
@@ -30,7 +27,7 @@ class Room(Rect):
         self.x2 = x + self.w
         self.y2 = y + self.h
 
-        if (self.room_detail != None):
+        if self.room_detail:
             self.room_detail.x = x
             self.room_detail.y = y
 
