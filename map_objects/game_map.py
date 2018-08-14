@@ -21,6 +21,7 @@ from map_objects.rect import Rect
 from map_objects.tile import Tile
 from map_objects.floor import Floor
 from map_objects.floor import Ground
+from map_objects.floor import Door
 from map_objects.wall import Wall
 
 
@@ -63,14 +64,15 @@ class GameMap:
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
         self.entities = [player]
 
-        self.generator = dungeonGenerator(map_height, map_width)
-        self.generator.placeRandomRooms(5, 11, 2, 4, 500)
-        self.generator.generateCorridors()
-        self.generator.connectAllRooms(30)
-        self.generator.pruneDeadends(20)
-        self.generator.placeWalls()
+        self.generator = self.level_generator(map_width, map_height)
 
-        print ("map: " + str(self.generator.width) + "," + str(self.generator.height))
+        #if (self.dungeon_level == 1):
+        #    self.generator = self.level_one_generator(map_width, map_height)
+        #elif (self.dungeon_level == 6):
+        #    self.generator = self.level_six_generator(map_width, map_height)
+        #else:
+        #    self.generator = self.level_generator(map_width, map_height)
+
         '''
         EMPTY = 0
         FLOOR = 1
@@ -88,21 +90,25 @@ class GameMap:
         for x in range(self.generator.width):
             for y in range(self.generator.height):
                 if self.generator.grid[x][y] == DOOR:
-                    self.map[x][y] = Floor()
+                    self.map[x][y] = Door()
                 elif self.generator.grid[x][y] == FLOOR:
                     self.map[x][y] = Floor()
                 elif self.generator.grid[x][y] == CORRIDOR:
                     self.map[x][y] = Ground()
-                else:
-                    self.map[x][y] = Wall()
+                elif self.generator.grid[x][y] == CAVE:
+                    self.map[x][y] = Ground()
+                elif self.generator.grid[x][y] == DEADEND:
+                    self.map[x][y] = Ground()
 
-        self.test_popluate_map(player)
+        #self.test_popluate_map(player)
+        player.x = 0
+        player.y = 0
 
     def test_popluate_map(self, player):
-        #room = self.generator.rooms[-1]
-        #stairs_component = Stairs(self.dungeon_level + 1)
-        #self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-        #self.add_entity_to_map(self.down_stairs)
+        room = self.generator.rooms[-1]
+        stairs_component = Stairs(self.dungeon_level + 1)
+        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.add_entity_to_map(self.down_stairs)
 
         room = self.generator.rooms[0]
         point = room.random_tile(self)
@@ -384,7 +390,7 @@ class GameMap:
         return False
 
     def add_entity_to_map(self, npc):
-        self.add_entity_to_map(npc)
+        self.entities.append(npc)
 
     def remove_npc_from_map(self, npc):
         self.entities.remove(npc)
@@ -503,3 +509,92 @@ class GameMap:
         npc.level.random_level_up(self.dungeon_level + add_levels)
 
         self.add_entity_to_map(npc)
+
+    def level_one_generator(self, map_width, map_height):
+        dm = dungeonGenerator(width=map_width, height=map_height)
+
+        dm.generateCaves(37, 4)
+        # clear away small islands
+        unconnected = dm.findUnconnectedAreas()
+        for area in unconnected:
+            if len(area) < 35:
+                for x, y in area:
+                    dm.grid[x][y] = EMPTY
+        # generate rooms and corridors
+        dm.placeRandomRooms(5, 9, 1, 1, 500)
+        x, y = dm.findEmptySpace(3)
+        while x:
+            dm.generateCorridors('l', x, y)
+            x, y = dm.findEmptySpace(3)
+        # join it all together
+        dm.connectAllRooms(0)
+        unconnected = dm.findUnconnectedAreas()
+        dm.joinUnconnectedAreas(unconnected)
+        dm.pruneDeadends(70)
+
+        return dm
+
+    def level_six_generator(self, map_width, map_height):
+        dm = dungeonGenerator(width=map_width, height=map_height)
+
+
+        # generate rooms and corridors
+        dm.placeRandomRooms(5, 9, 1, 1, 500)
+        x, y = dm.findEmptySpace(3)
+        while x:
+            dm.generateCorridors('l', x, y)
+            x, y = dm.findEmptySpace(3)
+        # join it all together
+        dm.connectAllRooms(0)
+        unconnected = dm.findUnconnectedAreas()
+        dm.joinUnconnectedAreas(unconnected)
+        dm.pruneDeadends(70)
+
+        return dm
+
+    def level_generator(self, map_width, map_height):
+        dm = dungeonGenerator(width=map_width, height=map_height)
+
+        '''
+        3 options:
+        1) all caverns
+        2) both rooms and caverns
+        3) all rooms
+        '''
+
+        chance = randint(0,100)
+
+        print("Chance = " + str(chance))
+
+        if (chance <= 66):
+            print("Caverns")
+            p = 37
+            if (chance <= 33):
+                p = 45
+            dm.generateCaves(p, 4)
+            # clear away small islands
+            unconnected = dm.findUnconnectedAreas()
+            for area in unconnected:
+                if len(area) < 35:
+                    for x, y in area:
+                        dm.grid[x][y] = EMPTY
+
+        if (chance > 33):
+            print("Rooms")
+            offset = 0
+            if (chance > 66):
+                offset = 2
+            # generate rooms and corridors
+            dm.placeRandomRooms(5 + offset, 9 + offset, 1 + offset, 1 + offset, 500)
+            x, y = dm.findEmptySpace(3)
+            while x:
+                dm.generateCorridors('l', x, y)
+                x, y = dm.findEmptySpace(3)
+            # join it all together
+            dm.connectAllRooms(0)
+
+        unconnected = dm.findUnconnectedAreas()
+        dm.joinUnconnectedAreas(unconnected)
+        dm.pruneDeadends(70)
+
+        return dm
