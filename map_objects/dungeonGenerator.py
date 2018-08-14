@@ -28,6 +28,35 @@ WALL = 5
 OBSTACLE = 6
 CAVE = 7
 
+class Prefab:
+    def __init__(self, room_map):
+        self.room_map = room_map
+        self.room = None
+        self.layout = []
+
+        self.parse_map()
+
+    def parse_map(self):
+        self.layout = [["#"
+        			for y in range(len(self.room_map))]
+        				for x in range(len(self.room_map[0]))]
+        y = 0
+        for line in self.room_map:
+            x = 0
+            for tile in line:
+                self.layout[x][y] = tile
+                x += 1
+            y += 1
+
+        self.room = dungeonRoom(0,0,len(self.room_map[0]),len(self.room_map))
+
+    def carve(self, map):
+        for xoffset in range(0, self.room.w):
+            for yoffset in range(0, self.room.h):
+                if (self.layout[xoffset][yoffset] == "#"):
+                    map[self.room.x1 + xoffset][self.room.y1 + yoffset] = WALL
+                else:
+                    map[self.room.x1 + xoffset][self.room.y1 + yoffset] = FLOOR
 
 class dungeonRoom:
     """
@@ -110,11 +139,10 @@ class dungeonGenerator:
         ** once created these will not be re-instanced, therefore any user made changes to grid will also need to update these lists for them to remain valid
     """
 
-    def __init__(self, height, width):
+    def __init__(self, width, height):
 
         self.height = abs(height)
         self.width = abs(width)
-        #self.grid = [[EMPTY for i in range(self.width)] for i in range(self.height)]
         self.grid = [[EMPTY for i in range(self.height)] for i in range(self.width)]
         self.rooms = []
         self.doors = []
@@ -302,10 +330,9 @@ class dungeonGenerator:
         Returns:
             A list of unconnected cells, where each group of cells is in its own list and each cell indice is stored as a tuple, ie [[(x1,y1), (x2,y2), (x3,y3)], [(xi1,yi1), (xi2,yi2), (xi3,yi3)]]
         """
-
         unconnectedAreas = []
         areaCount = 0
-        gridCopy = [[EMPTY for i in range(self.width)] for i in range(self.height)]
+        gridCopy = [[EMPTY for i in range(self.height)] for i in range(self.width)]
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y]:
