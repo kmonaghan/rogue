@@ -31,3 +31,14 @@ class Floor(Ground):
 
         self.fov_color = libtcod.grey
         self.out_of_fov_color = libtcod.darker_grey
+
+class Door(Ground):
+    """
+    A Door on a map. It may or may not be blocked, and may or may not block sight.
+    """
+
+    def __init__(self, blocked=False, block_sight=False):
+        super(Door, self).__init__(blocked, block_sight)
+
+        self.fov_color = libtcod.orange
+        self.out_of_fov_color = libtcod.darker_orange
