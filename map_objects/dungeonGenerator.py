@@ -148,6 +148,8 @@ class dungeonGenerator:
         self.doors = []
         self.corridors = []
         self.deadends = []
+        self.alcoves = []
+        self.caves = []
 
         self.graph = {}
 
@@ -368,6 +370,22 @@ class dungeonGenerator:
                 if self.grid[nx][ny]: touching += 1
             if touching == 1: self.deadends.append((x,y))
 
+    def findAlcoves(self):
+        for xi in range(self.width):
+            for yi in range(self.height):
+                walls = 0
+                if (self.grid[xi][yi] == CAVE):
+                    for nx, ny in self.findNeighboursDirect(xi, yi):
+                        if (self.grid[nx][ny] in [EMPTY, WALL]):
+                            walls += 1
+                    if (walls == 3):
+                        self.alcoves.append(Point(xi, yi))
+
+    def findCaves(self):
+        for xi in range(self.width):
+            for yi in range(self.height):
+                if (self.grid[xi][yi] == CAVE):
+                    self.caves.append(Point(xi, yi))
 
     ##### GENERATION FUNCTIONS #####
 
@@ -619,7 +637,18 @@ class dungeonGenerator:
                     self.grid[x][y] = CORRIDOR
             self.corridors.append((x,y))
 
-
+    def closeDeadDoors(self):
+        for xi in range(self.width):
+            for yi in range(self.height):
+                if (self.grid[xi][yi] == DOOR):
+                    print("Found DOOR")
+                    num_connections = 0
+                    for nx, ny in self.findNeighboursDirect(xi, yi):
+                        if (self.grid[nx][ny] in [FLOOR, CORRIDOR, CAVE]):
+                            num_connections += 1
+                    if (num_connections < 2):
+                        print("Removing DOOR")
+                        self.grid[xi][yi] = EMPTY
 
     ##### PATH FINDING FUNCTIONS #####
 
