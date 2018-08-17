@@ -18,12 +18,7 @@ from entities.snake import Snake, SnakeEgg
 
 from map_objects.point import Point
 from map_objects.rect import Rect
-from map_objects.tile import Tile
-from map_objects.floor import Floor
-from map_objects.floor import Ground
-from map_objects.floor import Door
-from map_objects.wall import Wall
-
+from map_objects.tile import *
 
 #import map_objects.prefab
 
@@ -45,10 +40,6 @@ class GameMap:
         self.levels = [{},{},{},{},{},{}]
         self.generator = None
 
-#    @property
-#    def map(self):
-#        return self.generator.level
-
     @property
     def width(self):
         return self.generator.width
@@ -64,14 +55,14 @@ class GameMap:
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
         self.entities = [player]
 
-        self.generator = self.level_generator(map_width, map_height)
-
-        #if (self.dungeon_level == 1):
-        #    self.generator = self.level_one_generator(map_width, map_height)
-        #elif (self.dungeon_level == 6):
-        #    self.generator = self.level_six_generator(map_width, map_height)
-        #else:
-        #    self.generator = self.level_generator(map_width, map_height)
+        if (self.dungeon_level == 1):
+            self.generator = self.level_one_generator(map_width, map_height)
+        else:
+            boss_chance = randint(0,3) + dungeon_level
+            if (self.dungeon_level >= 6):
+                self.generator = self.level_boss_generator(map_width, map_height)
+            else:
+                self.generator = self.level_generator(map_width, map_height)
 
         '''
         EMPTY = 0
@@ -87,22 +78,21 @@ class GameMap:
         self.map = [[Wall() for y in range(self.generator.height)]
                         for x in range(self.generator.width)]
 
-        for x in range(self.generator.width):
-            for y in range(self.generator.height):
-                if self.generator.grid[x][y] == DOOR:
-                    self.map[x][y] = Door()
-                elif self.generator.grid[x][y] == FLOOR:
-                    self.map[x][y] = Floor()
-                elif self.generator.grid[x][y] == CORRIDOR:
-                    self.map[x][y] = Ground()
-                elif self.generator.grid[x][y] == CAVE:
-                    self.map[x][y] = Ground()
-                elif self.generator.grid[x][y] == DEADEND:
-                    self.map[x][y] = Ground()
+        for x, y, tile in self.generator:
+            if self.generator.grid[x][y] == DOOR:
+                self.map[x][y] = Door()
+            elif self.generator.grid[x][y] == FLOOR:
+                self.map[x][y] = Floor()
+            elif self.generator.grid[x][y] == WALL:
+                self.map[x][y] = Wall()
+            elif self.generator.grid[x][y] == CORRIDOR:
+                self.map[x][y] = Ground()
+            elif self.generator.grid[x][y] == CAVE:
+                self.map[x][y] = Cave()
+            elif self.generator.grid[x][y] == DEADEND:
+                self.map[x][y] = Ground()
 
-        #self.test_popluate_map(player)
-        player.x = 0
-        player.y = 0
+        self.level_one(player)
 
     def test_popluate_map(self, player):
         room = self.generator.rooms[-1]
@@ -143,16 +133,18 @@ class GameMap:
 
         #Snakes and Rats
         for i in range(10):
-            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
+            point = choice(self.generator.caves)
             npc = Snake(point)
             self.add_entity_to_map(npc)
 
         for i in range(6):
-            point = self.random_open_cell(start_x=10, end_x = int(self.generator.width - (self.generator.width / 3)))
+            point = choice(self.generator.caves)
             npc = SnakeEgg(point)
             self.add_entity_to_map(npc)
 
-        alcoves = self.generator.findAlcoves()
+        self.generator.findAlcoves()
+
+        alcoves = self.generator.alcoves
 
         for i in range(6):
             point = choice(alcoves)
@@ -520,23 +512,28 @@ class GameMap:
             if len(area) < 35:
                 for x, y in area:
                     dm.grid[x][y] = EMPTY
+
+        dm.findCaves()
+
         # generate rooms and corridors
         dm.placeRandomRooms(5, 9, 1, 1, 500)
         x, y = dm.findEmptySpace(3)
         while x:
             dm.generateCorridors('l', x, y)
             x, y = dm.findEmptySpace(3)
+
         # join it all together
         dm.connectAllRooms(0)
         unconnected = dm.findUnconnectedAreas()
         dm.joinUnconnectedAreas(unconnected)
         dm.pruneDeadends(70)
+        dm.closeDeadDoors()
+        dm.placeWalls()
 
         return dm
 
-    def level_six_generator(self, map_width, map_height):
+    def level_boss_generator(self, map_width, map_height):
         dm = dungeonGenerator(width=map_width, height=map_height)
-
 
         # generate rooms and corridors
         dm.placeRandomRooms(5, 9, 1, 1, 500)
