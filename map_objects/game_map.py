@@ -93,6 +93,8 @@ class GameMap:
                 self.map[x][y] = Ground()
 
         self.level_one(player)
+        #player.x = 0
+        #player.y = 0
 
     def test_popluate_map(self, player):
         room = self.generator.rooms[-1]
@@ -137,24 +139,21 @@ class GameMap:
             npc = Snake(point)
             self.add_entity_to_map(npc)
 
-        for i in range(6):
-            point = choice(self.generator.caves)
-            npc = SnakeEgg(point)
-            self.add_entity_to_map(npc)
-
         self.generator.findAlcoves()
 
         alcoves = self.generator.alcoves
 
-        for i in range(6):
-            point = choice(alcoves)
-            alcoves.remove(point)
-            npc = RatNest(point)
-            self.add_entity_to_map(npc)
+        if (len(alcoves)):
+            for i in range(6):
+                point = choice(alcoves)
+                alcoves.remove(point)
+                npc = RatNest(point)
+                self.add_entity_to_map(npc)
 
-        point = choice(alcoves)
-        chest = Chest(point)
-        self.add_entity_to_map(chest)
+        if (len(alcoves)):
+            point = choice(alcoves)
+            chest = Chest(point, self.dungeon_level)
+            self.add_entity_to_map(chest)
 
         num_rooms = len(self.generator.rooms)
         for room in self.generator.rooms[1:num_rooms]:
@@ -169,7 +168,7 @@ class GameMap:
                 self.add_entity_to_map(npc)
 
         room = choice(self.generator.rooms[1:num_rooms])
-        chest2 = Chest(room.random_tile(self))
+        chest2 = Chest(room.random_tile(self), self.dungeon_level)
         self.add_entity_to_map(chest2)
         '''
         #Potions and scrolls
@@ -376,6 +375,12 @@ class GameMap:
 
     def is_blocked(self, point):
         #first test the map tile
+        if (point.x > self.generator.width):
+            return False
+
+        if (point.y > self.generator.height):
+            return False
+
         if self.map[point.x][point.y].blocked:
             return True
 
@@ -505,28 +510,40 @@ class GameMap:
     def level_one_generator(self, map_width, map_height):
         dm = dungeonGenerator(width=map_width, height=map_height)
 
-        dm.generateCaves(37, 4)
+        cave_width = int((map_width * 2)/ 3)
+        caves = dungeonGenerator(width=cave_width, height=map_height - 2)
+
+        caves.generateCaves(44, 3)
         # clear away small islands
         unconnected = dm.findUnconnectedAreas()
         for area in unconnected:
             if len(area) < 35:
                 for x, y in area:
-                    dm.grid[x][y] = EMPTY
+                    caves.grid[x][y] = EMPTY
+
+        for x, y, tile in caves:
+            dm.grid[x][y + 1] = caves.grid[x][y]
 
         dm.findCaves()
 
-        # generate rooms and corridors
-        dm.placeRandomRooms(5, 9, 1, 1, 500)
+        startY = randint(1, dm.height - 5)
+        dm.placeRoom(0, startY, 5, 5, ignoreOverlap = True)
+
+        dm.placeRandomRooms(5, 9, 2, 2, 500)
         x, y = dm.findEmptySpace(3)
         while x:
-            dm.generateCorridors('l', x, y)
+            dm.generateCorridors('f', x, y)
             x, y = dm.findEmptySpace(3)
-
         # join it all together
         dm.connectAllRooms(0)
+
         unconnected = dm.findUnconnectedAreas()
         dm.joinUnconnectedAreas(unconnected)
-        dm.pruneDeadends(70)
+
+        dm.findDeadends()
+        while len(dm.deadends):
+            dm.pruneDeadends(1)
+
         dm.closeDeadDoors()
         dm.placeWalls()
 
