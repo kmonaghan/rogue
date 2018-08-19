@@ -55,11 +55,11 @@ class GameMap:
     def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
         self.entities = [player]
 
+        boss_chance = randint(0,3) + self.dungeon_level
         if (self.dungeon_level == 1):
             self.generator = self.level_one_generator(map_width, map_height)
         else:
-            boss_chance = randint(0,3) + dungeon_level
-            if (self.dungeon_level >= 6):
+            if (boss_chance >= 6):
                 self.generator = self.level_boss_generator(map_width, map_height)
             else:
                 self.generator = self.level_generator(map_width, map_height)
@@ -92,9 +92,13 @@ class GameMap:
             elif self.generator.grid[x][y] == DEADEND:
                 self.map[x][y] = Ground()
 
-        self.level_one(player)
-        #player.x = 0
-        #player.y = 0
+        if (self.dungeon_level == 1):
+            self.level_one(player)
+        else:
+            if (boss_chance >= 6):
+                self.level_generic(player)
+            else:
+                self.level_generic(player)
 
     def test_popluate_map(self, player):
         room = self.generator.rooms[-1]
@@ -181,6 +185,37 @@ class GameMap:
         scroll3 = equipment.confusion_scroll(Point(1,4))
         self.add_entity_to_map(scroll3)
         '''
+
+    def level_generic(self, player):
+        if (len(self.generator.rooms)):
+            room = self.generator.rooms[-1]
+            downStairsPoint = room.random_tile(self)
+
+            room = self.generator.rooms[0]
+            playerStartPoint = room.random_tile(self)
+        else:
+            if (len(self.generator.alcoves)):
+                alcoves = self.generator.alcoves
+                downStairsPoint = choice(alcoves)
+                alcoves.remove(downStairsPoint)
+
+                playerStartPoint = choice(alcoves)
+                alcoves.remove(playerStartPoint)
+            else:
+                print("No alcoves?!?!?")
+                downStairsPoint = choice(self.generator.caves)
+                playerStartPoint = choice(self.generator.caves)
+
+        stairs_component = Stairs(self.dungeon_level + 1)
+        self.down_stairs = Entity(downStairsPoint, '>', 'Down Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.add_entity_to_map(self.down_stairs)
+
+        player.x = playerStartPoint.x
+        player.y = playerStartPoint.y
+
+        up_stairs_component = Stairs(self.dungeon_level - 1)
+        self.up_stairs = Entity(playerStartPoint, '<', 'Up Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=up_stairs_component)
+        self.add_entity_to_map(self.up_stairs)
 
     def popluate_map(self, player):
         if (self.dungeon_level == 6):
@@ -515,7 +550,7 @@ class GameMap:
 
         caves.generateCaves(44, 3)
         # clear away small islands
-        unconnected = dm.findUnconnectedAreas()
+        unconnected = caves.findUnconnectedAreas()
         for area in unconnected:
             if len(area) < 35:
                 for x, y in area:
@@ -527,7 +562,7 @@ class GameMap:
         dm.findCaves()
 
         startY = randint(1, dm.height - 5)
-        dm.placeRoom(0, startY, 5, 5, ignoreOverlap = True)
+        dm.placeRoom(1, startY, 5, 5, ignoreOverlap = True)
 
         dm.placeRandomRooms(5, 9, 2, 2, 500)
         x, y = dm.findEmptySpace(3)
@@ -592,6 +627,8 @@ class GameMap:
                 if len(area) < 35:
                     for x, y in area:
                         dm.grid[x][y] = EMPTY
+
+            dm.findCaves()
 
         if (chance > 33):
             print("Rooms")
