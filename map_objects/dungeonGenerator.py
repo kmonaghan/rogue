@@ -371,6 +371,7 @@ class dungeonGenerator:
             if touching == 1: self.deadends.append((x,y))
 
     def findAlcoves(self):
+        self.alcoves = []
         for xi in range(self.width):
             for yi in range(self.height):
                 walls = 0
@@ -382,6 +383,7 @@ class dungeonGenerator:
                         self.alcoves.append(Point(xi, yi))
 
     def findCaves(self):
+        self.caves = []
         for xi in range(self.width):
             for yi in range(self.height):
                 if (self.grid[xi][yi] == CAVE):
@@ -641,12 +643,11 @@ class dungeonGenerator:
         for xi in range(self.width):
             for yi in range(self.height):
                 if (self.grid[xi][yi] == DOOR):
-                    print("Found DOOR")
                     num_connections = 0
                     for nx, ny in self.findNeighboursDirect(xi, yi):
                         if (self.grid[nx][ny] in [FLOOR, CORRIDOR, CAVE]):
                             num_connections += 1
-                    if (num_connections < 2):
+                    if (num_connections != 2):
                         print("Removing DOOR")
                         self.grid[xi][yi] = EMPTY
 
