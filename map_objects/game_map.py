@@ -114,6 +114,7 @@ class GameMap:
 
     def level_one(self, player):
         room = self.generator.rooms[-1]
+        room = self.generator.rooms[0]
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.add_entity_to_map(self.down_stairs)
@@ -217,6 +218,9 @@ class GameMap:
         self.add_entity_to_map(self.up_stairs)
 
         self.place_creatures()
+
+        for room in self.generator.rooms:
+            self.place_npc(room)
 
     def popluate_map(self, player):
         if (self.dungeon_level == 6):
