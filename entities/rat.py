@@ -37,8 +37,6 @@ class Rat(Animal):
         self.inventory.add_item(teeth)
         self.equipment.toggle_equip(teeth)
 
-        self.egg_generation = 0
-
 class RatNest(Animal):
     def __init__(self, point = None, dungeon_level = 1):
         char = 'N'
@@ -58,8 +56,6 @@ class RatNest(Animal):
         potion.lootable = True
 
         self.inventory.add_item(potion)
-
-        self.egg_generation = 0
 
     def hasBeenAttacked(self, npc):
         print("Override hasBeenAttacked")
