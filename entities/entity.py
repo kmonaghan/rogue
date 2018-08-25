@@ -99,6 +99,12 @@ class Entity:
         self.attempt_move(target_x, target_y, game_map)
 
     def attempt_move(self, target_x, target_y, game_map):
+        if (target_x < 0) or (target_x > game_map.width):
+            return False
+
+        if (target_y < 0) or (target_y > game_map.height):
+            return False
+
         if not (game_map.is_blocked(Point(target_x, target_y)) or
                 game_map.get_blocking_entities_at_location(target_x, target_y)):
             self.move(target_x - self.x, target_y - self.y)
@@ -172,3 +178,8 @@ class Entity:
         self.ai = ai
         if self.ai:  #let the AI component know who owns it
             self.ai.owner = self
+
+    def setFighter(self, fighter):
+        self.fighter = fighter
+        if (self.fighter):
+            self.fighter.owner = self
