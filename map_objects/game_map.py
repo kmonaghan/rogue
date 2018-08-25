@@ -144,8 +144,6 @@ class GameMap:
             npc = Snake(point)
             self.add_entity_to_map(npc)
 
-        self.generator.findAlcoves()
-
         alcoves = self.generator.alcoves
 
         if (len(alcoves)):
@@ -218,6 +216,8 @@ class GameMap:
         self.up_stairs = Entity(playerStartPoint, '<', 'Up Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=up_stairs_component)
         self.add_entity_to_map(self.up_stairs)
 
+        self.place_creatures()
+
     def popluate_map(self, player):
         if (self.dungeon_level == 6):
             warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
@@ -288,6 +288,43 @@ class GameMap:
 #        point = self.generator.rooms[2].random_tile(self)
 #        necro = bestiary.necromancer(point)
 #        self.add_entity_to_map(necro)
+    def place_creatures(self):
+        npc_chances = {}
+        npc_chances['rat'] = random_utils.from_dungeon_level([[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances['snake'] = random_utils.from_dungeon_level([[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances['snakeegg'] = random_utils.from_dungeon_level([[1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances['ratnest'] = random_utils.from_dungeon_level([[1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+
+        max_npcs = len(self.generator.caves) // 100
+
+        num_npcs = libtcod.random_get_int(0, 0, max_npcs)
+
+        print ("Max NPCs: " + str(max_npcs) + ", number of NPCs: " + str(num_npcs))
+
+        alcoves = self.generator.alcoves
+
+        for i in range(num_npcs):
+            #choose random spot for this npc
+            creature_choice = random_utils.random_choice_from_dict(npc_chances)
+
+            if (creature_choice == 'ratnest') and len(alcoves):
+                point = choice(alcoves)
+                alcoves.remove(point)
+                npc = RatNest(point)
+                self.add_entity_to_map(npc)
+            else:
+                point = choice(self.generator.caves)
+
+                #only place it if the tile is not blocked
+                if not self.is_blocked(point):
+                    if creature_choice == 'snake':
+                        npc = Snake(point)
+                    elif creature_choice == 'snakeegg':
+                        npc = SnakeEgg(point)
+                    elif creature_choice == 'rat':
+                        npc = Rat(point)
+
+                self.add_entity_to_map(npc)
 
     def place_npc(self, room):
         #this is where we decide the chance of each npc or item appearing.
@@ -409,7 +446,7 @@ class GameMap:
 
         return self.entities
 
-    def is_blocked(self, point):
+    def is_blocked(self, point, check_entities = False):
         #first test the map tile
         if (point.x > self.generator.width):
             return False
@@ -419,6 +456,10 @@ class GameMap:
 
         if self.map[point.x][point.y].blocked:
             return True
+
+        if (check_entities):
+            if (self.get_blocking_entities_at_location(point.x, point.y)):
+                return True
 
         return False
 
@@ -563,6 +604,7 @@ class GameMap:
             dm.grid[x][y + 1] = caves.grid[x][y]
 
         dm.findCaves()
+        dm.findAlcoves()
 
         startY = randint(1, dm.height - 5)
         dm.placeRoom(1, startY, 5, 5, ignoreOverlap = True)
@@ -621,7 +663,7 @@ class GameMap:
         corridorType = 'f'
 
         if (chance <= 66):
-            print("Caverns")
+            print("Adding Caverns")
             p = 37
             if (chance <= 33):
                 p = 45
@@ -639,7 +681,7 @@ class GameMap:
             corridorType = 'l'
 
         if (chance > 33):
-            print("Rooms")
+            print("Adding Rooms")
             offset = 0
             if (chance > 66):
                 offset = 2
