@@ -11,3 +11,4 @@ class Species(Enum):
     EGG = auto()
     RATNEST = auto()
     INANIMATE = auto()
+    CREATURE = auto()

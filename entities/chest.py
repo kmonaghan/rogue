@@ -1,8 +1,10 @@
 import libtcodpy as libtcod
+from random import randint
 
 import equipment
 
 from components.fighter import Fighter
+from components.ai import BasicNPC
 
 from entities.character import Character
 
@@ -23,20 +25,38 @@ class Chest(Character):
 
         super(Chest, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
 
-        #TODO: Generate random loot in chest
-        potion = equipment.random_potion(dungeon_level=dungeon_level)
-        potion.lootable = True
+        mimic_chance = randint(1, 100)
 
-        scroll = equipment.random_scroll(dungeon_level=dungeon_level)
-        scroll.lootable = True
+        if (mimic_chance >= 99):
+            self.species = Species.CREATURE
+            self.setFighter(Fighter(hp=30, defense=3, power=3, xp=100))
 
-        weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
-        weapon.lootable = True
+            teeth = equipment.teeth()
+            teeth.lootable = False
 
-        armour = equipment.random_armour(dungeon_level=dungeon_level)
-        armour.lootable = True
+            self.inventory.add_item(teeth)
+            self.equipment.toggle_equip(teeth)
+        else:
+            #TODO: Generate random level appropriate loot in chest
+            potion = equipment.random_potion(dungeon_level=dungeon_level)
+            potion.lootable = True
 
-        self.inventory.add_item(potion)
-        self.inventory.add_item(scroll)
-        self.inventory.add_item(weapon)
-        self.inventory.add_item(armour)
+            scroll = equipment.random_scroll(dungeon_level=dungeon_level)
+            scroll.lootable = True
+
+            weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
+            weapon.lootable = True
+
+            armour = equipment.random_armour(dungeon_level=dungeon_level)
+            armour.lootable = True
+
+            self.inventory.add_item(potion)
+            self.inventory.add_item(scroll)
+            self.inventory.add_item(weapon)
+            self.inventory.add_item(armour)
+
+    def hasBeenAttacked(self, npc):
+        if (self.species == Species.CREATURE):
+            self.name = 'Mimic'
+            self.char = 'M'
+            self.setAI(BasicNPC())
