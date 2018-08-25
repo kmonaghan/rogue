@@ -39,6 +39,7 @@ class GameMap:
         self.entity_map = None
         self.levels = [{},{},{},{},{},{}]
         self.generator = None
+        self.map = None
 
     @property
     def width(self):
@@ -519,6 +520,7 @@ class GameMap:
         self.dungeon_level = lmap["dungeon_level"]
         self.entity_map = lmap["entity_map"]
         self.generator = lmap["generator"]
+        self.map = lmap["map"]
 
     def unload_map(self):
         print("unloading: " + str(self.dungeon_level))
@@ -529,6 +531,7 @@ class GameMap:
         umap["dungeon_level"] = self.dungeon_level
         umap["entity_map"] = self.entity_map
         umap["generator"] = self.generator
+        umap["map"] = self.map
 
         self.levels[self.dungeon_level - 1] = umap
 
@@ -615,6 +618,8 @@ class GameMap:
 
         print("Chance = " + str(chance))
 
+        corridorType = 'f'
+
         if (chance <= 66):
             print("Caverns")
             p = 37
@@ -629,6 +634,9 @@ class GameMap:
                         dm.grid[x][y] = EMPTY
 
             dm.findCaves()
+            dm.findAlcoves()
+
+            corridorType = 'l'
 
         if (chance > 33):
             print("Rooms")
@@ -639,7 +647,7 @@ class GameMap:
             dm.placeRandomRooms(5 + offset, 9 + offset, 1 + offset, 1 + offset, 500)
             x, y = dm.findEmptySpace(3)
             while x:
-                dm.generateCorridors('l', x, y)
+                dm.generateCorridors(corridorType, x, y)
                 x, y = dm.findEmptySpace(3)
             # join it all together
             dm.connectAllRooms(0)
