@@ -27,12 +27,14 @@ DEADEND = 4
 WALL = 5
 OBSTACLE = 6
 CAVE = 7
+IMPENETRABLE = 8
 
 class Prefab:
     def __init__(self, room_map):
         self.room_map = room_map
         self.room = None
         self.layout = []
+        self.door = None
 
         self.parse_map()
 
@@ -51,12 +53,17 @@ class Prefab:
         self.room = dungeonRoom(0,0,len(self.room_map[0]),len(self.room_map))
 
     def carve(self, map):
-        for xoffset in range(0, self.room.w):
-            for yoffset in range(0, self.room.h):
+        for xoffset in range(0, self.room.width):
+            for yoffset in range(0, self.room.height):
                 if (self.layout[xoffset][yoffset] == "#"):
-                    map[self.room.x1 + xoffset][self.room.y1 + yoffset] = WALL
+                    map[self.room.x + xoffset][self.room.y + yoffset] = WALL
+                elif (self.layout[xoffset][yoffset] == "I"):
+                    map[self.room.x + xoffset][self.room.y + yoffset] = IMPENETRABLE
+                elif (self.layout[xoffset][yoffset] == "D"):
+                    map[self.room.x + xoffset][self.room.y + yoffset] = FLOOR
+                    self.door = Point(self.room.x + xoffset, self.room.y + yoffset)
                 else:
-                    map[self.room.x1 + xoffset][self.room.y1 + yoffset] = FLOOR
+                    map[self.room.x + xoffset][self.room.y + yoffset] = FLOOR
 
 class dungeonRoom:
     """
@@ -81,7 +88,7 @@ class dungeonRoom:
         self.height = height
 
     def describe(self):
-        return "Room: " + str(self.x) + ',' + str(self.y) + ',' + str(self.w) + ',' + str(self.h)
+        return "Room: " + str(self.x) + ',' + str(self.y) + ',' + str(self.width) + ',' + str(self.height)
 
     def random_tile(self, map):
         point = None
@@ -135,7 +142,8 @@ class dungeonGenerator:
         corridors: **list of all the corridor tiles in the grid, elements are tuples (x,y), empty until generateCorridors() is called
         deadends: list of all corridor tiles only connected to one other tile, elements are tuples (x,y), empty until findDeadends() is called
         graph: dictionary where keys are the coordinates of all floor/corridor tiles and values are a list of floor/corridor directly connected, ie (x, y): [(x+1, y), (x-1, y), (x, y+1), (x, y-1)], empty until constructGraph() is called
-
+        caves: list of all the floor tiles in areas generated with generateCaves 
+        alcoves: list of all the alcoves (a floor tile with 3 wall tiles adjoining) in the cave areas
         ** once created these will not be re-instanced, therefore any user made changes to grid will also need to update these lists for them to remain valid
     """
 
@@ -377,7 +385,7 @@ class dungeonGenerator:
                 walls = 0
                 if (self.grid[xi][yi] == CAVE):
                     for nx, ny in self.findNeighboursDirect(xi, yi):
-                        if (self.grid[nx][ny] in [EMPTY, WALL]):
+                        if (self.grid[nx][ny] in [EMPTY, WALL, IMPENETRABLE]):
                             walls += 1
                     if (walls == 3):
                         self.alcoves.append(Point(xi, yi))
@@ -669,10 +677,10 @@ class dungeonGenerator:
             if self.grid[x][y] < WALL: break
         for x in range(self.width):
             for y in range(self.height):
-                if self.grid[x][y] not in [WALL, EMPTY, OBSTACLE]:
+                if self.grid[x][y] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE]:
                     self.graph[(x, y)] = []
                     for nx, ny in self.findNeighboursDirect(x, y):
-                        if self.grid[nx][ny] not in [WALL, EMPTY, OBSTACLE]:
+                        if self.grid[nx][ny] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE]:
                             self.graph[(x, y)].append((nx, ny))
 
     def findPath(self, startX, startY, endX, endY):
