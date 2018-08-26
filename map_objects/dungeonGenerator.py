@@ -28,6 +28,8 @@ WALL = 5
 OBSTACLE = 6
 CAVE = 7
 IMPENETRABLE = 8
+SHALLOWWATER = 9
+DEEPWATER = 10
 
 class Prefab:
     def __init__(self, room_map):
@@ -142,7 +144,7 @@ class dungeonGenerator:
         corridors: **list of all the corridor tiles in the grid, elements are tuples (x,y), empty until generateCorridors() is called
         deadends: list of all corridor tiles only connected to one other tile, elements are tuples (x,y), empty until findDeadends() is called
         graph: dictionary where keys are the coordinates of all floor/corridor tiles and values are a list of floor/corridor directly connected, ie (x, y): [(x+1, y), (x-1, y), (x, y+1), (x, y-1)], empty until constructGraph() is called
-        caves: list of all the floor tiles in areas generated with generateCaves 
+        caves: list of all the floor tiles in areas generated with generateCaves
         alcoves: list of all the alcoves (a floor tile with 3 wall tiles adjoining) in the cave areas
         ** once created these will not be re-instanced, therefore any user made changes to grid will also need to update these lists for them to remain valid
     """
