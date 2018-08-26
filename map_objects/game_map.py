@@ -19,10 +19,8 @@ from entities.snake import Snake, SnakeEgg
 from map_objects.point import Point
 from map_objects.rect import Rect
 from map_objects.tile import *
-
-#import map_objects.prefab
-
 from map_objects.dungeonGenerator import *
+from map_objects.prefab import boss_room
 
 from render_order import RenderOrder
 
@@ -86,6 +84,8 @@ class GameMap:
                 self.map[x][y] = Floor()
             elif self.generator.grid[x][y] == WALL:
                 self.map[x][y] = Wall()
+            elif self.generator.grid[x][y] == IMPENETRABLE:
+                self.map[x][y] = Wall()
             elif self.generator.grid[x][y] == CORRIDOR:
                 self.map[x][y] = Ground()
             elif self.generator.grid[x][y] == CAVE:
@@ -97,12 +97,12 @@ class GameMap:
             self.level_one(player)
         else:
             if (boss_chance >= 6):
-                self.level_generic(player)
+                self.level_boss(player)
             else:
                 self.level_generic(player)
 
     def test_popluate_map(self, player):
-        room = self.generator.rooms[-1]
+        room = self.generator.rooms[0]
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.add_entity_to_map(self.down_stairs)
@@ -219,59 +219,6 @@ class GameMap:
 
         self.place_creatures()
 
-        for room in self.generator.rooms:
-            self.place_npc(room)
-
-    def popluate_map(self, player):
-        if (self.dungeon_level == 6):
-            warlord = bestiary.warlord(Point(prefabbed.room.x1+5, prefabbed.room.y1 + 2))
-            self.add_entity_to_map(warlord)
-            self.generator.rooms.remove(prefabbed.room)
-        else:
-            stairs_component = Stairs(self.dungeon_level + 1)
-            room = self.generator.rooms[-1]
-            self.generator.rooms.remove(room)
-            self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-            self.add_entity_to_map(self.down_stairs)
-
-        #Random room for player start
-        room = choice(self.generator.rooms)
-        self.generator.rooms.remove(room)
-        point = room.random_tile(self)
-        player.x = point.x
-        player.y = point.y
-
-        stairs_component = Stairs(self.dungeon_level - 1)
-        self.up_stairs = Entity(player.point, '<', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
-        self.add_entity_to_map(self.up_stairs)
-
-        point = room.random_tile(self)
-        npc = bestiary.bountyhunter(point)
-
-        q = None
-
-        if (self.dungeon_level == 2):
-            q = quest.kill_gobbos()
-        elif (self.dungeon_level == 3):
-            q = quest.kill_orcs()
-        elif (self.dungeon_level == 4):
-            q = quest.kill_trolls()
-        elif (self.dungeon_level == 6):
-            q = quest.kill_warlord()
-
-        if (q != None):
-            if (self.dungeon_level == 2):
-                q2 = quest.Quest('Kill the leader', 'Cut the head off and no more problem', 100)
-                q2.npc = bestiary.goblin(Point(0,0))
-                q.next_quest = q2
-            elif (self.dungeon_level == 3):
-                q2 = quest.Quest('Kill the leader', 'Cut the head off and no more problem', 100)
-                q2.npc = bestiary.warlord(Point(0,0))
-                q.next_quest = q2
-
-            npc.questgiver.add_quest(q)
-            self.add_entity_to_map(npc)
-
         #Add npcs and items
         for room in self.generator.rooms:
             self.place_npc(room)
@@ -289,9 +236,41 @@ class GameMap:
             bestiary.upgrade_npc(npc)
             self.add_entity_to_map(npc)
 
+    def level_boss(self, player):
+        room = self.generator.rooms[0]
+        warlord = bestiary.warlord(Point(room.x+5, room.y + 2))
+        self.add_entity_to_map(warlord)
+
+        room = self.generator.rooms[-1]
+        stairs_component = Stairs(self.dungeon_level + 1)
+        self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.add_entity_to_map(self.down_stairs)
+
+        room = self.generator.rooms[-1]
+        point = room.random_tile(self)
+        player.x = point.x
+        player.y = point.y
+
+        stairs_component = Stairs(self.dungeon_level - 1)
+        self.up_stairs = Entity(player.point, '<', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        self.add_entity_to_map(self.up_stairs)
+
+        point = room.random_tile(self)
+        npc = bestiary.bountyhunter(point)
+
+        q = quest.kill_warlord()
+        npc.questgiver.add_quest(q)
+        self.add_entity_to_map(npc)
+
+        #Add npcs and items
+        for room in self.generator.rooms:
+            self.place_npc(room)
+            self.place_object(room)
+
 #        point = self.generator.rooms[2].random_tile(self)
 #        necro = bestiary.necromancer(point)
 #        self.add_entity_to_map(necro)
+
     def place_creatures(self):
         npc_chances = {}
         npc_chances['rat'] = random_utils.from_dungeon_level([[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
@@ -633,23 +612,6 @@ class GameMap:
 
         return dm
 
-    def level_boss_generator(self, map_width, map_height):
-        dm = dungeonGenerator(width=map_width, height=map_height)
-
-        # generate rooms and corridors
-        dm.placeRandomRooms(5, 9, 1, 1, 500)
-        x, y = dm.findEmptySpace(3)
-        while x:
-            dm.generateCorridors('l', x, y)
-            x, y = dm.findEmptySpace(3)
-        # join it all together
-        dm.connectAllRooms(0)
-        unconnected = dm.findUnconnectedAreas()
-        dm.joinUnconnectedAreas(unconnected)
-        dm.pruneDeadends(70)
-
-        return dm
-
     def level_generator(self, map_width, map_height):
         dm = dungeonGenerator(width=map_width, height=map_height)
 
@@ -701,5 +663,36 @@ class GameMap:
         unconnected = dm.findUnconnectedAreas()
         dm.joinUnconnectedAreas(unconnected)
         dm.pruneDeadends(70)
+
+        return dm
+
+    def level_boss_generator(self, map_width, map_height):
+        dm = dungeonGenerator(width=map_width, height=map_height)
+
+        prefab = Prefab(boss_room())
+
+        startX = randint(1, map_width - prefab.room.width - 1)
+        startY = randint(1, map_height - prefab.room.height - 2)
+
+        dm.placeRoom(startX, startY, prefab.room.width, prefab.room.height, ignoreOverlap = True)
+        prefab.room.x = startX
+        prefab.room.y = startY
+        prefab.carve(dm.grid)
+        print(prefab.room.describe())
+
+        # generate rooms and corridors
+        dm.placeRandomRooms(10, 15, 2, 2, 500)
+
+        if (prefab.door):
+            dm.generateCorridors('f', prefab.door.x, prefab.door.y + 2)
+            dm.grid[prefab.door.x][prefab.door.y + 1] = DOOR
+
+        # join it all together
+        dm.connectAllRooms(0)
+        unconnected = dm.findUnconnectedAreas()
+        dm.joinUnconnectedAreas(unconnected)
+        dm.closeDeadDoors()
+        dm.pruneDeadends(70)
+        dm.placeWalls()
 
         return dm
