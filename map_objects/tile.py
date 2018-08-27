@@ -69,14 +69,14 @@ class Wall(Tile):
 
 class ShallowWater(Tile):
     def __init__(self, blocked=False, block_sight=False):
-        super(Wall, self).__init__(blocked, block_sight)
+        super(ShallowWater, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.lighter_blue
         self.out_of_fov_color = libtcod.light_blue
 
 class DeepWater(Tile):
     def __init__(self, blocked=True, block_sight=False):
-        super(Wall, self).__init__(blocked, block_sight)
+        super(DeepWater, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.dark_blue
         self.out_of_fov_color = libtcod.darkest_blue
