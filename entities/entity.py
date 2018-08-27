@@ -6,6 +6,7 @@ import equipment
 import math
 
 from components.item import Item
+from components.death import BasicDeath
 from map_objects.point import Point
 
 from game_messages import Message
@@ -18,7 +19,7 @@ class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
-                 fighter=None, ai=None, item=None, stairs=None, equippable=None, render_order=RenderOrder.CORPSE):
+                 fighter=None, ai=None, item=None, stairs=None, equippable=None, render_order=RenderOrder.CORPSE, death=None):
 
         self.x = None
         self.y = None
@@ -64,6 +65,13 @@ class Entity:
 
         self.render_order = render_order
 
+        self.death = death
+        if (self.death):
+            self.death.owner = self
+        else:
+            self.death = BasicDeath()
+            self.death.owner = self
+
     @property
     def point(self):
         return Point(self.x,self.y)
@@ -106,7 +114,7 @@ class Entity:
             return False
 
         if not (game_map.is_blocked(Point(target_x, target_y)) or
-                game_map.get_blocking_entities_at_location(target_x, target_y)):
+                game_map.get_blocking_entities_at_location(Point(target_x, target_y))):
             self.move(target_x - self.x, target_y - self.y)
             return True
 

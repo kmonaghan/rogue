@@ -1,6 +1,6 @@
 import libtcodpy as libtcod
 
-from death_functions import player_death, npc_death
+from death_functions import player_death
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
 from game_states import GameStates
@@ -76,8 +76,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             destination_x = player.x + dx
             destination_y = player.y + dy
 
-            if not game_map.is_blocked(Point(destination_x, destination_y)):
-                target = game_map.get_blocking_entities_at_location(destination_x, destination_y)
+            point = Point(destination_x, destination_y)
+            if not game_map.is_blocked(point):
+                target = game_map.get_blocking_entities_at_location(point)
 
                 if target:
                     if target.questgiver:
@@ -217,7 +218,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 if dead_entity == player:
                     message, game_state = player_death(dead_entity)
                 else:
-                    message = npc_death(dead_entity, game_map)
+                    message = dead_entity.death.npc_death(game_map)
 
                 message_log.add_message(message)
 
@@ -283,7 +284,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         if game_state == GameStates.ENEMY_TURN:
             for entity in game_map.entities:
-                if entity.ai:
+                if entity.death.dead:
+                    entity.death.decompose(game_map)
+                elif entity.ai:
                     enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
 
                     for enemy_turn_result in enemy_turn_results:
@@ -295,14 +298,14 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             message_log.add_message(message)
 
                         if killed_entity:
-                            npc_death(killed_entity, game_map)
+                            killed_entity.death.npc_death(game_map)
                             entity.onKill(killed_entity, game_map)
 
                         if dead_entity:
                             if dead_entity == player:
                                 message, game_state = player_death(dead_entity)
                             else:
-                                message = npc_death(dead_entity, game_map)
+                                message = dead_entity.death.npc_death(game_map)
 
                             message_log.add_message(message)
 

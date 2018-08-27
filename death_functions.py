@@ -6,31 +6,6 @@ from game_states import GameStates
 
 from render_functions import RenderOrder
 
-def npc_death(npc, game_map):
-    #transform it into a nasty corpse! it doesn't block, can't be
-    #attacked and doesn't move
-    death_message = Message('{0} is dead!'.format(npc.name.capitalize()), libtcod.orange)
-
-    npc.char = '%'
-    npc.color = libtcod.dark_red
-    npc.blocks = False
-    npc.fighter = None
-    npc.ai = None
-    npc.name = 'remains of ' + npc.name
-    npc.render_order = RenderOrder.CORPSE
-
-    print ("number of items: " + str(len(npc.inventory.items)))
-    for item in npc.inventory.items:
-        print("checking: " + item.name)
-        if (item.lootable):
-            print("dropping: " + item.name)
-            item.x = npc.x
-            item.y = npc.y
-            #npc.inventory.drop_item(item)
-            game_map.add_entity_to_map(item)
-
-    return death_message
-
 def player_death(player):
     #for added effect, transform the player into a corpse!
     player.char = '%'
