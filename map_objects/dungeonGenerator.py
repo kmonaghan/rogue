@@ -61,6 +61,8 @@ class Prefab:
                     map[self.room.x + xoffset][self.room.y + yoffset] = WALL
                 elif (self.layout[xoffset][yoffset] == "I"):
                     map[self.room.x + xoffset][self.room.y + yoffset] = IMPENETRABLE
+                elif (self.layout[xoffset][yoffset] == "W"):
+                    map[self.room.x + xoffset][self.room.y + yoffset] = SHALLOWWATER
                 elif (self.layout[xoffset][yoffset] == "D"):
                     map[self.room.x + xoffset][self.room.y + yoffset] = FLOOR
                     self.door = Point(self.room.x + xoffset, self.room.y + yoffset)
