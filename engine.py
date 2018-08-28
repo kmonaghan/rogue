@@ -279,7 +279,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 game_state = GameStates.QUEST_ONBOARDING
 
                 quest_request = quest_onboarding
-                #print "Do something with quest: " + quest_onboarding.title
 
             if quest_cancelled:
                 game_state = previous_game_state
@@ -304,8 +303,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             entity.onKill(killed_entity, game_map)
 
                         if dead_entity:
-                            print("dead entity: " + dead_entity.name)
-
                             message_log.add_message(message)
 
                             if (game_state == GameStates.PLAYER_DEAD) or (game_state == GameStates.GAME_COMPLETE):

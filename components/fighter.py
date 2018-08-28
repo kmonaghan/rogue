@@ -91,8 +91,6 @@ class Fighter:
                 elif (level_difference > 0):
                     earned_xp = int(earned_xp * (1 + ((5 - abs(level_difference)) / 5)))
 
-                print ("base xp: " + str(self.xp) + ", earned XP " + str(earned_xp))
-
             results.append({'dead': self.owner, 'xp': earned_xp})
 
         self.owner.hasBeenAttacked(npc)

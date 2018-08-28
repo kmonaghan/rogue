@@ -51,12 +51,10 @@ class Character(Entity):
         return desc
 
     def isDead(self):
-        #print "am ded?"
         if (self.fighter):
             if (self.fighter.hp > 0):
                 return False
 
-        #print "not ded"
         return True
 
     def onKill(self, npc, game_map):

@@ -27,11 +27,8 @@ class BasicDeath:
         self.owner.name = 'rotting remains of ' + self.owner.name
         self.owner.render_order = RenderOrder.CORPSE
 
-        print ("number of items: " + str(len(self.owner.inventory.items)))
         for item in self.owner.inventory.items:
-            print("checking: " + item.name)
             if (item.lootable):
-                print("dropping: " + item.name)
                 item.x = self.owner.x
                 item.y = self.owner.y
                 #npc.inventory.drop_item(item)
