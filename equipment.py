@@ -119,7 +119,7 @@ def random_magic_weapon(dungeon_level = 1):
     return item
 
 def healing_potion(point = None):
-    item_component = Item(use_function=heal, amount=4)
+    item_component = Item(use_function=heal, number_of_dice=1, type_of_dice=8)
 
     item = Entity(point, '!', 'Healing Potion', libtcod.violet, render_order=RenderOrder.ITEM,
                     item=item_component)
@@ -128,7 +128,7 @@ def healing_potion(point = None):
 
 def lighting_scroll(point = None):
     #create a lightning bolt scroll
-    item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
+    item_component = Item(use_function=cast_lightning, number_of_dice=2, type_of_dice=10, maximum_range=5)
     item = Entity(point, '#', 'Lightning Scroll', libtcod.yellow, render_order=RenderOrder.ITEM,
                     item=item_component)
 
@@ -138,7 +138,7 @@ def fireball_scroll(point = None):
     #create a fireball scroll
     item_component = Item(use_function=cast_fireball, targeting=True, targeting_message=Message(
                         'Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan),
-                                          damage=12, radius=3)
+                                          number_of_dice=3, type_of_dice=6, radius=3)
     item = Entity(point, '#', 'Fireball Scroll', libtcod.light_yellow, render_order=RenderOrder.ITEM,
                                   item=item_component)
 

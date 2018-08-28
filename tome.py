@@ -6,20 +6,19 @@ from map_objects.point import Point
 
 from game_messages import Message
 
-import game_state
+from random_utils import die_roll
 
 #spell values
 HEAL_AMOUNT = 40
-LIGHTNING_DAMAGE = 40
 LIGHTNING_RANGE = 5
 CONFUSE_RANGE = 8
 CONFUSE_NUM_TURNS = 10
 FIREBALL_RADIUS = 3
-FIREBALL_DAMAGE = 25
 
 def heal(*args, **kwargs):
     entity = args[0]
-    amount = kwargs.get('amount')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
     target = kwargs.get('target')
 
     results = []
@@ -27,7 +26,7 @@ def heal(*args, **kwargs):
     if entity.fighter.hp == entity.fighter.max_hp:
         results.append({'consumed': False, 'message': Message('You are already at full health', libtcod.yellow)})
     else:
-        entity.fighter.heal(amount)
+        entity.fighter.heal(die_roll(number_of_dice, type_of_dice))
         results.append({'consumed': True, 'message': Message('Your wounds start to feel better!', libtcod.green)})
 
     return results
@@ -37,7 +36,8 @@ def cast_lightning(*args, **kwargs):
     caster = args[0]
     entities = kwargs.get('entities')
     fov_map = kwargs.get('fov_map')
-    damage = kwargs.get('damage')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
     maximum_range = kwargs.get('maximum_range')
 
     results = []
@@ -54,6 +54,7 @@ def cast_lightning(*args, **kwargs):
                 closest_distance = distance
 
     if target:
+        damage = die_roll(number_of_dice, type_of_dice)
         results.append({'consumed': True, 'target': target, 'message': Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage))})
         results.extend(target.fighter.take_damage(damage, caster))
     else:
@@ -66,7 +67,8 @@ def cast_fireball(*args, **kwargs):
     caster = args[0]
     entities = kwargs.get('entities')
     fov_map = kwargs.get('fov_map')
-    damage = kwargs.get('damage')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
     radius = kwargs.get('radius')
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
@@ -81,6 +83,7 @@ def cast_fireball(*args, **kwargs):
 
     for entity in entities:
         if entity.distance(target_x, target_y) <= radius and entity.fighter:
+            damage = die_roll(number_of_dice, type_of_dice)
             results.append({'message': Message('The {0} gets burned for {1} hit points.'.format(entity.name, damage), libtcod.orange)})
             results.extend(entity.fighter.take_damage(damage, caster))
 

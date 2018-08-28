@@ -1,5 +1,7 @@
 import libtcodpy as libtcod
 
+from random_utils import die_roll
+
 class Equippable:
     def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0, bonus_damage=0):
         self.slot = slot
@@ -12,12 +14,7 @@ class Equippable:
         self.bonus_damage = 0
 
     def damage(self):
-        total = self.bonus_damage
-
-        for x in range(0, self.number_of_dice):
-            total += libtcod.random_get_int(0, 1, self.type_of_dice)
-
-        return total
+        return die_roll(self.number_of_dice, self.type_of_dice, self.bonus_damage)
 
     def damage_description(self):
         base = 'Damage: ' + str(self.number_of_dice) + 'd' + str(self.type_of_dice)
