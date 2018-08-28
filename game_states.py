@@ -13,3 +13,4 @@ class GameStates(Enum):
     EXAMINE_INVENTORY = auto()
     SHOW_QUESTS = auto()
     QUEST_ONBOARDING = auto()
+    GAME_COMPLETE = auto()

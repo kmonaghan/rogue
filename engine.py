@@ -1,6 +1,5 @@
 import libtcodpy as libtcod
 
-from death_functions import player_death
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
 from game_states import GameStates
@@ -65,13 +64,22 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
         fullscreen = action.get('fullscreen')
         quest_list = action.get('quest_list')
         quest_response = action.get('quest_response')
+        quest_response = action.get('quest_response')
+        restart_game = action.get('restart_game')
 
         left_click = mouse_action.get('left_click')
         right_click = mouse_action.get('right_click')
 
         player_turn_results = []
 
-        if move and game_state == GameStates.PLAYERS_TURN:
+        if (restart_game):
+            player, game_map, message_log, game_state = get_game_variables(constants)
+            fov_map = initialize_fov(game_map)
+            fov_recompute = True
+            libtcod.console_clear(con)
+            game_state = GameStates.ENEMY_TURN
+
+        elif move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
             destination_x = player.x + dx
             destination_y = player.y + dy
@@ -212,13 +220,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             if dead_entity:
                 quest_result = check_quests_for_npc_death(dead_entity)
 
-                #if (len(quest_result)):
-                #    message_log.add_message(quest_result)
-
-                if dead_entity == player:
-                    message, game_state = player_death(dead_entity)
-                else:
-                    message = dead_entity.death.npc_death(game_map)
+                message, game_state = dead_entity.death.npc_death(game_map)
 
                 message_log.add_message(message)
 
@@ -298,21 +300,18 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             message_log.add_message(message)
 
                         if killed_entity:
-                            killed_entity.death.npc_death(game_map)
+                            message, game_state = killed_entity.death.npc_death(game_map)
                             entity.onKill(killed_entity, game_map)
 
                         if dead_entity:
-                            if dead_entity == player:
-                                message, game_state = player_death(dead_entity)
-                            else:
-                                message = dead_entity.death.npc_death(game_map)
+                            print("dead entity: " + dead_entity.name)
 
                             message_log.add_message(message)
 
-                            if game_state == GameStates.PLAYER_DEAD:
+                            if (game_state == GameStates.PLAYER_DEAD) or (game_state == GameStates.GAME_COMPLETE):
                                 break
 
-                    if game_state == GameStates.PLAYER_DEAD:
+                    if (game_state == GameStates.PLAYER_DEAD) or (game_state == GameStates.GAME_COMPLETE):
                         break
 
                 game_map.update_entity_map()

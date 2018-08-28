@@ -6,7 +6,9 @@ from game_states import GameStates
 
 
 def handle_keys(key, game_state):
-    if game_state == GameStates.PLAYERS_TURN:
+    if game_state == GameStates.GAME_COMPLETE:
+        return handle_game_complete_keys(key)
+    elif game_state == GameStates.PLAYERS_TURN:
         return handle_player_turn_keys(key)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_player_dead_keys(key)
@@ -195,5 +197,17 @@ def handle_mouse(mouse):
         return {'left_click': (x, y)}
     elif mouse.rbutton_pressed:
         return {'right_click': (x, y)}
+
+    return {}
+
+def handle_game_complete_keys(key):
+    key_char = chr(key.c)
+
+    if key_char == 'a':
+        return {'restart_game': True}
+    elif key_char == 'b':
+        return {'new_game': True}
+    elif key_char == 'c' or key.vk == libtcod.KEY_ESCAPE:
+        return {'exit': True}
 
     return {}

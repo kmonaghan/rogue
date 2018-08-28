@@ -43,7 +43,7 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
             if player.equipment.main_hand == item:
                 options.append(['{0} (carried in main hand)'.format(item.name), item.color])
             elif player.equipment.off_hand == item:
-                options.append(['{0} (carreid in off hand)'.format(item.name), item.color])
+                options.append(['{0} (carried in off hand)'.format(item.name), item.color])
             elif player.equipment.chest == item:
                 options.append(['{0} (worn on chest)'.format(item.name), item.color])
             elif player.equipment.head == item:
@@ -74,7 +74,7 @@ def quest_list_menu(con, header, player, inventory_width, screen_width, screen_h
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
 def main_menu(con, background_image, screen_width, screen_height):
-    libtcod.image_blit_2x(background_image, 0, 0, 0)
+    #libtcod.image_blit_2x(background_image, 0, 0, 0)
 
     libtcod.console_set_default_foreground(0, libtcod.light_yellow)
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height / 2) - 4, libtcod.BKGND_NONE, libtcod.CENTER,
@@ -117,6 +117,13 @@ def character_screen(player, character_screen_width, character_screen_height, sc
     y = screen_height // 2 - character_screen_height // 2
     libtcod.console_blit(window, 0, 0, character_screen_width, character_screen_height, 0, x, y, 1.0, 0.7)
 
+def game_completed(con, menu_width, screen_width, screen_height):
+    header = 'Congratulations - You have defeated the King Under the Hill'
+    options = [['Restart with higher level encounters', libtcod.white],
+                ['Start from scratch', libtcod.white],
+                ['Quit while the going is good', libtcod.white]]
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
 
 def message_box(con, header, width, screen_width, screen_height):
     menu(con, header, [], width, screen_width, screen_height)

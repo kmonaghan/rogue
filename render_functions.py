@@ -7,7 +7,7 @@ from enum import Enum
 from game_states import GameStates
 from render_order import RenderOrder
 
-from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu
+from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed
 
 def get_names_under_mouse(mouse, entities, fov_map):
     (x, y) = (mouse.cx, mouse.cy)
@@ -82,7 +82,10 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
-    if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.EXAMINE_INVENTORY):
+    if game_state == GameStates.GAME_COMPLETE:
+        game_completed(con, 60, screen_width, screen_height)
+
+    elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.EXAMINE_INVENTORY):
         if game_state == GameStates.SHOW_INVENTORY:
             inventory_title = 'Press the key next to an item to use it, or Esc to cancel.\n'
         elif game_state == GameStates.EXAMINE_INVENTORY:

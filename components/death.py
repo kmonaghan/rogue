@@ -37,7 +37,7 @@ class BasicDeath:
                 #npc.inventory.drop_item(item)
                 game_map.add_entity_to_map(item)
 
-        return death_message
+        return death_message, GameStates.ENEMY_TURN
 
     def decompose(self, game_map):
         self.rotting_time -= 1
@@ -46,3 +46,22 @@ class BasicDeath:
         elif (self.rotting_time <= 25):
             self.owner.color = libtcod.white
             self.owner.name = 'Skeletal remains of ' + self.owner.name
+
+class WarlordDeath(BasicDeath):
+    def npc_death(self, game_map):
+        #transform it into a nasty corpse! it doesn't block, can't be
+        #attacked and doesn't move
+        message, game_state = super(WarlordDeath, self).npc_death(game_map)
+
+        return Message('Victory is yours!', libtcod.gold), GameStates.GAME_COMPLETE
+
+class PlayerDeath(BasicDeath):
+    def npc_death(self, game_map):
+        print("player death")
+        #transform it into a nasty corpse! it doesn't block, can't be
+        #attacked and doesn't move
+        #message, game_state = super(PlayerDeath, self).npc_death(game_map)
+        self.owner.char = '%'
+        self.owner.color = libtcod.dark_red
+
+        return Message('You died!', libtcod.red), GameStates.PLAYER_DEAD

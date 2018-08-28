@@ -18,6 +18,8 @@ from entities.character import Character
 
 from map_objects.point import Point
 
+from components.death import PlayerDeath, WarlordDeath
+
 from species import Species
 
 def upgrade_npc(npc):
@@ -72,7 +74,7 @@ def create_player():
         fighter_component.base_power = 200
 
     player = Character(None, '@', 'player', libtcod.dark_green,
-                       fighter=fighter_component)
+                       fighter=fighter_component, death=PlayerDeath())
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
@@ -132,7 +134,7 @@ def warlord(point = None):
     ai_component = WarlordNPC()
 
     npc = Character(point, 'W', 'Warlord', libtcod.black,
-                    fighter=fighter_component, ai=ai_component, species=Species.ORC)
+                    fighter=fighter_component, ai=ai_component, species=Species.ORC, death=WarlordDeath())
 
     item = equipment.longsword()
     item.name = item.name + " of I'll FUCKING Have You"

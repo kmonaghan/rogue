@@ -16,8 +16,8 @@ from render_order import RenderOrder
 from species import Species
 
 class Character(Entity):
-    def __init__(self, point, char, name, color, always_visible=False, blocks=True, fighter=None, ai=None, item=None, gear=None, species=Species.NONDESCRIPT):
-        super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear)
+    def __init__(self, point, char, name, color, always_visible=False, blocks=True, fighter=None, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None):
+        super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear, death=death)
 
         self.inventory = Inventory(26)
         self.inventory.owner = self

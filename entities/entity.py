@@ -66,11 +66,10 @@ class Entity:
         self.render_order = render_order
 
         self.death = death
-        if (self.death):
-            self.death.owner = self
-        else:
+        if self.death == None:
             self.death = BasicDeath()
-            self.death.owner = self
+
+        self.death.owner = self
 
     @property
     def point(self):
