@@ -303,6 +303,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             entity.onKill(killed_entity, game_map)
 
                         if dead_entity:
+                            message, game_state = dead_entity.death.npc_death(game_map)
                             message_log.add_message(message)
 
                             if (game_state == GameStates.PLAYER_DEAD) or (game_state == GameStates.GAME_COMPLETE):
