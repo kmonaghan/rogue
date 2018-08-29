@@ -32,9 +32,16 @@ class Cave(Tile):
         self.fov_color = libtcod.lighter_sepia
         self.out_of_fov_color = libtcod.light_sepia
 
-class CavernWall(Tile):
+class CaveWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
-        super(CavernWall, self).__init__(blocked, block_sight)
+        super(CaveWall, self).__init__(blocked, block_sight)
+
+        self.fov_color = libtcod.dark_sepia
+        self.out_of_fov_color = libtcod.darkest_sepia
+
+class CorridorWall(Tile):
+    def __init__(self, blocked=True, block_sight=True):
+        super(CorridorWall, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.dark_sepia
         self.out_of_fov_color = libtcod.darkest_sepia
@@ -80,3 +87,10 @@ class DeepWater(Tile):
 
         self.fov_color = libtcod.dark_blue
         self.out_of_fov_color = libtcod.darkest_blue
+
+class EmptyTile(Tile):
+    def __init__(self, blocked=False, block_sight=False):
+        super(EmptyTile, self).__init__(blocked, block_sight)
+
+        self.fov_color = libtcod.black
+        self.out_of_fov_color = libtcod.black

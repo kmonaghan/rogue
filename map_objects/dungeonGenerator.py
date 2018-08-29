@@ -24,12 +24,15 @@ FLOOR = 1
 CORRIDOR = 2
 DOOR = 3
 DEADEND = 4
-WALL = 5
-OBSTACLE = 6
-CAVE = 7
-IMPENETRABLE = 8
-SHALLOWWATER = 9
-DEEPWATER = 10
+ROOMWALL = 5
+CAVEWALL = 6
+CORRIDORWALL = 7
+WALL = 8
+OBSTACLE = 9
+CAVE = 10
+IMPENETRABLE = 11
+SHALLOWWATER = 12
+DEEPWATER = 13
 
 class Prefab:
     def __init__(self, room_map):
@@ -389,7 +392,7 @@ class dungeonGenerator:
                 walls = 0
                 if (self.grid[xi][yi] == CAVE):
                     for nx, ny in self.findNeighboursDirect(xi, yi):
-                        if (self.grid[nx][ny] in [EMPTY, WALL, IMPENETRABLE]):
+                        if (self.grid[nx][ny] in [EMPTY, WALL, IMPENETRABLE, ROOMWALL, CAVEWALL, CORRIDORWALL]):
                             walls += 1
                     if (walls == 3):
                         self.alcoves.append(Point(xi, yi))
@@ -565,9 +568,20 @@ class dungeonGenerator:
             for y in range(self.height):
                 if not self.grid[x][y]:
                     for nx, ny in self.findNeighbours(x,y):
-                        if self.grid[nx][ny] and self.grid[nx][ny] is not WALL:
-                            self.grid[x][y] = WALL
-                            break
+                        if self.grid[nx][ny] and self.grid[nx][ny] not in [WALL, ROOMWALL, CAVEWALL, CORRIDORWALL]:
+                            if (self.grid[nx][ny] == FLOOR):
+                                self.grid[x][y] = ROOMWALL
+                                break
+                            elif (self.grid[nx][ny] == CAVE):
+                                self.grid[x][y] = CAVEWALL
+                                break
+                            elif (self.grid[nx][ny] == CORRIDOR):
+                                self.grid[x][y] = CORRIDORWALL
+                                break
+
+                            #else:
+                            #    self.grid[x][y] = WALL
+                            #    break
 
     def connectAllRooms(self, extraDoorChance = 0):
         """
@@ -681,10 +695,10 @@ class dungeonGenerator:
             if self.grid[x][y] < WALL: break
         for x in range(self.width):
             for y in range(self.height):
-                if self.grid[x][y] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE]:
+                if self.grid[x][y] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE, ROOMWALL, CAVEWALL, CORRIDORWALL]:
                     self.graph[(x, y)] = []
                     for nx, ny in self.findNeighboursDirect(x, y):
-                        if self.grid[nx][ny] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE]:
+                        if self.grid[nx][ny] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE, ROOMWALL, CAVEWALL, CORRIDORWALL]:
                             self.graph[(x, y)].append((nx, ny))
 
     def findPath(self, startX, startY, endX, endY):

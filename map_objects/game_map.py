@@ -74,20 +74,28 @@ class GameMap:
                 self.map[x][y] = Door()
             elif self.generator.grid[x][y] == FLOOR:
                 self.map[x][y] = Floor()
+            elif self.generator.grid[x][y] == ROOMWALL:
+                self.map[x][y] = Wall()
             elif self.generator.grid[x][y] == WALL:
                 self.map[x][y] = Wall()
             elif self.generator.grid[x][y] == IMPENETRABLE:
                 self.map[x][y] = Wall()
             elif self.generator.grid[x][y] == CORRIDOR:
                 self.map[x][y] = Ground()
+            elif self.generator.grid[x][y] == CORRIDORWALL:
+                self.map[x][y] = CorridorWall()
             elif self.generator.grid[x][y] == CAVE:
                 self.map[x][y] = Cave()
+            elif self.generator.grid[x][y] == CAVEWALL:
+                self.map[x][y] = CaveWall()
             elif self.generator.grid[x][y] == DEADEND:
                 self.map[x][y] = Ground()
             elif self.generator.grid[x][y] == SHALLOWWATER:
                 self.map[x][y] = ShallowWater()
             elif self.generator.grid[x][y] == DEEPWATER:
                 self.map[x][y] = DeepWater()
+            else:
+                self.map[x][y] = EmptyTile()
 
         if (self.dungeon_level == 1):
             self.level_one(player)
