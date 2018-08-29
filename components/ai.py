@@ -21,7 +21,7 @@ class BasicNPC:
         if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
 
             #move towards player if far away
-            if npc.distance_to(target) >= 2:
+            if npc.point.distance_to(target.point) >= 2:
                 npc.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
@@ -145,7 +145,7 @@ class WarlordNPC:
                         return results
 
             #move towards player if far away
-            if npc.distance_to(target) >= 2:
+            if npc.point.distance_to(target.point) >= 2:
                 npc.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
