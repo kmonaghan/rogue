@@ -58,7 +58,7 @@ class RatNest(Animal):
         self.inventory.add_item(potion)
 
     def hasBeenAttacked(self, npc):
-        print("Override hasBeenAttacked")
+        #print("Override hasBeenAttacked")
         spawn = randint(1, 10)
 
         if (spawn > 8):

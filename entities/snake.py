@@ -66,4 +66,5 @@ class SnakeEgg(Animal):
         super(SnakeEgg, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
 
     def hasBeenAttacked(self, npc):
-        print("Override hasBeenAttacked")
+        #print("Override hasBeenAttacked")
+        pass

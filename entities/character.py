@@ -58,10 +58,12 @@ class Character(Entity):
         return True
 
     def onKill(self, npc, game_map):
-        print("Override onKill")
+        #print("Override onKill")
+        pass
 
     def hasBeenAttacked(self, npc):
-        print("Override hasBeenAttacked")
+        #print("Override hasBeenAttacked")
+        pass
 
     def upgradeNPC(npc):
         self.color = libtcod.silver

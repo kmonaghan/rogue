@@ -96,16 +96,29 @@ class Entity:
         self.y += dy
 
     def move_towards(self, target_point, game_map):
-        distance = self.point.distance_to(target_point)
+        tx = target_point.x - self.x
+        ty = target_point.y - self.y
 
-        dx = int(round(target_point.x - self.x / distance))
-        dy = int(round(target_point.y - self.y / distance))
+        dx = tx
+        dy = ty
 
-        self.attempt_move(Point(target_point.x + dx, target_point.y + dy), game_map)
+        if (tx < 0):
+            dx = -1
+        elif (tx > 0):
+            dx = 1
+
+        if (ty < 0):
+            dy = -1
+        elif (ty > 0):
+            dx = 1
+
+        self.attempt_move(Point(self.x + dx, self.y + dy), game_map)
 
     def attempt_move(self, target_point, game_map):
         if not game_map.is_blocked(target_point, True):
-            self.move(target_point.x - self.x, target_point.y - self.y)
+            self.x = target_point.x
+            self.y = target_point.y
+
             return True
 
         return False
@@ -148,7 +161,7 @@ class Entity:
         else:
             # Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
             # it will still try to move towards the player (closer to the corridor opening)
-            self.move_towards(target, game_map)
+            self.move_towards(target.point, game_map)
 
             # Delete the path to free memory
         libtcod.path_delete(my_path)

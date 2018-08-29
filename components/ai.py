@@ -93,7 +93,7 @@ class StrollingNPC:
         if (self.moved == False):
             if self.tethered:
                 if (self.owner.point.distance_to(self.tethered) > self.tethered_distance):
-                    print("too far from tethered point")
+                    #print("too far from tethered point: " + self.tethered.describe())
                     self.owner.move_towards(self.tethered, game_map)
                     return results
 
@@ -243,9 +243,10 @@ class SpawnNPC:
             if (game_map.find_closest(self.owner.point, npc.species, 1) == None):
                 self.turns_since_last_spawn = 0
                 game_map.add_entity_to_map(npc)
-                print("Spawned " + npc.name)
+                #print("Spawned " + npc.name)
             else:
-                print("Already " + npc.name + " nearby")
+                #print("Already " + npc.name + " nearby")
+                pass
         else:
             self.turns_since_last_spawn += 1
 

@@ -24,7 +24,7 @@ def check_quest_for_location(point):
 
     for quest in active_quests:
         if (quest.map_point):
-            if (point.compare(quest.map_point)):
+            if (point == quest.map_point):
                 #TODO: do something with a location quest
                 print("TODO: do something with a location quest")
                 results.append({'message': Message('Quest completed!', libtcod.gold)})
@@ -135,7 +135,7 @@ class Quest:
 
     def start_quest(self, game_map):
         global active_quests
-        
+
         self.started = True
         active_quests.append(self)
 

@@ -538,7 +538,7 @@ class GameMap:
             try:
                 self.entity_map[entity.x][entity.y].append(entity)
             except IndexError:
-                print("update_entity_map IndexError: " + entity.describe())
+                print("update_entity_map IndexError: " + entity.describe() + ' ' + entity.point.describe())
 
     def load_map(self):
         lmap = self.levels[self.dungeon_level - 1]
