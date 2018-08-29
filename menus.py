@@ -1,6 +1,6 @@
 import libtcodpy as libtcod
 
-import game_state
+import quest
 
 def menu(con, header, options, width, screen_width, screen_height):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
@@ -63,13 +63,13 @@ def quest_menu(con, header, quest, inventory_width, screen_width, screen_height)
 
 def quest_list_menu(con, header, player, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
-    if len(game_state.active_quests) == 0:
+    if len(quest.active_quests) == 0:
         options = [['No active quests.', libtcod.white]]
     else:
         options = []
 
-        for quest in game_state.active_quests:
-            options.append([quest.title, libtcod.white])
+        for q in quest.active_quests:
+            options.append([q.title, libtcod.white])
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 

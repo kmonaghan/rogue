@@ -6,20 +6,25 @@ from random import choice
 from game_messages import Message
 from species import Species
 
+active_quests = []
+
 def check_quests_for_npc_death(npc):
+    global active_quests
     results = []
-    for quest in game_state.active_quests:
+    for quest in active_quests:
         if (quest.kill > 0):
             results.append(quest.kill_count(npc))
 
     return results
 
 def check_quest_for_location(point):
+    global active_quests
+
     results = []
 
-    for quest in game_state.active_quests:
+    for quest in active_quests:
         if (quest.map_point):
-            if (point.x == quest.map_point.x) and (point.y == quest.map_point.y):
+            if (point.compare(quest.map_point)):
                 #TODO: do something with a location quest
                 print("TODO: do something with a location quest")
                 results.append({'message': Message('Quest completed!', libtcod.gold)})
@@ -129,8 +134,10 @@ class Quest:
         return results
 
     def start_quest(self, game_map):
+        global active_quests
+        
         self.started = True
-        game_state.active_quests.append(self)
+        active_quests.append(self)
 
         if (self.start_func):
             self.start_func()
@@ -141,3 +148,10 @@ class Quest:
             self.npc.x = aPoint.x
             self.npc.y = aPoint.y
             game_map.add_entity_to_map(self.npc)
+
+    def status(self):
+        message = self.title
+        if (self.kill_type):
+            message += ' ' + str(self.kill_total) + ' of ' + str(self.kill) + ' killed'
+
+        return Message(message, libtcod.gold)

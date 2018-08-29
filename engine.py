@@ -9,7 +9,7 @@ from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 from map_objects.point import Point
-from quest import check_quests_for_npc_death, check_quest_for_location
+from quest import active_quests, check_quests_for_npc_death, check_quest_for_location
 
 def play_game(player, game_map, message_log, game_state, con, panel, constants):
     fov_recompute = True
@@ -64,7 +64,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
         fullscreen = action.get('fullscreen')
         quest_list = action.get('quest_list')
         quest_response = action.get('quest_response')
-        quest_response = action.get('quest_response')
+        quest_index = action.get('quest_index')
         restart_game = action.get('restart_game')
 
         left_click = mouse_action.get('left_click')
@@ -136,6 +136,11 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             quest_request.owner.start_quest(game_map)
             message_log.add_message(Message('Started quest: ' + quest_request.title, libtcod.yellow))
             quest_request = None
+            game_state = previous_game_state
+
+        if quest_index is not None and previous_game_state != GameStates.PLAYER_DEAD and quest_index < len(active_quests):
+            quest = active_quests[quest_index]
+            message_log.add_message(quest.status())
             game_state = previous_game_state
 
         if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
