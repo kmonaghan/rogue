@@ -68,11 +68,10 @@ class ConfusedNPC:
         results = []
 
         if self.number_of_turns > 0:
-            random_x = self.owner.x + randint(0, 2) - 1
-            random_y = self.owner.y + randint(0, 2) - 1
+            dx = libtcod.random_get_int(0, -1, 1)
+            dy = libtcod.random_get_int(0, -1, 1)
 
-            if random_x != self.owner.x and random_y != self.owner.y:
-                self.owner.move_towards(random_x, random_y, game_map)
+            self.owner.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
 
             self.number_of_turns -= 1
         else:
@@ -95,12 +94,12 @@ class StrollingNPC:
             if self.tethered:
                 if (self.owner.point.distance_to(self.tethered) > self.tethered_distance):
                     print("too far from tethered point")
-                    self.owner.move_towards(self.tethered.x, self.tethered.y, game_map)
+                    self.owner.move_towards(self.tethered, game_map)
                     return results
 
             dx = libtcod.random_get_int(0, -1, 1)
             dy = libtcod.random_get_int(0, -1, 1)
-            self.moved = self.owner.attempt_move(self.owner.x + dx, self.owner.y + dy, game_map)
+            self.moved = self.owner.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
         else:
             self.moved = False
 

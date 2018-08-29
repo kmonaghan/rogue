@@ -82,7 +82,7 @@ def cast_fireball(*args, **kwargs):
     results.append({'consumed': True, 'message': Message('The fireball explodes, burning everything within {0} tiles!'.format(radius), libtcod.orange)})
 
     for entity in entities:
-        if entity.distance(target_x, target_y) <= radius and entity.fighter:
+        if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.fighter:
             damage = die_roll(number_of_dice, type_of_dice)
             results.append({'message': Message('The {0} gets burned for {1} hit points.'.format(entity.name, damage), libtcod.orange)})
             results.extend(entity.fighter.take_damage(damage, caster))

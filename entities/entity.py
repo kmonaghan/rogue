@@ -95,39 +95,20 @@ class Entity:
         self.x += dx
         self.y += dy
 
-    def move_towards(self, target_x, target_y, game_map):
-        dx = target_x - self.x
-        dy = target_y - self.y
-        distance = math.sqrt(dx ** 2 + dy ** 2)
+    def move_towards(self, target_point, game_map):
+        distance = self.point.distance_to(target_point)
 
-        dx = int(round(dx / distance))
-        dy = int(round(dy / distance))
+        dx = int(round(target_point.x - self.x / distance))
+        dy = int(round(target_point.y - self.y / distance))
 
-        self.attempt_move(target_x, target_y, game_map)
+        self.attempt_move(Point(target_point.x + dx, target_point.y + dy), game_map)
 
-    def attempt_move(self, target_x, target_y, game_map):
-        if (target_x < 0) or (target_x > game_map.width):
-            return False
-
-        if (target_y < 0) or (target_y > game_map.height):
-            return False
-
-        if not (game_map.is_blocked(Point(target_x, target_y)) or
-                game_map.get_blocking_entities_at_location(Point(target_x, target_y))):
-            self.move(target_x - self.x, target_y - self.y)
+    def attempt_move(self, target_point, game_map):
+        if not game_map.is_blocked(target_point, True):
+            self.move(target_point.x - self.x, target_point.y - self.y)
             return True
 
         return False
-
-    def distance_to(self, other):
-        #return the distance to another object
-        dx = other.x - self.x
-        dy = other.y - self.y
-        return math.sqrt(dx ** 2 + dy ** 2)
-
-    def distance(self, x, y):
-        #return the distance to some coordinates
-        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def move_astar(self, target, game_map):
         # Create a FOV map that has the dimensions of the map
@@ -167,7 +148,7 @@ class Entity:
         else:
             # Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
             # it will still try to move towards the player (closer to the corridor opening)
-            self.move_towards(target.x, target.y, game_map)
+            self.move_towards(target, game_map)
 
             # Delete the path to free memory
         libtcod.path_delete(my_path)

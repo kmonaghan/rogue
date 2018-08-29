@@ -20,7 +20,7 @@ from map_objects.point import Point
 from map_objects.rect import Rect
 from map_objects.tile import *
 from map_objects.dungeonGenerator import *
-from map_objects.prefab import boss_room
+from map_objects.prefab import *
 
 from render_order import RenderOrder
 
@@ -55,6 +55,7 @@ class GameMap:
         self.entities = [player]
 
         boss_chance = randint(0,3) + self.dungeon_level
+
         if (self.dungeon_level == 1):
             self.generator = self.level_one_generator(map_width, map_height)
         else:
@@ -63,16 +64,7 @@ class GameMap:
             else:
                 self.generator = self.level_generator(map_width, map_height)
 
-        '''
-        EMPTY = 0
-        FLOOR = 1
-        CORRIDOR = 2
-        DOOR = 3
-        DEADEND = 4
-        WALL = 5
-        OBSTACLE = 6
-        CAVE = 7
-        '''
+        #self.generator = self.level_generator(map_width, map_height)
 
         self.map = [[Wall() for y in range(self.generator.height)]
                         for x in range(self.generator.width)]
@@ -92,6 +84,10 @@ class GameMap:
                 self.map[x][y] = Cave()
             elif self.generator.grid[x][y] == DEADEND:
                 self.map[x][y] = Ground()
+            elif self.generator.grid[x][y] == SHALLOWWATER:
+                self.map[x][y] = ShallowWater()
+            elif self.generator.grid[x][y] == DEEPWATER:
+                self.map[x][y] = DeepWater()
 
         if (self.dungeon_level == 1):
             self.level_one(player)
@@ -100,6 +96,8 @@ class GameMap:
                 self.level_boss(player)
             else:
                 self.level_generic(player)
+
+        #self.level_generic(player)
 
     def test_popluate_map(self, player):
         room = self.generator.rooms[0]
@@ -114,7 +112,6 @@ class GameMap:
 
     def level_one(self, player):
         room = self.generator.rooms[-1]
-        room = self.generator.rooms[0]
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.add_entity_to_map(self.down_stairs)
@@ -224,6 +221,7 @@ class GameMap:
             self.place_npc(room)
             self.place_object(room)
 
+        '''
         if (len(self.generator.rooms) > 4):
             num_to_select = 4                           # set the number to select here.
             list_of_random_items = sample(self.generator.rooms, num_to_select)
@@ -235,6 +233,7 @@ class GameMap:
             npc.ai.owner = npc
             bestiary.upgrade_npc(npc)
             self.add_entity_to_map(npc)
+        '''
 
     def level_boss(self, player):
         room = self.generator.rooms[0]
@@ -266,10 +265,6 @@ class GameMap:
         for room in self.generator.rooms:
             self.place_npc(room)
             self.place_object(room)
-
-#        point = self.generator.rooms[2].random_tile(self)
-#        necro = bestiary.necromancer(point)
-#        self.add_entity_to_map(necro)
 
     def place_creatures(self):
         npc_chances = {}
@@ -431,17 +426,20 @@ class GameMap:
 
     def is_blocked(self, point, check_entities = False):
         #first test the map tile
-        if (point.x > self.generator.width):
+        if (point.x < 0) or (point.x >= self.generator.width):
             return False
 
-        if (point.y > self.generator.height):
+        if (point.y < 0) or (point.y >= self.generator.height):
             return False
 
-        if self.map[point.x][point.y].blocked:
-            return True
+        try:
+            if self.map[point.x][point.y].blocked:
+                return True
+        except IndexError:
+            print("is_blocked IndexError: " + point.describe())
 
         if (check_entities):
-            if (self.get_blocking_entities_at_location(point.x, point.y)):
+            if (self.get_blocking_entities_at_location(point)):
                 return True
 
         return False
@@ -452,11 +450,14 @@ class GameMap:
     def remove_npc_from_map(self, npc):
         self.entities.remove(npc)
 
-    def get_blocking_entities_at_location(self, destination_x, destination_y):
-        if (len(self.entity_map[destination_x][destination_y])):
-            for entity in self.entity_map[destination_x][destination_y]:
-                if entity.blocks:
-                    return entity
+    def get_blocking_entities_at_location(self, point):
+        try:
+            if (len(self.entity_map[point.x][point.y])):
+                for entity in self.entity_map[point.x][point.y]:
+                    if entity.blocks:
+                        return entity
+        except IndexError:
+            print("get_blocking_entities_at_location IndexError: " + point.describe())
 
         return None
 
@@ -518,7 +519,6 @@ class GameMap:
                     for entity in self.entity_map[x][y]:
                         if (point.x == x) and (point.y == y):
                             continue
-                        #print ("checking: " + entity.describe())
                         if isinstance(entity, Character) and (entity.species == species) and not entity.isDead():
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
@@ -533,8 +533,12 @@ class GameMap:
         self.entity_map = [[[]
                             for y in range(self.generator.height)]
         				                for x in range(self.generator.width)]
+
         for entity in self.entities:
-            self.entity_map[entity.x][entity.y].append(entity)
+            try:
+                self.entity_map[entity.x][entity.y].append(entity)
+            except IndexError:
+                print("update_entity_map IndexError: " + entity.describe())
 
     def load_map(self):
         lmap = self.levels[self.dungeon_level - 1]
@@ -622,6 +626,12 @@ class GameMap:
         3) all rooms
         '''
 
+        lair = self.random_lair(map_width, map_height)
+        if (lair):
+            dm.placeRoom(lair.room.x, lair.room.y, lair.room.width, lair.room.height, ignoreOverlap = True)
+            lair.carve(dm.grid)
+            print(lair.room.describe())
+
         chance = randint(0,100)
 
         print("Chance = " + str(chance))
@@ -663,6 +673,7 @@ class GameMap:
         unconnected = dm.findUnconnectedAreas()
         dm.joinUnconnectedAreas(unconnected)
         dm.pruneDeadends(70)
+        dm.placeWalls()
 
         return dm
 
@@ -696,3 +707,23 @@ class GameMap:
         dm.placeWalls()
 
         return dm
+
+    def random_lair(self, map_width, map_height):
+        lair_chance = True
+
+        if (lair_chance):
+            prefab = Prefab(necromancer_lair())
+
+            startX = randint(1, map_width - prefab.room.width - 1)
+            startY = randint(1, map_height - prefab.room.height - 2)
+
+            prefab.room.x = startX
+            prefab.room.y = startY
+
+        #    point = prefab.room.random_tile(self)
+        #    necro = bestiary.necromancer(point)
+        #    self.add_entity_to_map(necro)
+
+            return prefab
+
+        return None
