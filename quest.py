@@ -25,9 +25,7 @@ def check_quest_for_location(point):
     for quest in active_quests:
         if (quest.map_point):
             if (point == quest.map_point):
-                #TODO: do something with a location quest
-                print("TODO: do something with a location quest")
-                results.append({'message': Message('Quest completed!', libtcod.gold)})
+                results.append({'message': Message('Quest ' + quest.title + ' completed!', libtcod.gold), 'xp': quest.xp})
 
     return results
 

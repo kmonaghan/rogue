@@ -130,7 +130,7 @@ class GameMap:
 
         q.next_quest = q2
 
-        q3 = quest.Quest('Go down', 'Find the stairs down', 100, map_point = self.down_stairs)
+        q3 = quest.Quest('Go down', 'Find the stairs down', 100, map_point = self.down_stairs.point)
         q2.next_quest = q3
 
         npc.questgiver.add_quest(q)
