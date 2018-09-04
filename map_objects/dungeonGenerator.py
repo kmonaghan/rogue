@@ -670,7 +670,7 @@ class dungeonGenerator:
     def closeDeadDoors(self):
         for xi in range(self.width):
             for yi in range(self.height):
-                if (self.grid[xi][yi] == DOOR):
+                if (self.grid[xi][yi] == Tiles.DOOR):
                     num_connections = 0
                     for nx, ny in self.findNeighboursDirect(xi, yi):
                         if (self.grid[nx][ny] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):

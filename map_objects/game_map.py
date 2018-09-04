@@ -595,7 +595,7 @@ class GameMap:
         for area in unconnected:
             if len(area) < 35:
                 for x, y in area:
-                    caves.grid[x][y] = EMPTY
+                    caves.grid[x][y] = Tiles.EMPTY
 
         for x, y, tile in caves:
             dm.grid[x][y + 1] = caves.grid[x][y]
@@ -748,7 +748,7 @@ class GameMap:
 
         if (prefab.door):
             dm.generateCorridors('f', prefab.door.x, prefab.door.y + 2)
-            dm.grid[prefab.door.x][prefab.door.y + 1] = DOOR
+            dm.grid[prefab.door.x][prefab.door.y + 1] = Tiles.DOOR
 
         # join it all together
         dm.connectAllRooms(0)
