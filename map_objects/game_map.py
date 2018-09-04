@@ -152,8 +152,14 @@ class GameMap:
 
         alcoves = self.generator.alcoves
 
-        if (len(alcoves)):
-            for i in range(6):
+        total_alcoves = len(alcoves)
+
+        if (total_alcoves):
+            nests = 6
+            if (total_alcoves < nests):
+                nests = total_alcoves
+
+            for i in range(nests):
                 point = choice(alcoves)
                 alcoves.remove(point)
                 npc = RatNest(point)
