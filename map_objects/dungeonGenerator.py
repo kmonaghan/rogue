@@ -582,7 +582,7 @@ class dungeonGenerator:
                     continue
 
                 for nx, ny in self.findNeighbours(x,y):
-                    if (self.grid[nx][ny] == Tiles.EMPTY):
+                    if not self.grid[nx][ny] or (wallType > self.grid[nx][ny]):
                         self.grid[nx][ny] = wallType
 
     def connectAllRooms(self, extraDoorChance = 0):
