@@ -72,6 +72,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         player_turn_results = []
 
+        if player.level.can_level_up():
+            game_state = GameStates.LEVEL_UP
+
         if (restart_game):
             player, game_map, message_log, game_state = get_game_variables(constants)
             fov_map = initialize_fov(game_map)
@@ -168,12 +171,11 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         if level_up:
             if level_up == 'hp':
-                player.fighter.base_max_hp += 20
-                player.fighter.hp += 20
+                player.level.level_up_stats(0)
             elif level_up == 'str':
-                player.fighter.base_power += 1
+                player.level.level_up_stats(1)
             elif level_up == 'def':
-                player.fighter.base_defense += 1
+                player.level.level_up_stats(2)
 
             game_state = previous_game_state
 
@@ -272,13 +274,8 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 message_log.add_message(Message('Targeting cancelled'))
 
             if xp:
-                leveled_up = player.level.add_xp(xp)
+                player.level.add_xp(xp)
                 message_log.add_message(Message('You gain {0} experience points.'.format(xp)))
-
-                if leveled_up:
-
-                    previous_game_state = game_state
-                    game_state = GameStates.LEVEL_UP
 
             if quest_onboarding:
                 previous_game_state = GameStates.PLAYERS_TURN

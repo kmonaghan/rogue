@@ -22,6 +22,9 @@ def get_names_under_mouse(mouse, entities, fov_map):
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
     bar_width = int(float(value) / maximum * total_width)
 
+    if (bar_width > total_width):
+        bar_width = total_width
+        
     libtcod.console_set_default_background(panel, back_color)
     libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
 

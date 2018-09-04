@@ -45,7 +45,7 @@ def bountyhunter(point = None):
 
 def goblin(point = None):
     #create a goblin
-    fighter_component = Fighter(hp=10, defense=7, power=3, xp=10)
+    fighter_component = Fighter(hp=20, defense=5, power=5, xp=10)
     ai_component = BasicNPC()
 
     npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
@@ -66,7 +66,7 @@ def goblin(point = None):
 
 def create_player():
     #create object representing the player
-    fighter_component = Fighter(hp=100, defense=10, power=2, xp=0)
+    fighter_component = Fighter(hp=30, defense=6, power=6, xp=0)
 
     if (game_state.debug == True):
         fighter_component.hp = 1000

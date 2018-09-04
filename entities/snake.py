@@ -21,7 +21,7 @@ class Snake(Animal):
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        fighter = Fighter(hp=5, defense=1, power=1, xp=2)
+        fighter = Fighter(hp=8, defense=2, power=2, xp=4)
         ai = Hunter(attacked_ai = BasicNPC(), hunting = Species.RAT)
         item = None
         gear = None
