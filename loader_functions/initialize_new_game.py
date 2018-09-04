@@ -14,8 +14,8 @@ from render_functions import RenderOrder
 def get_constants():
     window_title = 'Roguelike Tutorial Revised'
 
-    screen_width = 91
-    screen_height = 61
+    screen_width = 71
+    screen_height = 51
 
     bar_width = 20
     panel_height = 10
@@ -58,9 +58,6 @@ def get_constants():
         'message_height': message_height,
         'map_width': map_width,
         'map_height': map_height,
-        'room_max_size': room_max_size,
-        'room_min_size': room_min_size,
-        'max_rooms': max_rooms,
         'fov_algorithm': fov_algorithm,
         'fov_light_walls': fov_light_walls,
         'fov_radius': fov_radius,

@@ -38,6 +38,8 @@ class GameMap:
         self.levels = [{},{},{},{},{},{}]
         self.generator = None
         self.map = None
+        self.down_stairs_room = None
+        self.up_stairs_room = None
 
     @property
     def width(self):
@@ -51,7 +53,7 @@ class GameMap:
     def rooms(self):
         return self.generator.rooms
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, map_width, map_height, player, offset=0):
+    def make_map(self, map_width, map_height, player):
         self.entities = [player]
 
         boss_chance = randint(0,3) + self.dungeon_level
@@ -64,35 +66,35 @@ class GameMap:
             else:
                 self.generator = self.level_generator(map_width, map_height)
 
-        #self.generator = self.level_generator(map_width, map_height)
-
-        self.map = [[Wall() for y in range(self.generator.height)]
+        self.map = [[EmptyTile() for y in range(self.generator.height)]
                         for x in range(self.generator.width)]
 
         for x, y, tile in self.generator:
-            if self.generator.grid[x][y] == DOOR:
-                self.map[x][y] = Door()
-            elif self.generator.grid[x][y] == FLOOR:
-                self.map[x][y] = Floor()
-            elif self.generator.grid[x][y] == ROOMWALL:
-                self.map[x][y] = Wall()
-            elif self.generator.grid[x][y] == WALL:
-                self.map[x][y] = Wall()
-            elif self.generator.grid[x][y] == IMPENETRABLE:
-                self.map[x][y] = Wall()
-            elif self.generator.grid[x][y] == CORRIDOR:
-                self.map[x][y] = Ground()
-            elif self.generator.grid[x][y] == CORRIDORWALL:
+            if self.generator.grid[x][y] == Tiles.EMPTY:
+                self.map[x][y] = EmptyTile()
+            elif self.generator.grid[x][y] == Tiles.OBSTACLE:
+                self.map[x][y] = EmptyTile()
+            elif self.generator.grid[x][y] == Tiles.IMPENETRABLE:
+                self.map[x][y] = EmptyTile()
+            elif self.generator.grid[x][y] == Tiles.CAVERN_WALL:
+                self.map[x][y] = CavernWall()
+            elif self.generator.grid[x][y] == Tiles.CORRIDOR_WALL:
                 self.map[x][y] = CorridorWall()
-            elif self.generator.grid[x][y] == CAVE:
-                self.map[x][y] = Cave()
-            elif self.generator.grid[x][y] == CAVEWALL:
-                self.map[x][y] = CaveWall()
-            elif self.generator.grid[x][y] == DEADEND:
-                self.map[x][y] = Ground()
-            elif self.generator.grid[x][y] == SHALLOWWATER:
+            elif self.generator.grid[x][y] == Tiles.ROOM_WALL:
+                self.map[x][y] = RoomWall()
+            elif self.generator.grid[x][y] == Tiles.DOOR:
+                self.map[x][y] = Door()
+            elif self.generator.grid[x][y] == Tiles.DEADEND:
+                self.map[x][y] = CorridorWall()
+            elif self.generator.grid[x][y] == Tiles.CAVERN_FLOOR:
+                self.map[x][y] = CavernFloor()
+            elif self.generator.grid[x][y] == Tiles.CORRIDOR_FLOOR:
+                self.map[x][y] = CorridorFloor()
+            elif self.generator.grid[x][y] == Tiles.ROOM_FLOOR:
+                self.map[x][y] = RoomFloor()
+            elif self.generator.grid[x][y] == Tiles.SHALLOWWATER:
                 self.map[x][y] = ShallowWater()
-            elif self.generator.grid[x][y] == DEEPWATER:
+            elif self.generator.grid[x][y] == Tiles.DEEPWATER:
                 self.map[x][y] = DeepWater()
             else:
                 self.map[x][y] = EmptyTile()
@@ -104,8 +106,6 @@ class GameMap:
                 self.level_boss(player)
             else:
                 self.level_generic(player)
-
-        #self.level_generic(player)
 
     def test_popluate_map(self, player):
         room = self.generator.rooms[0]
@@ -193,10 +193,12 @@ class GameMap:
 
     def level_generic(self, player):
         if (len(self.generator.rooms)):
+            '''
             room = self.generator.rooms[-1]
             downStairsPoint = room.random_tile(self)
-
+            '''
             room = self.generator.rooms[0]
+
             playerStartPoint = room.random_tile(self)
         else:
             if (len(self.generator.alcoves)):
@@ -211,10 +213,11 @@ class GameMap:
                 downStairsPoint = choice(self.generator.caves)
                 playerStartPoint = choice(self.generator.caves)
 
+        '''
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(downStairsPoint, '>', 'Down Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.add_entity_to_map(self.down_stairs)
-
+        '''
         player.x = playerStartPoint.x
         player.y = playerStartPoint.y
 
@@ -276,10 +279,10 @@ class GameMap:
 
     def place_creatures(self):
         npc_chances = {}
-        npc_chances['rat'] = random_utils.from_dungeon_level([[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances['snake'] = random_utils.from_dungeon_level([[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances['snakeegg'] = random_utils.from_dungeon_level([[1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        npc_chances['ratnest'] = random_utils.from_dungeon_level([[1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances['rat'] = random_utils.from_dungeon_level([[95, 1], [95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances['snake'] = random_utils.from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances['snakeegg'] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances['ratnest'] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         max_npcs = len(self.generator.caves) // 100
 
@@ -320,9 +323,9 @@ class GameMap:
 
         #chance of each npc
         npc_chances = {}
-        npc_chances['goblin'] = random_utils.from_dungeon_level([[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances['orc'] = random_utils.from_dungeon_level([[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances['troll'] = random_utils.from_dungeon_level([[1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances['goblin'] = random_utils.from_dungeon_level([[95, 1],[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances['orc'] = random_utils.from_dungeon_level([[95, 1],[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances['troll'] = random_utils.from_dungeon_level([[95, 1],[95, 2], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, 0, max_npcs)
@@ -398,8 +401,7 @@ class GameMap:
         self.down_stairs = None
         self.up_stairs = None
 
-        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'], player)
+        self.make_map(constants['map_width'], constants['map_height'], player)
 
         return self.entities
 
@@ -624,8 +626,78 @@ class GameMap:
 
         return dm
 
-    def level_generator(self, map_width, map_height):
+    def level_caverns(self, map_width, map_height):
         dm = dungeonGenerator(width=map_width, height=map_height)
+
+        dm.generateCaves(45, 4)
+        # clear away small islands
+        unconnected = dm.findUnconnectedAreas()
+        for area in unconnected:
+            if len(area) < 35:
+                for x, y in area:
+                    dm.grid[x][y] = Tiles.EMPTY
+
+        unconnected = dm.findUnconnectedAreas()
+        dm.joinUnconnectedAreas(unconnected)
+
+        dm.findCaves()
+
+        return dm
+
+    def level_cavern_rooms(self, map_width, map_height):
+        dm = dungeonGenerator(width=map_width, height=map_height)
+
+        dm.generateCaves(37, 4)
+        # clear away small islands
+        unconnected = dm.findUnconnectedAreas()
+        for area in unconnected:
+            if len(area) < 35:
+                for x, y in area:
+                    dm.grid[x][y] = Tiles.EMPTY
+
+        dm.findCaves()
+
+        # generate rooms and corridors
+        dm.placeRandomRooms(5, 10, 1, 1, 1000)
+        x, y = dm.findEmptySpace(3)
+        while x:
+            dm.generateCorridors('f', x, y)
+            x, y = dm.findEmptySpace(3)
+
+        # join it all together
+        dm.connectAllRooms(0)
+
+        unconnected = dm.findUnconnectedAreas()
+        dm.joinUnconnectedAreas(unconnected)
+
+        #clear all dead ends
+        dm.findDeadends()
+        while dm.deadends:
+            dm.pruneDeadends(1)
+
+        return dm
+
+    def level_rooms(self, map_width, map_height):
+        dm = dungeonGenerator(width=map_width, height=map_height)
+
+        # generate rooms and corridors
+        dm.placeRandomRooms(8, 12, 1, 1, 1000)
+        x, y = dm.findEmptySpace(3)
+        while x:
+            dm.generateCorridors('l', x, y)
+            x, y = dm.findEmptySpace(3)
+
+        # join it all together
+        dm.connectAllRooms(0)
+
+        #clear all dead ends
+        dm.findDeadends()
+        while dm.deadends:
+            dm.pruneDeadends(1)
+
+        return dm
+
+    def level_generator(self, map_width, map_height):
 
         '''
         3 options:
@@ -634,54 +706,26 @@ class GameMap:
         3) all rooms
         '''
 
+        chance = randint(0,100)
+
+        if (chance <= 33):
+            dm = self.level_caverns(map_width, map_height)
+        elif (chance <= 66):
+            dm = self.level_cavern_rooms(map_width, map_height)
+        else:
+            dm = self.level_rooms(map_width, map_height)
+
         lair = self.random_lair(map_width, map_height)
         if (lair):
             dm.placeRoom(lair.room.x, lair.room.y, lair.room.width, lair.room.height, ignoreOverlap = True)
             lair.carve(dm.grid)
             print(lair.room.describe())
 
-        chance = randint(0,100)
-
-        print("Chance = " + str(chance))
-
-        corridorType = 'f'
-
-        if (chance <= 66):
-            print("Adding Caverns")
-            p = 37
-            if (chance <= 33):
-                p = 45
-            dm.generateCaves(p, 4)
-            # clear away small islands
-            unconnected = dm.findUnconnectedAreas()
-            for area in unconnected:
-                if len(area) < 35:
-                    for x, y in area:
-                        dm.grid[x][y] = EMPTY
-
-            dm.findCaves()
-            dm.findAlcoves()
-
-            corridorType = 'l'
-
-        if (chance > 33):
-            print("Adding Rooms")
-            offset = 0
-            if (chance > 66):
-                offset = 2
-            # generate rooms and corridors
-            dm.placeRandomRooms(5 + offset, 9 + offset, 1 + offset, 1 + offset, 500)
-            x, y = dm.findEmptySpace(3)
-            while x:
-                dm.generateCorridors(corridorType, x, y)
-                x, y = dm.findEmptySpace(3)
-            # join it all together
-            dm.connectAllRooms(0)
-
-        unconnected = dm.findUnconnectedAreas()
-        dm.joinUnconnectedAreas(unconnected)
-        dm.pruneDeadends(70)
         dm.placeWalls()
+        dm.findAlcoves()
+
+        self.down_stairs_room = self.place_stair_room(dm)
+        self.up_stairs_room = self.place_stair_room(dm)
 
         return dm
 
@@ -717,7 +761,7 @@ class GameMap:
         return dm
 
     def random_lair(self, map_width, map_height):
-        lair_chance = True
+        lair_chance = False
 
         if (lair_chance):
             prefab = Prefab(necromancer_lair())
@@ -735,3 +779,25 @@ class GameMap:
             return prefab
 
         return None
+
+    def place_stair_room(self, dm):
+        startX = randint(3, dm.width - 6)
+        startY = randint(3, dm.height - 6)
+
+        dm.placeRoom(startX, startY, 3, 3, ignoreOverlap = True)
+
+        for x in range(startX - 1, startX + 4):
+            print(str(x) + ',' + str(startY - 1))
+            dm.grid[x][startY - 1] = Tiles.ROOM_WALL
+
+        for x in range(startX - 1, startX + 4):
+            print(str(x) + ',' + str(startY + 3))
+            dm.grid[x][startY + 3] = Tiles.ROOM_WALL
+
+        for y in range(startY - 1, startY + 4):
+            dm.grid[startX - 1][y] = Tiles.ROOM_WALL
+
+        for y in range(startY - 1, startY + 4):
+            dm.grid[startX + 3][y] = Tiles.ROOM_WALL
+
+        return dm.rooms[-1]

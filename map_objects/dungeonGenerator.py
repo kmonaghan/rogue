@@ -14,25 +14,37 @@
 
 import libtcodpy as libtcod
 
+from enum import IntEnum, auto
 from random import randint, choice, randrange
 
 from map_objects.point import Point
 
 #tile constants
-EMPTY = 0
-FLOOR = 1
-CORRIDOR = 2
-DOOR = 3
-DEADEND = 4
-ROOMWALL = 5
-CAVEWALL = 6
-CORRIDORWALL = 7
-WALL = 8
-OBSTACLE = 9
-CAVE = 10
-IMPENETRABLE = 11
-SHALLOWWATER = 12
-DEEPWATER = 13
+class Tiles(IntEnum):
+    EMPTY = 0
+    OBSTACLE = auto()
+    IMPENETRABLE = auto()
+    CAVERN_WALL = auto()
+    CORRIDOR_WALL = auto()
+    ROOM_WALL = auto()
+    DOOR = auto()
+    DEADEND = auto()
+    CAVERN_FLOOR = auto()
+    CORRIDOR_FLOOR = auto()
+    ROOM_FLOOR = auto()
+    SHALLOWWATER = auto()
+    DEEPWATER = auto()
+
+floor_to_wall = {
+    Tiles.OBSTACLE: Tiles.CAVERN_WALL,
+    Tiles.IMPENETRABLE: Tiles.CAVERN_WALL,
+    Tiles.CAVERN_FLOOR: Tiles.CAVERN_WALL,
+    Tiles.DEADEND: Tiles.CORRIDOR_WALL,
+    Tiles.CORRIDOR_FLOOR: Tiles.CORRIDOR_WALL,
+    Tiles.ROOM_FLOOR: Tiles.ROOM_WALL,
+    Tiles.DEEPWATER: Tiles.CAVERN_WALL,
+    Tiles.SHALLOWWATER: Tiles.CAVERN_WALL
+}
 
 class Prefab:
     def __init__(self, room_map):
@@ -61,16 +73,16 @@ class Prefab:
         for xoffset in range(0, self.room.width):
             for yoffset in range(0, self.room.height):
                 if (self.layout[xoffset][yoffset] == "#"):
-                    map[self.room.x + xoffset][self.room.y + yoffset] = WALL
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.ROOM_WALL
                 elif (self.layout[xoffset][yoffset] == "I"):
-                    map[self.room.x + xoffset][self.room.y + yoffset] = IMPENETRABLE
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.IMPENETRABLE
                 elif (self.layout[xoffset][yoffset] == "W"):
-                    map[self.room.x + xoffset][self.room.y + yoffset] = SHALLOWWATER
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.SHALLOWWATER
                 elif (self.layout[xoffset][yoffset] == "D"):
-                    map[self.room.x + xoffset][self.room.y + yoffset] = FLOOR
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.ROOM_FLOOR
                     self.door = Point(self.room.x + xoffset, self.room.y + yoffset)
                 else:
-                    map[self.room.x + xoffset][self.room.y + yoffset] = FLOOR
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.ROOM_FLOOR
 
 class dungeonRoom:
     """
@@ -158,7 +170,7 @@ class dungeonGenerator:
 
         self.height = abs(height)
         self.width = abs(width)
-        self.grid = [[EMPTY for i in range(self.height)] for i in range(self.width)]
+        self.grid = [[Tiles.EMPTY for i in range(self.height)] for i in range(self.width)]
         self.rooms = []
         self.doors = []
         self.corridors = []
@@ -293,7 +305,6 @@ class dungeonGenerator:
         Returns:
             none
         """
-
         if not grid: grid = self.grid
         toFill = set()
         toFill.add((x,y))
@@ -349,7 +360,7 @@ class dungeonGenerator:
         """
         unconnectedAreas = []
         areaCount = 0
-        gridCopy = [[EMPTY for i in range(self.height)] for i in range(self.width)]
+        gridCopy = [[Tiles.EMPTY for i in range(self.height)] for i in range(self.width)]
         for x in range(self.width):
             for y in range(self.height):
                 if self.grid[x][y]:
@@ -390,9 +401,9 @@ class dungeonGenerator:
         for xi in range(self.width):
             for yi in range(self.height):
                 walls = 0
-                if (self.grid[xi][yi] == CAVE):
+                if (self.grid[xi][yi] == Tiles.CAVERN_FLOOR):
                     for nx, ny in self.findNeighboursDirect(xi, yi):
-                        if (self.grid[nx][ny] in [EMPTY, WALL, IMPENETRABLE, ROOMWALL, CAVEWALL, CORRIDORWALL]):
+                        if (self.grid[nx][ny] <= Tiles.ROOM_WALL):
                             walls += 1
                     if (walls == 3):
                         self.alcoves.append(Point(xi, yi))
@@ -401,7 +412,7 @@ class dungeonGenerator:
         self.caves = []
         for xi in range(self.width):
             for yi in range(self.height):
-                if (self.grid[xi][yi] == CAVE):
+                if (self.grid[xi][yi] == Tiles.CAVERN_FLOOR):
                     self.caves.append(Point(xi, yi))
 
     ##### GENERATION FUNCTIONS #####
@@ -423,7 +434,7 @@ class dungeonGenerator:
         if self.quadFits(startX, startY, roomWidth, roomHeight, 0) or ignoreOverlap:
             for x in range(roomWidth):
                 for y in range(roomHeight):
-                    self.grid[startX+x][startY+y] = FLOOR
+                    self.grid[startX+x][startY+y] = Tiles.ROOM_FLOOR
             self.rooms.append(dungeonRoom(startX, startY, roomWidth, roomHeight))
             return True
 
@@ -452,7 +463,7 @@ class dungeonGenerator:
             if self.quadFits(startX, startY, roomWidth, roomHeight, margin):
                 for x in range(roomWidth):
                     for y in range(roomHeight):
-                        self.grid[startX+x][startY+y] = FLOOR
+                        self.grid[startX+x][startY+y] = Tiles.ROOM_FLOOR
                 self.rooms.append(dungeonRoom(startX, startY, roomWidth, roomHeight))
 
     def generateCaves(self, p = 45, smoothing = 4):
@@ -470,20 +481,20 @@ class dungeonGenerator:
         for x in range(self.width):
             for y in range(self.height):
                 if randint(0, 100) < p:
-                    self.grid[x][y] = CAVE
+                    self.grid[x][y] = Tiles.CAVERN_FLOOR
         for i in range(smoothing):
             for x in range(self.width):
                 for y in range(self.height):
                     if x == 0 or x == self.width or y == 0 or y == self.height:
-                        self.grid[x][y] = EMPTY
+                        self.grid[x][y] = Tiles.EMPTY
                     touchingEmptySpace = 0
                     for nx, ny in self.findNeighbours(x,y):
-                        if self.grid[nx][ny] == CAVE:
+                        if self.grid[nx][ny] == Tiles.CAVERN_FLOOR:
                             touchingEmptySpace += 1
                     if touchingEmptySpace >= 5:
-                        self.grid[x][y] = CAVE
+                        self.grid[x][y] = Tiles.CAVERN_FLOOR
                     elif touchingEmptySpace <= 2:
-                       self.grid[x][y] = EMPTY
+                       self.grid[x][y] = Tiles.EMPTY
 
     def generateCorridors(self, mode = 'r', x = None, y = None):
         """
@@ -512,7 +523,7 @@ class dungeonGenerator:
             while not self.canCarve(x, y, 0, 0):
                 x = randint(1, self.width-2)
                 y = randint(1, self.height-2)
-        self.grid[x][y] = CORRIDOR
+        self.grid[x][y] = Tiles.CORRIDOR_FLOOR
         self.corridors.append((x,y))
         cells.append((x,y))
         while cells:
@@ -527,7 +538,7 @@ class dungeonGenerator:
             possMoves = self.getPossibleMoves(x, y)
             if possMoves:
                 xi, yi = choice(possMoves)
-                self.grid[xi][yi] = CORRIDOR
+                self.grid[xi][yi] = Tiles.CORRIDOR_FLOOR
                 self.corridors.append((xi,yi))
                 cells.append((xi, yi))
             else:
@@ -548,7 +559,7 @@ class dungeonGenerator:
         for i in range(amount):
             self.findDeadends()
             for x, y in self.deadends:
-                self.grid[x][y] = EMPTY
+                self.grid[x][y] = Tiles.EMPTY
                 self.corridors.remove((x,y))
         self.findDeadends()
 
@@ -566,22 +577,13 @@ class dungeonGenerator:
 
         for x in range(self.width):
             for y in range(self.height):
-                if not self.grid[x][y]:
-                    for nx, ny in self.findNeighbours(x,y):
-                        if self.grid[nx][ny] and self.grid[nx][ny] not in [WALL, ROOMWALL, CAVEWALL, CORRIDORWALL]:
-                            if (self.grid[nx][ny] == FLOOR):
-                                self.grid[x][y] = ROOMWALL
-                                break
-                            elif (self.grid[nx][ny] == CAVE):
-                                self.grid[x][y] = CAVEWALL
-                                break
-                            elif (self.grid[nx][ny] == CORRIDOR):
-                                self.grid[x][y] = CORRIDORWALL
-                                break
+                wallType = floor_to_wall.get(self.grid[x][y])
+                if not wallType:
+                    continue
 
-                            #else:
-                            #    self.grid[x][y] = WALL
-                            #    break
+                for nx, ny in self.findNeighbours(x,y):
+                    if (self.grid[nx][ny] == Tiles.EMPTY):
+                        self.grid[nx][ny] = wallType
 
     def connectAllRooms(self, extraDoorChance = 0):
         """
@@ -620,11 +622,11 @@ class dungeonGenerator:
                         x, y = choice(connections)
                         pickAgain = False
                         for xi, yi in self.findNeighbours(x, y):
-                            if self.grid[xi][yi] == DOOR:
+                            if self.grid[xi][yi] == Tiles.DOOR:
                                 pickAgain = True
                                 break
                     chance = randint(0, 100)
-                    self.grid[x][y] = DOOR
+                    self.grid[x][y] = Tiles.DOOR
                     self.doors.append((x, y))
             else:
                 unconnectedRooms.append(room)
@@ -658,11 +660,11 @@ class dungeonGenerator:
             c.sort()
             x, y = c[0]
             for x in range(c[0][0]+1, c[1][0]):
-                if self.grid[x][y] == EMPTY:
-                    self.grid[x][y] = CORRIDOR
+                if self.grid[x][y] == Tiles.EMPTY:
+                    self.grid[x][y] = Tiles.CORRIDOR_FLOOR
             for y in range(c[0][1]+1, c[1][1]):
-                if self.grid[x][y] == EMPTY:
-                    self.grid[x][y] = CORRIDOR
+                if self.grid[x][y] == Tiles.EMPTY:
+                    self.grid[x][y] = Tiles.CORRIDOR_FLOOR
             self.corridors.append((x,y))
 
     def closeDeadDoors(self):
@@ -671,11 +673,11 @@ class dungeonGenerator:
                 if (self.grid[xi][yi] == DOOR):
                     num_connections = 0
                     for nx, ny in self.findNeighboursDirect(xi, yi):
-                        if (self.grid[nx][ny] in [FLOOR, CORRIDOR, CAVE]):
+                        if (self.grid[nx][ny] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
                             num_connections += 1
                     if (num_connections != 2):
                         print("Removing DOOR")
-                        self.grid[xi][yi] = EMPTY
+                        self.grid[xi][yi] = Tiles.EMPTY
 
     ##### PATH FINDING FUNCTIONS #####
 
@@ -692,13 +694,13 @@ class dungeonGenerator:
             none
         """
         for x, y in self.corridors:
-            if self.grid[x][y] < WALL: break
+            if self.grid[x][y] <= Tiles.ROOM_WALL: break
         for x in range(self.width):
             for y in range(self.height):
-                if self.grid[x][y] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE, ROOMWALL, CAVEWALL, CORRIDORWALL]:
+                if self.grid[x][y] > Tiles.ROOM_WALL:
                     self.graph[(x, y)] = []
                     for nx, ny in self.findNeighboursDirect(x, y):
-                        if self.grid[nx][ny] not in [WALL, EMPTY, OBSTACLE, IMPENETRABLE, ROOMWALL, CAVEWALL, CORRIDORWALL]:
+                        if self.grid[nx][ny] > Tiles.ROOM_WALL:
                             self.graph[(x, y)].append((nx, ny))
 
     def findPath(self, startX, startY, endX, endY):

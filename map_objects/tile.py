@@ -25,16 +25,16 @@ class Tile:
     def isWall(self):
         return (self.blocked and self.block_sight)
 
-class Cave(Tile):
+class CavernFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
-        super(Cave, self).__init__(blocked, block_sight)
+        super(CavernFloor, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.lighter_sepia
         self.out_of_fov_color = libtcod.light_sepia
 
-class CaveWall(Tile):
+class CavernWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
-        super(CaveWall, self).__init__(blocked, block_sight)
+        super(CavernWall, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.dark_sepia
         self.out_of_fov_color = libtcod.darkest_sepia
@@ -53,23 +53,23 @@ class Door(Tile):
         self.fov_color = libtcod.orange
         self.out_of_fov_color = libtcod.darker_orange
 
-class Floor(Tile):
+class RoomFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
-        super(Floor, self).__init__(blocked, block_sight)
+        super(RoomFloor, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.light_grey
         self.out_of_fov_color = libtcod.grey
 
-class Ground(Tile):
+class CorridorFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
-        super(Ground, self).__init__(blocked, block_sight)
+        super(CorridorFloor, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.sepia
         self.out_of_fov_color = libtcod.darker_sepia
 
-class Wall(Tile):
+class RoomWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
-        super(Wall, self).__init__(blocked, block_sight)
+        super(RoomWall, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.dark_grey
         self.out_of_fov_color = libtcod.darkest_grey
