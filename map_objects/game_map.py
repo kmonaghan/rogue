@@ -621,8 +621,8 @@ class GameMap:
         while len(dm.deadends):
             dm.pruneDeadends(1)
 
-        dm.closeDeadDoors()
         dm.placeWalls()
+        dm.closeDeadDoors()
 
         return dm
 
@@ -754,9 +754,9 @@ class GameMap:
         dm.connectAllRooms(0)
         unconnected = dm.findUnconnectedAreas()
         dm.joinUnconnectedAreas(unconnected)
-        dm.closeDeadDoors()
         dm.pruneDeadends(70)
         dm.placeWalls()
+        dm.closeDeadDoors()
 
         return dm
 

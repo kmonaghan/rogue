@@ -668,16 +668,58 @@ class dungeonGenerator:
             self.corridors.append((x,y))
 
     def closeDeadDoors(self):
+        """
+        Remove any doors that don't have either a floor tile E & W or N & S and
+        walls (or empty tiles) on the opposite axis and replace with a corridor.
+
+        Args:
+            none
+
+        Returns:
+            none
+        """
         for xi in range(self.width):
             for yi in range(self.height):
                 if (self.grid[xi][yi] == Tiles.DOOR):
-                    num_connections = 0
-                    for nx, ny in self.findNeighboursDirect(xi, yi):
-                        if (self.grid[nx][ny] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
-                            num_connections += 1
-                    if (num_connections != 2):
-                        print("Removing DOOR")
-                        self.grid[xi][yi] = Tiles.EMPTY
+                    north_wall = False
+                    north_floor = False
+
+                    south_wall = False
+                    south_floor = False
+
+                    east_wall = False
+                    east_floor = False
+
+                    west_wall = False
+                    west_floor = False
+
+                    if (xi == 0) or (self.grid[xi - 1][yi] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                        west_wall = True
+                    elif (self.grid[xi - 1][yi] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
+                        west_floor = True
+
+                    if (xi == self.width) or (self.grid[xi + 1][yi] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                        east_wall = True
+                    elif (self.grid[xi + 1][yi] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
+                        east_floor = True
+
+                    if (yi == 0) or (self.grid[xi][yi - 1] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                        north_wall = True
+                    elif (self.grid[xi][yi - 1] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
+                        north_floor = True
+
+                    if (yi == self.height) or (self.grid[xi][yi + 1] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                        south_wall = True
+                    elif (self.grid[xi][yi + 1] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
+                        south_floor = True
+
+                    if (north_wall and south_wall and west_floor and east_floor):
+                        continue
+
+                    if (north_floor and south_floor and west_wall and east_floor):
+                        continue
+
+                    self.grid[xi][yi] = Tiles.CORRIDOR_FLOOR
 
     ##### PATH FINDING FUNCTIONS #####
 
