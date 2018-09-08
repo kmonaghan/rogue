@@ -523,6 +523,45 @@ class GameMap:
 
         return npc
 
+    def find_all_closest(self, point, species, max_distance=2):
+        start_x = point.x - max_distance
+        start_y = point.y - max_distance
+
+        if (start_x < 0):
+            start_x = 0
+
+        if (start_y < 0):
+            start_y = 0
+
+        end_x = start_x + (max_distance * 2) + 1
+        if (end_x > self.generator.width):
+            end_x = self.generator.width
+
+        end_y = start_y + (max_distance * 2) + 1
+        if (end_y > self.generator.height):
+            end_y = self.generator.height
+
+        dist = max_distance + 1
+
+        npcs = []
+        for x in range(start_x, end_x):
+            for y in range(start_y, end_y):
+                #print ("checking " + str(x) + ", " + str(y))
+
+                if (len(self.entity_map[x][y])):
+                    for entity in self.entity_map[x][y]:
+                        if (point.x == x) and (point.y == y):
+                            continue
+                        if isinstance(entity, Character) and (entity.species == species) and not entity.isDead():
+                            entity_distance = abs(x - point.x)
+                            if (entity_distance < dist):
+                                #print("FOUND!")
+                                npcs.append(entity)
+                #else:
+                #    #print "no entites at " + str(x) + ", " + str(y)
+
+        return npcs
+
     def update_entity_map(self):
         self.entity_map = [[[]
                             for y in range(self.generator.height)]

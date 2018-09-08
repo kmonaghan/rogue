@@ -4,9 +4,7 @@ from random import randint
 
 import equipment
 
-from components.ai import BasicNPC
-from components.ai import Hunter
-from components.ai import SpawnNPC
+from components.ai import BasicNPC, Hunter, SpawnNPC, ScreamerNPC
 
 from components.fighter import Fighter
 
@@ -59,8 +57,23 @@ class RatNest(Animal):
 
     def hasBeenAttacked(self, npc):
         #print("Override hasBeenAttacked")
+        health = (self.fighter.hp * 100.0) / self.fighter.max_hp
+        print("health: " + str(health))
+        if (health < 90):
+            self.setAI(ScreamerNPC(Species.RAT))
+
+        scream = 0
+        if (health < 30):
+            spawn_chance = 5
+            self.ai.alert_range = 3
+        elif (health < 60):
+            spawn_chance = 7
+            self.ai.alert_range = 2
+        elif (health < 90):
+            spawn_chance = 9
+
         spawn = randint(1, 10)
 
-        if (spawn > 8):
+        if (spawn >= spawn_chance):
             #npc = Rat(self.point)
             print("Would spawn rat")

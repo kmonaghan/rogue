@@ -251,3 +251,21 @@ class SpawnNPC:
             self.turns_since_last_spawn += 1
 
         return results
+
+class ScreamerNPC:
+    def __init__(self, alert_npc_type, alert_range = 1):
+        self.alert_npc_type = alert_npc_type
+        self.alert_range = alert_range
+
+    def take_turn(self, target, fov_map, game_map):
+        results = []
+
+        npcs = game_map.find_all_closest(self.owner.point, self.alert_npc_type, self.alert_range)
+
+        if len(npcs):
+            for npc in npcs:
+                npc.setAI(BasicNPC())
+
+            results.append({'message': Message('Alert nearby creatures!', libtcod.red)})
+
+        return results
