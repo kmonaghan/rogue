@@ -57,11 +57,6 @@ def goblin(point = None):
     npc.inventory.add_item(dagger)
     npc.equipment.toggle_equip(dagger)
 
-    dice = libtcod.random_get_int(0, 1, 100)
-
-    if (dice >= 98):
-        upgrade_npc(npc)
-
     return npc
 
 def create_player():
@@ -100,11 +95,6 @@ def orc(point = None):
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
 
-    dice = libtcod.random_get_int(0, 1, 100)
-
-    if (dice >= 98):
-        upgrade_npc(npc)
-
     return npc
 
 def troll(point = None):
@@ -120,11 +110,6 @@ def troll(point = None):
 
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
-
-    dice = libtcod.random_get_int(0, 1, 100)
-
-    if (dice >= 98):
-        upgrade_npc(npc)
 
     return npc
 
@@ -199,4 +184,36 @@ def necromancer(point = None):
 #    if (dice >= 98):
 #        upgrade_npc(npc)
 
+    return npc
+
+names = False
+
+def generate_npc(type, dungeon_level = 1, player_level = 1, point = None):
+    global names
+
+    if (type == Species.GOBLIN):
+        npc = goblin(point)
+    elif (type == Species.ORC):
+        npc = orc(point)
+    elif (type == Species.TROLL):
+        npc = troll(point)
+
+    if not names:
+        libtcod.namegen_parse('data/names.txt')
+        names = True
+
+    npc.name = libtcod.namegen_generate(npc.name)
+
+    npc_level = (dungeon_level - 1) + player_level + libtcod.random_get_int(0, -1, 1)
+
+    if npc_level > 1:
+        npc.level.random_level_up(npc_level - 1)
+
+    dice = libtcod.random_get_int(0, 1, 100)
+
+    if (dice >= 98):
+        upgrade_npc(npc)
+        npc.level.random_level_up(1)
+
+    print("final npc level: " + str(npc.level.current_level))
     return npc

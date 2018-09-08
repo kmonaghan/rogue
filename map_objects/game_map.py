@@ -175,10 +175,7 @@ class GameMap:
             num_npcs = libtcod.random_get_int(0, 0, 2)
 
             for i in range(num_npcs):
-                npc = bestiary.goblin(room.random_tile(self))
-
-                add_levels = self.dungeon_level + libtcod.random_get_int(0, -1, 1)
-                npc.level.random_level_up(add_levels)
+                npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level, room.random_tile(self))
 
                 self.add_entity_to_map(npc)
 
@@ -235,7 +232,7 @@ class GameMap:
 
         #Add npcs and items
         for room in self.generator.rooms:
-            self.place_npc(room)
+            self.place_npc(room, player)
             self.place_object(room)
 
         '''
@@ -280,15 +277,15 @@ class GameMap:
 
         #Add npcs and items
         for room in self.generator.rooms:
-            self.place_npc(room)
+            self.place_npc(room, player)
             self.place_object(room)
 
     def place_creatures(self):
         npc_chances = {}
-        npc_chances['rat'] = random_utils.from_dungeon_level([[95, 1], [95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances['snake'] = random_utils.from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances['snakeegg'] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        npc_chances['ratnest'] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.RAT] = random_utils.from_dungeon_level([[95, 1], [95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances[Species.SNAKE] = random_utils.from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances[Species.EGG] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.RATNEST] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         max_npcs = len(self.generator.caves) // 100
 
@@ -302,7 +299,7 @@ class GameMap:
             #choose random spot for this npc
             creature_choice = random_utils.random_choice_from_dict(npc_chances)
 
-            if (creature_choice == 'ratnest') and len(alcoves):
+            if (creature_choice == Species.RATNEST) and len(alcoves):
                 point = choice(alcoves)
                 alcoves.remove(point)
                 npc = RatNest(point)
@@ -312,16 +309,16 @@ class GameMap:
 
                 #only place it if the tile is not blocked
                 if not self.is_blocked(point):
-                    if creature_choice == 'snake':
+                    if creature_choice == Species.SNAKE:
                         npc = Snake(point)
-                    elif creature_choice == 'snakeegg':
+                    elif creature_choice == Species.EGG:
                         npc = SnakeEgg(point)
-                    elif creature_choice == 'rat':
+                    elif creature_choice == Species.RAT:
                         npc = Rat(point)
 
                 self.add_entity_to_map(npc)
 
-    def place_npc(self, room):
+    def place_npc(self, room, player):
         #this is where we decide the chance of each npc or item appearing.
 
         #maximum number of npcs per room
@@ -329,9 +326,9 @@ class GameMap:
 
         #chance of each npc
         npc_chances = {}
-        npc_chances['goblin'] = random_utils.from_dungeon_level([[95, 1],[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances['orc'] = random_utils.from_dungeon_level([[95, 1],[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances['troll'] = random_utils.from_dungeon_level([[95, 1],[95, 2], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.GOBLIN] = random_utils.from_dungeon_level([[95, 1],[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances[Species.ORC] = random_utils.from_dungeon_level([[95, 1],[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances[Species.TROLL] = random_utils.from_dungeon_level([[95, 1],[95, 2], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, 0, max_npcs)
@@ -345,26 +342,7 @@ class GameMap:
             #only place it if the tile is not blocked
             if not self.is_blocked(point):
                 choice = random_utils.random_choice_from_dict(npc_chances)
-                if choice == 'orc':
-                    npc = bestiary.orc(point)
-                elif choice == 'troll':
-                    npc = bestiary.troll(point)
-                elif choice == 'goblin':
-                    npc = bestiary.goblin(point)
-
-                if (self.dungeon_level > 1):
-                    add_levels = libtcod.random_get_int(0, -1, 1)
-
-                    if (choice == 'goblin'):
-                        npc.level.random_level_up(self.dungeon_level + add_levels - 1)
-
-                    if ((self.dungeon_level > 2) and choice == 'orc'):
-                        npc.level.random_level_up(self.dungeon_level + add_levels - 2)
-
-                    if ((self.dungeon_level > 3) and choice == 'troll'):
-                        npc.level.random_level_up(self.dungeon_level + add_levels - 3)
-
-                npc.name = libtcod.namegen_generate(npc.name)
+                npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level, point)
                 self.add_entity_to_map(npc)
 
         libtcod.namegen_destroy()
@@ -582,12 +560,8 @@ class GameMap:
     def level_one_goblin(self):
         print("calling level_one_goblin from quest")
         point = self.random_open_cell(start_x=int(self.generator.width - ((self.generator.width / 3) * 2)), end_x = int(self.generator.width - (self.generator.width / 3)))
-        npc = bestiary.goblin(point)
 
-        add_levels = libtcod.random_get_int(0, -1, 1)
-        npc.level.random_level_up(self.dungeon_level + add_levels)
-
-        self.add_entity_to_map(npc)
+        self.add_entity_to_map(bestiary.generate_npc(Species.GOBLIN, 1, 1, point))
 
     def level_one_generator(self, map_width, map_height):
         dm = dungeonGenerator(width=map_width, height=map_height)
