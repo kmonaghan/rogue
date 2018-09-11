@@ -1,7 +1,5 @@
 import libtcodpy as libtcod
 
-import game_state
-
 from game_states import GameStates
 
 
@@ -51,11 +49,9 @@ def handle_player_turn_keys(key):
     elif key_char == 'z':
         return {'wait': True}
     elif key_char == ']':
-        game_state.debug = True
-        return {'wait': True}
+        return {'wait': True, 'debug_on': True}
     elif key_char == '[':
-        game_state.debug = False
-        return {'wait': True}
+        return {'wait': True, 'debug_off': True}
 
     if key_char == 'g':
         return {'pickup': True}

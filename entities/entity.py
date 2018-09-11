@@ -13,8 +13,6 @@ from game_messages import Message
 
 from render_order import RenderOrder
 
-import game_state
-
 class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.

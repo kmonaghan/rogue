@@ -1,7 +1,7 @@
 import libtcodpy as libtcod
 
 import equipment
-import game_state
+from game_states import debug
 import quest
 
 from components.ai import BasicNPC
@@ -63,7 +63,7 @@ def create_player():
     #create object representing the player
     fighter_component = Fighter(hp=30, defense=6, power=6, xp=0)
 
-    if (game_state.debug == True):
+    if debug:
         fighter_component.hp = 1000
         fighter_component.base_defense = 200
         fighter_component.base_power = 200
@@ -73,7 +73,7 @@ def create_player():
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
-    if (game_state.debug == True):
+    if debug:
         dagger.number_of_dice = 100
 
     player.inventory.add_item(dagger)
@@ -204,7 +204,8 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None):
 
     npc.name = libtcod.namegen_generate(npc.name)
 
-    npc_level = (dungeon_level - 1) + player_level + libtcod.random_get_int(0, -1, 1)
+#    npc_level = (dungeon_level - 1) + player_level + libtcod.random_get_int(0, -1, 1)
+    npc_level = (dungeon_level - 1) + libtcod.random_get_int(0, -1, 1)
 
     if npc_level > 1:
         npc.level.random_level_up(npc_level - 1)

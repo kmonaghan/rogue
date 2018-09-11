@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+debug = False
 
 class GameStates(Enum):
     PLAYERS_TURN = auto()

@@ -1,6 +1,5 @@
 import libtcodpy as libtcod
 
-import game_state
 from random import choice
 
 from game_messages import Message

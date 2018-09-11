@@ -3,7 +3,6 @@ from random import choice, sample, randint
 
 import bestiary
 import equipment
-import game_state
 import quest
 import random_utils
 

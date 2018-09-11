@@ -1,6 +1,5 @@
 import libtcodpy as libtcod
 
-import game_state
 import random_utils
 import tome
 

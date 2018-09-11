@@ -2,8 +2,6 @@ __metaclass__ = type
 
 import libtcodpy as libtcod
 
-import game_state
-
 from entities.entity import Entity
 
 import equipment
@@ -14,6 +12,7 @@ from components.level import Level
 
 from render_order import RenderOrder
 from species import Species
+from game_states import debug
 
 class Character(Entity):
     def __init__(self, point, char, name, color, always_visible=False, blocks=True, fighter=None, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None):
@@ -45,7 +44,7 @@ class Character(Entity):
         if (self.level):
             desc += " (Level " + str(self.level.current_level) + ")"
 
-        if (game_state.debug == True):
+        if debug:
             desc += " (" + str(self.x) + ", " + str(self.y) +")"
 
         return desc

@@ -2,7 +2,7 @@ import libtcodpy as libtcod
 
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
-from game_states import GameStates
+import game_states
 from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from loader_functions.initialize_new_game import get_constants, get_game_variables
 from loader_functions.data_loaders import load_game, save_game
@@ -19,7 +19,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
-    game_state = GameStates.PLAYERS_TURN
+    game_state = game_states.GameStates.PLAYERS_TURN
     previous_game_state = game_state
 
     targeting_item = None
@@ -50,6 +50,8 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
         action = handle_keys(key, game_state)
         mouse_action = handle_mouse(mouse)
 
+        turn_on_debug = action.get('debug_on')
+        turn_off_debug = action.get('debug_off')
         move = action.get('move')
         wait = action.get('wait')
         pickup = action.get('pickup')
@@ -73,16 +75,24 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
         player_turn_results = []
 
         if player.level.can_level_up():
-            game_state = GameStates.LEVEL_UP
+            game_state = game_states.GameStates.LEVEL_UP
+
+        if turn_on_debug:
+            game_states.debug = turn_on_debug
+            fov_recompute = True
+
+        if turn_off_debug:
+            game_states.debug = False
+            fov_recompute = True
 
         if (restart_game):
             player, game_map, message_log, game_state = get_game_variables(constants)
             fov_map = initialize_fov(game_map)
             fov_recompute = True
             libtcod.console_clear(con)
-            game_state = GameStates.ENEMY_TURN
+            game_state = game_states.GameStates.ENEMY_TURN
 
-        elif move and game_state == GameStates.PLAYERS_TURN:
+        elif move and game_state == game_states.GameStates.PLAYERS_TURN:
             dx, dy = move
             destination_x = player.x + dx
             destination_y = player.y + dy
@@ -105,12 +115,12 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
                     fov_recompute = True
 
-                game_state = GameStates.ENEMY_TURN
+                game_state = game_states.GameStates.ENEMY_TURN
 
         elif wait:
-            game_state = GameStates.ENEMY_TURN
+            game_state = game_states.GameStates.ENEMY_TURN
 
-        elif pickup and game_state == GameStates.PLAYERS_TURN:
+        elif pickup and game_state == game_states.GameStates.PLAYERS_TURN:
             for entity in game_map.entity_map[player.x][player.y]:
                 if entity.item:
                     pickup_results = player.inventory.add_item(entity)
@@ -122,19 +132,19 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         if show_inventory:
             previous_game_state = game_state
-            game_state = GameStates.SHOW_INVENTORY
+            game_state = game_states.GameStates.SHOW_INVENTORY
 
         if drop_inventory:
             previous_game_state = game_state
-            game_state = GameStates.DROP_INVENTORY
+            game_state = game_states.GameStates.DROP_INVENTORY
 
         if examine_inventory:
             previous_game_state = game_state
-            game_state = GameStates.EXAMINE_INVENTORY
+            game_state = game_states.GameStates.EXAMINE_INVENTORY
 
         if quest_list:
             previous_game_state = game_state
-            game_state = GameStates.SHOW_QUESTS
+            game_state = game_states.GameStates.SHOW_QUESTS
 
         if quest_response:
             quest_request.owner.start_quest(game_map)
@@ -142,23 +152,23 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             quest_request = None
             game_state = previous_game_state
 
-        if quest_index is not None and previous_game_state != GameStates.PLAYER_DEAD and quest_index < len(active_quests):
+        if quest_index is not None and previous_game_state != game_states.GameStates.PLAYER_DEAD and quest_index < len(active_quests):
             quest = active_quests[quest_index]
             message_log.add_message(quest.status())
             game_state = previous_game_state
 
-        if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
+        if inventory_index is not None and previous_game_state != game_states.GameStates.PLAYER_DEAD and inventory_index < len(
                 player.inventory.items):
             item = player.inventory.items[inventory_index]
 
-            if game_state == GameStates.SHOW_INVENTORY:
+            if game_state == game_states.GameStates.SHOW_INVENTORY:
                 player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map))
-            elif game_state == GameStates.DROP_INVENTORY:
+            elif game_state == game_states.GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
-            elif game_state == GameStates.EXAMINE_INVENTORY:
+            elif game_state == game_states.GameStates.EXAMINE_INVENTORY:
                 player_turn_results.extend(player.inventory.examine_item(item))
 
-        if take_stairs and game_state == GameStates.PLAYERS_TURN:
+        if take_stairs and game_state == game_states.GameStates.PLAYERS_TURN:
             if (game_map.check_for_stairs(player.x, player.y)):
                     game_map.next_floor(player, message_log, constants)
                     fov_map = initialize_fov(game_map)
@@ -181,9 +191,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         if show_character_screen:
             previous_game_state = game_state
-            game_state = GameStates.CHARACTER_SCREEN
+            game_state = game_states.GameStates.CHARACTER_SCREEN
 
-        if game_state == GameStates.TARGETING:
+        if game_state == game_states.GameStates.TARGETING:
             if left_click:
                 target_x, target_y = left_click
 
@@ -194,11 +204,11 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 player_turn_results.append({'targeting_cancelled': True})
 
         if exit:
-            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.EXAMINE_INVENTORY, GameStates.SHOW_QUESTS, GameStates.CHARACTER_SCREEN):
+            if game_state in (game_states.GameStates.SHOW_INVENTORY, game_states.GameStates.DROP_INVENTORY, game_states.GameStates.EXAMINE_INVENTORY, game_states.GameStates.SHOW_QUESTS, game_states.GameStates.CHARACTER_SCREEN):
                 game_state = previous_game_state
-            elif game_state == GameStates.TARGETING:
+            elif game_state == game_states.GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
-            elif game_state == GameStates.QUEST_ONBOARDING:
+            elif game_state == game_states.GameStates.QUEST_ONBOARDING:
                 player_turn_results.append({'quest_cancelled': True})
             else:
                 save_game(player, game_map, message_log, game_state)
@@ -235,15 +245,15 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             if item_added:
                 game_map.entities.remove(item_added)
 
-                game_state = GameStates.ENEMY_TURN
+                game_state = game_states.GameStates.ENEMY_TURN
 
             if item_consumed:
-                game_state = GameStates.ENEMY_TURN
+                game_state = game_states.GameStates.ENEMY_TURN
 
             if item_dropped:
                 game_map.add_entity_to_map(item_dropped)
 
-                game_state = GameStates.ENEMY_TURN
+                game_state = game_states.GameStates.ENEMY_TURN
 
             if equip:
                 equip_results = player.equipment.toggle_equip(equip)
@@ -258,11 +268,11 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                     if dequipped:
                         message_log.add_message(Message('You dequipped the {0}'.format(dequipped.name)))
 
-                game_state = GameStates.ENEMY_TURN
+                game_state = game_states.GameStates.ENEMY_TURN
 
             if targeting:
-                previous_game_state = GameStates.PLAYERS_TURN
-                game_state = GameStates.TARGETING
+                previous_game_state = game_states.GameStates.PLAYERS_TURN
+                game_state = game_states.GameStates.TARGETING
 
                 targeting_item = targeting
 
@@ -278,15 +288,15 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 message_log.add_message(Message('You gain {0} experience points.'.format(xp)))
 
             if quest_onboarding:
-                previous_game_state = GameStates.PLAYERS_TURN
-                game_state = GameStates.QUEST_ONBOARDING
+                previous_game_state = game_states.GameStates.PLAYERS_TURN
+                game_state = game_states.GameStates.QUEST_ONBOARDING
 
                 quest_request = quest_onboarding
 
             if quest_cancelled:
                 game_state = previous_game_state
 
-        if game_state == GameStates.ENEMY_TURN:
+        if game_state == game_states.GameStates.ENEMY_TURN:
             for entity in game_map.entities:
                 if entity.death.dead:
                     entity.death.decompose(game_map)
@@ -309,15 +319,15 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             message, game_state = dead_entity.death.npc_death(game_map)
                             message_log.add_message(message)
 
-                            if (game_state == GameStates.PLAYER_DEAD) or (game_state == GameStates.GAME_COMPLETE):
+                            if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
                                 break
 
-                    if (game_state == GameStates.PLAYER_DEAD) or (game_state == GameStates.GAME_COMPLETE):
+                    if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
                         break
 
                 game_map.update_entity_map()
             else:
-                game_state = GameStates.PLAYERS_TURN
+                game_state = game_states.GameStates.PLAYERS_TURN
 
 
 def main():
@@ -365,7 +375,7 @@ def main():
                 show_load_error_message = False
             elif new_game:
                 player, game_map, message_log, game_state = get_game_variables(constants)
-                game_state = GameStates.PLAYERS_TURN
+                game_state = game_states.GameStates.PLAYERS_TURN
 
                 show_main_menu = False
             elif load_saved_game:

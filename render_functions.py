@@ -1,10 +1,8 @@
 import libtcodpy as libtcod
 
-from game_state import debug
-
 from enum import Enum
 
-from game_states import GameStates
+import game_states
 from render_order import RenderOrder
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed
@@ -13,7 +11,7 @@ def get_names_under_mouse(mouse, entities, fov_map):
     (x, y) = (mouse.cx, mouse.cy)
 
     names = [entity.describe() for entity in entities
-             if entity.x == x and entity.y == y and (libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or debug)]
+             if entity.x == x and entity.y == y and (libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or game_states.debug)]
     names = ', '.join(names)
 
     return str(x) + ',' + str(y) + ' ' + names
@@ -24,7 +22,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
 
     if (bar_width > total_width):
         bar_width = total_width
-        
+
     libtcod.console_set_default_background(panel, back_color)
     libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
 
@@ -43,14 +41,21 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
     # Draw all the tiles in the game map
         for y in range(game_map.height):
             for x in range(game_map.width):
-                visible = libtcod.map_is_in_fov(fov_map, x, y) or debug
+                visible = libtcod.map_is_in_fov(fov_map, x, y)
 
-                if visible:
+                if game_states.debug:
                     libtcod.console_set_char_background(con, x, y, game_map.map[x][y].fov_color, libtcod.BKGND_SET)
+                    if visible:
+                        game_map.map[x][y].explored = True
+                else:
+                    if visible:
+                        libtcod.console_set_char_background(con, x, y, game_map.map[x][y].fov_color, libtcod.BKGND_SET)
 
-                    game_map.map[x][y].explored = True
-                elif game_map.map[x][y].explored:
-                    libtcod.console_set_char_background(con, x, y, game_map.map[x][y].out_of_fov_color, libtcod.BKGND_SET)
+                        game_map.map[x][y].explored = True
+                    elif game_map.map[x][y].explored:
+                        libtcod.console_set_char_background(con, x, y, game_map.map[x][y].out_of_fov_color, libtcod.BKGND_SET)
+                    else:
+                        libtcod.console_set_char_background(con, x, y, libtcod.black, libtcod.BKGND_SET)
 
     entities_in_render_order = sorted(game_map.entities, key=lambda x: x.render_order.value)
 
@@ -85,42 +90,39 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
-    if game_state == GameStates.GAME_COMPLETE:
+    if game_state == game_states.GameStates.GAME_COMPLETE:
         game_completed(con, 60, screen_width, screen_height)
 
-    elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.EXAMINE_INVENTORY):
-        if game_state == GameStates.SHOW_INVENTORY:
+    elif game_state in (game_states.GameStates.SHOW_INVENTORY, game_states.GameStates.DROP_INVENTORY, game_states.GameStates.EXAMINE_INVENTORY):
+        if game_state == game_states.GameStates.SHOW_INVENTORY:
             inventory_title = 'Press the key next to an item to use it, or Esc to cancel.\n'
-        elif game_state == GameStates.EXAMINE_INVENTORY:
+        elif game_state == game_states.GameStates.EXAMINE_INVENTORY:
             inventory_title = 'Press the key next to an item to examine it, or Esc to cancel.\n'
         else:
             inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.\n'
 
         inventory_menu(con, inventory_title, player, 50, screen_width, screen_height)
 
-    elif game_state == GameStates.QUEST_ONBOARDING:
+    elif game_state == game_states.GameStates.QUEST_ONBOARDING:
         quest_menu(con, '', quest_request, 50, screen_width, screen_height)
 
-    elif game_state == GameStates.SHOW_QUESTS:
+    elif game_state == game_states.GameStates.SHOW_QUESTS:
         quest_list_menu(con, 'Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)
 
-    elif game_state == GameStates.LEVEL_UP:
+    elif game_state == game_states.GameStates.LEVEL_UP:
         level_up_menu(con, 'Level up! Choose a stat to raise:', player, 40, screen_width, screen_height)
 
-    elif game_state == GameStates.CHARACTER_SCREEN:
+    elif game_state == game_states.GameStates.CHARACTER_SCREEN:
         character_screen(player, 30, 10, screen_width, screen_height)
-
 
 def clear_all(con, game_map):
     for entity in game_map.entities:
         clear_entity(con, entity, game_map)
 
-
 def draw_entity(con, entity, fov_map, game_map):
-    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.map[entity.x][entity.y].explored) or entity.always_visible or debug:
+    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.map[entity.x][entity.y].explored) or entity.always_visible or game_states.debug:
         libtcod.console_set_default_foreground(con, entity.display_color())
         libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
-
 
 def clear_entity(con, entity, game_map):
     # erase the character that represents this object
