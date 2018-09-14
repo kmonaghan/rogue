@@ -693,22 +693,22 @@ class dungeonGenerator:
                     west_wall = False
                     west_floor = False
 
-                    if (xi == 0) or (self.grid[xi - 1][yi] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                    if (xi == 0) or (self.grid[xi - 1][yi] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL]):
                         west_wall = True
                     elif (self.grid[xi - 1][yi] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
                         west_floor = True
 
-                    if (xi == self.width) or (self.grid[xi + 1][yi] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                    if (xi == self.width) or (self.grid[xi + 1][yi] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL]):
                         east_wall = True
                     elif (self.grid[xi + 1][yi] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
                         east_floor = True
 
-                    if (yi == 0) or (self.grid[xi][yi - 1] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                    if (yi == 0) or (self.grid[xi][yi - 1] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL]):
                         north_wall = True
                     elif (self.grid[xi][yi - 1] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
                         north_floor = True
 
-                    if (yi == self.height) or (self.grid[xi][yi + 1] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.EMPTY]):
+                    if (yi == self.height) or (self.grid[xi][yi + 1] in [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL]):
                         south_wall = True
                     elif (self.grid[xi][yi + 1] in [Tiles.CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR]):
                         south_floor = True
@@ -716,7 +716,7 @@ class dungeonGenerator:
                     if (north_wall and south_wall and west_floor and east_floor):
                         continue
 
-                    if (north_floor and south_floor and west_wall and east_floor):
+                    if (north_floor and south_floor and west_wall and east_wall):
                         continue
 
                     self.grid[xi][yi] = Tiles.CORRIDOR_FLOOR
