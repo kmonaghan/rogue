@@ -7,20 +7,28 @@ from render_order import RenderOrder
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed
 
-def get_names_under_mouse(mouse, entities, fov_map, game_map):
+def get_names_under_mouse(mouse, fov_map, game_map):
     (x, y) = (mouse.cx, mouse.cy)
+
+    location = ''
+
+    try:
+        if game_map.map[x][y]:
+            location = str(x) + ',' + str(y)
+    except IndexError:
+        print("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
+        return ''
 
     tile_description = ''
     names = ''
-    
+
     if (libtcod.map_is_in_fov(fov_map, x, y) or game_states.debug):
         tile_description = game_map.map[x][y].describe() + ' '
 
         names = [entity.describe() for entity in game_map.entity_map[x][y]]
         names = ', '.join(names)
 
-    return tile_description + str(x) + ',' + str(y) + ' ' + names
-
+    return tile_description + location + ' ' + names
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
     bar_width = int(float(value) / maximum * total_width)
@@ -91,7 +99,7 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
     libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-                             get_names_under_mouse(mouse, game_map.entities, fov_map, game_map))
+                             get_names_under_mouse(mouse, fov_map, game_map))
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
