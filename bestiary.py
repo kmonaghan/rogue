@@ -4,6 +4,8 @@ import equipment
 from game_states import debug
 import quest
 
+from entities.chest import Chest
+
 from components.ai import BasicNPC
 from components.ai import StrollingNPC
 from components.ai import WarlordNPC
@@ -218,3 +220,17 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None):
 
     print("final npc level: " + str(npc.level.current_level))
     return npc
+
+def place_chest(point, game_map):
+    chest = Chest(point, game_map.dungeon_level)
+    game_map.add_entity_to_map(chest)
+
+    guards = libtcod.random_get_int(0, 1, 3)
+
+    for i in range(guards):
+        npc = goblin(point)
+        ai_component = StrollingNPC(tethered = point, tethered_distance = 2, aggressive = True)
+        ai_component.attacked_ai = npc.ai
+        npc.setAI(ai_component)
+
+        game_map.add_entity_to_map(npc)

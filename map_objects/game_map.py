@@ -11,7 +11,6 @@ from components.stairs import Stairs
 
 from entities.entity import Entity
 from entities.character import Character
-from entities.chest import Chest
 from entities.rat import Rat, RatNest
 from entities.snake import Snake, SnakeEgg
 
@@ -33,7 +32,7 @@ class GameMap:
         self.down_stairs = None
         self.up_stairs = None
         self.dungeon_level = dungeon_level
-        self.entity_map = None
+        self.entity_map = []
         self.levels = [{},{},{},{},{},{}]
         self.generator = None
         self.map = None
@@ -166,8 +165,7 @@ class GameMap:
 
         if (len(alcoves)):
             point = choice(alcoves)
-            chest = Chest(point, self.dungeon_level)
-            self.add_entity_to_map(chest)
+            bestiary.place_chest(point, self)
 
         num_rooms = len(self.generator.rooms)
         for room in self.generator.rooms[1:num_rooms]:
@@ -179,8 +177,8 @@ class GameMap:
                 self.add_entity_to_map(npc)
 
         room = choice(self.generator.rooms[1:num_rooms])
-        chest2 = Chest(room.random_tile(self), self.dungeon_level)
-        self.add_entity_to_map(chest2)
+        bestiary.place_chest(room.random_tile(self), self)
+
         '''
         #Potions and scrolls
         potion = equipment.healing_potion(Point(1,1))
@@ -385,6 +383,8 @@ class GameMap:
         self.up_stairs = None
 
         self.make_map(constants['map_width'], constants['map_height'], player)
+
+        self.update_entity_map()
 
         return self.entities
 

@@ -81,16 +81,34 @@ class ConfusedNPC:
         return results
 
 class StrollingNPC:
-    def __init__(self, attacked_ai = None, tethered = None, tethered_distance = 4):
+    def __init__(self, attacked_ai = None, tethered = None, tethered_distance = 4, aggressive = False, pursue_distance = 10):
         self.moved = False
         self.attacked_ai = attacked_ai
         self.tethered = tethered
         self.tethered_distance = tethered_distance
+        self.aggressive = aggressive
+        self.pursue_distance = pursue_distance
 
     def take_turn(self, target, fov_map, game_map):
         results = []
 
-        if (self.moved == False):
+        if (self.aggressive and libtcod.map_is_in_fov(fov_map, self.owner.x, self.owner.y)):
+            #move towards player if far away
+            distance = self.owner.point.distance_to(target.point)
+            if distance > self.pursue_distance:
+                print("returning to patrol point")
+                self.owner.move_towards(self.tethered, game_map)
+                return results
+            elif distance >= 2:
+                self.owner.move_astar(target, game_map)
+                self.moved = True
+            #close enough, attack! (if the player is still alive.)
+            elif target.fighter.hp > 0:
+                attack_results = self.owner.fighter.attack(target)
+                results.extend(attack_results)
+                self.moved = True
+
+        if not self.moved:
             if self.tethered:
                 if (self.owner.point.distance_to(self.tethered) > self.tethered_distance):
                     #print("too far from tethered point: " + self.tethered.describe())
