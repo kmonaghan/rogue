@@ -21,6 +21,8 @@ class Questgiver:
         self.owner.char = "Q"
         self.owner.color = libtcod.blue
         self.owner.always_visible = False
+        self.quest.finish_quest()
+
         self.quest = self.quest.next_quest
 
         if (self.quest):
@@ -49,7 +51,6 @@ class Questgiver:
             results.append({'quest_onboarding': self.quest})
         elif (self.quest.completed):
             results.append({'message': Message('Well done!', libtcod.gold), 'xp': self.quest.xp})
-
             complete_result = self.completed_quest()
 
             results.extend(complete_result)

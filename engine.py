@@ -9,7 +9,7 @@ from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 from map_objects.point import Point
-from quest import active_quests, check_quests_for_npc_death, check_quest_for_location
+import quest
 
 def play_game(player, game_map, message_log, game_state, con, panel, constants):
     fov_recompute = True
@@ -110,7 +110,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                         player_turn_results.extend(attack_results)
                 else:
                     player.move(dx, dy)
-                    quest_results = check_quest_for_location(player.point)
+                    quest_results = quest.check_quest_for_location(player.point)
                     player_turn_results.extend(quest_results)
 
                     fov_recompute = True
@@ -152,9 +152,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             quest_request = None
             game_state = previous_game_state
 
-        if quest_index is not None and previous_game_state != game_states.GameStates.PLAYER_DEAD and quest_index < len(active_quests):
-            quest = active_quests[quest_index]
-            message_log.add_message(quest.status())
+        if quest_index is not None and previous_game_state != game_states.GameStates.PLAYER_DEAD and quest_index < len(quest.active_quests):
+            selected_quest = quest.active_quests[quest_index]
+            message_log.add_message(selected_quest.status())
             game_state = previous_game_state
 
         if inventory_index is not None and previous_game_state != game_states.GameStates.PLAYER_DEAD and inventory_index < len(
@@ -237,7 +237,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 message_log.add_message(message)
 
             if dead_entity:
-                quest_result = check_quests_for_npc_death(dead_entity)
+                quest_result = quest.check_quests_for_npc_death(dead_entity)
 
                 message, game_state = dead_entity.death.npc_death(game_map)
 
@@ -376,7 +376,6 @@ def main():
                 show_load_error_message = False
             elif new_game:
                 player, game_map, message_log, game_state = get_game_variables(constants)
-                game_state = game_states.GameStates.PLAYERS_TURN
 
                 show_main_menu = False
             elif load_saved_game:

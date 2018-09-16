@@ -10,6 +10,7 @@ from map_objects.game_map import GameMap
 
 from render_functions import RenderOrder
 
+import quest
 
 def get_constants():
     window_title = 'Roguelike Tutorial Revised'
@@ -82,5 +83,7 @@ def get_game_variables(constants):
     game_map.create_floor(player, message_log, constants)
 
     game_state = GameStates.PLAYERS_TURN
+
+    quest.active_quests = []
 
     return player, game_map, message_log, game_state

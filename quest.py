@@ -146,6 +146,11 @@ class Quest:
             self.npc.y = aPoint.y
             game_map.add_entity_to_map(self.npc)
 
+    def finish_quest(self):
+        global active_quests
+
+        active_quests.remove(self)
+
     def status(self):
         message = self.title
         if (self.kill_type):
