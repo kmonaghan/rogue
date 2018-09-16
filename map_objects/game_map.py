@@ -283,6 +283,7 @@ class GameMap:
         npc_chances[Species.SNAKE] = random_utils.from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
         npc_chances[Species.EGG] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
         npc_chances[Species.RATNEST] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.BAT] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         max_npcs = len(self.generator.caves) // 100
 
@@ -312,6 +313,8 @@ class GameMap:
                         npc = SnakeEgg(point)
                     elif creature_choice == Species.RAT:
                         npc = Rat(point)
+                    elif creature_choice == Species.BAT:
+                        npc = bestiary.bat(point)
 
                 self.add_entity_to_map(npc)
 
