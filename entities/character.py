@@ -32,14 +32,14 @@ class Character(Entity):
         self.species = species
 
     def describe(self):
-        desc = self.name.capitalize()
+        desc = self.name.title()
 
         if (self.species == Species.GOBLIN):
-            desc += "(Goblin)"
+            desc += " (Goblin)"
         elif (self.species == Species.ORC):
-            desc += "(Orc)"
+            desc += " (Orc)"
         elif (self.species == Species.TROLL):
-            desc += "(Troll)"
+            desc += " (Troll)"
 
         if (self.level):
             desc += " (Level " + str(self.level.current_level) + ")"
