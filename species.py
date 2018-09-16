@@ -12,3 +12,4 @@ class Species(Enum):
     RATNEST = auto()
     INANIMATE = auto()
     CREATURE = auto()
+    BAT = auto()

@@ -69,6 +69,20 @@ def create_player():
 
     return player
 
+def bat(point = None):
+    fighter_component = Fighter(hp=4, defense=1, power=1, xp=2)
+
+    creature = Character(point, 'B', 'bat', libtcod.darker_gray,
+                    fighter=fighter_component, ai=StrollingNPC(attacked_ai=BasicNPC()), species=Species.BAT)
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    creature.inventory.add_item(teeth)
+    creature.equipment.toggle_equip(teeth)
+
+    return creature
+
 def goblin(point = None):
     #create a goblin
     fighter_component = Fighter(hp=20, defense=5, power=5, xp=10)
