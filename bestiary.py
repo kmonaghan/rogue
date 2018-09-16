@@ -22,6 +22,8 @@ from map_objects.point import Point
 
 from components.death import PlayerDeath, WarlordDeath
 
+from random_utils import from_dungeon_level, random_choice_from_dict
+
 from species import Species
 
 def upgrade_npc(npc):
@@ -42,22 +44,6 @@ def bountyhunter(point = None):
     questgiver = Questgiver()
     questgiver.owner = npc
     npc.questgiver = questgiver
-
-    return npc
-
-def goblin(point = None):
-    #create a goblin
-    fighter_component = Fighter(hp=20, defense=5, power=5, xp=10)
-    ai_component = BasicNPC()
-
-    npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.GOBLIN)
-
-    dagger = equipment.dagger()
-    dagger.lootable = False
-
-    npc.inventory.add_item(dagger)
-    npc.equipment.toggle_equip(dagger)
 
     return npc
 
@@ -82,6 +68,22 @@ def create_player():
     player.equipment.toggle_equip(dagger)
 
     return player
+
+def goblin(point = None):
+    #create a goblin
+    fighter_component = Fighter(hp=20, defense=5, power=5, xp=10)
+    ai_component = BasicNPC()
+
+    npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
+                    fighter=fighter_component, ai=ai_component, species=Species.GOBLIN)
+
+    dagger = equipment.dagger()
+    dagger.lootable = False
+
+    npc.inventory.add_item(dagger)
+    npc.equipment.toggle_equip(dagger)
+
+    return npc
 
 def orc(point = None):
     #create an orc
@@ -227,8 +229,14 @@ def place_chest(point, game_map):
 
     guards = libtcod.random_get_int(0, 1, 3)
 
+    npc_chances = {}
+    npc_chances[Species.GOBLIN] = from_dungeon_level([[90, 1], [75, 2], [50, 3], [25, 4], [20, 5], [10, 6]], game_map.dungeon_level)
+    npc_chances[Species.ORC] = from_dungeon_level([[9, 1], [20,2], [40, 3], [60, 4], [60, 5], [65, 6]], game_map.dungeon_level)
+    npc_chances[Species.TROLL] = from_dungeon_level([[1, 1], [5,3], [10, 3], [15, 4], [20, 5], [25, 6]], game_map.dungeon_level)
+    npc_choice = random_choice_from_dict(npc_chances)
+
     for i in range(guards):
-        npc = goblin(point)
+        npc = generate_npc(npc_choice, dungeon_level=game_map.dungeon_level, point=point)
         ai_component = StrollingNPC(tethered = point, tethered_distance = 2, aggressive = True)
         ai_component.attacked_ai = npc.ai
         npc.setAI(ai_component)
