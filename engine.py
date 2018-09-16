@@ -162,7 +162,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             item = player.inventory.items[inventory_index]
 
             if game_state == game_states.GameStates.SHOW_INVENTORY:
-                player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map))
+                player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map, game_map=game_map))
             elif game_state == game_states.GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
             elif game_state == game_states.GameStates.EXAMINE_INVENTORY:
@@ -231,6 +231,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             xp = player_turn_result.get('xp')
             quest_onboarding = player_turn_result.get('quest_onboarding')
             quest_cancelled = player_turn_result.get('quest_cancelled')
+            fov_recompute = player_turn_result.get('fov_recompute')
 
             if message:
                 message_log.add_message(message)

@@ -150,3 +150,16 @@ def resurrect_all_npc(npc_type, game_map, target):
             game_map.remove_npc_from_map(entity)
             game_map.add_entity_to_map(npc)
     return
+
+def cast_mapping(*args, **kwargs):
+    game_map = kwargs.get('game_map')
+
+    results = []
+
+    for y in range(game_map.height):
+        for x in range(game_map.width):
+            game_map.map[x][y].explored = True
+
+    results.append({'consumed': True, 'fov_recompute': True, 'message': Message('The scroll contains a map of immediate area.', libtcod.gold)})
+
+    return results

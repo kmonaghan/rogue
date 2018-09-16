@@ -10,7 +10,7 @@ from entities.entity import Entity
 
 from game_messages import Message
 
-from tome import cast_confuse, cast_fireball, cast_lightning, heal
+from tome import cast_confuse, cast_fireball, cast_lightning, heal, cast_mapping
 
 from equipment_slots import EquipmentSlots
 from render_order import RenderOrder
@@ -60,6 +60,7 @@ def random_scroll(point = None, dungeon_level = 1):
     item_chances['lightning'] = 40
     item_chances['fireball'] = 30
     item_chances['confuse'] = 30
+    item_chances['map_scroll'] = 20
 
     choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'lightning':
@@ -70,6 +71,9 @@ def random_scroll(point = None, dungeon_level = 1):
 
     elif choice == 'confuse':
         item = confusion_scroll(point)
+
+    elif choice == 'map_scroll':
+        item = map_scroll(point)
 
     return item
 
@@ -147,7 +151,14 @@ def confusion_scroll(point = None):
     #create a confuse scroll
     item_component = Item(use_function=cast_confuse, targeting=True, targeting_message=Message(
                         'Left-click an enemy to confuse it, or right-click to cancel.', libtcod.light_cyan))
-    item = Entity(point, '#', 'Confusion Scroll', libtcod.light_pink, render_order=RenderOrder.ITEM,
+    item = Entity(point, '#', 'Confusion Scroll', libtcod.light_yellow, render_order=RenderOrder.ITEM,
+                    item=item_component)
+
+    return item
+
+def map_scroll(point = None):
+    item_component = Item(use_function=cast_mapping)
+    item = Entity(point, '#', 'Mapping Scroll', libtcod.light_yellow, render_order=RenderOrder.ITEM,
                     item=item_component)
 
     return item
