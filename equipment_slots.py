@@ -5,3 +5,6 @@ class EquipmentSlots(Enum):
     OFF_HAND = auto()
     HEAD = auto()
     CHEST = auto()
+    RING = auto()
+    LEFT_RING_FINGER = auto()
+    RIGHT_RING_FINGER = auto()

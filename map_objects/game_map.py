@@ -180,7 +180,7 @@ class GameMap:
         bestiary.place_chest(room.random_tile(self), self)
 
         '''
-        #Potions and scrolls
+        #Potions, scrolls and rings
         potion = equipment.healing_potion(Point(1,1))
         self.add_entity_to_map(potion)
         scroll1 = equipment.lighting_scroll(Point(1,2))
@@ -191,8 +191,12 @@ class GameMap:
         self.add_entity_to_map(scroll3)
         scroll4 = equipment.map_scroll(player.point)
         self.add_entity_to_map(scroll4)
+        ring1 = equipment.ring_of_power(player.point)
+        self.add_entity_to_map(ring1)
+        ring2 = equipment.ring_of_defense(player.point)
+        self.add_entity_to_map(ring2)
         '''
-
+        
     def level_generic(self, player):
         if (len(self.generator.rooms)):
             '''

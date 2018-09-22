@@ -9,6 +9,8 @@ class Equipment:
         self.off_hand = None
         self.chest = None
         self.head = None
+        self.left_ring_finger = None
+        self.right_ring_finger = None
 
     @property
     def max_hp_bonus(self):
@@ -25,6 +27,12 @@ class Equipment:
 
         if self.head and self.head.equippable:
             bonus += self.head.equippable.max_hp_bonus
+
+        if self.left_ring_finger and self.left_ring_finger.equippable:
+            bonus += self.left_ring_finger.equippable.max_hp_bonus
+
+        if self.right_ring_finger and self.right_ring_finger.equippable:
+            bonus += self.right_ring_finger.equippable.max_hp_bonus
 
         return bonus
 
@@ -44,6 +52,12 @@ class Equipment:
         if self.head and self.head.equippable:
             bonus += self.head.equippable.power_bonus
 
+        if self.left_ring_finger and self.left_ring_finger.equippable:
+            bonus += self.left_ring_finger.equippable.power_bonus
+
+        if self.right_ring_finger and self.right_ring_finger.equippable:
+            bonus += self.right_ring_finger.equippable.power_bonus
+
         return bonus
 
     @property
@@ -61,6 +75,12 @@ class Equipment:
 
         if self.head and self.head.equippable:
             bonus += self.head.equippable.defense_bonus
+
+        if self.left_ring_finger and self.left_ring_finger.equippable:
+            bonus += self.left_ring_finger.equippable.defense_bonus
+
+        if self.right_ring_finger and self.right_ring_finger.equippable:
+            bonus += self.right_ring_finger.equippable.defense_bonus
 
         return bonus
 
@@ -109,6 +129,39 @@ class Equipment:
 
                 self.head = equippable_entity
                 results.append({'equipped': equippable_entity})
+        elif slot == EquipmentSlots.RING:
+            if not self.left_ring_finger:
+                self.left_ring_finger = equippable_entity
+                results.append({'equipped': equippable_entity})
+            elif not self.right_ring_finger:
+                self.right_ring_finger = equippable_entity
+                results.append({'equipped': equippable_entity})
+            else:
+                if self.left_ring_finger:
+                    results.append({'dequipped': self.left_ring_finger})
+
+                self.left_ring_finger = equippable_entity
+                results.append({'equipped': equippable_entity})
+        elif slot == EquipmentSlots.LEFT_RING_FINGER:
+            if self.left_ring_finger == equippable_entity:
+                self.left_ring_finger = None
+                results.append({'dequipped': equippable_entity})
+            else:
+                if self.left_ring_finger:
+                    results.append({'dequipped': self.head})
+
+                self.left_ring_finger = equippable_entity
+                results.append({'equipped': equippable_entity})
+        elif slot == EquipmentSlots.RIGHT_RING_FINGER:
+            if self.right_ring_finger == equippable_entity:
+                self.right_ring_finger = None
+                results.append({'dequipped': equippable_entity})
+            else:
+                if self.right_ring_finger:
+                    results.append({'dequipped': self.head})
+
+                self.right_ring_finger = equippable_entity
+                results.append({'equipped': equippable_entity})
 
         return results
 
@@ -124,5 +177,11 @@ class Equipment:
 
         if slot == EquipmentSlots.HEAD:
             return self.head
+
+        if slot == EquipmentSlots.LEFT_RING_FINGER:
+            return self.left_ring_finger
+
+        if slot == EquipmentSlots.RIGHT_RING_FINGER:
+            return self.right_ring_finger
 
         return None

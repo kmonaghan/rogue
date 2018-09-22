@@ -55,6 +55,20 @@ def random_potion(point = None, dungeon_level = 1):
 
     return item
 
+def random_ring(point = None, dungeon_level = 1):
+    item_chances = {}
+    item_chances['power'] = 50
+    item_chances['defense'] = 50
+
+    choice = random_utils.random_choice_from_dict(item_chances)
+    if choice == 'power':
+        item = ring_of_power(point)
+
+    elif choice == 'defense':
+        item = ring_of_defense(point)
+
+    return item
+
 def random_scroll(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['lightning'] = 40
@@ -119,6 +133,18 @@ def random_magic_weapon(dungeon_level = 1):
 
     item.equippable.number_of_dice = 2
 
+    return item
+
+def ring_of_power(point = None):
+    equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)
+    item = Entity(point, 'o', 'Ring of Power', libtcod.violet, render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+    return item
+
+def ring_of_defense(point = None):
+    equippable_component = Equippable(EquipmentSlots.RING, defense_bonus=1)
+    item = Entity(point, 'o', 'Ring of Health', libtcod.violet, render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
     return item
 
 def healing_potion(point = None):

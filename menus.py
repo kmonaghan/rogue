@@ -48,6 +48,10 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
                 options.append(['{0} (worn on chest)'.format(item.name), item.color])
             elif player.equipment.head == item:
                 options.append(['{0} (worn on head)'.format(item.name), item.color])
+            elif player.equipment.left_ring_finger == item:
+                options.append(['{0} (worn on left hand)'.format(item.name), item.color])
+            elif player.equipment.right_ring_finger == item:
+                options.append(['{0} (worn on right hand)'.format(item.name), item.color])
             else:
                 options.append([item.name, item.color])
 
