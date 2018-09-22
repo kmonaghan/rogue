@@ -144,11 +144,9 @@ def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
                     return
 
 def resurrect_all_npc(npc_type, game_map, target):
-    for entity in game_map.npcs:
-        if entity.char == '%':
-            npc = npc_type(old_npc = entity)
-            game_map.remove_npc_from_map(entity)
-            game_map.add_entity_to_map(npc)
+    for entity in game_map.entities:
+        if entity.health and entity.health.dead:
+            npc_type(entity)
     return
 
 def cast_mapping(*args, **kwargs):

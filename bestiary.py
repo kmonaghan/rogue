@@ -53,22 +53,21 @@ def create_player():
     fighter_component = Fighter(defense=6, power=6, xp=0)
     health_component = Health(30)
 
-    if debug:
-        fighter_component.hp = 1000
-        fighter_component.base_defense = 200
-        fighter_component.base_power = 200
-
     player = Character(None, '@', 'player', libtcod.dark_green,
                        fighter=fighter_component, death=PlayerDeath(),
                        health=health_component)
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
-    if debug:
-        dagger.number_of_dice = 100
 
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
+
+    if debug:
+        player.level.random_level_up(100)
+        weapon = equipment.random_magic_weapon()
+        player.inventory.add_item(weapon)
+        player.equipment.toggle_equip(weapon)
 
     return player
 
@@ -106,6 +105,24 @@ def goblin(point = None):
 
     return npc
 
+def necromancer(point = None):
+    #create a necromancer
+    fighter_component = Fighter(defense=12, power=8, xp=100)
+    health_component = Health(30)
+    ai_component = NecromancerNPC()
+
+    npc = Character(point, 'N', 'necromancer', libtcod.darker_green,
+                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT,
+                    health=health_component)
+
+    item = equipment.longsword()
+    item.lootable = False
+
+    npc.inventory.add_item(item)
+    npc.equipment.toggle_equip(item)
+
+    return npc
+
 def orc(point = None):
     #create an orc
     fighter_component = Fighter(defense=10, power=4, xp=35)
@@ -121,6 +138,39 @@ def orc(point = None):
 
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
+
+    return npc
+
+def reanmimate(old_npc):
+    if (old_npc.death.skeletal):
+        return skeleton(old_npc.point, old_npc)
+
+    return zombie(old_npc.point, old_npc)
+
+def skeleton(point = None, old_npc = None):
+    ai_component = BasicNPC()
+    fighter_component = Fighter(defense=12, power=8, xp=100)
+    health_component = Health(30)
+
+    if old_npc:
+        old_npc.blocks = True
+        old_npc.char = 'S'
+        old_npc.name = 'Skeletal ' + old_npc.death.orginal_name
+        old_npc.setAI(ai_component)
+        old_npc.setHealth(Health(old_npc.health.max_hp // 4))
+        old_npc.setFighter(fighter_component)
+
+        return old_npc
+    else:
+        npc = Character(point, 'S', 'skeleton', libtcod.darker_green,
+                        fighter=fighter_component, ai=ai_component,
+                        species=Species.NONDESCRIPT, health=health_component)
+
+        item = equipment.longsword()
+        item.lootable = False
+
+        npc.inventory.add_item(item)
+        npc.equipment.toggle_equip(item)
 
     return npc
 
@@ -174,49 +224,30 @@ def warlord(point = None):
 
     return npc
 
-def skeleton(point = None, old_npc = None):
+def zombie(point = None, old_npc = None):
+    ai_component = BasicNPC()
     fighter_component = Fighter(defense=12, power=8, xp=100)
     health_component = Health(30)
-    ai_component = BasicNPC()
-
-    npc = Character(point, 'S', 'skeleton', libtcod.darker_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT,
-                    health=health_component)
 
     if old_npc:
-        npc.species = old_npc.species
-        npc.x = old_npc.x
-        npc.y = old_npc.y
-        npc.name = 'Skeletal ' + old_npc.name
+        old_npc.blocks = True
+        old_npc.char = 'Z'
+        old_npc.name = 'Zombie ' + old_npc.death.orginal_name
+        old_npc.setAI(ai_component)
+        old_npc.setHealth(Health(old_npc.health.max_hp // 2))
+        old_npc.setFighter(fighter_component)
 
-    item = equipment.longsword()
-    item.lootable = False
+        return old_npc
+    else:
+        npc = Character(point, 'Z', 'zombie', libtcod.darker_green,
+                        fighter=fighter_component, ai=ai_component,
+                        species=Species.NONDESCRIPT, health=health_component)
 
-    npc.inventory.add_item(item)
-    npc.equipment.toggle_equip(item)
+        item = equipment.longsword()
+        item.lootable = False
 
-    return npc
-
-def necromancer(point = None):
-    #create a necromancer
-    fighter_component = Fighter(defense=12, power=8, xp=100)
-    health_component = Health(30)
-    ai_component = NecromancerNPC()
-
-    npc = Character(point, 'N', 'necromancer', libtcod.darker_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT,
-                    health=health_component)
-
-    item = equipment.longsword()
-    item.lootable = False
-
-    npc.inventory.add_item(item)
-    npc.equipment.toggle_equip(item)
-
-#    dice = libtcod.random_get_int(0, 1, 100)
-
-#    if (dice >= 98):
-#        upgrade_npc(npc)
+        npc.inventory.add_item(item)
+        npc.equipment.toggle_equip(item)
 
     return npc
 

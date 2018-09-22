@@ -191,7 +191,7 @@ class NecromancerNPC:
              self.ritual_turns -= 1
 
         if not self.ritual_cast and (self.ritual_turns == 0):
-            tome.resurrect_all_npc(bestiary.skeleton, game_map, target)
+            tome.resurrect_all_npc(bestiary.reanmimate, game_map, target)
             results.append({'message': Message('Rise and serve me again, now and forever!', libtcod.red)})
             self.ritual_cast = True
 
@@ -241,7 +241,7 @@ class Hatching:
         if (self.incubate < 1):
             npc = self.owner
 
-            game_map.remove_npc_from_map(npc)
+            game_map.remove_entity_from_map(npc)
             self.hatches.x = npc.x
             self.hatches.y = npc.y
             game_map.add_entity_to_map(self.hatches)

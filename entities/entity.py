@@ -172,7 +172,7 @@ class Entity:
         return self.color
 
     def describe(self):
-        return self.name.capitalize()
+        return self.name.title()
 
     def setAI(self, ai):
         self.ai = ai

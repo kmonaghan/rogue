@@ -196,7 +196,7 @@ class GameMap:
         ring2 = equipment.ring_of_defense(player.point)
         self.add_entity_to_map(ring2)
         '''
-        
+
     def level_generic(self, player):
         if (len(self.generator.rooms)):
             '''
@@ -322,7 +322,7 @@ class GameMap:
                     elif creature_choice == Species.BAT:
                         npc = bestiary.bat(point)
 
-                self.add_entity_to_map(npc)
+                    self.add_entity_to_map(npc)
 
     def place_npc(self, room, player):
         #this is where we decide the chance of each npc or item appearing.
@@ -339,8 +339,6 @@ class GameMap:
         #choose random number of npcs
         num_npcs = libtcod.random_get_int(0, 0, max_npcs)
 
-        libtcod.namegen_parse('data/names.txt')
-
         for i in range(num_npcs):
             #choose random spot for this npc
             point = room.random_tile(self)
@@ -350,8 +348,6 @@ class GameMap:
                 choice = random_utils.random_choice_from_dict(npc_chances)
                 npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level, point)
                 self.add_entity_to_map(npc)
-
-        libtcod.namegen_destroy()
 
     def place_object(self, room):
         #maximum number of items per room
@@ -449,7 +445,7 @@ class GameMap:
     def add_entity_to_map(self, npc):
         self.entities.append(npc)
 
-    def remove_npc_from_map(self, npc):
+    def remove_entity_from_map(self, npc):
         self.entities.remove(npc)
 
     def get_blocking_entities_at_location(self, point):
@@ -788,7 +784,7 @@ class GameMap:
         return dm
 
     def random_lair(self, map_width, map_height):
-        lair_chance = False
+        lair_chance = True
 
         if (lair_chance):
             prefab = Prefab(necromancer_lair())
@@ -799,9 +795,9 @@ class GameMap:
             prefab.room.x = startX
             prefab.room.y = startY
 
-        #    point = prefab.room.random_tile(self)
-        #    necro = bestiary.necromancer(point)
-        #    self.add_entity_to_map(necro)
+            point = prefab.room.random_tile(self)
+            necro = bestiary.necromancer(point)
+            self.add_entity_to_map(necro)
 
             return prefab
 

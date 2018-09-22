@@ -299,7 +299,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         if game_state == game_states.GameStates.ENEMY_TURN:
             for entity in game_map.entities:
-                if entity.death.dead:
+                if entity.health and entity.health.dead:
                     entity.death.decompose(game_map)
                 elif entity.ai:
                     enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
