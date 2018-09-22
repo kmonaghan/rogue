@@ -6,6 +6,7 @@ import equipment
 
 from components.ai import BasicNPC, Hunter, SpawnNPC, ScreamerNPC
 
+from components.health import Health
 from components.fighter import Fighter
 
 from entities.animal import Animal
@@ -21,13 +22,14 @@ class Rat(Animal):
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        fighter = Fighter(hp=4, defense=1, power=1, xp=2)
+        health = Health(4)
+        fighter = Fighter(defense=1, power=1, xp=2)
         ai = Hunter(attacked_ai = BasicNPC(), hunting = Species.EGG)
         item = None
         gear = None
         species = Species.RAT
 
-        super(Rat, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
+        super(Rat, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species, health=health)
 
         teeth = equipment.teeth()
         teeth.lootable = False
@@ -42,13 +44,14 @@ class RatNest(Animal):
         color = libtcod.red
         always_visible = False
         blocks = True
-        fighter = Fighter(hp=4, defense=1, power=0, xp=2)
+        fighter = Fighter(defense=1, power=0, xp=2)
+        health = Health(4)
         ai = SpawnNPC(Rat)
         item = None
         gear = None
         species = Species.RATNEST
 
-        super(RatNest, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
+        super(RatNest, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species, health=health)
 
         potion = equipment.random_potion(dungeon_level = dungeon_level)
         potion.lootable = True
@@ -57,7 +60,7 @@ class RatNest(Animal):
 
     def hasBeenAttacked(self, npc):
         #print("Override hasBeenAttacked")
-        health = (self.fighter.hp * 100.0) / self.fighter.max_hp
+        health = (self.health.hp * 100.0) / self.health.max_hp
         print("health: " + str(health))
         if (health < 90):
             self.setAI(ScreamerNPC(Species.RAT))

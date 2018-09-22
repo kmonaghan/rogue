@@ -23,10 +23,10 @@ def heal(*args, **kwargs):
 
     results = []
 
-    if entity.fighter.hp == entity.fighter.max_hp:
+    if entity.health.hp == entity.health.max_hp:
         results.append({'consumed': False, 'message': Message('You are already at full health', libtcod.yellow)})
     else:
-        entity.fighter.heal(die_roll(number_of_dice, type_of_dice))
+        entity.health.heal(die_roll(number_of_dice, type_of_dice))
         results.append({'consumed': True, 'message': Message('Your wounds start to feel better!', libtcod.green)})
 
     return results

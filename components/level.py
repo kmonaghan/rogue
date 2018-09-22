@@ -33,14 +33,14 @@ class Level:
         self.next_level_xp = int(self.next_level_xp * self.level_up_factor)
 
         if choice == 0:
-            self.owner.fighter.base_max_hp += 20
-            self.owner.fighter.hp += 20
+            self.owner.health.base_max_hp += 20
+            self.owner.health.hp += 20
         elif choice == 1:
             self.owner.fighter.base_power += 1
         elif choice == 2:
             self.owner.fighter.base_defense += 1
 
-        self.owner.fighter.hp = self.owner.fighter.max_hp
+        self.owner.health.hp = self.owner.health.max_hp
 
     def random_level_up(self, total_levels):
         if (total_levels < 1):

@@ -6,6 +6,7 @@ from components.ai import BasicNPC
 from components.ai import Hatching
 from components.ai import Hunter
 
+from components.health import Health
 from components.fighter import Fighter
 
 from entities.animal import Animal
@@ -21,13 +22,14 @@ class Snake(Animal):
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        fighter = Fighter(hp=8, defense=2, power=2, xp=4)
+        fighter = Fighter(defense=2, power=2, xp=4)
+        health = Health(8)
         ai = Hunter(attacked_ai = BasicNPC(), hunting = Species.RAT)
         item = None
         gear = None
         species = Species.SNAKE
 
-        super(Snake, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
+        super(Snake, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species, health=health)
 
         teeth = equipment.teeth()
         teeth.lootable = False
@@ -57,13 +59,14 @@ class SnakeEgg(Animal):
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        fighter = Fighter(hp=2, defense=4, power=0, xp=0)
+        fighter = Fighter(defense=4, power=0, xp=0)
+        health = Health(4)
         ai = Hatching(Snake())
         item = None
         gear = None
         species = Species.EGG
 
-        super(SnakeEgg, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species)
+        super(SnakeEgg, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species,health=health)
 
     def hasBeenAttacked(self, npc):
         #print("Override hasBeenAttacked")

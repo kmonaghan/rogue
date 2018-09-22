@@ -25,7 +25,7 @@ class BasicNPC:
                 npc.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
-            elif target.fighter.hp > 0:
+            elif target.health.hp > 0:
                 attack_results = npc.fighter.attack(target)
                 results.extend(attack_results)
 
@@ -103,7 +103,7 @@ class StrollingNPC:
                 self.owner.move_astar(target, game_map)
                 self.moved = True
             #close enough, attack! (if the player is still alive.)
-            elif target.fighter.hp > 0:
+            elif target.health.hp > 0:
                 attack_results = self.owner.fighter.attack(target)
                 results.extend(attack_results)
                 self.moved = True
@@ -136,7 +136,7 @@ class WarlordNPC:
         if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
 
             if (self.summoned_orcs == False) or (self.summoned_goblins == False) or (self.summoned_trolls == False):
-                health = (npc.fighter.hp * 100.0) / npc.fighter.max_hp
+                health = (npc.health.hp * 100.0) / npc.health.max_hp
 
                 if (health < 40):
                     if (self.summoned_trolls == False):
@@ -167,7 +167,7 @@ class WarlordNPC:
                 npc.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
-            elif target.fighter.hp > 0:
+            elif target.health.hp > 0:
                 attack_results = npc.fighter.attack(target)
                 results.extend(attack_results)
 
@@ -215,7 +215,7 @@ class Hunter(StrollingNPC):
             if dist > 1:
                 npc.move_astar(target, game_map)
                 return results
-            elif not target.isDead() and (dist == 1):
+            elif not target.health.dead and (dist == 1):
                 attack_results = npc.fighter.attack(target)
                 dead_entity = None
                 for turn_result in attack_results:

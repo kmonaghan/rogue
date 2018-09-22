@@ -15,8 +15,8 @@ from species import Species
 from game_states import debug
 
 class Character(Entity):
-    def __init__(self, point, char, name, color, always_visible=False, blocks=True, fighter=None, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None):
-        super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear, death=death)
+    def __init__(self, point, char, name, color, always_visible=False, blocks=True, fighter=None, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None):
+        super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear, death=death, health=health)
 
         self.inventory = Inventory(26)
         self.inventory.owner = self
@@ -51,7 +51,7 @@ class Character(Entity):
 
     def isDead(self):
         if (self.fighter):
-            if (self.fighter.hp > 0):
+            if (self.health.hp > 0):
                 return False
 
         return True

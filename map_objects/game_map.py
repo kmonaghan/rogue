@@ -189,6 +189,8 @@ class GameMap:
         self.add_entity_to_map(scroll2)
         scroll3 = equipment.confusion_scroll(Point(1,4))
         self.add_entity_to_map(scroll3)
+        scroll4 = equipment.map_scroll(player.point)
+        self.add_entity_to_map(scroll4)
         '''
 
     def level_generic(self, player):
@@ -414,7 +416,7 @@ class GameMap:
             self.create_floor(player, message_log, constants)
 
             if (self.dungeon_level > 1):
-                player.fighter.heal(player.fighter.max_hp // 2)
+                player.health.heal(player.health.max_hp // 2)
 
                 message_log.add_message(Message('You take a moment to rest and recover your strength.', libtcod.light_violet))
 
@@ -515,7 +517,7 @@ class GameMap:
                     for entity in self.entity_map[x][y]:
                         if (point.x == x) and (point.y == y):
                             continue
-                        if isinstance(entity, Character) and (entity.species == species) and not entity.isDead():
+                        if isinstance(entity, Character) and (entity.species == species) and not entity.health.dead:
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
                                 #print("FOUND!")
@@ -554,7 +556,7 @@ class GameMap:
                     for entity in self.entity_map[x][y]:
                         if (point.x == x) and (point.y == y):
                             continue
-                        if isinstance(entity, Character) and (entity.species == species) and not entity.isDead():
+                        if isinstance(entity, Character) and (entity.species == species) and not entity.health.dead:
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
                                 #print("FOUND!")
@@ -624,7 +626,7 @@ class GameMap:
         dm.findCaves()
         dm.findAlcoves()
 
-        startY = randint(1, dm.height - 5)
+        startY = randint(1, dm.height - 6)
         dm.placeRoom(1, startY, 5, 5, ignoreOverlap = True)
 
         dm.placeRandomRooms(5, 9, 2, 2, 500)

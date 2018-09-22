@@ -13,6 +13,7 @@ from components.ai import NecromancerNPC
 from components.ai import Hunter
 from components.ai import Hatching
 
+from components.health import Health
 from components.fighter import Fighter
 from components.questgiver import Questgiver
 
@@ -49,7 +50,8 @@ def bountyhunter(point = None):
 
 def create_player():
     #create object representing the player
-    fighter_component = Fighter(hp=30, defense=6, power=6, xp=0)
+    fighter_component = Fighter(defense=6, power=6, xp=0)
+    health_component = Health(30)
 
     if debug:
         fighter_component.hp = 1000
@@ -57,7 +59,8 @@ def create_player():
         fighter_component.base_power = 200
 
     player = Character(None, '@', 'player', libtcod.dark_green,
-                       fighter=fighter_component, death=PlayerDeath())
+                       fighter=fighter_component, death=PlayerDeath(),
+                       health=health_component)
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
@@ -70,10 +73,12 @@ def create_player():
     return player
 
 def bat(point = None):
-    fighter_component = Fighter(hp=4, defense=1, power=1, xp=2)
+    fighter_component = Fighter(defense=1, power=1, xp=2)
+    health_component = Health(4)
 
     creature = Character(point, 'B', 'bat', libtcod.darker_gray,
-                    fighter=fighter_component, ai=StrollingNPC(attacked_ai=BasicNPC()), species=Species.BAT)
+                    fighter=fighter_component, ai=StrollingNPC(attacked_ai=BasicNPC()),
+                    species=Species.BAT, health=health_component)
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -85,11 +90,13 @@ def bat(point = None):
 
 def goblin(point = None):
     #create a goblin
-    fighter_component = Fighter(hp=20, defense=5, power=5, xp=10)
+    fighter_component = Fighter(defense=5, power=5, xp=10)
+    health_component = Health(20)
     ai_component = BasicNPC()
 
     npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.GOBLIN)
+                    fighter=fighter_component, ai=ai_component, species=Species.GOBLIN,
+                    health=health_component)
 
     dagger = equipment.dagger()
     dagger.lootable = False
@@ -101,11 +108,13 @@ def goblin(point = None):
 
 def orc(point = None):
     #create an orc
-    fighter_component = Fighter(hp=20, defense=10, power=4, xp=35)
+    fighter_component = Fighter(defense=10, power=4, xp=35)
+    health_component = Health(20)
     ai_component = BasicNPC()
 
     npc = Character(point, 'O', 'orc', libtcod.light_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.ORC)
+                    fighter=fighter_component, ai=ai_component, species=Species.ORC,
+                    health=health_component)
 
     item = equipment.shortsword()
     item.lootable = False
@@ -117,11 +126,13 @@ def orc(point = None):
 
 def troll(point = None):
     #create a troll
-    fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
+    fighter_component = Fighter(defense=12, power=8, xp=100)
+    health_component = Health(30)
     ai_component = BasicNPC()
 
     npc = Character(point, 'T', 'troll', libtcod.darker_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.TROLL)
+                    fighter=fighter_component, ai=ai_component, species=Species.TROLL,
+                    health=health_component)
 
     item = equipment.longsword()
     item.lootable = False
@@ -133,11 +144,12 @@ def troll(point = None):
 
 def warlord(point = None):
     #create a warlord
-    fighter_component = Fighter(hp=50, defense=10, power=4, xp=100)
+    fighter_component = Fighter(defense=10, power=4, xp=100)
     ai_component = WarlordNPC()
 
     npc = Character(point, 'W', 'Warlord', libtcod.black,
-                    fighter=fighter_component, ai=ai_component, species=Species.ORC, death=WarlordDeath())
+                    fighter=fighter_component, ai=ai_component, species=Species.ORC, death=WarlordDeath(),
+                    health=health_component)
 
     item = equipment.longsword()
     item.name = item.name + " of I'll FUCKING Have You"
@@ -163,11 +175,13 @@ def warlord(point = None):
     return npc
 
 def skeleton(point = None, old_npc = None):
-    fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
+    fighter_component = Fighter(defense=12, power=8, xp=100)
+    health_component = Health(30)
     ai_component = BasicNPC()
 
     npc = Character(point, 'S', 'skeleton', libtcod.darker_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT)
+                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT,
+                    health=health_component)
 
     if old_npc:
         npc.species = old_npc.species
@@ -185,11 +199,13 @@ def skeleton(point = None, old_npc = None):
 
 def necromancer(point = None):
     #create a necromancer
-    fighter_component = Fighter(hp=30, defense=12, power=8, xp=100)
+    fighter_component = Fighter(defense=12, power=8, xp=100)
+    health_component = Health(30)
     ai_component = NecromancerNPC()
 
     npc = Character(point, 'N', 'necromancer', libtcod.darker_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT)
+                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT,
+                    health=health_component)
 
     item = equipment.longsword()
     item.lootable = False

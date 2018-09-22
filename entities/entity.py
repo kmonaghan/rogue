@@ -17,7 +17,8 @@ class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
-                 fighter=None, ai=None, item=None, stairs=None, equippable=None, render_order=RenderOrder.CORPSE, death=None):
+                 fighter=None, ai=None, item=None, stairs=None, equippable=None,
+                 render_order=RenderOrder.CORPSE, death=None, health=None):
 
         self.x = None
         self.y = None
@@ -33,6 +34,10 @@ class Entity:
         self.fighter = fighter
         if self.fighter:  #let the fighter component know who owns it
             self.fighter.owner = self
+
+        self.health = health
+        if self.health:  #let the fighter component know who owns it
+            self.health.owner = self
 
         self.ai = ai
         if self.ai:  #let the AI component know who owns it
@@ -59,8 +64,6 @@ class Entity:
 
         self.questgiver = None
 
-        self.description = None
-
         self.render_order = render_order
 
         self.death = death
@@ -76,9 +79,7 @@ class Entity:
     def examine(self):
         results = []
 
-        detail = self.name.capitalize()
-        if self.description:
-            detail += ' ' + self.description()
+        detail = self.name.title()
 
         if self.equippable:
             detail += ' ' + self.equippable.equipment_description()
@@ -165,8 +166,8 @@ class Entity:
         libtcod.path_delete(my_path)
 
     def display_color(self):
-        if (self.fighter):
-            return self.fighter.display_color()
+        if (self.health):
+            return self.health.display_color()
 
         return self.color
 
@@ -182,3 +183,8 @@ class Entity:
         self.fighter = fighter
         if (self.fighter):
             self.fighter.owner = self
+
+    def setHealth(self, health):
+        self.health = health
+        if (self.health):
+            self.health.owner = self
