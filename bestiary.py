@@ -12,9 +12,12 @@ from components.ai import WarlordNPC
 from components.ai import NecromancerNPC
 from components.ai import Hunter
 from components.ai import Hatching
+from components.ai import SpawnNPC
 
-from components.health import Health
 from components.fighter import Fighter
+from components.health import Health
+from components.offense import Offense
+from components.defence import Defence
 from components.questgiver import Questgiver
 
 from entities.character import Character
@@ -29,8 +32,8 @@ from species import Species
 
 def upgrade_npc(npc):
     npc.color = libtcod.silver
-    npc.fighter.multiplier = 1.5
-    npc.fighter.xp = npc.fighter.xp * 1.5
+    npc.offense.multiplier = 1.5
+    npc.level.xp_value = npc.level.xp_value * 1.5
     item = equipment.random_magic_weapon()
 
     npc.inventory.add_item(item)
@@ -40,7 +43,7 @@ def bountyhunter(point = None):
     #create a questgiver
 
     ai_component = StrollingNPC(tethered = point)
-    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold,  ai=ai_component, species=Species.NONDESCRIPT)
+    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component, species=Species.NONDESCRIPT)
 
     questgiver = Questgiver()
     questgiver.owner = npc
@@ -50,12 +53,13 @@ def bountyhunter(point = None):
 
 def create_player():
     #create object representing the player
-    fighter_component = Fighter(defense=6, power=6, xp=0)
     health_component = Health(30)
 
     player = Character(None, '@', 'player', libtcod.dark_green,
-                       fighter=fighter_component, death=PlayerDeath(),
-                       health=health_component)
+                       death=PlayerDeath(), health=health_component)
+
+    player.setOffense(Offense(base_power = 6))
+    player.setDefence(Defence(defence = 6))
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
@@ -64,7 +68,7 @@ def create_player():
     player.equipment.toggle_equip(dagger)
 
     if debug:
-        player.level.random_level_up(100)
+        player.level.random_level_up(20)
         weapon = equipment.random_magic_weapon()
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
@@ -72,12 +76,15 @@ def create_player():
     return player
 
 def bat(point = None):
-    fighter_component = Fighter(defense=1, power=1, xp=2)
+    fighter_component = Fighter(xp=2)
     health_component = Health(4)
 
-    creature = Character(point, 'B', 'bat', libtcod.darker_gray,
-                    fighter=fighter_component, ai=StrollingNPC(attacked_ai=BasicNPC()),
+    creature = Character(point, 'B', 'bat', libtcod.darker_red,
+                    ai=StrollingNPC(attacked_ai=BasicNPC()),
                     species=Species.BAT, health=health_component)
+
+    creature.setOffense(Offense(base_power = 1))
+    creature.setDefence(Defence(defence = 1))
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -89,13 +96,16 @@ def bat(point = None):
 
 def goblin(point = None):
     #create a goblin
-    fighter_component = Fighter(defense=5, power=5, xp=10)
+    fighter_component = Fighter(xp=10)
     health_component = Health(20)
     ai_component = BasicNPC()
 
     npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.GOBLIN,
+                    ai=ai_component, species=Species.GOBLIN,
                     health=health_component)
+
+    npc.setOffense(Offense(base_power = 5))
+    npc.setDefence(Defence(defence = 5))
 
     dagger = equipment.dagger()
     dagger.lootable = False
@@ -107,13 +117,16 @@ def goblin(point = None):
 
 def necromancer(point = None):
     #create a necromancer
-    fighter_component = Fighter(defense=12, power=8, xp=100)
+    fighter_component = Fighter(xp=100)
     health_component = Health(30)
     ai_component = NecromancerNPC()
 
     npc = Character(point, 'N', 'necromancer', libtcod.darker_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.NONDESCRIPT,
+                    ai=ai_component, species=Species.NONDESCRIPT,
                     health=health_component)
+
+    npc.setOffense(Offense(base_power = 12))
+    npc.setDefence(Defence(defence = 8))
 
     item = equipment.longsword()
     item.lootable = False
@@ -125,13 +138,16 @@ def necromancer(point = None):
 
 def orc(point = None):
     #create an orc
-    fighter_component = Fighter(defense=10, power=4, xp=35)
+    fighter_component = Fighter(xp=35)
     health_component = Health(20)
     ai_component = BasicNPC()
 
     npc = Character(point, 'O', 'orc', libtcod.light_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.ORC,
+                    ai=ai_component, species=Species.ORC,
                     health=health_component)
+
+    npc.setOffense(Offense(base_power = 10))
+    npc.setDefence(Defence(defence = 4))
 
     item = equipment.shortsword()
     item.lootable = False
@@ -141,6 +157,42 @@ def orc(point = None):
 
     return npc
 
+def rat(point = None):
+    fighter_component = Fighter(xp=2)
+    health_component = Health(4)
+
+    creature = Character(point, 'R', 'rat', libtcod.darker_green,
+                    ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.EGG),
+                    species=Species.RAT, health=health_component)
+
+    creature.setOffense(Offense(base_power = 1))
+    creature.setDefence(Defence(defence = 1))
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    creature.inventory.add_item(teeth)
+    creature.equipment.toggle_equip(teeth)
+
+    return creature
+
+def ratsnest(point = None):
+    fighter_component = Fighter(xp=2)
+    health_component = Health(4)
+
+    creature = Character(point, 'N', 'rat\'s nest', libtcod.darker_green,
+                    ai=SpawnNPC(rat),
+                    species=Species.RAT, health=health_component)
+
+    creature.setDefence(Defence(defence = 4))
+
+    # potion = equipment.random_potion(dungeon_level = dungeon_level)
+    # potion.lootable = True
+    #
+    # creature.inventory.add_item(potion)
+
+    return creature
+
 def reanmimate(old_npc):
     if (old_npc.death.skeletal):
         return skeleton(old_npc.point, old_npc)
@@ -149,7 +201,7 @@ def reanmimate(old_npc):
 
 def skeleton(point = None, old_npc = None):
     ai_component = BasicNPC()
-    fighter_component = Fighter(defense=12, power=8, xp=100)
+    fighter_component = Fighter(xp=100)
     health_component = Health(30)
 
     if old_npc:
@@ -158,13 +210,15 @@ def skeleton(point = None, old_npc = None):
         old_npc.name = 'Skeletal ' + old_npc.death.orginal_name
         old_npc.setAI(ai_component)
         old_npc.setHealth(Health(old_npc.health.max_hp // 4))
-        old_npc.setFighter(fighter_component)
 
         return old_npc
     else:
         npc = Character(point, 'S', 'skeleton', libtcod.darker_green,
-                        fighter=fighter_component, ai=ai_component,
-                        species=Species.NONDESCRIPT, health=health_component)
+                        ai=ai_component, species=Species.NONDESCRIPT,
+                        health=health_component)
+
+        npc.setOffense(Offense(base_power = 12))
+        npc.setDefence(Defence(defence = 8))
 
         item = equipment.longsword()
         item.lootable = False
@@ -174,15 +228,37 @@ def skeleton(point = None, old_npc = None):
 
     return npc
 
+def snake(point = None):
+    fighter_component = Fighter(xp=4)
+    health_component = Health(8)
+
+    creature = Character(point, 'S', 'snake', libtcod.darker_green,
+                    ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.RAT),
+                    species=Species.SNAKE, health=health_component)
+
+    creature.setOffense(Offense(base_power = 1))
+    creature.setDefence(Defence(defence = 1))
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    creature.inventory.add_item(teeth)
+    creature.equipment.toggle_equip(teeth)
+
+    return creature
+
 def troll(point = None):
     #create a troll
-    fighter_component = Fighter(defense=12, power=8, xp=100)
+    fighter_component = Fighter(xp=100)
     health_component = Health(30)
     ai_component = BasicNPC()
 
     npc = Character(point, 'T', 'troll', libtcod.darker_green,
-                    fighter=fighter_component, ai=ai_component, species=Species.TROLL,
+                    ai=ai_component, species=Species.TROLL,
                     health=health_component)
+
+    npc.setOffense(Offense(base_power = 12))
+    npc.setDefence(Defence(defence = 8))
 
     item = equipment.longsword()
     item.lootable = False
@@ -194,12 +270,15 @@ def troll(point = None):
 
 def warlord(point = None):
     #create a warlord
-    fighter_component = Fighter(defense=10, power=4, xp=100)
+    fighter_component = Fighter(xp=100)
     ai_component = WarlordNPC()
 
     npc = Character(point, 'W', 'Warlord', libtcod.black,
-                    fighter=fighter_component, ai=ai_component, species=Species.ORC, death=WarlordDeath(),
+                    ai=ai_component, species=Species.ORC, death=WarlordDeath(),
                     health=health_component)
+
+    npc.setOffense(Offense(base_power = 10))
+    npc.setDefence(Defence(defence = 4))
 
     item = equipment.longsword()
     item.name = item.name + " of I'll FUCKING Have You"
@@ -211,14 +290,14 @@ def warlord(point = None):
     shield = equipment.shield()
     shield.name = shield.name + " of Hide and Seek"
     shield.color = libtcod.purple
-    shield.equippable.power_bonus = item.equippable.defense_bonus * 2
+    shield.equippable.power_bonus = item.equippable.defence_bonus * 2
     npc.inventory.add_item(shield)
     npc.equipment.toggle_equip(shield)
 
     breastplate = equipment.breastplate()
     breastplate.name = breastplate.name + " of Rebounding"
     breastplate.color = libtcod.purple
-    breastplate.equippable.power_bonus = item.equippable.defense_bonus * 2
+    breastplate.equippable.power_bonus = item.equippable.defence_bonus * 2
     npc.inventory.add_item(breastplate)
     npc.equipment.toggle_equip(breastplate)
 
@@ -226,7 +305,7 @@ def warlord(point = None):
 
 def zombie(point = None, old_npc = None):
     ai_component = BasicNPC()
-    fighter_component = Fighter(defense=12, power=8, xp=100)
+    fighter_component = Fighter(xp=100)
     health_component = Health(30)
 
     if old_npc:
@@ -243,6 +322,9 @@ def zombie(point = None, old_npc = None):
                         fighter=fighter_component, ai=ai_component,
                         species=Species.NONDESCRIPT, health=health_component)
 
+        npc.setOffense(Offense(base_power = 10))
+        npc.setDefence(Defence(defence = 4))
+
         item = equipment.longsword()
         item.lootable = False
 
@@ -252,6 +334,22 @@ def zombie(point = None, old_npc = None):
     return npc
 
 names = False
+
+def generate_creature(type, dungeon_level = 1, player_level = 1, point = None):
+    creature = None
+
+    if (type == Species.BAT):
+        creature = bat(point)
+    elif (type == Species.RAT):
+        creature = rat(point)
+    elif (type == Species.SNAKE):
+        creature = snake(point)
+    elif (type == Species.RATNEST):
+        creature = ratsnest(point)
+    elif (type == Species.EGG):
+        creature = egg(point)
+
+    return creature
 
 def generate_npc(type, dungeon_level = 1, player_level = 1, point = None):
     global names
@@ -269,7 +367,6 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None):
 
     npc.name = libtcod.namegen_generate(npc.name)
 
-#    npc_level = (dungeon_level - 1) + player_level + libtcod.random_get_int(0, -1, 1)
     npc_level = (dungeon_level - 1) + libtcod.random_get_int(0, -1, 1)
 
     if npc_level > 1:

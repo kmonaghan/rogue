@@ -15,8 +15,8 @@ from species import Species
 from game_states import debug
 
 class Character(Entity):
-    def __init__(self, point, char, name, color, always_visible=False, blocks=True, fighter=None, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None):
-        super(Character, self).__init__(point, char, name, color, blocks, always_visible, fighter, ai, item, gear, death=death, health=health)
+    def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None):
+        super(Character, self).__init__(point, char, name, color, blocks, always_visible, ai, item, gear, death=death, health=health)
 
         self.inventory = Inventory(26)
         self.inventory.owner = self
@@ -50,7 +50,7 @@ class Character(Entity):
         return desc
 
     def isDead(self):
-        if (self.fighter):
+        if (self.health):
             if (self.health.hp > 0):
                 return False
 
@@ -66,8 +66,8 @@ class Character(Entity):
 
     def upgradeNPC(npc):
         self.color = libtcod.silver
-        self.fighter.multiplier = 1.5
-        self.fighter.xp = npc.fighter.xp * 1.5
+        self.offense.multiplier = 1.5
+        self.level.xp_value = npc.level.xp_value * 1.5
         item = equipment.random_magic_weapon()
 
         self.inventory.add_item(item)

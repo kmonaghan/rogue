@@ -2,7 +2,6 @@ import libtcodpy as libtcod
 
 from game_messages import Message
 
-
 class Inventory:
     def __init__(self, capacity):
         self.capacity = capacity

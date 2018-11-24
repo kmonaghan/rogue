@@ -56,7 +56,7 @@ def cast_lightning(*args, **kwargs):
     if target:
         damage = die_roll(number_of_dice, type_of_dice)
         results.append({'consumed': True, 'target': target, 'message': Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage))})
-        results.extend(target.fighter.take_damage(damage, caster))
+        results.extend(target.health.take_damage(damage, caster))
     else:
         results.append({'consumed': False, 'target': None, 'message': Message('No enemy is close enough to strike.', libtcod.red)})
 

@@ -3,10 +3,10 @@ import libtcodpy as libtcod
 from random_utils import die_roll
 
 class Equippable:
-    def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0, bonus_damage=0):
+    def __init__(self, slot, power_bonus=0, defence_bonus=0, max_hp_bonus=0, bonus_damage=0):
         self.slot = slot
         self.power_bonus = power_bonus
-        self.defense_bonus = defense_bonus
+        self.defence_bonus = defence_bonus
         self.max_hp_bonus = max_hp_bonus
         self.bonus_damage = bonus_damage
         self.number_of_dice = 1

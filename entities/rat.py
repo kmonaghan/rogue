@@ -15,21 +15,21 @@ from map_objects.point import Point
 
 from species import Species
 
-class Rat(Animal):
+class RatOld(Animal):
     def __init__(self, point = None):
         char = 'R'
         name = 'Rat'
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        health = Health(4)
-        fighter = Fighter(defense=1, power=1, xp=2)
+        rat_health = Health(4)
+        fighter = Fighter(xp=2)
         ai = Hunter(attacked_ai = BasicNPC(), hunting = Species.EGG)
         item = None
         gear = None
         species = Species.RAT
 
-        super(Rat, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species, health=health)
+        super(Rat, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species, health=rat_health)
 
         teeth = equipment.teeth()
         teeth.lootable = False
@@ -44,7 +44,7 @@ class RatNest(Animal):
         color = libtcod.red
         always_visible = False
         blocks = True
-        fighter = Fighter(defense=1, power=0, xp=2)
+        fighter = Fighter(xp=2)
         health = Health(4)
         ai = SpawnNPC(Rat)
         item = None

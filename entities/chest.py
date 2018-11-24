@@ -18,7 +18,7 @@ class Chest(Character):
         color= libtcod.blue
         always_visible = False
         blocks = True
-        fighter = Fighter(defense=1, power=0, xp=0)
+        fighter = Fighter(xp=0)
         health_component = Health(10)
         ai = None
         item = None
@@ -31,7 +31,7 @@ class Chest(Character):
 
         if (mimic_chance >= 99):
             self.species = Species.CREATURE
-            self.setFighter(Fighter(defense=3, power=3, xp=100))
+            self.setFighter(Fighter(xp=100))
             self.setHealth(Health(30))
             teeth = equipment.teeth()
             teeth.lootable = False

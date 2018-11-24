@@ -120,6 +120,11 @@ class dungeonRoom:
 
         return point
 
+    def center_tile(self):
+        point = Point(self.x + int(self.width / 2), int(self.y + self.height / 2))
+
+        return point
+
 class dungeonGenerator:
     """
     A renderer/framework/engine independent functions for generating random dungeons, including rooms, corridors, connects and path finding

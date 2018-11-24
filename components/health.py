@@ -15,14 +15,25 @@ class Health:
 
         return self.base_max_hp + bonus
 
-    def take_damage(self, dmg):
-        if (self.dead):
-            return
+    def take_damage(self, amount, npc = None):
+        results = []
 
-        self.hp -= dmg
+        if (self.dead):
+            return results
+
+        self.hp -= amount
         if (self.hp <= 0):
             self.dead = True
             self.hp = 0
+
+        if self.dead:
+            earned_xp = self.owner.level.xp_worth(npc)
+
+            results.append({'dead': self.owner, 'xp': earned_xp})
+
+        self.owner.hasBeenAttacked(npc)
+
+        return results
 
     def heal(self, amt):
         if (self.dead):

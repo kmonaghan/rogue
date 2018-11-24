@@ -15,21 +15,21 @@ from map_objects.point import Point
 
 from species import Species
 
-class Snake(Animal):
+class SnakeOld(Animal):
     def __init__(self, point = None):
         char = 'S'
         name = 'Snake'
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        fighter = Fighter(defense=2, power=2, xp=4)
-        health = Health(8)
+        fighter = Fighter(xp=4)
+        snake_health = Health(8)
         ai = Hunter(attacked_ai = BasicNPC(), hunting = Species.RAT)
         item = None
         gear = None
         species = Species.SNAKE
 
-        super(Snake, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species, health=health)
+        super(Snake, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species, health=snake_health)
 
         teeth = equipment.teeth()
         teeth.lootable = False
@@ -59,14 +59,14 @@ class SnakeEgg(Animal):
         color = libtcod.darker_gray
         always_visible = False
         blocks = True
-        fighter = Fighter(defense=4, power=0, xp=0)
-        health = Health(4)
+        fighter = Fighter(xp=0)
+        egg_health = Health(4)
         ai = Hatching(Snake())
         item = None
         gear = None
         species = Species.EGG
 
-        super(SnakeEgg, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species,health=health)
+        super(SnakeEgg, self).__init__(point, char, name, color, always_visible, blocks, fighter, ai, item, gear, species,health=egg_health)
 
     def hasBeenAttacked(self, npc):
         #print("Override hasBeenAttacked")

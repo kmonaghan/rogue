@@ -11,8 +11,6 @@ from components.stairs import Stairs
 
 from entities.entity import Entity
 from entities.character import Character
-from entities.rat import Rat, RatNest
-from entities.snake import Snake, SnakeEgg
 
 from map_objects.point import Point
 from map_objects.rect import Rect
@@ -53,7 +51,7 @@ class GameMap:
 
     def make_map(self, map_width, map_height, player):
         self.entities = [player]
-
+        '''
         boss_chance = randint(0,3) + self.dungeon_level
 
         if (self.dungeon_level == 1):
@@ -63,6 +61,9 @@ class GameMap:
                 self.generator = self.level_boss_generator(map_width, map_height)
             else:
                 self.generator = self.level_generator(map_width, map_height)
+        '''
+
+        self.generator = self.arena(map_width, map_height)
 
         self.map = [[EmptyTile() for y in range(self.generator.height)]
                         for x in range(self.generator.width)]
@@ -97,6 +98,9 @@ class GameMap:
             else:
                 self.map[x][y] = EmptyTile()
 
+        self.test_popluate_map(player)
+
+        '''
         if (self.dungeon_level == 1):
             self.level_one(player)
         else:
@@ -104,6 +108,7 @@ class GameMap:
                 self.level_boss(player)
             else:
                 self.level_generic(player)
+        '''
 
     def test_popluate_map(self, player):
         room = self.generator.rooms[0]
@@ -112,9 +117,23 @@ class GameMap:
         self.add_entity_to_map(self.down_stairs)
 
         room = self.generator.rooms[0]
-        point = room.random_tile(self)
+        point = room.center_tile()
         player.x = point.x
         player.y = point.y
+
+        # npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level, room.random_tile(self))
+        # bestiary.upgrade_npc(npc)
+        # for i in range(5):
+        #     snake = bestiary.generate_creature(Species.SNAKE, self.dungeon_level, player.level.current_level, room.random_tile(self))
+        #     self.add_entity_to_map(snake)
+        #
+        # for i in range(5):
+        #     rat = bestiary.generate_creature(Species.RAT, self.dungeon_level, player.level.current_level, room.random_tile(self))
+        #     self.add_entity_to_map(rat)
+
+        for i in range(5):
+            rat = bestiary.generate_creature(Species.RATNEST, self.dungeon_level, player.level.current_level, room.random_tile(self))
+            self.add_entity_to_map(rat)
 
     def level_one(self, player):
         room = self.generator.rooms[-1]
@@ -145,8 +164,8 @@ class GameMap:
         #Snakes and Rats
         for i in range(10):
             point = choice(self.generator.caves)
-            npc = Snake(point)
-            self.add_entity_to_map(npc)
+            #npc = Snake(point)
+            #self.add_entity_to_map(npc)
 
         alcoves = self.generator.alcoves
 
@@ -193,7 +212,7 @@ class GameMap:
         self.add_entity_to_map(scroll4)
         ring1 = equipment.ring_of_power(player.point)
         self.add_entity_to_map(ring1)
-        ring2 = equipment.ring_of_defense(player.point)
+        ring2 = equipment.ring_of_defence(player.point)
         self.add_entity_to_map(ring2)
         '''
 
@@ -313,6 +332,8 @@ class GameMap:
 
                 #only place it if the tile is not blocked
                 if not self.is_blocked(point):
+                    bestiary.generate_creature(creature_choice, dungeon_level = 1, player_level = 1, point = None)
+                    '''
                     if creature_choice == Species.SNAKE:
                         npc = Snake(point)
                     elif creature_choice == Species.EGG:
@@ -321,7 +342,7 @@ class GameMap:
                         npc = Rat(point)
                     elif creature_choice == Species.BAT:
                         npc = bestiary.bat(point)
-
+                    '''
                     self.add_entity_to_map(npc)
 
     def place_npc(self, room, player):
@@ -443,7 +464,8 @@ class GameMap:
         return False
 
     def add_entity_to_map(self, npc):
-        self.entities.append(npc)
+        if npc:
+            self.entities.append(npc)
 
     def remove_entity_from_map(self, npc):
         self.entities.remove(npc)
@@ -824,3 +846,12 @@ class GameMap:
             dm.grid[startX + 3][y] = Tiles.ROOM_WALL
 
         return dm.rooms[-1]
+
+    def arena(self, map_width, map_height):
+        dm = dungeonGenerator(width=map_width, height=map_height)
+
+        dm.placeRoom(10, 10, 15, 15)
+
+        dm.placeWalls()
+
+        return dm

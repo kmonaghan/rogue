@@ -58,14 +58,14 @@ def random_potion(point = None, dungeon_level = 1):
 def random_ring(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['power'] = 50
-    item_chances['defense'] = 50
+    item_chances['defence'] = 50
 
     choice = random_utils.random_choice_from_dict(item_chances)
     if choice == 'power':
         item = ring_of_power(point)
 
-    elif choice == 'defense':
-        item = ring_of_defense(point)
+    elif choice == 'defence':
+        item = ring_of_defence(point)
 
     return item
 
@@ -141,8 +141,8 @@ def ring_of_power(point = None):
                         equippable=equippable_component)
     return item
 
-def ring_of_defense(point = None):
-    equippable_component = Equippable(EquipmentSlots.RING, defense_bonus=1)
+def ring_of_defence(point = None):
+    equippable_component = Equippable(EquipmentSlots.RING, defence_bonus=1)
     item = Entity(point, 'o', 'Ring of Health', libtcod.violet, render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
@@ -191,42 +191,42 @@ def map_scroll(point = None):
 
 def shield(point = None):
     #create a shield
-    equippable_component = Equippable(EquipmentSlots.OFF_HAND, defense_bonus=1)
+    equippable_component = Equippable(EquipmentSlots.OFF_HAND, defence_bonus=1)
     item = Entity(point, '[', 'shield', libtcod.darker_orange, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def helmet(point = None):
     #create a helmet
-    equippable_component = Equippable(EquipmentSlots.HEAD, defense_bonus=1)
+    equippable_component = Equippable(EquipmentSlots.HEAD, defence_bonus=1)
     item = Entity(point, '^', 'helmet', libtcod.darker_orange, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def leathershirt(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=1)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=1)
     item = Entity(point, '=', 'leather shirt', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def scalemail(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=2)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=2)
     item = Entity(point, '=', 'scalemail', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def chainmail(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=3)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=3)
     item = Entity(point, '=', 'chainmail', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def breastplate(point = None):
     #create a breastplate
-    equippable_component = Equippable(EquipmentSlots.CHEST, defense_bonus=4)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=4)
     item = Entity(point, '=', 'breastplate', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item

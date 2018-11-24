@@ -17,7 +17,7 @@ class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
-                 fighter=None, ai=None, item=None, stairs=None, equippable=None,
+                 ai=None, item=None, stairs=None, equippable=None,
                  render_order=RenderOrder.CORPSE, death=None, health=None):
 
         self.x = None
@@ -31,12 +31,8 @@ class Entity:
         self.blocks = blocks
         self.always_visible = always_visible
 
-        self.fighter = fighter
-        if self.fighter:  #let the fighter component know who owns it
-            self.fighter.owner = self
-
         self.health = health
-        if self.health:  #let the fighter component know who owns it
+        if self.health:  #let the health component know who owns it
             self.health.owner = self
 
         self.ai = ai
@@ -179,12 +175,17 @@ class Entity:
         if self.ai:  #let the AI component know who owns it
             self.ai.owner = self
 
-    def setFighter(self, fighter):
-        self.fighter = fighter
-        if (self.fighter):
-            self.fighter.owner = self
-
     def setHealth(self, health):
         self.health = health
         if (self.health):
             self.health.owner = self
+
+    def setOffense(self, offense):
+        self.offense = offense
+        if (self.offense):
+            self.offense.owner = self
+
+    def setDefence(self, defence):
+        self.defence = defence
+        if (self.defence):
+            self.defence.owner = self

@@ -19,7 +19,7 @@ def boss_room():
                 ".....D....."]
 
     return room_map
-
+'''
 def necromancer_lair():
     room_map = ["######.######",
                 "#####...#####",
@@ -32,5 +32,15 @@ def necromancer_lair():
                 "####.....####",
                 "#####...#####",
                 "######.######"]
+'''
+
+def necromancer_lair():
+    room_map = ["...........",
+                "...........",
+                ".....W.....",
+                "....WWW....",
+                ".....W.....",
+                "...........",
+                "..........."]
 
     return room_map
