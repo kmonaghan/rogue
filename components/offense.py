@@ -15,6 +15,9 @@ class Offense:
         else:
             bonus = 0
 
+        if self.owner.subspecies:
+            bonus += self.owner.subspecies.bonus_power
+            
         return self.base_power + bonus
 
     def attack(self, target):

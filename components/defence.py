@@ -14,4 +14,7 @@ class Defence:
         else:
             bonus = 0
 
+        if self.owner.subspecies:
+            bonus += self.owner.subspecies.bonus_defence
+
         return self.base_defence + bonus

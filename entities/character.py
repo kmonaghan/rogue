@@ -57,7 +57,10 @@ class Character(Entity):
             desc += " (Level " + str(self.level.current_level) + ")"
 
         if debug:
-            desc += " (" + str(self.x) + ", " + str(self.y) +")"
+            if self.offense:
+                desc += " O:" + str(self.offense.power)
+            if self.defence:
+                desc += " D:" + str(self.defence.defence)
 
         return desc
 
@@ -67,7 +70,7 @@ class Character(Entity):
 
         if self.subspecies:
             return self.subspecies.subcolor
-            
+
         return self.color
 
     def isDead(self):
