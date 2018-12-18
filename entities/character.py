@@ -31,15 +31,27 @@ class Character(Entity):
 
         self.species = species
 
+        self.subspecies = None
+
+    def species_describe(self):
+        desc = ""
+
+        if (self.species == Species.GOBLIN):
+            desc += "Goblin"
+        elif (self.species == Species.ORC):
+            desc += "Orc"
+        elif (self.species == Species.TROLL):
+            desc += "Troll"
+
+        if self.subspecies:
+            desc = self.subspecies.name + " " + desc
+
+        return " (" + desc + ")"
+
     def describe(self):
         desc = self.name.title()
 
-        if (self.species == Species.GOBLIN):
-            desc += " (Goblin)"
-        elif (self.species == Species.ORC):
-            desc += " (Orc)"
-        elif (self.species == Species.TROLL):
-            desc += " (Troll)"
+        desc += self.species_describe()
 
         if (self.level):
             desc += " (Level " + str(self.level.current_level) + ")"
@@ -48,6 +60,15 @@ class Character(Entity):
             desc += " (" + str(self.x) + ", " + str(self.y) +")"
 
         return desc
+
+    def display_color(self):
+        if (self.health.health_percentage < 100):
+            return self.health.display_color()
+
+        if self.subspecies:
+            return self.subspecies.subcolor
+            
+        return self.color
 
     def isDead(self):
         if (self.health):
@@ -64,11 +85,7 @@ class Character(Entity):
         #print("Override hasBeenAttacked")
         pass
 
-    def upgradeNPC(npc):
-        self.color = libtcod.silver
-        self.offense.multiplier = 1.5
-        self.level.xp_value = npc.level.xp_value * 1.5
-        item = equipment.random_magic_weapon()
-
-        self.inventory.add_item(item)
-        self.equipment.toggle_equip(item)
+    def setSubspecies(self, subspecies):
+        self.subspecies = subspecies
+        if (self.subspecies):
+            self.subspecies.owner = self

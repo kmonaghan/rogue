@@ -19,6 +19,7 @@ from components.health import Health
 from components.offense import Offense
 from components.defence import Defence
 from components.questgiver import Questgiver
+from components.subspecies import Subspecies
 
 from entities.character import Character
 
@@ -38,6 +39,15 @@ def upgrade_npc(npc):
 
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
+
+def tweak_npc(npc):
+    dice = libtcod.random_get_int(0, 1, 100)
+    if (dice < 50):
+        return
+    else:
+        subspecies = Subspecies()
+        subspecies.random_subspecies()
+        npc.setSubspecies(subspecies)
 
 def bountyhunter(point = None):
     #create a questgiver
@@ -351,7 +361,7 @@ def generate_creature(type, dungeon_level = 1, player_level = 1, point = None):
 
     return creature
 
-def generate_npc(type, dungeon_level = 1, player_level = 1, point = None):
+def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrade_chance = 98):
     global names
 
     if (type == Species.GOBLIN):
@@ -374,11 +384,14 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None):
 
     dice = libtcod.random_get_int(0, 1, 100)
 
-    if (dice >= 98):
+    if (dice >= upgrade_chance):
         upgrade_npc(npc)
         npc.level.random_level_up(1)
 
     print("final npc level: " + str(npc.level.current_level))
+
+    tweak_npc(npc)
+
     return npc
 
 def place_chest(point, game_map):
