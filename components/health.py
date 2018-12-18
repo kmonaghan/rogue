@@ -7,6 +7,10 @@ class Health:
         self.dead = False
 
     @property
+    def health_percentage(self):
+        return ((self.hp * 100) / self.max_hp)
+
+    @property
     def max_hp(self):
         if self.owner and self.owner.equipment:
             bonus = self.owner.equipment.max_hp_bonus
@@ -44,12 +48,12 @@ class Health:
             self.hp = self.base_max_hp
 
     def display_color(self):
-        healthpercent = (self.hp * 100) / self.max_hp
-        if (healthpercent <=20):
+
+        if (self.health_percentage <=20):
             return libtcod.red
-        elif (healthpercent <=60):
+        elif (self.health_percentage <=60):
             return libtcod.orange
-        elif (healthpercent <=80):
+        elif (self.health_percentage <=80):
             return libtcod.yellow
 
         return self.owner.color
