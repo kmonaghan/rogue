@@ -29,9 +29,10 @@ class Offense:
         total = total + self.power
         hit = total - target.defence.defence
 
+        weapon = self.owner.equipment.get_equipped_in_slot(EquipmentSlots.MAIN_HAND)
+
         if (hit > 0) or (multiplier == 2):
             #make the target take some damage
-            weapon = self.owner.equipment.get_equipped_in_slot(EquipmentSlots.MAIN_HAND)
             damage = weapon.equippable.damage() * multiplier
 
             msg = '{0} attacks {1} with {2} for {3} hit points.'
