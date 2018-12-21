@@ -26,7 +26,7 @@ class Entity:
             self.x = point.x
             self.y = point.y
         self.char = char
-        self.name = name
+        self.base_name = name
         self.color = color
         self.blocks = blocks
         self.always_visible = always_visible
@@ -71,6 +71,17 @@ class Entity:
     @property
     def point(self):
         return Point(self.x,self.y)
+
+    @property
+    def name(self):
+        real_name = self.base_name
+        if self.health and self.health.dead:
+            if self.death.skeletal:
+                real_name = "Skeletal remains of " + real_name
+            elif self.death.rotting:
+                real_name = "Rotting corpse of " + real_name
+
+        return real_name
 
     def examine(self):
         results = []

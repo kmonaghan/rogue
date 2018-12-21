@@ -65,10 +65,10 @@ class Character(Entity):
         return desc
 
     def display_color(self):
-        if (self.health.health_percentage < 100):
+        if not self.health.dead and (self.health.health_percentage < 100):
             return self.health.display_color()
 
-        if self.subspecies:
+        if not self.health.dead and self.subspecies:
             return self.subspecies.subcolor
 
         return self.color

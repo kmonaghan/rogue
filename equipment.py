@@ -115,19 +115,19 @@ def random_magic_weapon(dungeon_level = 1):
     dice = libtcod.random_get_int(0, 1, 1000)
 
     if (dice <= 500):
-        item.name = item.name + " of Stabby Stabby"
+        item.base_name = item.base_name + " of Stabby Stabby"
         item.color = libtcod.chartreuse
         item.equippable.power_bonus = item.equippable.power_bonus * 1.25
     elif (dice <= 750):
-        item.name = item.name + " of YORE MA"
+        item.base_name = item.base_name + " of YORE MA"
         item.color = libtcod.blue
         item.equippable.power_bonus = item.equippable.power_bonus * 1.5
     elif (dice <= 990):
-        item.name = item.name + " of I'll FUCKING Have You"
+        item.base_name = item.base_name + " of I'll FUCKING Have You"
         item.color = libtcod.purple
         item.equippable.power_bonus = item.equippable.power_bonus * 2
     else:
-        item.name = item.name + " of Des and Troy"
+        item.base_name = item.base_name + " of Des and Troy"
         item.color = libtcod.crimson
         item.equippable.power_bonus = item.equippable.power_bonus * 4
 

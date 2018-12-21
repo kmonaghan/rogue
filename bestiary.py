@@ -217,7 +217,7 @@ def skeleton(point = None, old_npc = None):
     if old_npc:
         old_npc.blocks = True
         old_npc.char = 'S'
-        old_npc.name = 'Skeletal ' + old_npc.death.orginal_name
+        old_npc.base_name = 'Skeletal ' + old_npc.base_name
         old_npc.setAI(ai_component)
         old_npc.setHealth(Health(old_npc.health.max_hp // 4))
 
@@ -291,21 +291,21 @@ def warlord(point = None):
     npc.setDefence(Defence(defence = 4))
 
     item = equipment.longsword()
-    item.name = item.name + " of I'll FUCKING Have You"
+    item.base_name = item.base_name + " of I'll FUCKING Have You"
     item.color = libtcod.purple
     item.equippable.power_bonus = item.equippable.power_bonus * 2
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
 
     shield = equipment.shield()
-    shield.name = shield.name + " of Hide and Seek"
+    shield.base_name = shield.base_name + " of Hide and Seek"
     shield.color = libtcod.purple
     shield.equippable.power_bonus = item.equippable.defence_bonus * 2
     npc.inventory.add_item(shield)
     npc.equipment.toggle_equip(shield)
 
     breastplate = equipment.breastplate()
-    breastplate.name = breastplate.name + " of Rebounding"
+    breastplate.base_name = breastplate.base_name + " of Rebounding"
     breastplate.color = libtcod.purple
     breastplate.equippable.power_bonus = item.equippable.defence_bonus * 2
     npc.inventory.add_item(breastplate)
@@ -321,7 +321,7 @@ def zombie(point = None, old_npc = None):
     if old_npc:
         old_npc.blocks = True
         old_npc.char = 'Z'
-        old_npc.name = 'Zombie ' + old_npc.death.orginal_name
+        old_npc.base_name = 'Zombie ' + old_npc.base_name
         old_npc.setAI(ai_component)
         old_npc.setHealth(Health(old_npc.health.max_hp // 2))
         old_npc.setFighter(fighter_component)
@@ -375,7 +375,7 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
         libtcod.namegen_parse('data/names.txt')
         names = True
 
-    npc.name = libtcod.namegen_generate(npc.name)
+    npc.base_name = libtcod.namegen_generate(npc.base_name)
 
     npc_level = (dungeon_level - 1) + libtcod.random_get_int(0, -1, 1)
 

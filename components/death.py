@@ -25,7 +25,6 @@ class BasicDeath:
         self.owner.blocks = False
         #self.owner.fighter = None
         self.owner.ai = None
-        self.owner.name = 'rotting remains of ' + self.orginal_name
         self.owner.render_order = RenderOrder.CORPSE
 
         for item in self.owner.inventory.items:
@@ -47,7 +46,6 @@ class BasicDeath:
             self.rotting = False
             self.skeletal = True
             self.owner.color = libtcod.white
-            self.owner.name = 'Skeletal remains of ' + self.orginal_name
 
 class WarlordDeath(BasicDeath):
     def npc_death(self, game_map):
