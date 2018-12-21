@@ -12,4 +12,4 @@ class Animal(Character):
 
     def hasBeenAttacked(self, npc):
         if (npc.name == 'player'):
-            self.setAI(BasicNPC())
+            self.add_component(BasicNPC(), "ai")

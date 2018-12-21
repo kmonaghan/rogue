@@ -282,7 +282,7 @@ class ScreamerNPC:
 
         if len(npcs):
             for npc in npcs:
-                npc.setAI(BasicNPC())
+                npc.add_component(BasicNPC(), "ai")
 
             results.append({'message': Message('Alert nearby creatures!', libtcod.red)})
 

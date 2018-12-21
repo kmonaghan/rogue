@@ -65,10 +65,10 @@ class Character(Entity):
         return desc
 
     def display_color(self):
-        if not self.health.dead and (self.health.health_percentage < 100):
+        if self.health and not self.health.dead and (self.health.health_percentage < 100):
             return self.health.display_color()
 
-        if not self.health.dead and self.subspecies:
+        if self.health and not self.health.dead and self.subspecies:
             return self.subspecies.subcolor
 
         return self.color
@@ -87,8 +87,3 @@ class Character(Entity):
     def hasBeenAttacked(self, npc):
         #print("Override hasBeenAttacked")
         pass
-
-    def setSubspecies(self, subspecies):
-        self.subspecies = subspecies
-        if (self.subspecies):
-            self.subspecies.owner = self

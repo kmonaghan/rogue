@@ -35,17 +35,9 @@ class Entity:
         if self.health:  #let the health component know who owns it
             self.health.owner = self
 
-        self.ai = ai
-        if self.ai:  #let the AI component know who owns it
-            self.ai.owner = self
-
-        self.item = item
-        if self.item:  #let the Item component know who owns it
-            self.item.owner = self
-
-        self.stairs = stairs
-        if self.stairs:
-            self.stairs.owner = self
+        self.add_component(ai, "ai")
+        self.add_component(item, "item")
+        self.add_component(stairs, "stairs")
 
         self.equippable = equippable
         if self.equippable:
@@ -181,22 +173,10 @@ class Entity:
     def describe(self):
         return self.name.title()
 
-    def setAI(self, ai):
-        self.ai = ai
-        if self.ai:  #let the AI component know who owns it
-            self.ai.owner = self
-
-    def setHealth(self, health):
-        self.health = health
-        if (self.health):
-            self.health.owner = self
-
-    def setOffense(self, offense):
-        self.offense = offense
-        if (self.offense):
-            self.offense.owner = self
-
-    def setDefence(self, defence):
-        self.defence = defence
-        if (self.defence):
-            self.defence.owner = self
+    def add_component(self, component, component_name):
+        """Add a component as an attribute of the current object, and set the
+        owner of the component to the current object.
+        """
+        if component:
+            component.owner = self
+        setattr(self, component_name, component)
