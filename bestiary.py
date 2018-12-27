@@ -1,10 +1,10 @@
 import libtcodpy as libtcod
 
+from random import randint
+
 import equipment
 from game_states import debug
 import quest
-
-from entities.chest import Chest
 
 from components.ai import BasicNPC
 from components.ai import StrollingNPC
@@ -63,6 +63,71 @@ def bountyhunter(point = None):
     npc.questgiver = questgiver
 
     return npc
+
+def chest(point = None, dungeon_level = 1):
+    npc = Character(point, 'C', 'Chest', libtcod.blue, species=Species.NONDESCRIPT)
+
+    mimic_chance = randint(1, 100)
+
+    if (mimic_chance >= 50):
+        npc.species = Species.CREATURE
+        npc.color = libtcod.darker_blue
+        npc.add_component(Health(30), "health")
+        npc.add_component(Offense(base_power = 3), "offense")
+        npc.add_component(Defence(defence = 3), "defence")
+        npc.add_component(Level(), "level")
+
+        teeth = equipment.teeth()
+        teeth.lootable = False
+
+        npc.inventory.add_item(teeth)
+        npc.equipment.toggle_equip(teeth)
+
+        pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.ATTACKED, mimic_activate))
+        pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.TICK, mimic_shimmer))
+    else:
+        npc.add_component(Health(10), "health")
+        npc.add_component(Defence(defence = 2), "defence")
+        #TODO: Generate random level appropriate loot in chest
+        potion = equipment.random_potion(dungeon_level=dungeon_level)
+        potion.lootable = True
+
+        scroll = equipment.random_scroll(dungeon_level=dungeon_level)
+        scroll.lootable = True
+
+        weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
+        weapon.lootable = True
+
+        armour = equipment.random_armour(dungeon_level=dungeon_level)
+        armour.lootable = True
+
+        npc.inventory.add_item(potion)
+        npc.inventory.add_item(scroll)
+        npc.inventory.add_item(weapon)
+        npc.inventory.add_item(armour)
+
+    return npc
+
+def mimic_activate(sub, message, fov_map, game_map):
+    if (sub.entity.uuid == message.target.uuid):
+        sub.entity.add_component(BasicNPC(), "ai")
+        sub.entity.char = 'M'
+        sub.entity.base_name = 'Mimic'
+        pubsub.pubsub.mark_subscription_for_removal(sub)
+
+def mimic_shimmer(sub, message, fov_map, game_map):
+    if sub.entity.ai:
+        pubsub.pubsub.mark_subscription_for_removal(sub)
+        return
+
+    if (sub.entity.char == 'M'):
+        sub.entity.char = 'C'
+        sub.entity.base_name = 'Chest'
+    else:
+        mimic_chance = randint(1, 100)
+        if (mimic_chance >= 99):
+            sub.entity.char = 'M'
+            sub.entity.base_name = 'Mimic'
 
 def create_player():
     #create object representing the player
@@ -431,7 +496,7 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
     return npc
 
 def place_chest(point, game_map):
-    chest = Chest(point, game_map.dungeon_level)
+    chest = chest(point, game_map.dungeon_level)
     game_map.add_entity_to_map(chest)
 
     guards = libtcod.random_get_int(0, 1, 3)
