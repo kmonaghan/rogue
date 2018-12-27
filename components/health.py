@@ -33,8 +33,10 @@ class Health:
             self.hp = 0
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
 
-        if self.dead:
-            earned_xp = self.owner.level.xp_worth(npc)
+        if self.dead: 
+            earned_xp = 0
+            if hasattr(self.owner, 'level'):
+                earned_xp = self.owner.level.xp_worth(npc)
 
             results.append({'dead': self.owner, 'xp': earned_xp})
 
