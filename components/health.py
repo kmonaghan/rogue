@@ -1,5 +1,7 @@
 import libtcodpy as libtcod
 
+import pubsub
+
 class Health:
     def __init__(self, hp):
         self.base_max_hp = hp
@@ -29,6 +31,7 @@ class Health:
         if (self.hp <= 0):
             self.dead = True
             self.hp = 0
+            pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
 
         if self.dead:
             earned_xp = self.owner.level.xp_worth(npc)

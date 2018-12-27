@@ -13,6 +13,8 @@ from game_messages import Message
 
 from render_order import RenderOrder
 
+import uuid
+
 class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
@@ -59,6 +61,8 @@ class Entity:
             self.death = BasicDeath()
 
         self.death.owner = self
+
+        self.uuid = str(uuid.uuid4())
 
     @property
     def point(self):
@@ -180,3 +184,8 @@ class Entity:
         if component:
             component.owner = self
         setattr(self, component_name, component)
+
+    def del_component(self, component_name):
+        """Remove a component as an attribute of the current object.
+        """
+        delattr(self, component_name)

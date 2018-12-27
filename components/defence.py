@@ -9,6 +9,8 @@ class Defence:
 
     @property
     def defence(self):
+        multiplier = 1
+
         if self.owner and self.owner.equipment:
             bonus = self.owner.equipment.defence_bonus
         else:
@@ -17,4 +19,7 @@ class Defence:
         if self.owner.subspecies:
             bonus += self.owner.subspecies.bonus_defence
 
-        return self.base_defence + bonus
+        if hasattr(self.owner, 'berserk'):
+            multiplier = self.owner.berserk.defence_modifier
+
+        return (self.base_defence + bonus) * multiplier

@@ -14,6 +14,7 @@ from components.ai import Hunter
 from components.ai import Hatching
 from components.ai import SpawnNPC
 
+from components.berserk import Berserk
 from components.fighter import Fighter
 from components.health import Health
 from components.offense import Offense
@@ -145,7 +146,17 @@ def goblin(point = None):
     npc.inventory.add_item(dagger)
     npc.equipment.toggle_equip(dagger)
 
+    pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.DEATH, goblin_observed_death))
+
     return npc
+
+def goblin_observed_death(sub, message, fov_map, game_map):
+    if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):
+        if (sub.entity.uuid == message.entity.uuid):
+            pubsub.pubsub.mark_subscription_for_removal(sub)
+        elif libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
+            if not hasattr(sub.entity, "berserk"):
+                sub.entity.add_component(Berserk(), "berserk")
 
 def necromancer(point = None):
     #create a necromancer

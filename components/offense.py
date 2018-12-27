@@ -12,6 +12,8 @@ class Offense:
 
     @property
     def power(self):
+        multiplier = 1
+
         if self.owner and self.owner.equipment:
             bonus = self.owner.equipment.power_bonus
         else:
@@ -20,7 +22,10 @@ class Offense:
         if self.owner.subspecies:
             bonus += self.owner.subspecies.bonus_power
 
-        return self.base_power + bonus
+        if hasattr(self.owner, 'berserk'):
+            multiplier = self.owner.berserk.power_modifier
+
+        return (self.base_power + bonus) * multiplier
 
     def attack(self, target):
         results = []

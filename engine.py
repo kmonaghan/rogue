@@ -331,6 +331,8 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             else:
                 game_state = game_states.GameStates.PLAYERS_TURN
 
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.TICK))
+
         pubsub.pubsub.process_queue(fov_map, game_map)
 
 def main():
