@@ -31,6 +31,8 @@ from random_utils import from_dungeon_level, random_choice_from_dict
 
 from species import Species
 
+import pubsub
+
 def upgrade_npc(npc):
     npc.color = libtcod.silver
     npc.offense.multiplier = 1.5
@@ -66,7 +68,8 @@ def create_player():
     health_component = Health(30)
 
     player = Character(None, '@', 'player', libtcod.dark_green,
-                       death=PlayerDeath(), health=health_component)
+                       death=PlayerDeath(), health=health_component,
+                       species=Species.PLAYER)
 
     player.add_component(Offense(base_power = 6), "offense")
     player.add_component(Defence(defence = 6), "defence")
@@ -203,7 +206,14 @@ def rat(point = None):
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
 
+    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, rat_become_aggressive))
+
     return creature
+
+def rat_become_aggressive(sub, message, fov_map, game_map):
+    if (message.entity.species == Species.PLAYER) and (message.target.species == Species.RAT):
+        if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
+            sub.entity.add_component(BasicNPC(), "ai")
 
 def ratsnest(point = None):
     fighter_component = Fighter(xp=2)

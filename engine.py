@@ -10,6 +10,7 @@ from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 from map_objects.point import Point
 import quest
+import pubsub
 
 def play_game(player, game_map, message_log, game_state, con, panel, constants):
     fov_recompute = True
@@ -330,6 +331,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             else:
                 game_state = game_states.GameStates.PLAYERS_TURN
 
+        pubsub.pubsub.process_queue(fov_map, game_map)
 
 def main():
     constants = get_constants()

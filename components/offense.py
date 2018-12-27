@@ -3,6 +3,8 @@ import libtcodpy as libtcod
 from equipment_slots import EquipmentSlots
 from game_messages import Message
 
+import pubsub
+
 class Offense:
     def __init__(self, base_power = 0):
         self.base_power = base_power
@@ -17,7 +19,7 @@ class Offense:
 
         if self.owner.subspecies:
             bonus += self.owner.subspecies.bonus_power
-            
+
         return self.base_power + bonus
 
     def attack(self, target):
@@ -44,6 +46,9 @@ class Offense:
 
             results.append({'message': Message(msg.format(self.owner.name.title(), target.name, weapon.name, str(damage)), libtcod.white)})
             results.extend(target.health.take_damage(damage, self.owner))
+
+            pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
+
         else:
             results.append({'message': Message('{0} attacks {1} with {2} but does no damage.'.format(
                 self.owner.name.title(), target.name, weapon.name), libtcod.white)})

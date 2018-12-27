@@ -10,6 +10,8 @@ from map_objects.game_map import GameMap
 
 from render_functions import RenderOrder
 
+import pubsub
+
 import quest
 
 def get_constants():
@@ -71,6 +73,8 @@ def get_constants():
 
 
 def get_game_variables(constants):
+    pubsub.pubsub = pubsub.PubSub()
+
     player = create_player()
 
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
