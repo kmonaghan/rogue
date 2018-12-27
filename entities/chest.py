@@ -4,7 +4,6 @@ from random import randint
 import equipment
 
 from components.health import Health
-from components.fighter import Fighter
 from components.ai import BasicNPC
 
 from entities.character import Character
@@ -28,7 +27,6 @@ class Chest(Character):
 
         if (mimic_chance >= 99):
             self.species = Species.CREATURE
-            self.add_component(Fighter(xp=100), "fighter")
             self.add_component(Health(30), "health")
             teeth = equipment.teeth()
             teeth.lootable = False
@@ -36,7 +34,6 @@ class Chest(Character):
             self.inventory.add_item(teeth)
             self.equipment.toggle_equip(teeth)
         else:
-            self.add_component(Fighter(xp=0), "fighter")
             self.add_component(Health(10), "health")
             #TODO: Generate random level appropriate loot in chest
             potion = equipment.random_potion(dungeon_level=dungeon_level)

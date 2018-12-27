@@ -23,7 +23,6 @@ class BasicDeath:
         self.owner.char = '%'
         self.owner.color = libtcod.dark_red
         self.owner.blocks = False
-        #self.owner.fighter = None
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
 

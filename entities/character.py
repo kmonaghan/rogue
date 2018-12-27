@@ -21,9 +21,6 @@ class Character(Entity):
         self.inventory = Inventory(26)
         self.inventory.owner = self
 
-        self.level = Level()
-        self.level.owner = self
-
         self.equipment = Equipment()
         self.equipment.owner = self
 

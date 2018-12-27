@@ -15,8 +15,8 @@ from components.ai import Hatching
 from components.ai import SpawnNPC
 
 from components.berserk import Berserk
-from components.fighter import Fighter
 from components.health import Health
+from components.level import Level
 from components.offense import Offense
 from components.defence import Defence
 from components.questgiver import Questgiver
@@ -74,6 +74,7 @@ def create_player():
 
     player.add_component(Offense(base_power = 6), "offense")
     player.add_component(Defence(defence = 6), "defence")
+    player.add_component(Level(), "level")
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
@@ -90,7 +91,6 @@ def create_player():
     return player
 
 def bat(point = None):
-    fighter_component = Fighter(xp=2)
     health_component = Health(4)
 
     creature = Character(point, 'B', 'bat', libtcod.darker_red,
@@ -109,7 +109,6 @@ def bat(point = None):
     return creature
 
 def egg(point = None):
-    fighter_component = Fighter(xp=0)
     health_component = Health(4)
 
     creature = Character(point, 'E', 'Snake Egg', libtcod.darker_gray,
@@ -129,7 +128,6 @@ def egg(point = None):
 
 def goblin(point = None):
     #create a goblin
-    fighter_component = Fighter(xp=10)
     health_component = Health(20)
     ai_component = BasicNPC()
 
@@ -139,6 +137,7 @@ def goblin(point = None):
 
     npc.add_component(Offense(base_power = 5), "offense")
     npc.add_component(Defence(defence = 5), "defence")
+    npc.add_component(Level(xp_value = 10), "level")
 
     dagger = equipment.dagger()
     dagger.lootable = False
@@ -160,7 +159,6 @@ def goblin_observed_death(sub, message, fov_map, game_map):
 
 def necromancer(point = None):
     #create a necromancer
-    fighter_component = Fighter(xp=100)
     health_component = Health(30)
     ai_component = NecromancerNPC()
 
@@ -170,6 +168,7 @@ def necromancer(point = None):
 
     npc.add_component(Offense(base_power = 12), "offense")
     npc.add_component(Defence(defence = 8), "defense")
+    npc.add_component(Level(xp_value = 10), "level")
 
     item = equipment.longsword()
     item.lootable = False
@@ -181,7 +180,6 @@ def necromancer(point = None):
 
 def orc(point = None):
     #create an orc
-    fighter_component = Fighter(xp=35)
     health_component = Health(20)
     ai_component = BasicNPC()
 
@@ -191,6 +189,7 @@ def orc(point = None):
 
     npc.add_component(Offense(base_power = 10), "offense")
     npc.add_component(Defence(defence = 4), "defence")
+    npc.add_component(Level(xp_value = 10), "level")
 
     item = equipment.shortsword()
     item.lootable = False
@@ -201,7 +200,6 @@ def orc(point = None):
     return npc
 
 def rat(point = None):
-    fighter_component = Fighter(xp=2)
     health_component = Health(4)
 
     creature = Character(point, 'R', 'rat', libtcod.darker_green,
@@ -210,6 +208,7 @@ def rat(point = None):
 
     creature.add_component(Offense(base_power = 1), "offense")
     creature.add_component(Defence(defence = 1), "defence")
+    creature.add_component(Level(xp_value = 10), "level")
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -227,7 +226,6 @@ def rat_become_aggressive(sub, message, fov_map, game_map):
             sub.entity.add_component(BasicNPC(), "ai")
 
 def ratsnest(point = None):
-    fighter_component = Fighter(xp=2)
     health_component = Health(4)
 
     creature = Character(point, 'N', 'rat\'s nest', libtcod.darker_green,
@@ -235,6 +233,7 @@ def ratsnest(point = None):
                     species=Species.RAT, health=health_component)
 
     creature.add_component(Defence(defence = 4), "defence")
+    creature.add_component(Level(xp_value = 1), "level")
 
     # potion = equipment.random_potion(dungeon_level = dungeon_level)
     # potion.lootable = True
@@ -251,7 +250,6 @@ def reanmimate(old_npc):
 
 def skeleton(point = None, old_npc = None):
     ai_component = BasicNPC()
-    fighter_component = Fighter(xp=100)
     health_component = Health(30)
 
     if old_npc:
@@ -279,7 +277,6 @@ def skeleton(point = None, old_npc = None):
     return npc
 
 def snake(point = None):
-    fighter_component = Fighter(xp=4)
     health_component = Health(8)
 
     creature = Character(point, 'S', 'snake', libtcod.darker_green,
@@ -288,6 +285,7 @@ def snake(point = None):
 
     creature.add_component(Offense(base_power = 1), "offense")
     creature.add_component(Defence(defence = 1), "defence")
+    creature.add_component(Level(xp_value = 10), "level")
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -299,7 +297,6 @@ def snake(point = None):
 
 def troll(point = None):
     #create a troll
-    fighter_component = Fighter(xp=100)
     health_component = Health(30)
     ai_component = BasicNPC()
 
@@ -309,6 +306,7 @@ def troll(point = None):
 
     npc.add_component(Offense(base_power = 12), "offense")
     npc.add_component(Defence(defence = 8), "defense")
+    npc.add_component(Level(xp_value = 10), "level")
 
     item = equipment.longsword()
     item.lootable = False
@@ -320,7 +318,6 @@ def troll(point = None):
 
 def warlord(point = None):
     #create a warlord
-    fighter_component = Fighter(xp=100)
     ai_component = WarlordNPC()
 
     npc = Character(point, 'W', 'Warlord', libtcod.black,
@@ -329,6 +326,7 @@ def warlord(point = None):
 
     npc.add_component(Offense(base_power = 10), "offense")
     npc.add_component(Defence(defence = 4), "defense")
+    npc.add_component(Level(xp_value = 10), "level")
 
     item = equipment.longsword()
     item.base_name = item.base_name + " of I'll FUCKING Have You"
@@ -355,7 +353,6 @@ def warlord(point = None):
 
 def zombie(point = None, old_npc = None):
     ai_component = BasicNPC()
-    fighter_component = Fighter(xp=100)
     health_component = Health(30)
 
     if old_npc:
@@ -364,13 +361,12 @@ def zombie(point = None, old_npc = None):
         old_npc.base_name = 'Zombie ' + old_npc.base_name
         old_npc.add_component(ai_component, "ai")
         old_npc.add_component(Health(old_npc.health.max_hp // 2), "health")
-        old_npc.add_component(fighter_component, "fighter")
 
         return old_npc
     else:
         npc = Character(point, 'Z', 'zombie', libtcod.darker_green,
-                        fighter=fighter_component, ai=ai_component,
-                        species=Species.NONDESCRIPT, health=health_component)
+                        ai=ai_component, species=Species.NONDESCRIPT,
+                        health=health_component)
 
         npc.add_component(Offense(base_power = 10), "offense")
         npc.add_component(Defence(defence = 4), "defense")
