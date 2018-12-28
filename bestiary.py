@@ -75,7 +75,7 @@ def create_chest(point = None, dungeon_level = 1):
 
     mimic_chance = randint(1, 100)
 
-    if (mimic_chance >= 50):
+    if (mimic_chance >= 95):
         npc.species = Species.CREATURE
         npc.color = libtcod.darker_blue
         npc.add_component(Health(30), 'health')
