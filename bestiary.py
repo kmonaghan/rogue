@@ -34,23 +34,29 @@ from species import Species
 
 import pubsub
 
-def upgrade_npc(npc):
-    npc.color = libtcod.silver
-    npc.offense.multiplier = 1.5
-    npc.level.xp_value = npc.level.xp_value * 1.5
-    item = equipment.random_magic_weapon()
+names = False
 
-    npc.inventory.add_item(item)
-    npc.equipment.toggle_equip(item)
+'''
+Create npc/creatures/player
+'''
 
-def tweak_npc(npc):
-    dice = libtcod.random_get_int(0, 1, 100)
-    if (dice < 50):
-        return
-    else:
-        subspecies = Subspecies()
-        subspecies.random_subspecies()
-        npc.add_component(subspecies, "subspecies")
+def bat(point = None):
+    health_component = Health(4)
+
+    creature = Character(point, 'B', 'bat', libtcod.darker_red,
+                    ai=StrollingNPC(attacked_ai=BasicNPC()),
+                    species=Species.BAT, health=health_component)
+
+    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Defence(defence = 1), 'defence')
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    creature.inventory.add_item(teeth)
+    creature.equipment.toggle_equip(teeth)
+
+    return creature
 
 def bountyhunter(point = None):
     #create a questgiver
@@ -64,7 +70,7 @@ def bountyhunter(point = None):
 
     return npc
 
-def chest(point = None, dungeon_level = 1):
+def create_chest(point = None, dungeon_level = 1):
     npc = Character(point, 'C', 'Chest', libtcod.blue, species=Species.NONDESCRIPT)
 
     mimic_chance = randint(1, 100)
@@ -72,10 +78,10 @@ def chest(point = None, dungeon_level = 1):
     if (mimic_chance >= 50):
         npc.species = Species.CREATURE
         npc.color = libtcod.darker_blue
-        npc.add_component(Health(30), "health")
-        npc.add_component(Offense(base_power = 3), "offense")
-        npc.add_component(Defence(defence = 3), "defence")
-        npc.add_component(Level(), "level")
+        npc.add_component(Health(30), 'health')
+        npc.add_component(Offense(base_power = 3), 'offense')
+        npc.add_component(Defence(defence = 3), 'defence')
+        npc.add_component(Level(), 'level')
 
         teeth = equipment.teeth()
         teeth.lootable = False
@@ -86,8 +92,8 @@ def chest(point = None, dungeon_level = 1):
         pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.ATTACKED, mimic_activate))
         pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.TICK, mimic_shimmer))
     else:
-        npc.add_component(Health(10), "health")
-        npc.add_component(Defence(defence = 2), "defence")
+        npc.add_component(Health(10), 'health')
+        npc.add_component(Defence(defence = 2), 'defence')
         #TODO: Generate random level appropriate loot in chest
         potion = equipment.random_potion(dungeon_level=dungeon_level)
         potion.lootable = True
@@ -108,27 +114,6 @@ def chest(point = None, dungeon_level = 1):
 
     return npc
 
-def mimic_activate(sub, message, fov_map, game_map):
-    if (sub.entity.uuid == message.target.uuid):
-        sub.entity.add_component(BasicNPC(), "ai")
-        sub.entity.char = 'M'
-        sub.entity.base_name = 'Mimic'
-        pubsub.pubsub.mark_subscription_for_removal(sub)
-
-def mimic_shimmer(sub, message, fov_map, game_map):
-    if sub.entity.ai:
-        pubsub.pubsub.mark_subscription_for_removal(sub)
-        return
-
-    if (sub.entity.char == 'M'):
-        sub.entity.char = 'C'
-        sub.entity.base_name = 'Chest'
-    else:
-        mimic_chance = randint(1, 100)
-        if (mimic_chance >= 99):
-            sub.entity.char = 'M'
-            sub.entity.base_name = 'Mimic'
-
 def create_player():
     #create object representing the player
     health_component = Health(30)
@@ -137,9 +122,9 @@ def create_player():
                        death=PlayerDeath(), health=health_component,
                        species=Species.PLAYER)
 
-    player.add_component(Offense(base_power = 6), "offense")
-    player.add_component(Defence(defence = 6), "defence")
-    player.add_component(Level(), "level")
+    player.add_component(Offense(base_power = 6), 'offense')
+    player.add_component(Defence(defence = 6), 'defence')
+    player.add_component(Level(), 'level')
 
     #initial equipment: a dagger
     dagger = equipment.dagger()
@@ -155,24 +140,6 @@ def create_player():
 
     return player
 
-def bat(point = None):
-    health_component = Health(4)
-
-    creature = Character(point, 'B', 'bat', libtcod.darker_red,
-                    ai=StrollingNPC(attacked_ai=BasicNPC()),
-                    species=Species.BAT, health=health_component)
-
-    creature.add_component(Offense(base_power = 1), "offense")
-    creature.add_component(Defence(defence = 1), "defence")
-
-    teeth = equipment.teeth()
-    teeth.lootable = False
-
-    creature.inventory.add_item(teeth)
-    creature.equipment.toggle_equip(teeth)
-
-    return creature
-
 def egg(point = None):
     health_component = Health(4)
 
@@ -180,8 +147,8 @@ def egg(point = None):
                     ai=Hatching(snake()),
                     species=Species.EGG, health=health_component)
 
-    creature.add_component(Offense(base_power = 1), "offense")
-    creature.add_component(Defence(defence = 1), "defence")
+    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Defence(defence = 1), 'defence')
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -200,9 +167,9 @@ def goblin(point = None):
                     ai=ai_component, species=Species.GOBLIN,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 5), "offense")
-    npc.add_component(Defence(defence = 5), "defence")
-    npc.add_component(Level(xp_value = 10), "level")
+    npc.add_component(Offense(base_power = 5), 'offense')
+    npc.add_component(Defence(defence = 5), 'defence')
+    npc.add_component(Level(xp_value = 10), 'level')
 
     dagger = equipment.dagger()
     dagger.lootable = False
@@ -214,14 +181,6 @@ def goblin(point = None):
 
     return npc
 
-def goblin_observed_death(sub, message, fov_map, game_map):
-    if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):
-        if (sub.entity.uuid == message.entity.uuid):
-            pubsub.pubsub.mark_subscription_for_removal(sub)
-        elif libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
-            if not hasattr(sub.entity, "berserk"):
-                sub.entity.add_component(Berserk(), "berserk")
-
 def necromancer(point = None):
     #create a necromancer
     health_component = Health(30)
@@ -231,9 +190,9 @@ def necromancer(point = None):
                     ai=ai_component, species=Species.NONDESCRIPT,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 12), "offense")
+    npc.add_component(Offense(base_power = 12), 'offense')
     npc.add_component(Defence(defence = 8), "defense")
-    npc.add_component(Level(xp_value = 10), "level")
+    npc.add_component(Level(xp_value = 10), 'level')
 
     item = equipment.longsword()
     item.lootable = False
@@ -252,9 +211,9 @@ def orc(point = None):
                     ai=ai_component, species=Species.ORC,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 10), "offense")
-    npc.add_component(Defence(defence = 4), "defence")
-    npc.add_component(Level(xp_value = 10), "level")
+    npc.add_component(Offense(base_power = 10), 'offense')
+    npc.add_component(Defence(defence = 4), 'defence')
+    npc.add_component(Level(xp_value = 10), 'level')
 
     item = equipment.shortsword()
     item.lootable = False
@@ -271,9 +230,9 @@ def rat(point = None):
                     ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.EGG),
                     species=Species.RAT, health=health_component)
 
-    creature.add_component(Offense(base_power = 1), "offense")
-    creature.add_component(Defence(defence = 1), "defence")
-    creature.add_component(Level(xp_value = 10), "level")
+    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Defence(defence = 1), 'defence')
+    creature.add_component(Level(xp_value = 10), 'level')
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -281,24 +240,19 @@ def rat(point = None):
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
 
-    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, rat_become_aggressive))
+    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, rat_swarm))
 
     return creature
-
-def rat_become_aggressive(sub, message, fov_map, game_map):
-    if (message.entity.species == Species.PLAYER) and (message.target.species == Species.RAT):
-        if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
-            sub.entity.add_component(BasicNPC(), "ai")
 
 def ratsnest(point = None):
     health_component = Health(4)
 
     creature = Character(point, 'N', 'rat\'s nest', libtcod.darker_green,
                     ai=SpawnNPC(rat),
-                    species=Species.RAT, health=health_component)
+                    species=Species.RATNEST, health=health_component)
 
-    creature.add_component(Defence(defence = 4), "defence")
-    creature.add_component(Level(xp_value = 1), "level")
+    creature.add_component(Defence(defence = 4), 'defence')
+    creature.add_component(Level(xp_value = 1), 'level')
 
     # potion = equipment.random_potion(dungeon_level = dungeon_level)
     # potion.lootable = True
@@ -321,8 +275,8 @@ def skeleton(point = None, old_npc = None):
         old_npc.blocks = True
         old_npc.char = 'S'
         old_npc.base_name = 'Skeletal ' + old_npc.base_name
-        old_npc.add_component(ai_component, "ai")
-        old_npc.add_component(Health(old_npc.health.max_hp // 4), "health")
+        old_npc.add_component(ai_component, 'ai')
+        old_npc.add_component(Health(old_npc.health.max_hp // 4), 'health')
 
         return old_npc
     else:
@@ -330,8 +284,8 @@ def skeleton(point = None, old_npc = None):
                         ai=ai_component, species=Species.NONDESCRIPT,
                         health=health_component)
 
-        npc.add_component(Offense(base_power = 12), "offense")
-        npc.add_component(Defence(defence = 8), "defence")
+        npc.add_component(Offense(base_power = 12), 'offense')
+        npc.add_component(Defence(defence = 8), 'defence')
 
         item = equipment.longsword()
         item.lootable = False
@@ -348,15 +302,17 @@ def snake(point = None):
                     ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.RAT),
                     species=Species.SNAKE, health=health_component)
 
-    creature.add_component(Offense(base_power = 1), "offense")
-    creature.add_component(Defence(defence = 1), "defence")
-    creature.add_component(Level(xp_value = 10), "level")
+    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Defence(defence = 1), 'defence')
+    creature.add_component(Level(xp_value = 10), 'level')
 
     teeth = equipment.teeth()
     teeth.lootable = False
 
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
+
+    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, npc_become_aggressive))
 
     return creature
 
@@ -369,9 +325,9 @@ def troll(point = None):
                     ai=ai_component, species=Species.TROLL,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 12), "offense")
+    npc.add_component(Offense(base_power = 12), 'offense')
     npc.add_component(Defence(defence = 8), "defense")
-    npc.add_component(Level(xp_value = 10), "level")
+    npc.add_component(Level(xp_value = 10), 'level')
 
     item = equipment.longsword()
     item.lootable = False
@@ -389,9 +345,9 @@ def warlord(point = None):
                     ai=ai_component, species=Species.ORC, death=WarlordDeath(),
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 10), "offense")
+    npc.add_component(Offense(base_power = 10), 'offense')
     npc.add_component(Defence(defence = 4), "defense")
-    npc.add_component(Level(xp_value = 10), "level")
+    npc.add_component(Level(xp_value = 10), 'level')
 
     item = equipment.longsword()
     item.base_name = item.base_name + " of I'll FUCKING Have You"
@@ -424,8 +380,8 @@ def zombie(point = None, old_npc = None):
         old_npc.blocks = True
         old_npc.char = 'Z'
         old_npc.base_name = 'Zombie ' + old_npc.base_name
-        old_npc.add_component(ai_component, "ai")
-        old_npc.add_component(Health(old_npc.health.max_hp // 2), "health")
+        old_npc.add_component(ai_component, 'ai')
+        old_npc.add_component(Health(old_npc.health.max_hp // 2), 'health')
 
         return old_npc
     else:
@@ -433,7 +389,7 @@ def zombie(point = None, old_npc = None):
                         ai=ai_component, species=Species.NONDESCRIPT,
                         health=health_component)
 
-        npc.add_component(Offense(base_power = 10), "offense")
+        npc.add_component(Offense(base_power = 10), 'offense')
         npc.add_component(Defence(defence = 4), "defense")
 
         item = equipment.longsword()
@@ -444,7 +400,9 @@ def zombie(point = None, old_npc = None):
 
     return npc
 
-names = False
+'''
+Helper methods to create npcs/creatures/objects
+'''
 
 def generate_creature(type, dungeon_level = 1, player_level = 1, point = None):
     creature = None
@@ -496,7 +454,7 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
     return npc
 
 def place_chest(point, game_map):
-    chest = chest(point, game_map.dungeon_level)
+    chest = create_chest(point, game_map.dungeon_level)
     game_map.add_entity_to_map(chest)
 
     guards = libtcod.random_get_int(0, 1, 3)
@@ -511,6 +469,65 @@ def place_chest(point, game_map):
         npc = generate_npc(npc_choice, dungeon_level=game_map.dungeon_level, point=point)
         ai_component = StrollingNPC(tethered = point, tethered_distance = 2, aggressive = True)
         ai_component.attacked_ai = npc.ai
-        npc.add_component(ai_component, "ai")
+        npc.add_component(ai_component, 'ai')
 
         game_map.add_entity_to_map(npc)
+
+def tweak_npc(npc):
+    dice = libtcod.random_get_int(0, 1, 100)
+    if (dice < 50):
+        return
+    else:
+        subspecies = Subspecies()
+        subspecies.random_subspecies()
+        npc.add_component(subspecies, 'subspecies')
+
+def upgrade_npc(npc):
+    npc.color = libtcod.silver
+    npc.offense.multiplier = 1.5
+    npc.level.xp_value = npc.level.xp_value * 1.5
+    item = equipment.random_magic_weapon()
+
+    npc.inventory.add_item(item)
+    npc.equipment.toggle_equip(item)
+
+'''
+Subscription methods
+'''
+def goblin_observed_death(sub, message, fov_map, game_map):
+    if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):
+        if (sub.entity.uuid == message.entity.uuid):
+            pass
+        elif libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
+            if not hasattr(sub.entity, 'berserk'):
+                sub.entity.add_component(Berserk(), 'berserk')
+
+def npc_become_aggressive(sub, message, fov_map, game_map):
+    if (message.entity.species == Species.PLAYER) and (message.target.uuid == sub.entity.uuid):
+        sub.entity.add_component(BasicNPC(), 'ai')
+
+def mimic_activate(sub, message, fov_map, game_map):
+    if (sub.entity.uuid == message.target.uuid):
+        sub.entity.add_component(BasicNPC(), 'ai')
+        sub.entity.char = 'M'
+        sub.entity.base_name = 'Mimic'
+        pubsub.pubsub.mark_subscription_for_removal(sub)
+
+def mimic_shimmer(sub, message, fov_map, game_map):
+    if sub.entity.ai:
+        pubsub.pubsub.mark_subscription_for_removal(sub)
+        return
+
+    if (sub.entity.char == 'M'):
+        sub.entity.char = 'C'
+        sub.entity.base_name = 'Chest'
+    else:
+        mimic_chance = randint(1, 100)
+        if (mimic_chance >= 99):
+            sub.entity.char = 'M'
+            sub.entity.base_name = 'Mimic'
+
+def rat_swarm(sub, message, fov_map, game_map):
+    if (message.entity.species == Species.PLAYER) and (message.target.species == Species.RAT):
+        if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
+            sub.entity.add_component(BasicNPC(), 'ai')

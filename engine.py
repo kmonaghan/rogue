@@ -240,9 +240,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             if dead_entity:
                 quest_result = quest.check_quests_for_npc_death(dead_entity)
 
-                message, game_state = dead_entity.death.npc_death(game_map)
-
-                message_log.add_message(message)
+                game_state = dead_entity.death.npc_death(game_map)
 
             if item_added:
                 game_map.entities.remove(item_added)
@@ -314,12 +312,11 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             message_log.add_message(message)
 
                         if killed_entity:
-                            message, game_state = killed_entity.death.npc_death(game_map)
+                            game_state = killed_entity.death.npc_death(game_map)
                             entity.onKill(killed_entity, game_map)
 
                         if dead_entity:
-                            message, game_state = dead_entity.death.npc_death(game_map)
-                            message_log.add_message(message)
+                            game_state = dead_entity.death.npc_death(game_map)
 
                             if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
                                 break

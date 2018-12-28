@@ -6,13 +6,15 @@ class PubSubTypes(Enum):
     ATTACKED = auto()
     DEATH = auto()
     TICK = auto()
+    MESSAGE = auto()
 
 class Publish:
-    def __init__(self, entity, type, target = None, priority = 0):
+    def __init__(self, entity, type, target = None, priority = 0, message = None):
         self.entity = entity
         self.type = type
         self.priority = priority
         self.target = target
+        self.message = message
 
 class Subscription:
     def __init__(self, entity, type, callback):
@@ -33,8 +35,11 @@ class PubSub:
         self.subscriptions[sub.type].append(sub)
 
     def remove_subscription(self, sub):
-        self.subscriptions[sub.type].remove(sub)
-
+        try:
+            self.subscriptions[sub.type].remove(sub)
+        except ValueError:
+            pass
+            
     def mark_subscription_for_removal(self, sub):
         self.for_removal.append(sub)
 
@@ -53,3 +58,12 @@ class PubSub:
             self.remove_subscription(sub)
 
         self.for_removal = []
+
+    def unsubscribe_entity(self, entity):
+        for subs in self.subscriptions:
+            filtered = filter(lambda x: x.entity == entity, self.subscriptions[subs])
+            for sub in filtered:
+                self.mark_subscription_for_removal(sub)
+
+        for sub in self.for_removal:
+            self.remove_subscription(sub)

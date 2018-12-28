@@ -6,6 +6,8 @@ from game_states import GameStates
 
 from render_functions import RenderOrder
 
+import pubsub
+
 class BasicDeath:
     #an object that can be equipped, yielding bonuses. automatically adds the Item component.
     def __init__(self):
@@ -18,6 +20,8 @@ class BasicDeath:
         #transform it into a nasty corpse! it doesn't block, can't be
         #attacked and doesn't move
         death_message = Message('{0} is dead!'.format(self.owner.name.title()), libtcod.orange)
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = death_message))
+
         self.orginal_name = self.owner.name
 
         self.owner.char = '%'
@@ -35,7 +39,7 @@ class BasicDeath:
 
         self.rotting = True
 
-        return death_message, GameStates.ENEMY_TURN
+        return GameStates.ENEMY_TURN
 
     def decompose(self, game_map):
         self.rotting_time -= 1
@@ -50,17 +54,16 @@ class WarlordDeath(BasicDeath):
     def npc_death(self, game_map):
         #transform it into a nasty corpse! it doesn't block, can't be
         #attacked and doesn't move
-        message, game_state = super(WarlordDeath, self).npc_death(game_map)
+        game_state = super(WarlordDeath, self).npc_death(game_map)
 
         return Message('Victory is yours!', libtcod.gold), GameStates.GAME_COMPLETE
 
 class PlayerDeath(BasicDeath):
     def npc_death(self, game_map):
         print("player death")
-        #transform it into a nasty corpse! it doesn't block, can't be
-        #attacked and doesn't move
-        #message, game_state = super(PlayerDeath, self).npc_death(game_map)
+
         self.owner.char = '%'
         self.owner.color = libtcod.dark_red
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You died!', libtcod.red)))
 
-        return Message('You died!', libtcod.red), GameStates.PLAYER_DEAD
+        return GameStates.PLAYER_DEAD

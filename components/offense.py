@@ -45,17 +45,18 @@ class Offense:
             #make the target take some damage
             damage = weapon.equippable.damage() * multiplier
 
-            msg = '{0} attacks {1} with {2} for {3} hit points.'
+            msg_text = '{0} attacks {1} with {2} for {3} hit points.'
             if (multiplier > 1):
-                msg = '{0} smashes {1} with a massive blow from their {2} for {3} hit points.'
+                msg_text = '{0} smashes {1} with a massive blow from their {2} for {3} hit points.'
 
-            results.append({'message': Message(msg.format(self.owner.name.title(), target.name, weapon.name, str(damage)), libtcod.white)})
+            msg = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(damage)), libtcod.white)
             results.extend(target.health.take_damage(damage, self.owner))
 
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
 
         else:
-            results.append({'message': Message('{0} attacks {1} with {2} but does no damage.'.format(
-                self.owner.name.title(), target.name, weapon.name), libtcod.white)})
+            msg = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), libtcod.white)
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
 
         return results

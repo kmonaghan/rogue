@@ -133,12 +133,15 @@ class GameMap:
         #    rat = bestiary.generate_creature(Species.RATNEST, self.dungeon_level, player.level.current_level, room.random_tile(self))
         #    self.add_entity_to_map(rat)
         #
-        for i in range(5):
-            egg = bestiary.generate_creature(Species.EGG, self.dungeon_level, player.level.current_level, room.random_tile(self))
-            self.add_entity_to_map(egg)
+        #for i in range(5):
+        #    egg = bestiary.generate_creature(Species.EGG, self.dungeon_level, player.level.current_level, room.random_tile(self))
+        #    self.add_entity_to_map(egg)
 
+        #for i in range(5):
+        #    npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level, room.random_tile(self))
+        #    self.add_entity_to_map(npc)
         for i in range(5):
-            npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level, room.random_tile(self))
+            npc = bestiary.chest(room.random_tile(self), self.dungeon_level)
             self.add_entity_to_map(npc)
 
     def level_one(self, player):
@@ -409,7 +412,7 @@ class GameMap:
                 self.add_entity_to_map(item)
                 #item.always_visible = True  #items are visible even out-of-FOV, if in an explored area
 
-    def create_floor(self, player, message_log, constants):
+    def create_floor(self, player, constants):
         self.entities = [player]
         self.down_stairs = None
         self.up_stairs = None
