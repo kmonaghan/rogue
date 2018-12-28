@@ -53,7 +53,7 @@ class Level:
             self.owner.health.base_max_hp += 20
             self.owner.health.hp += 20
         elif choice == 1:
-            self.owner.offense.base_power += 1
+            self.owner.offence.base_power += 1
         elif choice == 2:
             self.owner.defence.base_defence += 1
 

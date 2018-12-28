@@ -26,7 +26,7 @@ class BasicNPC:
 
             #close enough, attack! (if the player is still alive.)
             elif target.health.hp > 0:
-                attack_results = npc.offense.attack(target)
+                attack_results = npc.offence.attack(target)
                 results.extend(attack_results)
 
         return results
@@ -104,7 +104,7 @@ class StrollingNPC:
                 self.moved = True
             #close enough, attack! (if the player is still alive.)
             elif target.health.hp > 0:
-                attack_results = self.owner.offense.attack(target)
+                attack_results = self.owner.offence.attack(target)
                 results.extend(attack_results)
                 self.moved = True
 
@@ -216,7 +216,7 @@ class Hunter(StrollingNPC):
                 npc.move_astar(target, game_map)
                 return results
             elif not target.health.dead and (dist == 1):
-                attack_results = npc.offense.attack(target)
+                attack_results = npc.offence.attack(target)
                 dead_entity = None
                 for turn_result in attack_results:
                     dead_entity = turn_result.get('dead')

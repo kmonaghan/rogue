@@ -107,7 +107,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                         quest_results = target.questgiver.talk(target)
                         player_turn_results.extend(quest_results)
                     elif target.defence:
-                        attack_results = player.offense.attack(target)
+                        attack_results = player.offence.attack(target)
                         player_turn_results.extend(attack_results)
                 else:
                     player.move(dx, dy)

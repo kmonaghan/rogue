@@ -5,7 +5,7 @@ from game_messages import Message
 
 import pubsub
 
-class Offense:
+class Offence:
     def __init__(self, base_power = 0):
         self.base_power = base_power
         self.owner = None

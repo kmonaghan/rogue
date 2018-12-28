@@ -54,8 +54,8 @@ class Character(Entity):
             desc += " (Level " + str(self.level.current_level) + ")"
 
         if debug:
-            if self.offense:
-                desc += " O:" + str(self.offense.power)
+            if self.offence:
+                desc += " O:" + str(self.offence.power)
             if self.defence:
                 desc += " D:" + str(self.defence.defence)
 

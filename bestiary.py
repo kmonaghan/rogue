@@ -17,7 +17,7 @@ from components.ai import SpawnNPC
 from components.berserk import Berserk
 from components.health import Health
 from components.level import Level
-from components.offense import Offense
+from components.offence import Offence
 from components.defence import Defence
 from components.questgiver import Questgiver
 from components.subspecies import Subspecies
@@ -47,7 +47,7 @@ def bat(point = None):
                     ai=StrollingNPC(attacked_ai=BasicNPC()),
                     species=Species.BAT, health=health_component)
 
-    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
 
     teeth = equipment.teeth()
@@ -79,7 +79,7 @@ def create_chest(point = None, dungeon_level = 1):
         npc.species = Species.CREATURE
         npc.color = libtcod.darker_blue
         npc.add_component(Health(30), 'health')
-        npc.add_component(Offense(base_power = 3), 'offense')
+        npc.add_component(Offence(base_power = 3), 'offence')
         npc.add_component(Defence(defence = 3), 'defence')
         npc.add_component(Level(), 'level')
 
@@ -122,7 +122,7 @@ def create_player():
                        death=PlayerDeath(), health=health_component,
                        species=Species.PLAYER)
 
-    player.add_component(Offense(base_power = 6), 'offense')
+    player.add_component(Offence(base_power = 6), 'offence')
     player.add_component(Defence(defence = 6), 'defence')
     player.add_component(Level(), 'level')
 
@@ -147,7 +147,7 @@ def egg(point = None):
                     ai=Hatching(snake()),
                     species=Species.EGG, health=health_component)
 
-    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
 
     teeth = equipment.teeth()
@@ -167,7 +167,7 @@ def goblin(point = None):
                     ai=ai_component, species=Species.GOBLIN,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 5), 'offense')
+    npc.add_component(Offence(base_power = 5), 'offence')
     npc.add_component(Defence(defence = 5), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
@@ -190,7 +190,7 @@ def necromancer(point = None):
                     ai=ai_component, species=Species.NONDESCRIPT,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 12), 'offense')
+    npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), "defense")
     npc.add_component(Level(xp_value = 10), 'level')
 
@@ -211,7 +211,7 @@ def orc(point = None):
                     ai=ai_component, species=Species.ORC,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 10), 'offense')
+    npc.add_component(Offence(base_power = 10), 'offence')
     npc.add_component(Defence(defence = 4), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
@@ -230,7 +230,7 @@ def rat(point = None):
                     ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.EGG),
                     species=Species.RAT, health=health_component)
 
-    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
 
@@ -284,7 +284,7 @@ def skeleton(point = None, old_npc = None):
                         ai=ai_component, species=Species.NONDESCRIPT,
                         health=health_component)
 
-        npc.add_component(Offense(base_power = 12), 'offense')
+        npc.add_component(Offence(base_power = 12), 'offence')
         npc.add_component(Defence(defence = 8), 'defence')
 
         item = equipment.longsword()
@@ -302,7 +302,7 @@ def snake(point = None):
                     ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.RAT),
                     species=Species.SNAKE, health=health_component)
 
-    creature.add_component(Offense(base_power = 1), 'offense')
+    creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
 
@@ -325,7 +325,7 @@ def troll(point = None):
                     ai=ai_component, species=Species.TROLL,
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 12), 'offense')
+    npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), "defense")
     npc.add_component(Level(xp_value = 10), 'level')
 
@@ -345,7 +345,7 @@ def warlord(point = None):
                     ai=ai_component, species=Species.ORC, death=WarlordDeath(),
                     health=health_component)
 
-    npc.add_component(Offense(base_power = 10), 'offense')
+    npc.add_component(Offence(base_power = 10), 'offence')
     npc.add_component(Defence(defence = 4), "defense")
     npc.add_component(Level(xp_value = 10), 'level')
 
@@ -389,7 +389,7 @@ def zombie(point = None, old_npc = None):
                         ai=ai_component, species=Species.NONDESCRIPT,
                         health=health_component)
 
-        npc.add_component(Offense(base_power = 10), 'offense')
+        npc.add_component(Offence(base_power = 10), 'offence')
         npc.add_component(Defence(defence = 4), "defense")
 
         item = equipment.longsword()
@@ -484,7 +484,7 @@ def tweak_npc(npc):
 
 def upgrade_npc(npc):
     npc.color = libtcod.silver
-    npc.offense.multiplier = 1.5
+    npc.offence.multiplier = 1.5
     npc.level.xp_value = npc.level.xp_value * 1.5
     item = equipment.random_magic_weapon()
 
