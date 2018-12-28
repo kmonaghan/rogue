@@ -91,7 +91,7 @@ def main_menu(con, background_image, screen_width, screen_height):
 
 def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
     options = [['Constitution (+20 HP, from {0})'.format(player.health.max_hp), libtcod.white],
-               ['Strength (+1 attack, from {0})'.format(player.attack.power), libtcod.white],
+               ['Strength (+1 attack, from {0})'.format(player.offense.power), libtcod.white],
                ['Agility (+1 defence, from {0})'.format(player.defence.defence), libtcod.white]]
 
     menu(con, header, options, menu_width, screen_width, screen_height)
@@ -113,7 +113,7 @@ def character_screen(player, character_screen_width, character_screen_height, sc
     libtcod.console_print_rect_ex(window, 0, 6, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
                                   libtcod.LEFT, 'Maximum HP: {0}'.format(player.health.max_hp))
     libtcod.console_print_rect_ex(window, 0, 7, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Attack: {0}'.format(player.attack.power))
+                                  libtcod.LEFT, 'Attack: {0}'.format(player.offense.power))
     libtcod.console_print_rect_ex(window, 0, 8, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
                                   libtcod.LEFT, 'Defense: {0}'.format(player.defence.defence))
 
