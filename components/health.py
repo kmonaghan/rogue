@@ -2,6 +2,8 @@ import libtcodpy as libtcod
 
 import pubsub
 
+from game_messages import Message
+
 class Health:
     def __init__(self, hp):
         self.base_max_hp = hp
@@ -31,14 +33,12 @@ class Health:
         if (self.hp <= 0):
             self.dead = True
             self.hp = 0
+            death_message = Message('{0} is dead!'.format(self.owner.name.title()), libtcod.orange)
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = death_message))
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
 
-        if self.dead: 
-            earned_xp = 0
-            if hasattr(self.owner, 'level'):
-                earned_xp = self.owner.level.xp_worth(npc)
-
-            results.append({'dead': self.owner, 'xp': earned_xp})
+        if self.dead:
+            results.append({'dead': self.owner})
 
         self.owner.hasBeenAttacked(npc)
 

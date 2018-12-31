@@ -3,7 +3,11 @@ import libtcodpy as libtcod
 from random import randint
 
 import equipment
+
+from game_messages import Message
+
 from game_states import debug
+
 import quest
 
 from components.ai import BasicNPC
@@ -137,6 +141,8 @@ def create_player():
         weapon = equipment.random_magic_weapon()
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
+
+    pubsub.pubsub.add_subscription(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_xp))
 
     return player
 
@@ -531,3 +537,9 @@ def rat_swarm(sub, message, fov_map, game_map):
     if (message.entity.species == Species.PLAYER) and (message.target.species == Species.RAT):
         if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
             sub.entity.add_component(BasicNPC(), 'ai')
+
+def earn_xp(sub, message, fov_map, game_map):
+    if (message.target.uuid == sub.entity.uuid) and hasattr(message.entity, 'level'):
+        xp = message.entity.level.xp_worth(message.target)
+        sub.entity.level.add_xp(xp)
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))

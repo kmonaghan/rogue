@@ -12,18 +12,12 @@ class BasicDeath:
     #an object that can be equipped, yielding bonuses. automatically adds the Item component.
     def __init__(self):
         self.rotting_time = 50
-        self.orginal_name = None
         self.rotting = False
         self.skeletal = False
 
     def npc_death(self, game_map):
         #transform it into a nasty corpse! it doesn't block, can't be
         #attacked and doesn't move
-        death_message = Message('{0} is dead!'.format(self.owner.name.title()), libtcod.orange)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = death_message))
-
-        self.orginal_name = self.owner.name
-
         self.owner.char = '%'
         self.owner.color = libtcod.dark_red
         self.owner.blocks = False
