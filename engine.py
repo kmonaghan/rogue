@@ -75,8 +75,25 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         player_turn_results = []
 
+        if (restart_game):
+            player, game_map, message_log, game_state = get_game_variables(constants)
+            fov_map = initialize_fov(game_map)
+            fov_recompute = True
+            libtcod.console_clear(con)
+            game_state = game_states.GameStates.ENEMY_TURN
+
         if player.level.can_level_up():
             game_state = game_states.GameStates.LEVEL_UP
+
+        if level_up:
+            if level_up == 'hp':
+                player.level.level_up_stats(0)
+            elif level_up == 'str':
+                player.level.level_up_stats(1)
+            elif level_up == 'def':
+                player.level.level_up_stats(2)
+
+            game_state = previous_game_state
 
         if turn_on_debug:
             game_states.debug = turn_on_debug
@@ -86,50 +103,12 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             game_states.debug = False
             fov_recompute = True
 
-        if (restart_game):
-            player, game_map, message_log, game_state = get_game_variables(constants)
-            fov_map = initialize_fov(game_map)
-            fov_recompute = True
-            libtcod.console_clear(con)
-            game_state = game_states.GameStates.ENEMY_TURN
-
-        elif move and game_state == game_states.GameStates.PLAYERS_TURN:
-            dx, dy = move
-            destination_x = player.x + dx
-            destination_y = player.y + dy
-
-            point = Point(destination_x, destination_y)
-            if not game_map.is_blocked(point):
-                target = game_map.get_blocking_entities_at_location(point)
-
-                if target:
-                    if target.questgiver:
-                        quest_results = target.questgiver.talk(target)
-                        player_turn_results.extend(quest_results)
-                    elif target.defence:
-                        attack_results = player.offence.attack(target)
-                        player_turn_results.extend(attack_results)
-                else:
-                    player.move(dx, dy)
-                    quest_results = quest.check_quest_for_location(player.point)
-                    player_turn_results.extend(quest_results)
-
-                    fov_recompute = True
-
-                game_state = game_states.GameStates.ENEMY_TURN
-
-        elif wait:
-            game_state = game_states.GameStates.ENEMY_TURN
-
-        elif pickup and game_state == game_states.GameStates.PLAYERS_TURN:
-            for entity in game_map.entity_map[player.x][player.y]:
-                if entity.item:
-                    pickup_results = player.inventory.add_item(entity)
-                    player_turn_results.extend(pickup_results)
-
-                    break
-            else:
-                message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
+        '''
+        Menu Options
+        '''
+        if show_character_screen:
+            previous_game_state = game_state
+            game_state = game_states.GameStates.CHARACTER_SCREEN
 
         if show_inventory:
             previous_game_state = game_state
@@ -169,30 +148,53 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             elif game_state == game_states.GameStates.EXAMINE_INVENTORY:
                 player_turn_results.extend(player.inventory.examine_item(item))
 
-        if take_stairs and game_state == game_states.GameStates.PLAYERS_TURN:
-            if (game_map.check_for_stairs(player.x, player.y)):
-                    game_map.next_floor(player, message_log, constants)
-                    fov_map = initialize_fov(game_map)
-                    fov_recompute = True
-                    libtcod.console_clear(con)
 
-                #    break
-            else:
-                message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
+        if game_state == game_states.GameStates.PLAYERS_TURN:
+            if move:
+                dx, dy = move
+                destination_x = player.x + dx
+                destination_y = player.y + dy
 
-        if level_up:
-            if level_up == 'hp':
-                player.level.level_up_stats(0)
-            elif level_up == 'str':
-                player.level.level_up_stats(1)
-            elif level_up == 'def':
-                player.level.level_up_stats(2)
+                point = Point(destination_x, destination_y)
+                if not game_map.is_blocked(point):
+                    target = game_map.get_blocking_entities_at_location(point)
 
-            game_state = previous_game_state
+                    if target:
+                        if target.questgiver:
+                            quest_results = target.questgiver.talk(player)
+                            player_turn_results.extend(quest_results)
+                        elif target.defence:
+                            attack_results = player.offence.attack(target)
+                            player_turn_results.extend(attack_results)
+                    else:
+                        player.move(dx, dy)
+                        quest_results = quest.check_quest_for_location(player.point)
+                        player_turn_results.extend(quest_results)
 
-        if show_character_screen:
-            previous_game_state = game_state
-            game_state = game_states.GameStates.CHARACTER_SCREEN
+                        fov_recompute = True
+
+                    game_state = game_states.GameStates.ENEMY_TURN
+            elif pickup:
+                for entity in game_map.entity_map[player.x][player.y]:
+                    if entity.item:
+                        pickup_results = player.inventory.add_item(entity)
+                        player_turn_results.extend(pickup_results)
+
+                        break
+                else:
+                    message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
+            elif take_stairs:
+                if (game_map.check_for_stairs(player.x, player.y)):
+                        game_map.next_floor(player, message_log, constants)
+                        fov_map = initialize_fov(game_map)
+                        fov_recompute = True
+                        libtcod.console_clear(con)
+
+                    #    break
+                else:
+                    message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
+            elif wait:
+                game_state = game_states.GameStates.ENEMY_TURN
 
         if game_state == game_states.GameStates.TARGETING:
             if left_click:
@@ -229,7 +231,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             equip = player_turn_result.get('equip')
             targeting = player_turn_result.get('targeting')
             targeting_cancelled = player_turn_result.get('targeting_cancelled')
-            xp = player_turn_result.get('xp')
             quest_onboarding = player_turn_result.get('quest_onboarding')
             quest_cancelled = player_turn_result.get('quest_cancelled')
             fov_recompute = player_turn_result.get('fov_recompute')
@@ -238,8 +239,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 message_log.add_message(message)
 
             if dead_entity:
-                quest_result = quest.check_quests_for_npc_death(dead_entity)
-
                 game_state = dead_entity.death.npc_death(game_map)
 
             if item_added:
@@ -283,10 +282,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
                 message_log.add_message(Message('Targeting cancelled'))
 
-            if xp:
-                player.level.add_xp(xp)
-                message_log.add_message(Message('You gain {0} experience points.'.format(xp)))
-
             if quest_onboarding:
                 previous_game_state = game_states.GameStates.PLAYERS_TURN
                 game_state = game_states.GameStates.QUEST_ONBOARDING
@@ -295,6 +290,8 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
             if quest_cancelled:
                 game_state = previous_game_state
+
+        pubsub.pubsub.process_queue(fov_map, game_map)
 
         if game_state == game_states.GameStates.ENEMY_TURN:
             for entity in game_map.entities:
