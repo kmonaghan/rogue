@@ -7,6 +7,7 @@ class PubSubTypes(Enum):
     DEATH = auto()
     TICK = auto()
     MESSAGE = auto()
+    EARNEDXP = auto()
 
 class Publish:
     def __init__(self, entity, type, target = None, priority = 0, message = None):
@@ -39,7 +40,7 @@ class PubSub:
             self.subscriptions[sub.type].remove(sub)
         except ValueError:
             pass
-            
+
     def mark_subscription_for_removal(self, sub):
         self.for_removal.append(sub)
 

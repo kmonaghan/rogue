@@ -2,6 +2,8 @@ import libtcodpy as libtcod
 
 from game_messages import Message
 
+import pubsub
+
 class Questgiver:
     def __init__(self, quest = None):
         self.owner = None
@@ -44,13 +46,15 @@ class Questgiver:
 
     def talk(self, pc):
         results = []
-        if (self.quest == None):
+        if not self.quest:
             return results
 
         if (self.quest.started == False):
             results.append({'quest_onboarding': self.quest})
         elif (self.quest.completed):
-            results.append({'message': Message('Well done!', libtcod.gold), 'xp': self.quest.xp})
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('Well done!', libtcod.gold)))
+            pubsub.pubsub.add_message(pubsub.Publish(self.quest, pubsub.PubSubTypes.EARNEDXP, target=pc))
+
             complete_result = self.completed_quest()
 
             results.extend(complete_result)

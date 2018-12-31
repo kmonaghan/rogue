@@ -142,7 +142,8 @@ def create_player():
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
 
-    pubsub.pubsub.add_subscription(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_xp))
+    pubsub.pubsub.add_subscription(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
+    pubsub.pubsub.add_subscription(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
     return player
 
@@ -538,8 +539,18 @@ def rat_swarm(sub, message, fov_map, game_map):
         if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
             sub.entity.add_component(BasicNPC(), 'ai')
 
-def earn_xp(sub, message, fov_map, game_map):
+def earn_death_xp(sub, message, fov_map, game_map):
     if (message.target.uuid == sub.entity.uuid) and hasattr(message.entity, 'level'):
         xp = message.entity.level.xp_worth(message.target)
+        sub.entity.level.add_xp(xp)
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))
+
+def earn_quest_xp(sub, message, fov_map, game_map):
+    print("earned xp for: ")
+    print(message.target.uuid)
+    print(sub.entity.uuid)
+    if (message.target.uuid == sub.entity.uuid):
+        print("adding XP")
+        xp = message.entity.xp
         sub.entity.level.add_xp(xp)
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))

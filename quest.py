@@ -5,16 +5,13 @@ from random import choice
 from game_messages import Message
 from species import Species
 
+import pubsub
+
 active_quests = []
 
-def check_quests_for_npc_death(npc):
-    global active_quests
-    results = []
-    for quest in active_quests:
-        if (quest.kill > 0):
-            results.append(quest.kill_count(npc))
-
-    return results
+def kill_quest_npc_death(sub, message, fov_map, game_map):
+    if (message.entity.species == sub.entity.kill_type) and (message.target.species == Species.PLAYER):
+        sub.entity.kill_count(message.entity)
 
 def check_quest_for_location(point):
     global active_quests
@@ -113,6 +110,9 @@ class Quest:
     def kill_count(self, npc):
         results = []
 
+        if self.completed:
+            return results
+
         ##print "tsting kill condition: " + npc.name
         if (self.kill == 0):
             return
@@ -123,7 +123,9 @@ class Quest:
 
         if (self.kill == self.kill_total):
             #print "quest complete"
-            results.append({'message': Message('Quest ' + self.title + ' completed!', libtcod.gold)})
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + self.title + ' completed!', libtcod.gold)))
+            pubsub.pubsub.unsubscribe_entity(self)
+
             self.completed = True
             if (self.return_to_quest_giver):
                 self.owner.return_to_giver()
@@ -145,6 +147,9 @@ class Quest:
             self.npc.x = aPoint.x
             self.npc.y = aPoint.y
             game_map.add_entity_to_map(self.npc)
+
+        if (self.kill > 0):
+            pubsub.pubsub.add_subscription(pubsub.Subscription(self, pubsub.PubSubTypes.DEATH, kill_quest_npc_death))
 
     def finish_quest(self):
         global active_quests
