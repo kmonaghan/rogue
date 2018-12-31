@@ -50,7 +50,7 @@ class Character(Entity):
 
         desc += self.species_describe()
 
-        if (self.level):
+        if hasattr(self, 'level'):
             desc += " (Level " + str(self.level.current_level) + ")"
 
         if debug:
