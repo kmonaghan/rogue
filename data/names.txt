@@ -14,19 +14,19 @@ name "king" {
 name "goblin" {
   syllablesStart = "Bob, John, Geoff, Dermot, Mike, Jonny"
   syllablesEnd = "Smith, Smythe, Bobson, Blythe"
-  rules = "$s, $s_$e"
+  rules = "$s_$e"
 }
 
 name "orc" {
   syllablesStart = "Bob, John, Geoff, Dermot, Mike, Jonny"
   syllablesEnd = "Smith, Smythe, Bobson, Blythe"
-  rules = "$s, $s_$e"
+  rules = "$s_$e"
 }
 
 name "troll" {
   syllablesStart = "Bob, John, Geoff, Dermot, Mike, Jonny"
   syllablesEnd = "Smith, Smythe, Bobson, Blythe"
-  rules = "$s, $s_$e"
+  rules = "$s_$e"
 }
 
 name "warlord" {
