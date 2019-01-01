@@ -298,29 +298,33 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 if entity.health and entity.health.dead:
                     entity.death.decompose(game_map)
                 elif entity.ai:
-                    enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
+                    entity.energy.increase_energy()
+                    if entity.energy.take_action():
+                        print(entity.name + "(" + entity.uuid + ") CAN take a turn")
+                        enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
 
-                    for enemy_turn_result in enemy_turn_results:
-                        message = enemy_turn_result.get('message')
-                        dead_entity = enemy_turn_result.get('dead')
-                        killed_entity = enemy_turn_result.get('entity_dead')
+                        for enemy_turn_result in enemy_turn_results:
+                            message = enemy_turn_result.get('message')
+                            dead_entity = enemy_turn_result.get('dead')
+                            killed_entity = enemy_turn_result.get('entity_dead')
 
-                        if message:
-                            message_log.add_message(message)
+                            if message:
+                                message_log.add_message(message)
 
-                        if killed_entity:
-                            game_state = killed_entity.death.npc_death(game_map)
-                            entity.onKill(killed_entity, game_map)
+                            if killed_entity:
+                                game_state = killed_entity.death.npc_death(game_map)
+                                entity.onKill(killed_entity, game_map)
 
-                        if dead_entity:
-                            game_state = dead_entity.death.npc_death(game_map)
+                            if dead_entity:
+                                game_state = dead_entity.death.npc_death(game_map)
 
-                            if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
-                                break
+                                if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
+                                    break
 
-                    if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
-                        break
-
+                        if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
+                            break
+                    else:
+                        print(entity.name + "(" + entity.uuid + ") can not take a turn yet")
                 game_map.update_entity_map()
             else:
                 game_state = game_states.GameStates.PLAYERS_TURN

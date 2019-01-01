@@ -5,6 +5,7 @@ import libtcodpy as libtcod
 import equipment
 import math
 
+from components.energy import Energy
 from components.item import Item
 from components.death import BasicDeath
 from map_objects.point import Point
@@ -20,7 +21,8 @@ class Entity:
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
                  ai=None, item=None, stairs=None, equippable=None,
-                 render_order=RenderOrder.CORPSE, death=None, health=None):
+                 render_order=RenderOrder.CORPSE, death=None, health=None,
+                 act_energy=2):
 
         self.x = None
         self.y = None
@@ -40,6 +42,7 @@ class Entity:
         self.add_component(ai, "ai")
         self.add_component(item, "item")
         self.add_component(stairs, "stairs")
+        self.add_component(Energy(act_energy), "energy")
 
         self.equippable = equippable
         if self.equippable:

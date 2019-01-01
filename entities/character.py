@@ -15,8 +15,8 @@ from species import Species
 from game_states import debug
 
 class Character(Entity):
-    def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None):
-        super(Character, self).__init__(point, char, name, color, blocks, always_visible, ai, item, gear, death=death, health=health)
+    def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None, act_energy=2):
+        super(Character, self).__init__(point, char, name, color, blocks, always_visible, ai, item, gear, death=death, health=health, act_energy=act_energy)
 
         self.inventory = Inventory(26)
         self.inventory.owner = self

@@ -49,7 +49,7 @@ def bat(point = None):
 
     creature = Character(point, 'B', 'bat', libtcod.darker_red,
                     ai=StrollingNPC(attacked_ai=BasicNPC()),
-                    species=Species.BAT, health=health_component)
+                    species=Species.BAT, health=health_component, act_energy=2)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -66,7 +66,7 @@ def bountyhunter(point = None):
     #create a questgiver
 
     ai_component = StrollingNPC(tethered = point)
-    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component, species=Species.NONDESCRIPT)
+    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component, species=Species.NONDESCRIPT, act_energy=2)
 
     questgiver = Questgiver()
     questgiver.owner = npc
@@ -172,7 +172,7 @@ def goblin(point = None):
 
     npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
                     ai=ai_component, species=Species.GOBLIN,
-                    health=health_component)
+                    health=health_component, act_energy=2)
 
     npc.add_component(Offence(base_power = 5), 'offence')
     npc.add_component(Defence(defence = 5), 'defence')
@@ -195,7 +195,7 @@ def necromancer(point = None):
 
     npc = Character(point, 'N', 'necromancer', libtcod.darker_green,
                     ai=ai_component, species=Species.NONDESCRIPT,
-                    health=health_component)
+                    health=health_component, act_energy=1)
 
     npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), "defense")
@@ -216,7 +216,7 @@ def orc(point = None):
 
     npc = Character(point, 'O', 'orc', libtcod.light_green,
                     ai=ai_component, species=Species.ORC,
-                    health=health_component)
+                    health=health_component, act_energy=2)
 
     npc.add_component(Offence(base_power = 10), 'offence')
     npc.add_component(Defence(defence = 4), 'defence')
@@ -235,7 +235,7 @@ def rat(point = None):
 
     creature = Character(point, 'R', 'rat', libtcod.darker_green,
                     ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.EGG),
-                    species=Species.RAT, health=health_component)
+                    species=Species.RAT, health=health_component, act_energy=2)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -256,7 +256,7 @@ def ratsnest(point = None):
 
     creature = Character(point, 'N', 'rat\'s nest', libtcod.darker_green,
                     ai=SpawnNPC(rat),
-                    species=Species.RATNEST, health=health_component)
+                    species=Species.RATNEST, health=health_component, act_energy=1)
 
     creature.add_component(Defence(defence = 4), 'defence')
     creature.add_component(Level(xp_value = 1), 'level')
@@ -289,7 +289,7 @@ def skeleton(point = None, old_npc = None):
     else:
         npc = Character(point, 'S', 'skeleton', libtcod.darker_green,
                         ai=ai_component, species=Species.NONDESCRIPT,
-                        health=health_component)
+                        health=health_component, act_energy=2)
 
         npc.add_component(Offence(base_power = 12), 'offence')
         npc.add_component(Defence(defence = 8), 'defence')
@@ -307,7 +307,7 @@ def snake(point = None):
 
     creature = Character(point, 'S', 'snake', libtcod.darker_green,
                     ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.RAT),
-                    species=Species.SNAKE, health=health_component)
+                    species=Species.SNAKE, health=health_component, act_energy=2)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -330,7 +330,7 @@ def troll(point = None):
 
     npc = Character(point, 'T', 'troll', libtcod.darker_green,
                     ai=ai_component, species=Species.TROLL,
-                    health=health_component)
+                    health=health_component, act_energy=3)
 
     npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), "defense")
