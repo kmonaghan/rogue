@@ -68,7 +68,7 @@ def handle_player_turn_keys(key):
     elif key_char == 'q':
         return {'quest_list': True}
 
-    elif key.vk == libtcod.KEY_ENTER or key_char == ',' or key_char == '.':
+    elif key.vk == key_char == ',' or key_char == '.':
         return {'take_stairs': True}
 
     elif key_char == 'c':
