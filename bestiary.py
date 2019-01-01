@@ -535,7 +535,7 @@ def mimic_shimmer(sub, message, fov_map, game_map):
             sub.entity.base_name = 'Mimic'
 
 def rat_swarm(sub, message, fov_map, game_map):
-    if (message.entity.species == Species.PLAYER) and (message.target.species == Species.RAT):
+    if (message.entity.species == Species.PLAYER) and ((message.target.species == Species.RAT) or (message.target.species == Species.RATNEST)):
         if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
             sub.entity.add_component(BasicNPC(), 'ai')
 
