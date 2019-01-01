@@ -508,6 +508,7 @@ def goblin_observed_death(sub, message, fov_map, game_map):
         elif libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
             if not hasattr(sub.entity, 'berserk'):
                 sub.entity.add_component(Berserk(), 'berserk')
+                sub.entity.berserk.start_berserker()
 
 def npc_become_aggressive(sub, message, fov_map, game_map):
     if (message.entity.species == Species.PLAYER) and (message.target.uuid == sub.entity.uuid):
