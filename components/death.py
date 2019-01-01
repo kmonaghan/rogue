@@ -40,9 +40,13 @@ class BasicDeath:
         if (self.rotting_time == 0):
             game_map.remove_entity_from_map(self.owner)
         elif (self.rotting_time <= 25):
-            self.rotting = False
-            self.skeletal = True
-            self.owner.color = libtcod.white
+            self.skeletonize()
+
+    def skeletonize(self):
+        self.rotting = False
+        self.skeletal = True
+        self.rotting_time = 24
+        self.owner.color = libtcod.white
 
 class WarlordDeath(BasicDeath):
     def npc_death(self, game_map):

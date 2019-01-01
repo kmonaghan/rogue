@@ -24,6 +24,7 @@ from components.level import Level
 from components.offence import Offence
 from components.defence import Defence
 from components.questgiver import Questgiver
+from components.spawn import Spawn
 from components.subspecies import Subspecies
 
 from entities.character import Character
@@ -312,6 +313,7 @@ def snake(point = None):
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
+    creature.add_component(Spawn(2, egg), 'spawn')
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -320,6 +322,7 @@ def snake(point = None):
     creature.equipment.toggle_equip(teeth)
 
     pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, npc_become_aggressive))
+    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.DEATH, eat_rat))
 
     return creature
 
@@ -501,6 +504,11 @@ def upgrade_npc(npc):
 '''
 Subscription methods
 '''
+def eat_rat(sub, message, fov_map, game_map):
+    if (message.entity.species == Species.RAT) and (message.target.uuid == sub.entity.uuid):
+        sub.entity.spawn.increase_energy()
+        message.entity.death.skeletonize()
+
 def goblin_observed_death(sub, message, fov_map, game_map):
     if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):
         if (sub.entity.uuid == message.entity.uuid):

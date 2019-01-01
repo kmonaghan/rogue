@@ -75,6 +75,7 @@ def get_constants():
 def get_game_variables(constants):
     pubsub.pubsub = pubsub.PubSub()
     pubsub.pubsub.add_subscription(pubsub.Subscription(None, pubsub.PubSubTypes.DEATH, on_entity_death))
+    pubsub.pubsub.add_subscription(pubsub.Subscription(None, pubsub.PubSubTypes.SPAWN, entity_spawn))
 
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
     pubsub.pubsub.add_subscription(pubsub.Subscription(message_log, pubsub.PubSubTypes.MESSAGE, add_to_messages))
@@ -96,6 +97,11 @@ def get_game_variables(constants):
 
 def add_to_messages(sub, message, fov_map, game_map):
     sub.entity.add_message(message.message)
+
+def entity_spawn(sub, message, fov_map, game_map):
+    npc = message.entity.spawn.spawn()
+    if npc:
+        game_map.add_entity_to_map(npc)
 
 def on_entity_death(sub, message, fov_map, game_map):
     pubsub.pubsub.unsubscribe_entity(message.entity)

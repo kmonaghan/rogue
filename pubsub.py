@@ -8,6 +8,7 @@ class PubSubTypes(Enum):
     TICK = auto()
     MESSAGE = auto()
     EARNEDXP = auto()
+    SPAWN = auto()
 
 class Publish:
     def __init__(self, entity, type, target = None, priority = 0, message = None):
