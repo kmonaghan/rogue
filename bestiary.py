@@ -94,8 +94,8 @@ def create_chest(point = None, dungeon_level = 1):
         npc.inventory.add_item(teeth)
         npc.equipment.toggle_equip(teeth)
 
-        pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.ATTACKED, mimic_activate))
-        pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.TICK, mimic_shimmer))
+        pubsub.pubsub.subscribe(pubsub.Subscription(npc, pubsub.PubSubTypes.ATTACKED, mimic_activate))
+        pubsub.pubsub.subscribe(pubsub.Subscription(npc, pubsub.PubSubTypes.TICK, mimic_shimmer))
     else:
         npc.add_component(Health(10), 'health')
         npc.add_component(Defence(defence = 2), 'defence')
@@ -143,8 +143,8 @@ def create_player():
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
 
-    pubsub.pubsub.add_subscription(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
-    pubsub.pubsub.add_subscription(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
+    pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
+    pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
     return player
 
@@ -185,7 +185,7 @@ def goblin(point = None):
     npc.inventory.add_item(dagger)
     npc.equipment.toggle_equip(dagger)
 
-    pubsub.pubsub.add_subscription(pubsub.Subscription(npc, pubsub.PubSubTypes.DEATH, goblin_observed_death))
+    pubsub.pubsub.subscribe(pubsub.Subscription(npc, pubsub.PubSubTypes.DEATH, goblin_observed_death))
 
     return npc
 
@@ -248,7 +248,7 @@ def rat(point = None):
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
 
-    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, rat_swarm))
+    pubsub.pubsub.subscribe(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, rat_swarm))
 
     return creature
 
@@ -321,8 +321,8 @@ def snake(point = None):
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
 
-    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, npc_become_aggressive))
-    pubsub.pubsub.add_subscription(pubsub.Subscription(creature, pubsub.PubSubTypes.DEATH, eat_rat))
+    pubsub.pubsub.subscribe(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, npc_become_aggressive))
+    pubsub.pubsub.subscribe(pubsub.Subscription(creature, pubsub.PubSubTypes.DEATH, eat_rat))
 
     return creature
 

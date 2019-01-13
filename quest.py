@@ -21,6 +21,7 @@ def check_quest_for_location(point):
     for quest in active_quests:
         if (quest.map_point):
             if (point == quest.map_point):
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + self.title + ' completed!', libtcod.gold)))
                 results.append({'message': Message('Quest ' + quest.title + ' completed!', libtcod.gold), 'xp': quest.xp})
 
     return results
@@ -149,7 +150,7 @@ class Quest:
             game_map.add_entity_to_map(self.npc)
 
         if (self.kill > 0):
-            pubsub.pubsub.add_subscription(pubsub.Subscription(self, pubsub.PubSubTypes.DEATH, kill_quest_npc_death))
+            pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.DEATH, kill_quest_npc_death))
 
     def finish_quest(self):
         global active_quests

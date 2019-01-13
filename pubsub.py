@@ -30,7 +30,7 @@ class PubSub:
         self.queue = []
         self.for_removal = []
 
-    def add_subscription(self, sub):
+    def subscribe(self, sub):
         if not sub.type in self.subscriptions:
             self.subscriptions[sub.type] = []
 

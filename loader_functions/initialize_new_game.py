@@ -74,11 +74,11 @@ def get_constants():
 
 def get_game_variables(constants):
     pubsub.pubsub = pubsub.PubSub()
-    pubsub.pubsub.add_subscription(pubsub.Subscription(None, pubsub.PubSubTypes.DEATH, on_entity_death))
-    pubsub.pubsub.add_subscription(pubsub.Subscription(None, pubsub.PubSubTypes.SPAWN, entity_spawn))
+    pubsub.pubsub.subscribe(pubsub.Subscription(None, pubsub.PubSubTypes.DEATH, on_entity_death))
+    pubsub.pubsub.subscribe(pubsub.Subscription(None, pubsub.PubSubTypes.SPAWN, entity_spawn))
 
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
-    pubsub.pubsub.add_subscription(pubsub.Subscription(message_log, pubsub.PubSubTypes.MESSAGE, add_to_messages))
+    pubsub.pubsub.subscribe(pubsub.Subscription(message_log, pubsub.PubSubTypes.MESSAGE, add_to_messages))
 
     map_height = constants['map_height']
     map_width = constants['map_width']
