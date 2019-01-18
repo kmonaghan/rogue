@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import tcod as libtcod
 from random import choice, sample, randint
 
 import bestiary

@@ -12,7 +12,7 @@
 #                                                                #
 ##################################################################
 
-import libtcodpy as libtcod
+import tcod as libtcod
 
 from enum import IntEnum, auto
 from random import randint, choice, randrange

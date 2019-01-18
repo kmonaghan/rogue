@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import tcod as libtcod
 
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
@@ -300,7 +300,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 elif entity.ai:
                     entity.energy.increase_energy()
                     if entity.energy.take_action():
-                        print(entity.name + "(" + entity.uuid + ") CAN take a turn")
+                        #print(entity.name + "(" + entity.uuid + ") CAN take a turn")
                         enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
 
                         for enemy_turn_result in enemy_turn_results:
@@ -324,7 +324,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                         if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
                             break
                     else:
-                        print(entity.name + "(" + entity.uuid + ") can not take a turn yet")
+                        #print(entity.name + "(" + entity.uuid + ") can not take a turn yet")
+                        pass
+
                 game_map.update_entity_map()
             else:
                 game_state = game_states.GameStates.PLAYERS_TURN

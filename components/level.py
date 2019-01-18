@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import tcod as libtcod
 
 #experience and level-ups
 LEVEL_UP_BASE = 100

@@ -1,6 +1,6 @@
 __metaclass__ = type
 
-import libtcodpy as libtcod
+import tcod as libtcod
 
 class Tile:
     """
