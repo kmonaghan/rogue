@@ -22,7 +22,7 @@ class BasicNPC:
 
             #move towards player if far away
             if npc.point.distance_to(target.point) >= 2:
-                npc.move_astar(target, game_map)
+                npc.movement.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
             elif target.health.hp > 0:
@@ -50,7 +50,7 @@ class PatrollingNPC:
             if (npc.x == self.target.x) and (npc.y == self.target.y):
                 self.next_target()
 
-            npc.move_astar(self.target, game_map)
+            npc.movement.move_astar(self.target, game_map)
 
         return results
 
@@ -71,7 +71,7 @@ class ConfusedNPC:
             dx = libtcod.random_get_int(0, -1, 1)
             dy = libtcod.random_get_int(0, -1, 1)
 
-            self.owner.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
+            self.owner.movement.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
 
             self.number_of_turns -= 1
         else:
@@ -97,10 +97,10 @@ class StrollingNPC:
             distance = self.owner.point.distance_to(target.point)
             if distance > self.pursue_distance:
                 print("returning to patrol point")
-                self.owner.move_towards(self.tethered, game_map)
+                self.owner.movement.move_towards(self.tethered, game_map)
                 return results
             elif distance >= 2:
-                self.owner.move_astar(target, game_map)
+                self.owner.movement.move_astar(target, game_map)
                 self.moved = True
             #close enough, attack! (if the player is still alive.)
             elif target.health.hp > 0:
@@ -112,12 +112,12 @@ class StrollingNPC:
             if self.tethered:
                 if (self.owner.point.distance_to(self.tethered) > self.tethered_distance):
                     #print("too far from tethered point: " + self.tethered.describe())
-                    self.owner.move_towards(self.tethered, game_map)
+                    self.owner.movement.move_towards(self.tethered, game_map)
                     return results
 
             dx = libtcod.random_get_int(0, -1, 1)
             dy = libtcod.random_get_int(0, -1, 1)
-            self.moved = self.owner.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
+            self.moved = self.owner.movement.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
         else:
             self.moved = False
 
@@ -164,7 +164,7 @@ class WarlordNPC:
 
             #move towards player if far away
             if npc.point.distance_to(target.point) >= 2:
-                npc.move_astar(target, game_map)
+                npc.movement.move_astar(target, game_map)
 
             #close enough, attack! (if the player is still alive.)
             elif target.health.hp > 0:
@@ -213,7 +213,7 @@ class Hunter(StrollingNPC):
             dist = max(abs(target.x - npc.x), abs(target.y - npc.y))
 
             if dist > 1:
-                npc.move_astar(target, game_map)
+                npc.movement.move_astar(target, game_map)
                 return results
             elif not target.health.dead and (dist == 1):
                 attack_results = npc.offence.attack(target)

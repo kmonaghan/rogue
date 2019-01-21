@@ -167,7 +167,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                             attack_results = player.offence.attack(target)
                             player_turn_results.extend(attack_results)
                     else:
-                        player.move(dx, dy)
+                        player.movement.move(dx, dy)
                         quest_results = quest.check_quest_for_location(player.point)
                         player_turn_results.extend(quest_results)
 
