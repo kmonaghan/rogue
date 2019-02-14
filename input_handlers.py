@@ -1,24 +1,25 @@
 import tcod as libtcod
 
-from game_states import GameStates
-
+from etc.enum import GameStates, InputTypes, INVENTORY_STATES
 
 def handle_keys(key, game_state):
-    if game_state == GameStates.GAME_COMPLETE:
+    if game_state == GameStates.CHARACTER_SCREEN:
+        return handle_character_screen(key)
+    elif game_state == GameStates.GAME_COMPLETE:
         return handle_game_complete_keys(key)
-    elif game_state == GameStates.PLAYERS_TURN:
+    elif game_state == GameStates.GAME_START:
+        return handle_main_menu(key)
+    elif game_state == GameStates.LEVEL_UP:
+        return handle_level_up_menu(key)
+    elif game_state == GameStates.PLAYER_TURN:
         return handle_player_turn_keys(key)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_player_dead_keys(key)
     elif game_state == GameStates.TARGETING:
         return handle_targeting_keys(key)
-    elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.EXAMINE_INVENTORY):
+    elif game_state in INVENTORY_STATES:
         return handle_inventory_keys(key)
-    elif game_state == GameStates.LEVEL_UP:
-        return handle_level_up_menu(key)
-    elif game_state == GameStates.CHARACTER_SCREEN:
-        return handle_character_screen(key)
-    elif game_state == GameStates.SHOW_QUESTS:
+    elif game_state == GameStates.QUEST_LIST:
         return handle_show_quests(key)
     elif game_state == GameStates.QUEST_ONBOARDING:
         return handle_quests_onboarding(key)
@@ -27,59 +28,60 @@ def handle_keys(key, game_state):
 
 
 def handle_player_turn_keys(key):
+    print(key)
     key_char = chr(key.c)
 
     # Movement keys
     if key.vk == libtcod.KEY_UP or key_char == 'k':
-        return {'move': (0, -1)}
+        return {InputTypes.MOVE: (0, -1)}
     elif key.vk == libtcod.KEY_DOWN or key_char == 'j':
-        return {'move': (0, 1)}
+        return {InputTypes.MOVE: (0, 1)}
     elif key.vk == libtcod.KEY_LEFT or key_char == 'h':
-        return {'move': (-1, 0)}
+        return {InputTypes.MOVE: (-1, 0)}
     elif key.vk == libtcod.KEY_RIGHT or key_char == 'l':
-        return {'move': (1, 0)}
+        return {InputTypes.MOVE: (1, 0)}
     elif key_char == 'y':
-        return {'move': (-1, -1)}
+        return {InputTypes.MOVE: (-1, -1)}
     elif key_char == 'u':
-        return {'move': (1, -1)}
+        return {InputTypes.MOVE: (1, -1)}
     elif key_char == 'b':
-        return {'move': (-1, 1)}
+        return {InputTypes.MOVE: (-1, 1)}
     elif key_char == 'n':
-        return {'move': (1, 1)}
+        return {InputTypes.MOVE: (1, 1)}
     elif key_char == 'z':
-        return {'wait': True}
+        return {InputTypes.WAIT: True}
     elif key_char == ']':
-        return {'wait': True, 'debug_on': True}
+        return {InputTypes.WAIT: True, InputTypes.DEBUG_ON: True}
     elif key_char == '[':
-        return {'wait': True, 'debug_off': True}
+        return {InputTypes.WAIT: True, InputTypes.DEBUG_OFF: False}
 
     if key_char == 'g':
-        return {'pickup': True}
+        return {InputTypes.PICKUP: True}
 
     elif key_char == 'i':
-        return {'show_inventory': True}
+        return {InputTypes.INVENTORY_USE: True}
 
     elif key_char == 'd':
-        return {'drop_inventory': True}
+        return {InputTypes.INVENTORY_DROP: True}
 
     elif key_char == 'e':
-        return {'examine_inventory': True}
+        return {InputTypes.INVENTORY_EXAMINE: True}
 
     elif key_char == 'q':
-        return {'quest_list': True}
+        return {InputTypes.QUEST_LIST: True}
 
     elif key.vk == key_char == ',' or key_char == '.':
-        return {'take_stairs': True}
+        return {InputTypes.TAKE_STAIRS: True}
 
     elif key_char == 'c':
-        return {'show_character_screen': True}
+        return {InputTypes.CHARACTER_SCREEN: True}
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
+        return {InputTypes.FULLSCREEN: True}
     elif key.vk == libtcod.KEY_ESCAPE:
         # Exit the game
-        return {'exit': True}
+        return {InputTypes.EXIT: True}
 
     # No key was pressed
     return {}
@@ -87,7 +89,7 @@ def handle_player_turn_keys(key):
 
 def handle_targeting_keys(key):
     if key.vk == libtcod.KEY_ESCAPE:
-        return {'exit': True}
+        return {InputTypes.EXIT: True}
 
     return {}
 
@@ -96,14 +98,14 @@ def handle_player_dead_keys(key):
     key_char = chr(key.c)
 
     if key_char == 'i':
-        return {'show_inventory': True}
+        return {InputTypes.INVENTORY_USE: True}
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
+        return {InputTypes.FULLSCREEN: True}
     elif key.vk == libtcod.KEY_ESCAPE:
         # Exit the menu
-        return {'exit': True}
+        return {InputTypes.EXIT: True}
 
     return {}
 
@@ -112,14 +114,11 @@ def handle_inventory_keys(key):
     index = key.c - ord('a')
 
     if index >= 0:
-        return {'inventory_index': index}
+        return {InputTypes.INVENTORY_INDEX: index}
 
-    if key.vk == libtcod.KEY_ENTER and key.lalt:
-        # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
-    elif key.vk == libtcod.KEY_ESCAPE:
+    if key.vk == libtcod.KEY_ESCAPE:
         # Exit the menu
-        return {'exit': True}
+        return {InputTypes.EXIT: True}
 
     return {}
 
@@ -128,11 +127,12 @@ def handle_main_menu(key):
     key_char = chr(key.c)
 
     if key_char == 'a':
-        return {'new_game': True}
+        print(">>>>> " + key_char)
+        return {InputTypes.GAME_NEW: True}
     elif key_char == 'b':
-        return {'load_game': True}
+        return {InputTypes.GAME_LOAD: True}
     elif key_char == 'c' or key.vk == libtcod.KEY_ESCAPE:
-        return {'exit': True}
+        return {InputTypes.EXIT: True}
 
     return {}
 
@@ -142,11 +142,11 @@ def handle_level_up_menu(key):
         key_char = chr(key.c)
 
         if key_char == 'a':
-            return {'level_up': 'hp'}
+            return {InputTypes.LEVEL_UP: 'hp'}
         elif key_char == 'b':
-            return {'level_up': 'str'}
+            return {InputTypes.LEVEL_UP: 'str'}
         elif key_char == 'c':
-            return {'level_up': 'def'}
+            return {InputTypes.LEVEL_UP: 'def'}
 
     return {}
 
@@ -154,14 +154,14 @@ def handle_show_quests(key):
     index = key.c - ord('a')
 
     if index >= 0:
-        return {'quest_index': index}
+        return {InputTypes.QUEST_INDEX: index}
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
+        return {InputTypes.FULLSCREEN: True}
     elif key.vk == libtcod.KEY_ESCAPE:
         # Exit the menu
-        return {'exit': True}
+        return {InputTypes.EXIT: True}
 
     return {}
 
@@ -170,29 +170,28 @@ def handle_quests_onboarding(key):
         key_char = chr(key.c)
 
         if key_char == 'a':
-            return {'quest_response': 'accept'}
+            return {InputType.QUEST_RESPONSE: 'accept'}
         elif key_char == 'b':
-            return {'quest_response': 'reject'}
+            return {InputType.QUEST_RESPONSE: 'reject'}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
-            return {'exit': True}
+            return {InputTypes.EXIT: True}
 
     return {}
 
 def handle_character_screen(key):
     if key.vk == libtcod.KEY_ESCAPE:
-        return {'exit': True}
+        return {InputTypes.EXIT: True}
 
     return {}
-
 
 def handle_mouse(mouse):
     (x, y) = (mouse.cx, mouse.cy)
 
     if mouse.lbutton_pressed:
-        return {'left_click': (x, y)}
+        return {InputTypes.CLICK_LEFT: (x, y)}
     elif mouse.rbutton_pressed:
-        return {'right_click': (x, y)}
+        return {InputTypes.CLICK_RIGHT: (x, y)}
 
     return {}
 
@@ -200,10 +199,8 @@ def handle_game_complete_keys(key):
     key_char = chr(key.c)
 
     if key_char == 'a':
-        return {'restart_game': True}
-    elif key_char == 'b':
-        return {'new_game': True}
-    elif key_char == 'c' or key.vk == libtcod.KEY_ESCAPE:
-        return {'exit': True}
+        return {InputTypes.GAME_RESTART: True}
+    elif key_char == 'b' or key.vk == libtcod.KEY_ESCAPE:
+        return {InputTypes.EXIT: True}
 
     return {}

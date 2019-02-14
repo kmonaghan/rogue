@@ -16,6 +16,7 @@ class BasicDeath:
         self.skeletal = False
 
     def npc_death(self, game_map):
+        print("NPC Death")
         #transform it into a nasty corpse! it doesn't block, can't be
         #attacked and doesn't move
         self.owner.char = '%'

@@ -69,18 +69,3 @@ class Character(Entity):
             return self.subspecies.subcolor
 
         return self.color
-
-    def isDead(self):
-        if (self.health):
-            if (self.health.hp > 0):
-                return False
-
-        return True
-
-    def onKill(self, npc, game_map):
-        #print("Override onKill")
-        pass
-
-    def hasBeenAttacked(self, npc):
-        #print("Override hasBeenAttacked")
-        pass

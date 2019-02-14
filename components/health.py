@@ -4,6 +4,8 @@ import pubsub
 
 from game_messages import Message
 
+from etc.enum import ResultTypes
+
 class Health:
     def __init__(self, hp):
         self.base_max_hp = hp
@@ -38,9 +40,7 @@ class Health:
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
 
         if self.dead:
-            results.append({'dead': self.owner})
-
-        self.owner.hasBeenAttacked(npc)
+            results.append({ResultTypes.DEAD_ENTITY: self.owner})
 
         return results
 

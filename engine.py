@@ -12,6 +12,22 @@ from map_objects.point import Point
 import quest
 import pubsub
 
+from etc.enum import (
+    ResultTypes, InputTypes, GameStates,
+    INVENTORY_STATES, INPUT_STATES, CANCEL_STATES)
+'''TODO: Move
+'''
+
+from utils.utils import (
+    flatten_list_of_dictionaries,
+    unpack_single_key_dict,
+    get_key_from_single_key_dict,
+    get_all_entities_with_component_in_position)
+
+def get_user_input(key, mouse):
+    event = libtcod.sys_wait_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse, True)
+    return key, mouse
+
 def play_game(player, game_map, message_log, game_state, con, panel, constants):
     fov_recompute = True
 
@@ -20,72 +36,133 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
-    game_state = game_states.GameStates.PLAYERS_TURN
-    previous_game_state = game_state
-
     targeting_item = None
     quest_request = None
 
+    # Initial values for game states
+    game_state = GameStates.PLAYER_TURN
+    previous_game_state = game_state
+    # Stacks for holding the results of player and enemy turns.
+    player_turn_results = []
+    enemy_turn_results = []
+
+    # A counter for how many times we have incremented the game loop on this
+    # floor.  Used to trigger updates that happen regularly with regards to
+    # game loop.  For example, graphical shimmering of water and ice.
+    game_loop = -1
+
     while not libtcod.console_is_window_closed():
-        #libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
+        game_loop += 1
+
+        #---------------------------------------------------------------------
+        # Recompute the player's field of view if necessary.
+        #---------------------------------------------------------------------
         if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
-                          constants['fov_algorithm'])
+            recompute_fov(fov_map, player.x, player.y,
+                            constants['fov_radius'], constants['fov_light_walls'],
+                            constants['fov_algorithm'])
 
+        #---------------------------------------------------------------------
+        # Render and display the dungeon and its inhabitates.
+        #---------------------------------------------------------------------
         render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log,
                    constants['screen_width'], constants['screen_height'], constants['bar_width'],
                    constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, quest_request)
 
         fov_recompute = False
 
-        #libtcod.console_flush()
-
         clear_all(con, game_map)
 
-        game_map.update_entity_map()
+        #---------------------------------------------------------------------
+        # Render any menus.
+        #---------------------------------------------------------------------
+
+        #---------------------------------------------------------------------
+        # Blit the subconsoles to the main console and flush all rendering.
+        #---------------------------------------------------------------------
 
         libtcod.console_flush()
-        libtcod.sys_wait_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse, True)
 
-        action = handle_keys(key, game_state)
+        #---------------------------------------------------------------------
+        # Get key input from the player.
+        #---------------------------------------------------------------------
+        user_input, mouse_action = get_user_input(key, mouse)
+
+        input_result = handle_keys(user_input, game_state)
         mouse_action = handle_mouse(mouse)
-
-        turn_on_debug = action.get('debug_on')
-        turn_off_debug = action.get('debug_off')
-        move = action.get('move')
-        wait = action.get('wait')
-        pickup = action.get('pickup')
-        show_inventory = action.get('show_inventory')
-        drop_inventory = action.get('drop_inventory')
-        examine_inventory = action.get('examine_inventory')
-        inventory_index = action.get('inventory_index')
-        take_stairs = action.get('take_stairs')
-        level_up = action.get('level_up')
-        show_character_screen = action.get('show_character_screen')
-        exit = action.get('exit')
-        fullscreen = action.get('fullscreen')
-        quest_list = action.get('quest_list')
-        quest_response = action.get('quest_response')
-        quest_index = action.get('quest_index')
-        restart_game = action.get('restart_game')
 
         left_click = mouse_action.get('left_click')
         right_click = mouse_action.get('right_click')
 
         player_turn_results = []
 
-        if (restart_game):
+        action, action_value = unpack_single_key_dict(input_result)
+
+        if action == InputTypes.GAME_RESTART:
             player, game_map, message_log, game_state = get_game_variables(constants)
             fov_map = initialize_fov(game_map)
             fov_recompute = True
             libtcod.console_clear(con)
-            game_state = game_states.GameStates.ENEMY_TURN
+            game_state = GameStates.ENEMY_TURN
+
+        if action == InputTypes.DEBUG_ON:
+            game_states.debug = True
+            fov_recompute = True
+
+        if action == InputTypes.DEBUG_OFF:
+            game_states.debug = False
+            fov_recompute = True
 
         if player.level.can_level_up():
-            game_state = game_states.GameStates.LEVEL_UP
+            game_state = GameStates.LEVEL_UP
 
-        if level_up:
+        if action == InputTypes.WAIT:
+            game_state = GameStates.ENEMY_TURN
+
+        '''
+        Menu Options
+        '''
+        if action == InputTypes.CHARACTER_SCREEN:
+            previous_game_state = game_state
+            game_state = GameStates.CHARACTER_SCREEN
+
+        if action == InputTypes.INVENTORY_DROP:
+            previous_game_state = game_state
+            game_state = GameStates.INVENTORY_DROP
+
+        if action == InputTypes.INVENTORY_EQUIP:
+            previous_game_state = game_state
+            game_state = GameStates.INVENTORY_EQUIP
+
+        if action == InputTypes.INVENTORY_EXAMINE:
+            previous_game_state = game_state
+            game_state = GameStates.INVENTORY_EXAMINE
+        '''
+        if action == InputTypes.INVENTORY_INDEX:
+            previous_game_state = game_state
+            game_state = GameStates.INVENTORY_INDEX
+        '''
+        if (action == InputTypes.INVENTORY_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
+                player.inventory.items):
+            item = player.inventory.items[inventory_index]
+
+            if game_state == GameStates.SHOW_INVENTORY:
+                player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map, game_map=game_map))
+            elif game_state == GameStates.DROP_INVENTORY:
+                player_turn_results.extend(player.inventory.drop_item(item))
+            elif game_state == GameStates.EXAMINE_INVENTORY:
+                player_turn_results.extend(player.inventory.examine_item(item))
+
+        if action == InputTypes.INVENTORY_THROW:
+            previous_game_state = game_state
+            game_state = GameStates.INVENTORY_THROW
+
+        if action == InputTypes.INVENTORY_USE:
+            previous_game_state = game_state
+            game_state = GameStates.INVENTORY_USE
+
+        if action == InputTypes.LEVEL_UP:
             if level_up == 'hp':
                 player.level.level_up_stats(0)
             elif level_up == 'str':
@@ -95,67 +172,26 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
             game_state = previous_game_state
 
-        if turn_on_debug:
-            game_states.debug = turn_on_debug
-            fov_recompute = True
-
-        if turn_off_debug:
-            game_states.debug = False
-            fov_recompute = True
-
-        '''
-        Menu Options
-        '''
-        if show_character_screen:
+        if action == InputTypes.QUEST_LIST:
             previous_game_state = game_state
-            game_state = game_states.GameStates.CHARACTER_SCREEN
+            game_state = GameStates.QUEST_LIST
 
-        if show_inventory:
-            previous_game_state = game_state
-            game_state = game_states.GameStates.SHOW_INVENTORY
-
-        if drop_inventory:
-            previous_game_state = game_state
-            game_state = game_states.GameStates.DROP_INVENTORY
-
-        if examine_inventory:
-            previous_game_state = game_state
-            game_state = game_states.GameStates.EXAMINE_INVENTORY
-
-        if quest_list:
-            previous_game_state = game_state
-            game_state = game_states.GameStates.SHOW_QUESTS
-
-        if quest_response:
+        if action == InputTypes.QUEST_RESPONSE:
             quest_request.owner.start_quest(game_map)
             message_log.add_message(Message('Started quest: ' + quest_request.title, libtcod.yellow))
             quest_request = None
             game_state = previous_game_state
 
-        if quest_index is not None and previous_game_state != game_states.GameStates.PLAYER_DEAD and quest_index < len(quest.active_quests):
+        if (action == InputTypes.QUEST_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and quest_index < len(quest.active_quests):
             selected_quest = quest.active_quests[quest_index]
             message_log.add_message(selected_quest.status())
             game_state = previous_game_state
 
-        if inventory_index is not None and previous_game_state != game_states.GameStates.PLAYER_DEAD and inventory_index < len(
-                player.inventory.items):
-            item = player.inventory.items[inventory_index]
+        if game_state == GameStates.PLAYER_TURN:
+            if action == InputTypes.MOVE:
+                dx, dy = action_value
+                point = Point(player.x + dx, player.y + dy)
 
-            if game_state == game_states.GameStates.SHOW_INVENTORY:
-                player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map, game_map=game_map))
-            elif game_state == game_states.GameStates.DROP_INVENTORY:
-                player_turn_results.extend(player.inventory.drop_item(item))
-            elif game_state == game_states.GameStates.EXAMINE_INVENTORY:
-                player_turn_results.extend(player.inventory.examine_item(item))
-
-
-        if game_state == game_states.GameStates.PLAYERS_TURN:
-            if move:
-                dx, dy = move
-                destination_x = player.x + dx
-                destination_y = player.y + dy
-
-                point = Point(destination_x, destination_y)
                 if not game_map.is_blocked(point):
                     target = game_map.get_blocking_entities_at_location(point)
 
@@ -173,30 +209,30 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
                         fov_recompute = True
 
-                    game_state = game_states.GameStates.ENEMY_TURN
-            elif pickup:
+                        game_map.update_entity_map()
+
+                    game_state = GameStates.ENEMY_TURN
+            elif action == InputTypes.PICKUP:
                 for entity in game_map.entity_map[player.x][player.y]:
                     if entity.item:
                         pickup_results = player.inventory.add_item(entity)
                         player_turn_results.extend(pickup_results)
 
-                        break
+                        game_map.update_entity_map()
                 else:
                     message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
-            elif take_stairs:
+            elif action == InputTypes.TAKE_STAIRS:
                 if (game_map.check_for_stairs(player.x, player.y)):
                         game_map.next_floor(player, message_log, constants)
                         fov_map = initialize_fov(game_map)
                         fov_recompute = True
                         libtcod.console_clear(con)
 
-                    #    break
+                        break
                 else:
                     message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
-            elif wait:
-                game_state = game_states.GameStates.ENEMY_TURN
 
-        if game_state == game_states.GameStates.TARGETING:
+        if game_state == GameStates.TARGETING:
             if left_click:
                 target_x, target_y = left_click
 
@@ -206,55 +242,86 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             elif right_click:
                 player_turn_results.append({'targeting_cancelled': True})
 
-        if exit:
-            if game_state in (game_states.GameStates.SHOW_INVENTORY, game_states.GameStates.DROP_INVENTORY, game_states.GameStates.EXAMINE_INVENTORY, game_states.GameStates.SHOW_QUESTS, game_states.GameStates.CHARACTER_SCREEN):
+        if action == InputTypes.EXIT:
+            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.EXAMINE_INVENTORY, GameStates.SHOW_QUESTS, GameStates.CHARACTER_SCREEN):
                 game_state = previous_game_state
-            elif game_state == game_states.GameStates.TARGETING:
+            elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
-            elif game_state == game_states.GameStates.QUEST_ONBOARDING:
+            elif game_state == GameStates.QUEST_ONBOARDING:
                 player_turn_results.append({'quest_cancelled': True})
             else:
                 save_game(player, game_map, message_log, game_state)
 
                 return True
 
-        if fullscreen:
+        if action == InputTypes.FULLSCREEN:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
-        for player_turn_result in player_turn_results:
-            message = player_turn_result.get('message')
-            dead_entity = player_turn_result.get('dead')
-            killed_entity = player_turn_result.get('entity_dead')
-            item_added = player_turn_result.get('item_added')
-            item_consumed = player_turn_result.get('consumed')
-            item_dropped = player_turn_result.get('item_dropped')
-            equip = player_turn_result.get('equip')
-            targeting = player_turn_result.get('targeting')
-            targeting_cancelled = player_turn_result.get('targeting_cancelled')
-            quest_onboarding = player_turn_result.get('quest_onboarding')
-            quest_cancelled = player_turn_result.get('quest_cancelled')
-            fov_recompute = player_turn_result.get('fov_recompute')
+        #----------------------------------------------------------------------
+        # Process the results stack
+        #......................................................................
+        # We are done processing player inputs, and may have some results on
+        # the player turn stack.  Process the stack by popping off the top
+        # result from the queue.  There are many different possible results,
+        # so each is handled with a dedicated handler.
+        #
+        # Note: Handling a result may result in other results being added to
+        # the stack, so we continually process the results stack until it is
+        # empty.
+        #----------------------------------------------------------------------
 
-            if message:
+        while player_turn_results != []:
+
+            # Sort the turn results stack by the priority order.
+            player_turn_results = sorted(
+                flatten_list_of_dictionaries(player_turn_results),
+                key = lambda d: get_key_from_single_key_dict(d))
+
+            result = player_turn_results.pop()
+            result_type, result_data = unpack_single_key_dict(result)
+
+            # Handle a simple message.
+            if result_type == ResultTypes.MESSAGE:
+                message = result_data
                 message_log.add_message(message)
+            # Handle death.
+            if result_type == ResultTypes.DEAD_ENTITY:
+                dead_entity = result_data
+                print(">>>>>")
+                print(result_data.describe())
+                if dead_entity == player:
+                    player_turn_results.extend(kill_player(player))
+                    game_state = GameStates.PLAYER_DEAD
+                else:
+                    #player_turn_results.extend(dead_entity.death.npc_death(game_map))
+                    dead_entity.death.npc_death(game_map)
+                    entity_map_needs_update = True
 
-            if dead_entity:
-                game_state = dead_entity.death.npc_death(game_map)
-
-            if item_added:
+            # Add an item to the inventory, and remove it from the game map.
+            if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
+                #entity, item = result_data
+                #entity.inventory.add(item)
+                #item.commitable.delete(game_map)
                 game_map.entities.remove(item_added)
+                game_state = GameStates.ENEMY_TURN
 
-                game_state = game_states.GameStates.ENEMY_TURN
+            # Remove consumed items from inventory
+            if result_type == ResultTypes.DISCARD_ITEM:
+                #item, consumed = result_data
+                #if consumed:
+                #    player.inventory.remove(item)
+                game_state = GameStates.ENEMY_TURN
 
-            if item_consumed:
-                game_state = game_states.GameStates.ENEMY_TURN
-
-            if item_dropped:
+            # Remove dropped items from inventory and place on the map
+            if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
+                #entity, item = result_data
+                #entity.inventory.remove(item)
+                #item.x, item.y = entity.x, entity.y
+                #game_map.entities.append(item)
                 game_map.add_entity_to_map(item_dropped)
+                game_state = GameStates.ENEMY_TURN
 
-                game_state = game_states.GameStates.ENEMY_TURN
-
-            if equip:
+            if result_type == ResultTypes.EQUIP:
                 equip_results = player.equipment.toggle_equip(equip)
 
                 for equip_result in equip_results:
@@ -267,11 +334,20 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                     if dequipped:
                         message_log.add_message(Message('You dequipped the {0}'.format(dequipped.name)))
 
-                game_state = game_states.GameStates.ENEMY_TURN
+                game_state = GameStates.ENEMY_TURN
+            if result_type == ResultTypes.QUEST_ONBOARDING:
+                quest_request = result_data
 
+                previous_game_state = GameStates.PLAYER_TURN
+                game_state = GameStates.QUEST_ONBOARDING
+
+            if result_type == GameStates.QUEST_RESPONSE:
+                pass
+
+            '''
             if targeting:
-                previous_game_state = game_states.GameStates.PLAYERS_TURN
-                game_state = game_states.GameStates.TARGETING
+                previous_game_state = GameStates.PLAYER_TURN
+                game_state = GameStates.TARGETING
 
                 targeting_item = targeting
 
@@ -281,55 +357,86 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 game_state = previous_game_state
 
                 message_log.add_message(Message('Targeting cancelled'))
-
-            if quest_onboarding:
-                previous_game_state = game_states.GameStates.PLAYERS_TURN
-                game_state = game_states.GameStates.QUEST_ONBOARDING
-
-                quest_request = quest_onboarding
-
-            if quest_cancelled:
-                game_state = previous_game_state
+            '''
 
         pubsub.pubsub.process_queue(fov_map, game_map)
 
-        if game_state == game_states.GameStates.ENEMY_TURN:
+        #game_state = GameStates.ENEMY_TURN
+
+        #-------------------------------------------------------------------
+        # All enemies and terrain take thier turns.
+        #-------------------------------------------------------------------
+        if game_state == GameStates.ENEMY_TURN:
+
             for entity in game_map.entities:
                 if entity.health and entity.health.dead:
                     entity.death.decompose(game_map)
                 elif entity.ai:
+                    # Enemies move and attack if possible.
                     entity.energy.increase_energy()
                     if entity.energy.take_action():
-                        #print(entity.name + "(" + entity.uuid + ") CAN take a turn")
-                        enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map)
+                        enemy_turn_results.extend(entity.ai.take_turn(player, fov_map, game_map))
 
-                        for enemy_turn_result in enemy_turn_results:
-                            message = enemy_turn_result.get('message')
-                            dead_entity = enemy_turn_result.get('dead')
-                            killed_entity = enemy_turn_result.get('entity_dead')
+            game_state = GameStates.PLAYER_TURN
 
-                            if message:
-                                message_log.add_message(message)
+        #---------------------------------------------------------------------
+        # Process all result actions of enemy turns.
+        #---------------------------------------------------------------------
+        entity_map_needs_update = False
 
-                            if killed_entity:
-                                game_state = killed_entity.death.npc_death(game_map)
-                                entity.onKill(killed_entity, game_map)
+        while enemy_turn_results != []:
 
-                            if dead_entity:
-                                game_state = dead_entity.death.npc_death(game_map)
+            enemy_turn_results = sorted(
+                flatten_list_of_dictionaries(enemy_turn_results),
+                key = lambda d: get_key_from_single_key_dict(d))
 
-                                if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
-                                    break
+            result = enemy_turn_results.pop()
+            result_type, result_data = unpack_single_key_dict(result)
 
-                        if (game_state == game_states.GameStates.PLAYER_DEAD) or (game_state == game_states.GameStates.GAME_COMPLETE):
-                            break
-                    else:
-                        #print(entity.name + "(" + entity.uuid + ") can not take a turn yet")
-                        pass
+            # Handle a move towards action.  Move towards a target.
+            if result_type == ResultTypes.MOVE_TOWARDS:
+               monster, target_x, target_y = result_data
+               monster.movable.move_towards(game_map, target_x, target_y)
+               entity_map_needs_update = True
+            # Handle a move random adjacent action.  Move to a random adjacent
+            # square.
+            if result_type == ResultTypes.MOVE_RANDOM_ADJACENT:
+               monster = result_data
+               monster.movable.move_to_random_adjacent(game_map)
+               entity_map_needs_update = True
+            # Handle a simple message.
+            if result_type == ResultTypes.MESSAGE:
+                message = result_data
+                message_log.add_message(message)
+            # Add a new entity to the game.
+            if result_type == ResultTypes.ADD_ENTITY:
+                entity = result_data
+                entity.commitable.commit(game_map)
+                entity_map_needs_update = True
+            # Remove an entity from the game.
+            if result_type == ResultTypes.REMOVE_ENTITY:
+                entity = result_data
+                entity.commitable.delete(game_map)
+                entity_map_needs_update = True
+            # Handle death.
+            if result_type == ResultTypes.DEAD_ENTITY:
+                dead_entity = result_data
 
+                if dead_entity == player:
+                    game_state = GameStates.PLAYER_DEAD
+
+                dead_entity.death.npc_death(game_map)
+                entity_map_needs_update = True
+
+            if entity_map_needs_update:
                 game_map.update_entity_map()
-            else:
-                game_state = game_states.GameStates.PLAYERS_TURN
+                entity_map_needs_update = False
+
+        #---------------------------------------------------------------------
+        # And done...
+        #---------------------------------------------------------------------
+
+        game_map.update_entity_map()
 
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.TICK))
 
@@ -370,28 +477,27 @@ def main():
 
             libtcod.console_flush()
 
-            action = handle_main_menu(key)
+            action = handle_keys(key, GameStates.GAME_START)
 
-            new_game = action.get('new_game')
-            load_saved_game = action.get('load_game')
-            exit_game = action.get('exit')
+            if len(action) > 0:
+                result_type, result_data = unpack_single_key_dict(action)
+                if show_load_error_message and (result_type == InputTypes.GAME_LOAD):
+                    show_load_error_message = False
+                elif result_type == InputTypes.GAME_NEW:
+                    player, game_map, message_log, game_state = get_game_variables(constants)
 
-            if show_load_error_message and (new_game or load_saved_game or exit_game):
-                show_load_error_message = False
-            elif new_game:
-                player, game_map, message_log, game_state = get_game_variables(constants)
-
-                show_main_menu = False
-            elif load_saved_game:
-                try:
-                    player, game_map, message_log, game_state = load_game()
                     show_main_menu = False
-                except FileNotFoundError:
-                    show_load_error_message = True
-            elif exit_game:
-                break
+                elif result_type == InputTypes.GAME_LOAD:
+                    try:
+                        player, game_map, message_log, game_state = load_game()
+                        show_main_menu = False
+                    except FileNotFoundError:
+                        show_load_error_message = True
+                elif result_type == InputTypes.GAME_EXIT:
+                    break
 
         else:
+            print("playing")
             libtcod.console_clear(con)
             play_game(player, game_map, message_log, game_state, con, panel, constants)
 

@@ -3,7 +3,7 @@ from enum import Enum, auto
 debug = False
 
 class GameStates(Enum):
-    PLAYERS_TURN = auto()
+    PLAYER_TURN = auto()
     ENEMY_TURN = auto()
     PLAYER_DEAD = auto()
     SHOW_INVENTORY = auto()

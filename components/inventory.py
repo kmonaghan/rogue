@@ -2,6 +2,8 @@ import tcod as libtcod
 
 from game_messages import Message
 
+from etc.enum import ResultTypes
+
 class Inventory:
     def __init__(self, capacity):
         self.capacity = capacity
@@ -12,13 +14,13 @@ class Inventory:
 
         if len(self.items) >= self.capacity:
             results.append({
-                'item_added': None,
-                'message': Message('You cannot carry any more, your inventory is full', libtcod.yellow)
+                ResultTypes.ADD_ITEM_TO_INVENTORY: None,
+                ResultTypes.MESSAGE: Message('You cannot carry any more, your inventory is full', libtcod.yellow)
             })
         else:
             results.append({
-                'item_added': item,
-                'message': Message('You pick up the {0}!'.format(item.name), libtcod.blue)
+                ResultTypes.ADD_ITEM_TO_INVENTORY: item,
+                ResultTypes.MESSAGE: Message('You pick up the {0}!'.format(item.name), libtcod.blue)
             })
 
             self.items.append(item)
@@ -36,7 +38,7 @@ class Inventory:
             if equippable_component:
                 results.append({'equip': item_entity})
             else:
-                results.append({'message': Message('The {0} cannot be used'.format(item_entity.name), libtcod.yellow)})
+                results.append({ResultTypes.MESSAGE: Message('The {0} cannot be used'.format(item_entity.name), libtcod.yellow)})
         else:
             if item_component.targeting and not (kwargs.get('target_x') or kwargs.get('target_y')):
                 results.append({'targeting': item_entity})
@@ -65,8 +67,8 @@ class Inventory:
         item.y = self.owner.y
 
         self.remove_item(item)
-        results.append({'item_dropped': item, 'message': Message('You dropped the {0}'.format(item.name),
-                                                                 libtcod.yellow)})
+        results.append({ResultTypes.DROP_ITEM_FROM_INVENTORY: item,
+                        ResultTypes.MESSAGE: Message('You dropped the {0}'.format(item.name), libtcod.yellow)})
 
         return results
 

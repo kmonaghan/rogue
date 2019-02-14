@@ -4,6 +4,8 @@ from game_messages import Message
 
 import pubsub
 
+from etc.enum import ResultTypes
+
 class Questgiver:
     def __init__(self, quest = None):
         self.owner = None
@@ -59,6 +61,6 @@ class Questgiver:
 
             results.extend(complete_result)
         else:
-            results.append({'message': Message('Have you done it yet?', libtcod.white)})
+            results.append({ResultTypes.MESSAGE: Message('Have you done it yet?', libtcod.white)})
 
         return results

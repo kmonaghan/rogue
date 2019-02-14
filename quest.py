@@ -22,7 +22,7 @@ def check_quest_for_location(point):
         if (quest.map_point):
             if (point == quest.map_point):
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + self.title + ' completed!', libtcod.gold)))
-                results.append({'message': Message('Quest ' + quest.title + ' completed!', libtcod.gold), 'xp': quest.xp})
+                results.append({ResultTypes.MESSAGE: Message('Quest ' + quest.title + ' completed!', libtcod.gold), 'xp': quest.xp})
 
     return results
 

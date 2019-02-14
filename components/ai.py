@@ -11,6 +11,32 @@ from game_messages import Message
 
 from map_objects.point import Point
 
+from etc.enum import ResultTypes
+
+class BasicMonster:
+    """Simple monster ai.
+
+    When in the players POV, attempt to move towards the player.  If adjacent
+    to the player, attack.
+    """
+    def __init__(self):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinFov(),
+                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                Sequence(
+                    InNamespace(name="target_point"),
+                    MoveTowardsPointInNamespace(name="target_point")),
+                TravelToRandomPosition()))
+
+    def take_turn(self, target, fov_map, game_map):
+        _, results = self.tree.tick(self.owner, target, game_map)
+        return results
+
 class BasicNPC:
     #AI for a basic npc.
     def take_turn(self, target, fov_map, game_map):
@@ -76,7 +102,7 @@ class ConfusedNPC:
             self.number_of_turns -= 1
         else:
             self.owner.ai = self.previous_ai
-            results.append({'message': Message('The {0} is no longer confused!'.format(self.owner.name), libtcod.red)})
+            results.append({ResultTypes.MESSAGE: Message('The {0} is no longer confused!'.format(self.owner.name), libtcod.red)})
 
         return results
 
@@ -141,7 +167,7 @@ class WarlordNPC:
                 if (health < 40):
                     if (self.summoned_trolls == False):
                         self.summoned_trolls = True
-                        results.append({'message': Message('Trolls! To me!', libtcod.red)})
+                        results.append({ResultTypes.MESSAGE: Message('Trolls! To me!', libtcod.red)})
                         tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.troll, game_map, 2)
 
                         return results
@@ -149,7 +175,7 @@ class WarlordNPC:
                 elif (health < 60):
                     if (self.summoned_orcs == False):
                         self.summoned_orcs = True
-                        results.append({'message': Message('Orcs! To me!', libtcod.red)})
+                        results.append({ResultTypes.MESSAGE: Message('Orcs! To me!', libtcod.red)})
                         tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.orc, game_map, 4)
 
                         return results
@@ -157,7 +183,7 @@ class WarlordNPC:
                 elif (health < 80):
                     if (self.summoned_goblins == False):
                         self.summoned_goblins = True
-                        results.append({'message': Message('Goblins! To me!', libtcod.red)})
+                        results.append({ResultTypes.MESSAGE: Message('Goblins! To me!', libtcod.red)})
                         tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.goblin, game_map, 6)
 
                         return results
@@ -192,7 +218,7 @@ class NecromancerNPC:
 
         if not self.ritual_cast and (self.ritual_turns == 0):
             tome.resurrect_all_npc(bestiary.reanmimate, game_map, target)
-            results.append({'message': Message('Rise and serve me again, now and forever!', libtcod.red)})
+            results.append({ResultTypes.MESSAGE: Message('Rise and serve me again, now and forever!', libtcod.red)})
             self.ritual_cast = True
 
         return results
@@ -219,10 +245,10 @@ class Hunter(StrollingNPC):
                 attack_results = npc.offence.attack(target)
                 dead_entity = None
                 for turn_result in attack_results:
-                    dead_entity = turn_result.get('dead')
+                    dead_entity = turn_result.get(ResultTypes.DEAD_ENTITY)
 
                 if (dead_entity):
-                    results.append({'entity_dead': target, 'killer': npc})
+                    results.append({ResultTypes.DEAD_ENTITY: target})
 
                 return results
 
@@ -284,6 +310,6 @@ class ScreamerNPC:
             for npc in npcs:
                 npc.add_component(BasicNPC(), "ai")
 
-            results.append({'message': Message('Alert nearby creatures!', libtcod.red)})
+            results.append({ResultTypes.MESSAGE: Message('Alert nearby creatures!', libtcod.red)})
 
         return results

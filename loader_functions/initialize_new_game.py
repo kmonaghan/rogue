@@ -89,7 +89,7 @@ def get_game_variables(constants):
 
     game_map.create_floor(player, constants)
 
-    game_state = GameStates.PLAYERS_TURN
+    game_state = GameStates.PLAYER_TURN
 
     quest.active_quests = []
 

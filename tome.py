@@ -24,10 +24,10 @@ def heal(*args, **kwargs):
     results = []
 
     if entity.health.hp == entity.health.max_hp:
-        results.append({'consumed': False, 'message': Message('You are already at full health', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You are already at full health', libtcod.yellow)})
     else:
         entity.health.heal(die_roll(number_of_dice, type_of_dice))
-        results.append({'consumed': True, 'message': Message('Your wounds start to feel better!', libtcod.green)})
+        results.append({'consumed': True, ResultTypes.MESSAGE: Message('Your wounds start to feel better!', libtcod.green)})
 
     return results
 
@@ -55,10 +55,10 @@ def cast_lightning(*args, **kwargs):
 
     if target:
         damage = die_roll(number_of_dice, type_of_dice)
-        results.append({'consumed': True, 'target': target, 'message': Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage))})
+        results.append({'consumed': True, 'target': target, ResultTypes.MESSAGE: Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage))})
         results.extend(target.health.take_damage(damage, caster))
     else:
-        results.append({'consumed': False, 'target': None, 'message': Message('No enemy is close enough to strike.', libtcod.red)})
+        results.append({'consumed': False, 'target': None, ResultTypes.MESSAGE: Message('No enemy is close enough to strike.', libtcod.red)})
 
     return results
 
@@ -76,15 +76,15 @@ def cast_fireball(*args, **kwargs):
     results = []
 
     if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
-        results.append({'consumed': False, 'message': Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
         return results
 
-    results.append({'consumed': True, 'message': Message('The fireball explodes, burning everything within {0} tiles!'.format(radius), libtcod.orange)})
+    results.append({'consumed': True, ResultTypes.MESSAGE: Message('The fireball explodes, burning everything within {0} tiles!'.format(radius), libtcod.orange)})
 
     for entity in entities:
         if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.fighter:
             damage = die_roll(number_of_dice, type_of_dice)
-            results.append({'message': Message('The {0} gets burned for {1} hit points.'.format(entity.name, damage), libtcod.orange)})
+            results.append({ResultTypes.MESSAGE: Message('The {0} gets burned for {1} hit points.'.format(entity.name, damage), libtcod.orange)})
             results.extend(entity.fighter.take_damage(damage, caster))
 
     return results
@@ -99,7 +99,7 @@ def cast_confuse(*args, **kwargs):
     results = []
 
     if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
-        results.append({'consumed': False, 'message': Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
         return results
 
     for entity in entities:
@@ -109,11 +109,11 @@ def cast_confuse(*args, **kwargs):
             confused_ai.owner = entity
             entity.ai = confused_ai
 
-            results.append({'consumed': True, 'message': Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), libtcod.light_green)})
+            results.append({'consumed': True, ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), libtcod.light_green)})
 
             break
     else:
-        results.append({'consumed': False, 'message': Message('There is no targetable enemy at that location.', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('There is no targetable enemy at that location.', libtcod.yellow)})
 
     return results
 
@@ -158,6 +158,6 @@ def cast_mapping(*args, **kwargs):
         for x in range(game_map.width):
             game_map.map[x][y].explored = True
 
-    results.append({'consumed': True, 'fov_recompute': True, 'message': Message('The scroll contains a map of immediate area.', libtcod.gold)})
+    results.append({'consumed': True, 'fov_recompute': True, ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', libtcod.gold)})
 
     return results

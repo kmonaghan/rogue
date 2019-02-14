@@ -93,7 +93,7 @@ class Entity:
         if self.equippable:
             detail += ' ' + self.equippable.equipment_description()
 
-        results.append({'message': Message(detail, libtcod.gold)})
+        results.append({ResultTypes.MESSAGE: Message(detail, libtcod.gold)})
 
         return results
 
