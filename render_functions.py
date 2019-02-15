@@ -4,7 +4,7 @@ import game_states
 
 from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
 
-from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed
+from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed, game_over, game_paused
 
 def get_names_under_mouse(mouse, fov_map, game_map):
     (x, y) = (mouse.cx, mouse.cy)
@@ -102,8 +102,10 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
-    if game_state == GameStates.PLAYER_DEAD:
-        pass
+    if game_state == GameStates.GAME_PAUSED:
+        game_paused(con, 60, screen_width, screen_height)
+    elif game_state == GameStates.GAME_OVER:
+        game_over(con, 60, screen_width, screen_height)
     elif game_state == GameStates.GAME_COMPLETE:
         game_completed(con, 60, screen_width, screen_height)
     elif game_state == GameStates.CHARACTER_SCREEN:

@@ -21,8 +21,6 @@ from enum import Enum, auto
 #   It is the enemy's turn to take action.
 # EQUIP_INVENTORY:
 #   The inventory screen is open for equipping items.
-# PLAYER_DEAD:
-#   The player is dead.
 # PLAYER_TURN:
 #   It is the player's turn to take action.
 # SHOW_INVENTORY:
@@ -34,6 +32,8 @@ class GameStates(Enum):
     CHARACTER_SCREEN = auto()
     ENEMY_TURN = auto()
     GAME_COMPLETE = auto()
+    GAME_EXIT = auto()
+    GAME_PAUSED = auto()
     GAME_START = auto()
     GAME_OVER = auto()
     INVENTORY_DROP = auto()
@@ -41,7 +41,6 @@ class GameStates(Enum):
     INVENTORY_THROW = auto()
     INVENTORY_USE = auto()
     LEVEL_UP = auto()
-    PLAYER_DEAD = auto()
     PLAYER_TURN = auto()
     POST_PLAYER_TURN = auto()
     QUEST_LIST = auto()
@@ -67,7 +66,8 @@ INPUT_STATES = {
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
     GameStates.QUEST_LIST,
     #GameStates.CURSOR_INPUT,
-    GameStates.PLAYER_DEAD, GameStates.PLAYER_TURN}
+    GameStates.GAME_PAUSED, GameStates.GAME_OVER,
+    GameStates.PLAYER_TURN}
 
 class InputTypes(Enum):
     CHARACTER_SCREEN = auto()

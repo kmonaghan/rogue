@@ -121,6 +121,23 @@ def character_screen(player, character_screen_width, character_screen_height, sc
     y = screen_height // 2 - character_screen_height // 2
     libtcod.console_blit(window, 0, 0, character_screen_width, character_screen_height, 0, x, y, 1.0, 0.7)
 
+def game_over(con, menu_width, screen_width, screen_height):
+    header = "You have failed. Death's cold embrace envelops you. Loser."
+    options = [['Start from scratch', libtcod.white],
+                ['View Stats', libtcod.white],
+                ['View Inventory', libtcod.white],
+                ['View Quests', libtcod.white],
+                ['Quit', libtcod.white]]
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
+
+def game_paused(con, menu_width, screen_width, screen_height):
+    header = ""
+    options = [['Restart', libtcod.white],
+                ['Quit', libtcod.white]]
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
+
 def game_completed(con, menu_width, screen_width, screen_height):
     header = 'Congratulations - You have defeated the King Under the Hill'
     options = [['Restart with higher level encounters', libtcod.white],

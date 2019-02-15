@@ -51,7 +51,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
     game_loop = -1
 
     while not libtcod.console_is_window_closed():
-
         game_loop += 1
 
         #---------------------------------------------------------------------
@@ -102,12 +101,16 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         action, action_value = unpack_single_key_dict(input_result)
 
+        if action == InputTypes.GAME_EXIT:
+            return GameStates.GAME_EXIT
+            break
+
         if action == InputTypes.GAME_RESTART:
             player, game_map, message_log, game_state = get_game_variables(constants)
             fov_map = initialize_fov(game_map)
             fov_recompute = True
             libtcod.console_clear(con)
-            game_state = GameStates.ENEMY_TURN
+            continue
 
         if action == InputTypes.DEBUG_ON:
             game_states.debug = True
@@ -146,7 +149,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             previous_game_state = game_state
             game_state = GameStates.INVENTORY_USE
 
-        if (action == InputTypes.INVENTORY_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and action_value < len(player.inventory.items):
+        if (action == InputTypes.INVENTORY_INDEX
+            and previous_game_state != GameStates.GAME_OVER
+            and action_value < len(player.inventory.items)):
             item = player.inventory.items[action_value]
 
             if game_state == GameStates.INVENTORY_USE:
@@ -176,7 +181,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             quest_request = None
             game_state = previous_game_state
 
-        if (action == InputTypes.QUEST_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and action_value < len(quest.active_quests):
+        if (action == InputTypes.QUEST_INDEX
+            and previous_game_state != GameStates.GAME_OVER
+            and action_value < len(quest.active_quests)):
             selected_quest = quest.active_quests[action_value]
             message_log.add_message(selected_quest.status())
             game_state = previous_game_state
@@ -199,15 +206,16 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             elif game_state == GameStates.QUEST_ONBOARDING:
                 player_turn_results.append({'quest_cancelled': True})
             else:
-                save_game(player, game_map, message_log, game_state)
-
-                return True
+                game_state = GameStates.GAME_PAUSED
+                continue
 
         if action == InputTypes.FULLSCREEN:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
         if game_state == GameStates.PLAYER_TURN:
-            if action == InputTypes.MOVE:
+            if player.health.dead:
+                game_state = GameStates.GAME_OVER
+            elif action == InputTypes.MOVE:
                 dx, dy = action_value
                 point = Point(player.x + dx, player.y + dy)
 
@@ -407,7 +415,7 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                 dead_entity = result_data
 
                 if dead_entity == player:
-                    game_state = GameStates.PLAYER_DEAD
+                    game_state = GameStates.GAME_OVER
 
                 dead_entity.death.npc_death(game_map)
                 entity_map_needs_update = True
@@ -425,12 +433,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.TICK))
 
         pubsub.pubsub.process_queue(fov_map, game_map)
-
-        #---------------------------------------------------------------------
-        # If the player is dead, the game is over.
-        #---------------------------------------------------------------------
-        if game_state == GameStates.PLAYER_DEAD:
-            continue
 
 def main():
     constants = get_constants()
@@ -456,6 +458,9 @@ def main():
     mouse = libtcod.Mouse()
 
     while not libtcod.console_is_window_closed():
+        if game_state == GameStates.GAME_EXIT:
+            break
+
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         if show_main_menu:
@@ -488,9 +493,9 @@ def main():
 
         else:
             libtcod.console_clear(con)
-            play_game(player, game_map, message_log, game_state, con, panel, constants)
+            game_state = play_game(player, game_map, message_log, game_state, con, panel, constants)
 
-        #show_main_menu = True
+            show_main_menu = True
 
 
 if __name__ == '__main__':

@@ -56,10 +56,11 @@ class WarlordDeath(BasicDeath):
 
 class PlayerDeath(BasicDeath):
     def npc_death(self, game_map):
-        print("player death")
 
         self.owner.char = '%'
         self.owner.color = libtcod.dark_red
+        self.owner.blocks = False
+        self.owner.render_order = RenderOrder.CORPSE
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You died!', libtcod.red)))
 
-        return GameStates.PLAYER_DEAD
+        return GameStates.GAME_OVER
