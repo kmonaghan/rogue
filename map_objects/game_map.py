@@ -18,11 +18,9 @@ from map_objects.tile import *
 from map_objects.dungeonGenerator import *
 from map_objects.prefab import *
 
-from render_order import RenderOrder
+from etc.enum import RenderOrder, Species
 
 from game_messages import Message
-
-from species import Species
 
 class GameMap:
     def __init__(self, dungeon_level=1):

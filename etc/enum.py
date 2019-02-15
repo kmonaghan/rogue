@@ -35,8 +35,8 @@ class GameStates(Enum):
     ENEMY_TURN = auto()
     GAME_COMPLETE = auto()
     GAME_START = auto()
+    GAME_OVER = auto()
     INVENTORY_DROP = auto()
-    INVENTORY_EQUIP = auto()
     INVENTORY_EXAMINE = auto()
     INVENTORY_THROW = auto()
     INVENTORY_USE = auto()
@@ -51,22 +51,21 @@ class GameStates(Enum):
 
 # Game states that can be canceled out of.
 CANCEL_STATES = {
-    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EQUIP,
-    GameStates.INVENTORY_EXAMINE, GameStates.INVENTORY_THROW,
-    GameStates.INVENTORY_USE, GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING}
+    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
+    GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
+    GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING}
     #GameStates.CURSOR_INPUT,}
 
 # Game states where an inventory is displayed.
 INVENTORY_STATES = {
-    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EQUIP,
-    GameStates.INVENTORY_EXAMINE, GameStates.INVENTORY_THROW,
-    GameStates.INVENTORY_USE}
+    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
+    GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE}
 
 # Game states accepting of user input.
 INPUT_STATES = {
-    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EQUIP,
-    GameStates.INVENTORY_EXAMINE, GameStates.INVENTORY_THROW,
-    GameStates.INVENTORY_USE, GameStates.QUEST_LIST,
+    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
+    GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
+    GameStates.QUEST_LIST,
     #GameStates.CURSOR_INPUT,
     GameStates.PLAYER_DEAD, GameStates.PLAYER_TURN}
 
@@ -84,7 +83,6 @@ class InputTypes(Enum):
     GAME_RESTART = auto()
     GAME_SAVE = auto()
     INVENTORY_DROP = auto()
-    INVENTORY_EQUIP = auto()
     INVENTORY_EXAMINE = auto()
     INVENTORY_INDEX = auto()
     INVENTORY_THROW = auto()
@@ -207,6 +205,27 @@ class ResultTypes(Enum):
     # These two must be processed first!
     ANIMATION = 99
     CURSOR_MODE = 98
+
+class RenderOrder(Enum):
+    STAIRS = auto()
+    CORPSE = auto()
+    ITEM = auto()
+    ACTOR = auto()
+
+class Species(Enum):
+    NONDESCRIPT = auto()
+    GOBLIN = auto()
+    ORC = auto()
+    TROLL = auto()
+    ANIMAL = auto()
+    RAT = auto()
+    SNAKE = auto()
+    EGG = auto()
+    RATNEST = auto()
+    INANIMATE = auto()
+    CREATURE = auto()
+    BAT = auto()
+    PLAYER = auto()
 
 class TreeStates(Enum):
     SUCCESS = auto()

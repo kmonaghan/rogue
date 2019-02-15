@@ -51,9 +51,9 @@ def handle_player_turn_keys(key):
     elif key_char == 'z':
         return {InputTypes.WAIT: True}
     elif key_char == ']':
-        return {InputTypes.WAIT: True, InputTypes.DEBUG_ON: True}
+        return {InputTypes.DEBUG_ON: True}
     elif key_char == '[':
-        return {InputTypes.WAIT: True, InputTypes.DEBUG_OFF: False}
+        return {InputTypes.DEBUG_OFF: False}
 
     if key_char == 'g':
         return {InputTypes.PICKUP: True}
@@ -99,6 +99,10 @@ def handle_player_dead_keys(key):
 
     if key_char == 'i':
         return {InputTypes.INVENTORY_USE: True}
+    elif key_char == 'q':
+        return {InputTypes.QUEST_LIST: True}
+    elif key_char == 'c':
+        return {InputTypes.CHARACTER_SCREEN: True}
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
@@ -107,7 +111,7 @@ def handle_player_dead_keys(key):
         # Exit the menu
         return {InputTypes.EXIT: True}
 
-    return {}
+    return {InputTypes.EXIT: True}
 
 
 def handle_inventory_keys(key):
@@ -127,7 +131,6 @@ def handle_main_menu(key):
     key_char = chr(key.c)
 
     if key_char == 'a':
-        print(">>>>> " + key_char)
         return {InputTypes.GAME_NEW: True}
     elif key_char == 'b':
         return {InputTypes.GAME_LOAD: True}
@@ -170,9 +173,9 @@ def handle_quests_onboarding(key):
         key_char = chr(key.c)
 
         if key_char == 'a':
-            return {InputType.QUEST_RESPONSE: 'accept'}
+            return {InputTypes.QUEST_RESPONSE: 'accept'}
         elif key_char == 'b':
-            return {InputType.QUEST_RESPONSE: 'reject'}
+            return {InputTypes.QUEST_RESPONSE: 'reject'}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {InputTypes.EXIT: True}
@@ -180,10 +183,7 @@ def handle_quests_onboarding(key):
     return {}
 
 def handle_character_screen(key):
-    if key.vk == libtcod.KEY_ESCAPE:
-        return {InputTypes.EXIT: True}
-
-    return {}
+    return {InputTypes.EXIT: True}
 
 def handle_mouse(mouse):
     (x, y) = (mouse.cx, mouse.cy)

@@ -13,7 +13,7 @@ from game_messages import Message
 from tome import cast_confuse, cast_fireball, cast_lightning, heal, cast_mapping
 
 from equipment_slots import EquipmentSlots
-from render_order import RenderOrder
+from etc.enum import RenderOrder
 
 def random_armour(point = None, dungeon_level = 1):
     item_chances = {}

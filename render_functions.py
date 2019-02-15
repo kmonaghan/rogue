@@ -1,9 +1,8 @@
 import tcod as libtcod
 
-from enum import Enum
-
 import game_states
-from render_order import RenderOrder
+
+from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed
 
@@ -103,30 +102,31 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
-    if game_state == game_states.GameStates.GAME_COMPLETE:
+    if game_state == GameStates.PLAYER_DEAD:
+        pass
+    elif game_state == GameStates.GAME_COMPLETE:
         game_completed(con, 60, screen_width, screen_height)
-
-    elif game_state in (game_states.GameStates.SHOW_INVENTORY, game_states.GameStates.DROP_INVENTORY, game_states.GameStates.EXAMINE_INVENTORY):
-        if game_state == game_states.GameStates.SHOW_INVENTORY:
+    elif game_state == GameStates.CHARACTER_SCREEN:
+        character_screen(player, 30, 10, screen_width, screen_height)
+    elif game_state in INVENTORY_STATES:
+        if game_state == GameStates.INVENTORY_USE:
             inventory_title = 'Press the key next to an item to use it, or Esc to cancel.\n'
-        elif game_state == game_states.GameStates.EXAMINE_INVENTORY:
+        elif game_state == GameStates.INVENTORY_EXAMINE:
             inventory_title = 'Press the key next to an item to examine it, or Esc to cancel.\n'
-        else:
+        elif game_state == GameStates.INVENTORY_DROP:
             inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.\n'
+        else:
+            inventory_title = 'Esc to cancel.\n'
 
         inventory_menu(con, inventory_title, player, 50, screen_width, screen_height)
-
-    elif game_state == game_states.GameStates.QUEST_ONBOARDING:
+    elif game_state == GameStates.QUEST_ONBOARDING:
         quest_menu(con, '', quest_request, 50, screen_width, screen_height)
-
-    elif game_state == game_states.GameStates.SHOW_QUESTS:
+    elif game_state == GameStates.QUEST_LIST:
         quest_list_menu(con, 'Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)
-
-    elif game_state == game_states.GameStates.LEVEL_UP:
+    elif game_state == GameStates.LEVEL_UP:
         level_up_menu(con, 'Level up! Choose a stat to raise:', player, 40, screen_width, screen_height)
 
-    elif game_state == game_states.GameStates.CHARACTER_SCREEN:
-        character_screen(player, 30, 10, screen_width, screen_height)
+
 
 def clear_all(con, game_map):
     for entity in game_map.entities:

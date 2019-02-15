@@ -2,9 +2,7 @@ import tcod as libtcod
 
 from game_messages import Message
 
-from game_states import GameStates
-
-from render_functions import RenderOrder
+from etc.enum import GameStates, RenderOrder
 
 import pubsub
 
@@ -16,7 +14,6 @@ class BasicDeath:
         self.skeletal = False
 
     def npc_death(self, game_map):
-        print("NPC Death")
         #transform it into a nasty corpse! it doesn't block, can't be
         #attacked and doesn't move
         self.owner.char = '%'
@@ -55,7 +52,7 @@ class WarlordDeath(BasicDeath):
         #attacked and doesn't move
         game_state = super(WarlordDeath, self).npc_death(game_map)
 
-        return Message('Victory is yours!', libtcod.gold), GameStates.GAME_COMPLETE
+        return GameStates.GAME_COMPLETE
 
 class PlayerDeath(BasicDeath):
     def npc_death(self, game_map):

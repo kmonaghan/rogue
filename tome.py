@@ -8,6 +8,8 @@ from game_messages import Message
 
 from random_utils import die_roll
 
+from etc.enum import ResultTypes
+
 #spell values
 HEAL_AMOUNT = 40
 LIGHTNING_RANGE = 5

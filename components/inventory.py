@@ -67,8 +67,7 @@ class Inventory:
         item.y = self.owner.y
 
         self.remove_item(item)
-        results.append({ResultTypes.DROP_ITEM_FROM_INVENTORY: item,
-                        ResultTypes.MESSAGE: Message('You dropped the {0}'.format(item.name), libtcod.yellow)})
+        results.append({ResultTypes.DROP_ITEM_FROM_INVENTORY: item})
 
         return results
 

@@ -14,7 +14,7 @@ from game_messages import Message
 
 from map_objects.point import Point
 
-from render_order import RenderOrder
+from etc.enum import ResultTypes, RenderOrder
 
 import uuid
 

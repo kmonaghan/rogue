@@ -3,7 +3,7 @@ import tcod as libtcod
 from random import choice
 
 from game_messages import Message
-from species import Species
+from etc.enum import Species
 
 import pubsub
 

@@ -4,8 +4,6 @@ from bestiary import create_player
 
 from game_messages import MessageLog
 
-from game_states import GameStates
-
 from map_objects.game_map import GameMap
 
 from render_functions import RenderOrder
@@ -13,6 +11,8 @@ from render_functions import RenderOrder
 import pubsub
 
 import quest
+
+from etc.enum import GameStates
 
 def get_constants():
     window_title = 'Roguelike Tutorial Revised'

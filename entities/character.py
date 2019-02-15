@@ -10,8 +10,7 @@ from components.equipment import Equipment
 from components.inventory import Inventory
 from components.level import Level
 
-from render_order import RenderOrder
-from species import Species
+from etc.enum import RenderOrder, Species
 from game_states import debug
 
 class Character(Entity):

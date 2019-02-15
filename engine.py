@@ -2,7 +2,6 @@ import tcod as libtcod
 
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
-import game_states
 from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from loader_functions.initialize_new_game import get_constants, get_game_variables
 from loader_functions.data_loaders import load_game, save_game
@@ -92,6 +91,10 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
         input_result = handle_keys(user_input, game_state)
         mouse_action = handle_mouse(mouse)
 
+        if (len(input_result) == 0):
+            print("No corresponding result for key press.")
+            continue
+
         left_click = mouse_action.get('left_click')
         right_click = mouse_action.get('right_click')
 
@@ -131,28 +134,9 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             previous_game_state = game_state
             game_state = GameStates.INVENTORY_DROP
 
-        if action == InputTypes.INVENTORY_EQUIP:
-            previous_game_state = game_state
-            game_state = GameStates.INVENTORY_EQUIP
-
         if action == InputTypes.INVENTORY_EXAMINE:
             previous_game_state = game_state
             game_state = GameStates.INVENTORY_EXAMINE
-        '''
-        if action == InputTypes.INVENTORY_INDEX:
-            previous_game_state = game_state
-            game_state = GameStates.INVENTORY_INDEX
-        '''
-        if (action == InputTypes.INVENTORY_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
-                player.inventory.items):
-            item = player.inventory.items[inventory_index]
-
-            if game_state == GameStates.SHOW_INVENTORY:
-                player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map, game_map=game_map))
-            elif game_state == GameStates.DROP_INVENTORY:
-                player_turn_results.extend(player.inventory.drop_item(item))
-            elif game_state == GameStates.EXAMINE_INVENTORY:
-                player_turn_results.extend(player.inventory.examine_item(item))
 
         if action == InputTypes.INVENTORY_THROW:
             previous_game_state = game_state
@@ -162,12 +146,22 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             previous_game_state = game_state
             game_state = GameStates.INVENTORY_USE
 
+        if (action == InputTypes.INVENTORY_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and action_value < len(player.inventory.items):
+            item = player.inventory.items[action_value]
+
+            if game_state == GameStates.INVENTORY_USE:
+                player_turn_results.extend(player.inventory.use(item, entities=game_map.entities, fov_map=fov_map, game_map=game_map))
+            elif game_state == GameStates.INVENTORY_DROP:
+                player_turn_results.extend(player.inventory.drop_item(item))
+            elif game_state == GameStates.INVENTORY_EXAMINE:
+                player_turn_results.extend(player.inventory.examine_item(item))
+
         if action == InputTypes.LEVEL_UP:
-            if level_up == 'hp':
+            if action_value == 'hp':
                 player.level.level_up_stats(0)
-            elif level_up == 'str':
+            elif action_value == 'str':
                 player.level.level_up_stats(1)
-            elif level_up == 'def':
+            elif action_value == 'def':
                 player.level.level_up_stats(2)
 
             game_state = previous_game_state
@@ -182,10 +176,35 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             quest_request = None
             game_state = previous_game_state
 
-        if (action == InputTypes.QUEST_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and quest_index < len(quest.active_quests):
-            selected_quest = quest.active_quests[quest_index]
+        if (action == InputTypes.QUEST_INDEX) and previous_game_state != GameStates.PLAYER_DEAD and action_value < len(quest.active_quests):
+            selected_quest = quest.active_quests[action_value]
             message_log.add_message(selected_quest.status())
             game_state = previous_game_state
+
+        if game_state == GameStates.TARGETING:
+            if left_click:
+                target_x, target_y = left_click
+
+                item_use_results = player.inventory.use(targeting_item, entities=game_map.entities, fov_map=fov_map,
+                                                        target_x=target_x, target_y=target_y)
+                player_turn_results.extend(item_use_results)
+            elif right_click:
+                player_turn_results.append({'targeting_cancelled': True})
+
+        if action == InputTypes.EXIT:
+            if game_state in CANCEL_STATES:
+                game_state = previous_game_state
+            elif game_state == GameStates.TARGETING:
+                player_turn_results.append({'targeting_cancelled': True})
+            elif game_state == GameStates.QUEST_ONBOARDING:
+                player_turn_results.append({'quest_cancelled': True})
+            else:
+                save_game(player, game_map, message_log, game_state)
+
+                return True
+
+        if action == InputTypes.FULLSCREEN:
+            libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
         if game_state == GameStates.PLAYER_TURN:
             if action == InputTypes.MOVE:
@@ -219,8 +238,8 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                         player_turn_results.extend(pickup_results)
 
                         game_map.update_entity_map()
-                else:
-                    message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
+                    else:
+                        message_log.add_message(Message('There is nothing here to pick up.', libtcod.yellow))
             elif action == InputTypes.TAKE_STAIRS:
                 if (game_map.check_for_stairs(player.x, player.y)):
                         game_map.next_floor(player, message_log, constants)
@@ -231,31 +250,6 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
                         break
                 else:
                     message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
-
-        if game_state == GameStates.TARGETING:
-            if left_click:
-                target_x, target_y = left_click
-
-                item_use_results = player.inventory.use(targeting_item, entities=game_map.entities, fov_map=fov_map,
-                                                        target_x=target_x, target_y=target_y)
-                player_turn_results.extend(item_use_results)
-            elif right_click:
-                player_turn_results.append({'targeting_cancelled': True})
-
-        if action == InputTypes.EXIT:
-            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.EXAMINE_INVENTORY, GameStates.SHOW_QUESTS, GameStates.CHARACTER_SCREEN):
-                game_state = previous_game_state
-            elif game_state == GameStates.TARGETING:
-                player_turn_results.append({'targeting_cancelled': True})
-            elif game_state == GameStates.QUEST_ONBOARDING:
-                player_turn_results.append({'quest_cancelled': True})
-            else:
-                save_game(player, game_map, message_log, game_state)
-
-                return True
-
-        if action == InputTypes.FULLSCREEN:
-            libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
         #----------------------------------------------------------------------
         # Process the results stack
@@ -287,22 +281,13 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
                 dead_entity = result_data
-                print(">>>>>")
-                print(result_data.describe())
-                if dead_entity == player:
-                    player_turn_results.extend(kill_player(player))
-                    game_state = GameStates.PLAYER_DEAD
-                else:
-                    #player_turn_results.extend(dead_entity.death.npc_death(game_map))
-                    dead_entity.death.npc_death(game_map)
-                    entity_map_needs_update = True
+                dead_entity.death.npc_death(game_map)
 
             # Add an item to the inventory, and remove it from the game map.
             if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
-                #entity, item = result_data
-                #entity.inventory.add(item)
                 #item.commitable.delete(game_map)
-                game_map.entities.remove(item_added)
+                #entity.inventory.add(result_data)
+                game_map.entities.remove(result_data)
                 game_state = GameStates.ENEMY_TURN
 
             # Remove consumed items from inventory
@@ -314,11 +299,10 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
             # Remove dropped items from inventory and place on the map
             if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
-                #entity, item = result_data
-                #entity.inventory.remove(item)
-                #item.x, item.y = entity.x, entity.y
-                #game_map.entities.append(item)
-                game_map.add_entity_to_map(item_dropped)
+                game_map.add_entity_to_map(result_data)
+                message = Message('You dropped the {0}'.format(result_data.name), libtcod.yellow)
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+
                 game_state = GameStates.ENEMY_TURN
 
             if result_type == ResultTypes.EQUIP:
@@ -442,6 +426,12 @@ def play_game(player, game_map, message_log, game_state, con, panel, constants):
 
         pubsub.pubsub.process_queue(fov_map, game_map)
 
+        #---------------------------------------------------------------------
+        # If the player is dead, the game is over.
+        #---------------------------------------------------------------------
+        if game_state == GameStates.PLAYER_DEAD:
+            continue
+
 def main():
     constants = get_constants()
 
@@ -497,11 +487,10 @@ def main():
                     break
 
         else:
-            print("playing")
             libtcod.console_clear(con)
             play_game(player, game_map, message_log, game_state, con, panel, constants)
 
-            show_main_menu = True
+        #show_main_menu = True
 
 
 if __name__ == '__main__':

@@ -52,7 +52,7 @@ class Questgiver:
             return results
 
         if (self.quest.started == False):
-            results.append({'quest_onboarding': self.quest})
+            results.append({ResultTypes.QUEST_ONBOARDING: self.quest})
         elif (self.quest.completed):
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('Well done!', libtcod.gold)))
             pubsub.pubsub.add_message(pubsub.Publish(self.quest, pubsub.PubSubTypes.EARNEDXP, target=pc))

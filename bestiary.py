@@ -35,7 +35,7 @@ from components.death import PlayerDeath, WarlordDeath
 
 from random_utils import from_dungeon_level, random_choice_from_dict
 
-from species import Species
+from etc.enum import Species
 
 import pubsub
 
