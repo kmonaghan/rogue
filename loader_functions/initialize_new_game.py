@@ -24,6 +24,9 @@ def get_constants():
     panel_height = 10
     panel_y = screen_height - panel_height
 
+    info_panel_width = bar_width + 4
+    message_panel_width = screen_width - info_panel_width
+
     message_x = bar_width + 2
     message_width = screen_width - bar_width - 2
     message_height = panel_height - 1
@@ -47,6 +50,8 @@ def get_constants():
         'screen_width': screen_width,
         'screen_height': screen_height,
         'bar_width': bar_width,
+        'info_panel_width': info_panel_width,
+        'message_panel_width': message_panel_width,
         'panel_height': panel_height,
         'panel_y': panel_y,
         'message_x': message_x,

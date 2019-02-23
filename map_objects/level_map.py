@@ -39,7 +39,7 @@ class LevelMap(Map):
     def blit_floor(self):
         self.walkable[:] = False
         self.transparent[:] = False
-        self.explored[:] = True
+        self.explored[:] = False
 
         for x, y, tile in self.floor:
             if self.floor.grid[x][y] == Tiles.EMPTY:
@@ -106,10 +106,19 @@ class LevelMap(Map):
 
         if recompute:
             self.compute_fov(player.x, player.y, 10, True, 0,)
-        self.console.bg[:] = self.dark_map_bg[:]
 
         where_fov = np.where(self.fov[:])
+        self.explored[where_fov] = True
+
+        explored = np.where(self.explored[:])
+        self.console.bg[explored] = self.dark_map_bg[explored]
         self.console.bg[where_fov] = self.light_map_bg[where_fov]
+
+#        entities_in_render_order = sorted(game_map.entities, key=lambda x: x.render_order.value)
+
+#        # Draw all entities in the list
+#        for entity in entities_in_render_order:
+#            draw_entity(con, entity, fov_map, game_map)
 
         self.console.ch[player.x, player.y] = ord(player.char)
         self.console.fg[player.x, player.y] = player.display_color()

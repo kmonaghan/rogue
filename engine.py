@@ -5,7 +5,7 @@ from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from loader_functions.initialize_new_game import get_constants, get_game_variables
 from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
-from render_functions import render_all, render_info_console, render_menu_console
+from render_functions import render_info_console, render_message_console, render_menu_console
 from map_objects.point import Point
 import quest
 import pubsub
@@ -27,7 +27,7 @@ def get_user_input(key, mouse):
     return key, mouse
 
 def play_game(player, game_map, message_log, game_state, consoles, constants):
-    root_console, map_console, info_console, menu_console = consoles
+    root_console, map_console, info_console, message_console, menu_console = consoles
 
     fov_recompute = True
 
@@ -73,13 +73,15 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         fov_recompute = False
 
         #---------------------------------------------------------------------
-        # Render info.
+        # Render infomation panels.
         #---------------------------------------------------------------------
-        info_console = render_info_console(info_console, message_log, player, constants['bar_width'], game_map)
+        render_info_console(info_console, player, game_map)
+        render_message_console(message_console, message_log)
 
         #---------------------------------------------------------------------
         # Render any menus.
         #---------------------------------------------------------------------
+        render_menu_console(root_console, game_state, constants['screen_width'], constants['screen_height'], player)
 
         #---------------------------------------------------------------------
         # Blit the subconsoles to the main console and flush all rendering.
@@ -87,14 +89,14 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         game_map.console.blit(root_console, 0, 0, 0, 0,
                           game_map.console.width, game_map.console.height)
         info_console.blit(root_console, 0, constants['panel_y'], 0, 0,
-                          constants['screen_width'], constants['panel_height'])
+                          constants['info_panel_width'], constants['panel_height'])
+        message_console.blit(root_console, constants['info_panel_width'], constants['panel_y'], 0, 0,
+                          constants['message_panel_width'], constants['panel_height'])
         '''
         if game_state in INVENTORY_STATES:
             root_console.blit(menu_console, menu_x, menu_y,
                               constants['screen_width'], constants['screen_height'], 0, 0)
         '''
-
-        render_menu_console(root_console, game_state, constants['screen_width'], constants['screen_height'], player)
 
         tcod.console_flush()
 
@@ -229,7 +231,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                 dx, dy = action_value
                 point = Point(player.x + dx, player.y + dy)
 
-                if not game_map.is_blocked(point):
+                if game_map.current_level.walkable[player.x + dx, player.y + dy]:
                     target = game_map.get_blocking_entities_at_location(point)
 
                     if target:
@@ -450,10 +452,11 @@ def main():
 
     root_console = tcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False, order='F')
     map_console = tcod.console.Console(constants['map_width'], constants['map_height'], 'F')
-    info_panel =  tcod.console.Console(constants['screen_width'], constants['panel_height'], 'F')
+    info_panel =  tcod.console.Console(constants['info_panel_width'], constants['panel_height'], 'F')
+    message_panel = tcod.console.Console(constants['message_panel_width'], constants['panel_height'], 'F')
     menu_console = tcod.console.Console(constants['map_width'], constants['map_height'], 'F')
 
-    consoles = [root_console, map_console, info_panel, menu_console]
+    consoles = [root_console, map_console, info_panel, message_panel, menu_console]
 
     player = None
     game_map = None
@@ -505,6 +508,8 @@ def main():
                     break
 
         else:
+            message_log.add_message(Message('Let\'s get ready to rock and/or roll!.', tcod.yellow))
+
             game_state = play_game(player, game_map, message_log, game_state, consoles, constants)
 
             show_main_menu = True
