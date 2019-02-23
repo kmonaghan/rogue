@@ -1,5 +1,6 @@
 import tcod as libtcod
 
+from etc.enum import LevelUp
 #experience and level-ups
 LEVEL_UP_BASE = 100
 LEVEL_UP_FACTOR = 1.5
@@ -44,17 +45,17 @@ class Level:
 
         return False
 
-    def level_up_stats(self, choice = 0):
+    def level_up_stats(self, choice = LevelUp.HEALTH):
         self.current_level += 1
         self.current_level_xp += self.next_level_xp
         self.next_level_xp = int(self.next_level_xp * self.level_up_factor)
 
-        if choice == 0:
+        if choice == LevelUp.HEALTH:
             self.owner.health.base_max_hp += 20
             self.owner.health.hp += 20
-        elif choice == 1:
+        elif choice == LevelUp.STRENGTH:
             self.owner.offence.base_power += 1
-        elif choice == 2:
+        elif choice == LevelUp.DEFENCE:
             self.owner.defence.base_defence += 1
 
         self.owner.health.hp = self.owner.health.max_hp

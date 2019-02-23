@@ -13,6 +13,15 @@ from map_objects.point import Point
 
 from etc.enum import ResultTypes
 
+from components.behaviour_trees.root import Root
+from components.behaviour_trees.composite import (
+    Selection, Sequence, Negate)
+from components.behaviour_trees.leaf import (
+     Attack, MoveTowardsTargetEntity, TravelToRandomPosition,
+     MoveTowardsPointInNamespace)
+from components.behaviour_trees.conditions import (
+    IsAdjacent, WithinFov, InNamespace)
+
 class BasicMonster:
     """Simple monster ai.
 
@@ -33,13 +42,13 @@ class BasicMonster:
                     MoveTowardsPointInNamespace(name="target_point")),
                 TravelToRandomPosition()))
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         _, results = self.tree.tick(self.owner, target, game_map)
         return results
 
 class BasicNPC:
     #AI for a basic npc.
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         #a basic npc takes its turn. if you can see it, it can see you
@@ -115,7 +124,7 @@ class StrollingNPC:
         self.aggressive = aggressive
         self.pursue_distance = pursue_distance
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         if (self.aggressive and libtcod.map_is_in_fov(fov_map, self.owner.x, self.owner.y)):
@@ -155,7 +164,7 @@ class WarlordNPC:
         self.summoned_orcs = False
         self.summoned_trolls = False
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
@@ -205,7 +214,7 @@ class NecromancerNPC:
         self.ritual_started = False
         self.ritual_turns = 50
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         npc = self.owner
@@ -228,7 +237,7 @@ class Hunter(StrollingNPC):
         super(Hunter, self).__init__(attacked_ai = attacked_ai)
         self.hunting = hunting
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         npc = self.owner
@@ -252,14 +261,14 @@ class Hunter(StrollingNPC):
 
                 return results
 
-        return super(Hunter, self).take_turn(target, fov_map, game_map)
+        return super(Hunter, self).take_turn(target, game_map)
 
 class Hatching:
     def __init__(self, hatches):
         self.incubate = randint(5, 15)
         self.hatches = hatches
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         self.incubate -= 1
@@ -279,7 +288,7 @@ class SpawnNPC:
         self.spawn = spawn
         self.turns_since_last_spawn = 0
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         if ((randint(0, 10) + self.turns_since_last_spawn) > 18):
@@ -301,7 +310,7 @@ class ScreamerNPC:
         self.alert_npc_type = alert_npc_type
         self.alert_range = alert_range
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         npcs = game_map.find_all_closest(self.owner.point, self.alert_npc_type, self.alert_range)

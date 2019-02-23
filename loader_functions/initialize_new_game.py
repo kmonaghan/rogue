@@ -1,4 +1,4 @@
-import tcod as libtcod
+import tcod
 
 from bestiary import create_player
 
@@ -35,19 +35,12 @@ def get_constants():
     room_min_size = 6
     max_rooms = 30
 
-    fov_algorithm = 0
+    fov_algorithm = tcod.FOV_RESTRICTIVE
     fov_light_walls = True
     fov_radius = 10
 
     max_monsters_per_room = 3
     max_items_per_room = 2
-
-    colors = {
-        'dark_wall': libtcod.darkest_sepia,
-        'dark_ground': libtcod.darker_sepia,
-        'light_wall': libtcod.dark_sepia,
-        'light_ground': libtcod.sepia
-    }
 
     constants = {
         'window_title': window_title,
@@ -65,8 +58,7 @@ def get_constants():
         'fov_light_walls': fov_light_walls,
         'fov_radius': fov_radius,
         'max_monsters_per_room': max_monsters_per_room,
-        'max_items_per_room': max_items_per_room,
-        'colors': colors
+        'max_items_per_room': max_items_per_room
     }
 
     return constants
@@ -87,7 +79,7 @@ def get_game_variables(constants):
 
     player = create_player()
 
-    game_map.create_floor(player, constants)
+    #game_map.create_floor(player, constants)
 
     game_state = GameStates.PLAYER_TURN
 

@@ -1,6 +1,6 @@
 '''via https://github.com/madrury/roguelike
 '''
-from pathfinding import get_shortest_path, get_path_to_radius_of_target
+from utils.pathfinding import get_shortest_path
 
 from etc.enum import TreeStates
 from etc.enum import ResultTypes
@@ -37,7 +37,7 @@ class MoveTowardsPointInNamespace(Node):
         self.namespace[self.name + '_previous'] = (owner.x, owner.y)
         return TreeStates.SUCCESS, results
 
-
+'''
 class SeekTowardsLInfinityRadius(Node):
     """Seek to stay a fixed radius from a target."""
     def __init__(self, radius):
@@ -55,7 +55,7 @@ class SeekTowardsLInfinityRadius(Node):
         results = [{
             ResultTypes.SET_POSITION: (owner, path[1][0], path[1][1])}]
         return TreeStates.SUCCESS, results
-
+'''
 
 class TravelToRandomPosition(Node):
     """Pick a random position on the map and walk towards it until getting
@@ -80,13 +80,13 @@ class TravelToRandomPosition(Node):
             ResultTypes.MOVE_TOWARDS: (owner, self.path[1][0], self.path[1][1])}]
         return TreeStates.SUCCESS, results
 
-
+'''
 class Skitter(Node):
     """Move the owner to a random adjacent tile."""
     def tick(self, owner, target, game_map):
         results = [{ResultTypes.MOVE_RANDOM_ADJACENT: owner}]
         return TreeStates.SUCCESS, results
-
+'''
 
 class DoNothing(Node):
     """Take no action and pass the turn."""
@@ -103,7 +103,7 @@ class Attack(Node):
         else:
             return TreeStates.FAILURE, []
 
-
+'''
 class SpawnEntity(Node):
 
     def __init__(self, maker):
@@ -118,3 +118,4 @@ class SpawnEntity(Node):
             if entity:
                 return TreeStates.SUCCESS, [{ResultTypes.ADD_ENTITY: entity}]
         return TreeStates.FAILURE, []
+'''

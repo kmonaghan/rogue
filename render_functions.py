@@ -6,7 +6,7 @@ from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed, game_over, game_paused
 
-def get_names_under_mouse(mouse, fov_map, game_map):
+def get_names_under_mouse(mouse, game_map):
     (x, y) = (mouse.cx, mouse.cy)
 
     location = ''
@@ -21,7 +21,7 @@ def get_names_under_mouse(mouse, fov_map, game_map):
     tile_description = ''
     names = ''
 
-    if (libtcod.map_is_in_fov(fov_map, x, y) or game_states.debug):
+    if (game_map.current_level.fov[x, y] or game_states.debug):
         tile_description = game_map.map[x][y].describe() + ' '
 
         names = [entity.describe() for entity in game_map.entity_map[x][y]]
@@ -47,13 +47,13 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
                              '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
+def render_all(con, panel, player, game_map, fov_recompute, message_log, screen_width, screen_height,
                bar_width, panel_height, panel_y, mouse, colors, game_state, quest_request = None):
     if fov_recompute:
     # Draw all the tiles in the game map
         for y in range(game_map.height):
             for x in range(game_map.width):
-                visible = libtcod.map_is_in_fov(fov_map, x, y)
+                visible = game_map.current_level.fov[x, y]
 
                 if game_states.debug:
                     libtcod.console_set_char_background(con, x, y, game_map.map[x][y].fov_color, libtcod.BKGND_SET)
@@ -77,31 +77,7 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
 
     libtcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
 
-    libtcod.console_set_default_background(panel, libtcod.black)
-    libtcod.console_clear(panel)
-
-    # Print the game messages, one line at a time
-    y = 1
-    for message in message_log.messages:
-        libtcod.console_set_default_foreground(panel, message.color)
-        libtcod.console_print_ex(panel, message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
-        y += 1
-
-    render_bar(panel, 1, 1, bar_width, 'HP', player.health.hp, player.health.max_hp,
-               libtcod.light_red, libtcod.darker_red)
-
-    render_bar(panel, 1, 3, bar_width, 'XP', player.level.current_xp, player.level.experience_to_next_level,
-                   libtcod.light_green, libtcod.darker_green)
-
-    libtcod.console_print_ex(panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT,
-                             'Dungeon level: {0}'.format(game_map.dungeon_level))
-
-    libtcod.console_set_default_foreground(panel, libtcod.light_gray)
-    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-                             get_names_under_mouse(mouse, fov_map, game_map))
-
-    libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
-
+def render_menu_console(con, game_state, screen_width, screen_height, player):
     if game_state == GameStates.GAME_PAUSED:
         game_paused(con, 60, screen_width, screen_height)
     elif game_state == GameStates.GAME_OVER:
@@ -128,11 +104,25 @@ def render_all(con, panel, player, game_map, fov_map, fov_recompute, message_log
     elif game_state == GameStates.LEVEL_UP:
         level_up_menu(con, 'Level up! Choose a stat to raise:', player, 40, screen_width, screen_height)
 
+def render_info_console(info_console, message_log, player, bar_width, game_map):
+    info_console.clear()
+    # Print the game messages, one line at a time
+    y = 1
+    for message in message_log.messages:
+        libtcod.console_set_default_foreground(info_console, message.color)
+        libtcod.console_print_ex(info_console, message_log.x, y, libtcod.BKGND_NONE, libtcod.LEFT, message.text)
+        y += 1
 
+    render_bar(info_console, 1, 1, bar_width, 'HP', player.health.hp, player.health.max_hp,
+               libtcod.light_red, libtcod.darker_red)
 
-def clear_all(con, game_map):
-    for entity in game_map.entities:
-        clear_entity(con, entity, game_map)
+    render_bar(info_console, 1, 3, bar_width, 'XP', player.level.current_xp, player.level.experience_to_next_level,
+                   libtcod.light_green, libtcod.darker_green)
+
+    libtcod.console_print_ex(info_console, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT,
+                             'Dungeon level: {0}'.format(game_map.dungeon_level))
+
+    return info_console
 
 def draw_entity(con, entity, fov_map, game_map):
     if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.map[entity.x][entity.y].explored) or entity.always_visible or game_states.debug:

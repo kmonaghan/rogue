@@ -10,6 +10,7 @@ from game_states import debug
 
 import quest
 
+from components.ai import BasicMonster
 from components.ai import BasicNPC
 from components.ai import StrollingNPC
 from components.ai import WarlordNPC
@@ -457,7 +458,7 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
         upgrade_npc(npc)
         npc.level.random_level_up(1)
 
-    print("final npc level: " + str(npc.level.current_level))
+    #print("final npc level: " + str(npc.level.current_level))
 
     tweak_npc(npc)
 
@@ -504,12 +505,12 @@ def upgrade_npc(npc):
 '''
 Subscription methods
 '''
-def eat_rat(sub, message, fov_map, game_map):
+def eat_rat(sub, message, game_map):
     if (message.entity.species == Species.RAT) and (message.target.uuid == sub.entity.uuid):
         sub.entity.spawn.increase_energy()
         message.entity.death.skeletonize()
 
-def goblin_observed_death(sub, message, fov_map, game_map):
+def goblin_observed_death(sub, message, game_map):
     if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):
         if (sub.entity.uuid == message.entity.uuid):
             pass
@@ -543,18 +544,24 @@ def mimic_shimmer(sub, message, fov_map, game_map):
             sub.entity.char = 'M'
             sub.entity.base_name = 'Mimic'
 
-def rat_swarm(sub, message, fov_map, game_map):
+def rat_swarm(sub, message, game_map):
     if (message.entity.species == Species.PLAYER) and ((message.target.species == Species.RAT) or (message.target.species == Species.RATNEST)):
         if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
             sub.entity.add_component(BasicNPC(), 'ai')
 
-def earn_death_xp(sub, message, fov_map, game_map):
+def earn_death_xp(sub, message, game_map):
+    if message.target is None:
+        print("the target is none?")
+
+    if sub.entity is None:
+        print("the subscriber is none?")
+
     if (message.target.uuid == sub.entity.uuid) and hasattr(message.entity, 'level'):
         xp = message.entity.level.xp_worth(message.target)
         sub.entity.level.add_xp(xp)
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))
 
-def earn_quest_xp(sub, message, fov_map, game_map):
+def earn_quest_xp(sub, message, game_map):
     print("earned xp for: ")
     print(message.target.uuid)
     print(sub.entity.uuid)

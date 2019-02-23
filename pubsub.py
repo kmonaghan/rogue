@@ -48,13 +48,13 @@ class PubSub:
     def add_message(self, message):
         self.queue.append(message)
 
-    def process_queue(self, fov_map, game_map):
+    def process_queue(self, game_map):
         while self.queue:
             message = self.queue.pop()
 
             if message.type in self.subscriptions:
                 for sub in self.subscriptions[message.type]:
-                    sub.callback(sub, message, fov_map, game_map)
+                    sub.callback(sub, message, game_map)
 
         for sub in self.for_removal:
             self.remove_subscription(sub)

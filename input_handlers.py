@@ -1,6 +1,6 @@
 import tcod as libtcod
 
-from etc.enum import GameStates, InputTypes, INVENTORY_STATES
+from etc.enum import GameStates, InputTypes, LevelUp, INVENTORY_STATES
 
 def handle_keys(key, game_state):
     if game_state == GameStates.CHARACTER_SCREEN:
@@ -125,11 +125,11 @@ def handle_level_up_menu(key):
         key_char = chr(key.c)
 
         if key_char == 'a':
-            return {InputTypes.LEVEL_UP: 'hp'}
+            return {InputTypes.LEVEL_UP: LevelUp.HEALTH}
         elif key_char == 'b':
-            return {InputTypes.LEVEL_UP: 'str'}
+            return {InputTypes.LEVEL_UP: LevelUp.STRENGTH}
         elif key_char == 'c':
-            return {InputTypes.LEVEL_UP: 'def'}
+            return {InputTypes.LEVEL_UP: LevelUp.DEFENCE}
 
     return {}
 

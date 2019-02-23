@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum, IntEnum, auto
 
 #-----------------------------------------------------------------------------
 # The various game states.
@@ -212,6 +212,15 @@ class RenderOrder(Enum):
     ITEM = auto()
     ACTOR = auto()
 
+class RoutingOptions(Enum):
+    AVOID_DOORS = auto()
+    AVOID_FIRE = auto()
+    AVOID_MONSTERS = auto()
+    AVOID_SHRUBS = auto()
+    AVOID_STAIRS = auto()
+    AVOID_STEAM = auto()
+    AVOID_WATER = auto()
+
 class Species(Enum):
     NONDESCRIPT = auto()
     GOBLIN = auto()
@@ -227,7 +236,27 @@ class Species(Enum):
     BAT = auto()
     PLAYER = auto()
 
+class Tiles(IntEnum):
+    EMPTY = 0
+    OBSTACLE = auto()
+    IMPENETRABLE = auto()
+    CAVERN_WALL = auto()
+    CORRIDOR_WALL = auto()
+    ROOM_WALL = auto()
+    DOOR = auto()
+    DEADEND = auto()
+    CAVERN_FLOOR = auto()
+    CORRIDOR_FLOOR = auto()
+    ROOM_FLOOR = auto()
+    SHALLOWWATER = auto()
+    DEEPWATER = auto()
+
 class TreeStates(Enum):
     SUCCESS = auto()
     FAILURE = auto()
     RUNNING = auto()
+
+class LevelUp(Enum):
+    HEALTH = auto()
+    STRENGTH = auto()
+    DEFENCE = auto()
