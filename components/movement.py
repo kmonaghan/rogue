@@ -6,14 +6,16 @@ class Movement:
         def __init__(self, can_move=True):
             self.can_move = can_move
 
-        def move(self, dx, dy):
+        def move(self, dx, dy, current_level):
             if not self.can_move:
                 return
 
+
             #move by the given amount, if the destination is not blocked
-            #if not is_blocked(Point(self.x + dx, self.y + dy)):
-            self.owner.x += dx
-            self.owner.y += dy
+            if current_level.walkable[self.owner.x + dx, self.owner.y + dy]:
+                current_level.move_entity(self.owner, Point(self.owner.x + dx, self.owner.y + dy))
+                self.owner.x += dx
+                self.owner.y += dy
 
         def move_towards(self, target_point, game_map):
             tx = target_point.x - self.owner.x
@@ -21,7 +23,7 @@ class Movement:
 
             dx = tx
             dy = ty
- 
+
             if (tx < 0):
                 dx = -1
             elif (tx > 0):
@@ -35,7 +37,7 @@ class Movement:
             self.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
 
         def attempt_move(self, target_point, game_map):
-            if not game_map.is_blocked(target_point, True):
+            if game_map.current_level.walkable[point.x, point.y] and not game_map.current_level.blocked[point.x, point.y]:
                 self.owner.x = target_point.x
                 self.owner.y = target_point.y
 

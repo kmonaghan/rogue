@@ -65,7 +65,6 @@ class GameMap:
         #self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         #self.current_level.add_down_stairs(self.down_stairs)
 
-        #room = self.current_level.rooms[0]
         point = room.center_tile()
         player.x = point.x
         player.y = point.y
@@ -89,7 +88,7 @@ class GameMap:
         #    egg = bestiary.generate_creature(Species.EGG, self.dungeon_level, player.level.current_level, room.random_tile(self))
         #    self.add_entity_to_map(egg)
 
-        for i in range(5):
+        for i in range(1):
             npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level, room.random_tile(self))
             self.current_level.add_entity(npc)
 
@@ -292,7 +291,7 @@ class GameMap:
                 point = choice(self.generator.caves)
 
                 #only place it if the tile is not blocked
-                if not self.is_blocked(point):
+                if not self.current_level.blocked[point.x, point.y]:
                     bestiary.generate_creature(creature_choice, dungeon_level = 1, player_level = 1, point = None)
                     '''
                     if creature_choice == Species.SNAKE:
@@ -326,7 +325,7 @@ class GameMap:
             point = room.random_tile(self)
 
             #only place it if the tile is not blocked
-            if not self.is_blocked(point):
+            if not self.current_level.blocked[point.x, point.y]:
                 choice = random_utils.random_choice_from_dict(npc_chances)
                 npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level, point)
                 self.add_entity_to_map(npc)
@@ -350,7 +349,7 @@ class GameMap:
             point = room.random_tile(self)
 
             #only place it if the tile is not blocked
-            if not self.is_blocked(point):
+            if not self.current_level.blocked[point.x, point.y]:
                 choice = random_utils.random_choice_from_dict(item_chances)
                 if choice == 'potion':
                     item = equipment.random_potion(point, self.dungeon_level)
@@ -406,22 +405,6 @@ class GameMap:
             player.health.heal(player.health.max_hp // 2)
 
             message_log.add_message(Message('You take a moment to rest and recover your strength.', libtcod.light_violet))
-
-    def is_blocked(self, point, check_entities = False):
-        print("Update this: is_blocked")
-
-        return self.current_level.blocked[point.x, point.y]
-
-    def add_entity_to_map(self, npc):
-        print("Remove this: add_entity_to_map")
-
-    def remove_entity_from_map(self, npc):
-        print("Remove this: remove_entity_from_map")
-
-    def get_blocking_entities_at_location(self, point):
-        print("Remove this: get_blocking_entities_at_location")
-
-        return None
 
     def check_for_stairs(self, x, y):
         if (self.down_stairs):

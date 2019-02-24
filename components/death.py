@@ -27,7 +27,10 @@ class BasicDeath:
                 item.x = self.owner.x
                 item.y = self.owner.y
                 #npc.inventory.drop_item(item)
-                game_map.add_entity_to_map(item)
+                game_map.current_level.add_entity(item)
+
+        print("unblocking because of death")
+        game_map.current_level.blocked[self.owner.x, self.owner.y] = False
 
         self.rotting = True
 
@@ -35,8 +38,8 @@ class BasicDeath:
 
     def decompose(self, game_map):
         self.rotting_time -= 1
-        if (self.rotting_time == 0):
-            game_map.remove_entity_from_map(self.owner)
+        if (self.rotting_time <= 0):
+            game_map.current_level.remove_entity(self.owner)
         elif (self.rotting_time <= 25):
             self.skeletonize()
 
