@@ -1,4 +1,4 @@
-import tcod as libtcod
+import tcod
 
 from etc.configuration import CONFIG
 from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
@@ -40,7 +40,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
         panel.bg[1:bar_width, y] = bar_color
 
     panel.print(x + (total_width // 2), y, '{0}: {1}/{2}'.format(name, value, maximum),
-                fg=libtcod.white, alignment=libtcod.CENTER)
+                fg=tcod.white, alignment=tcod.CENTER)
 
 def render_menu_console(con, game_state, screen_width, screen_height, player):
     if game_state == GameStates.GAME_PAUSED:
@@ -79,16 +79,16 @@ def render_info_console(info_console, player, game_map):
                 info_console.height,
                 "Stats",
                 False,
-                fg=libtcod.white,
-                bg=libtcod.black,
+                fg=tcod.white,
+                bg=tcod.black,
             )
     render_bar(info_console, 1, 2, info_console.width - 2, 'HP', player.health.hp, player.health.max_hp,
-               libtcod.light_red, libtcod.darker_red)
+               tcod.light_red, tcod.darker_red)
 
     render_bar(info_console, 1, 4, info_console.width - 2, 'XP', player.level.current_xp, player.level.experience_to_next_level,
-                   libtcod.light_green, libtcod.darker_green)
+                   tcod.light_green, tcod.darker_green)
 
-    info_console.print(1, 6, 'Dungeon level: {0}'.format(game_map.dungeon_level), libtcod.white)
+    info_console.print(1, 6, 'Dungeon level: {0}'.format(game_map.dungeon_level), tcod.white)
 
     return info_console
 
@@ -102,8 +102,8 @@ def render_message_console(message_console, message_log):
                 message_console.height,
                 "Messages",
                 False,
-                fg=libtcod.white,
-                bg=libtcod.black,
+                fg=tcod.white,
+                bg=tcod.black,
             )
     # Print the game messages, one line at a time
     y = 2
