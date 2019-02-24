@@ -60,18 +60,13 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                                             algorithm=constants['fov_algorithm'],
                                             radius=constants['fov_radius'],
                                             light_walls=constants['fov_light_walls'])
+        fov_recompute = False
 
         #---------------------------------------------------------------------
         # Render and display the dungeon and its inhabitates.
         #---------------------------------------------------------------------
-        game_map.current_level.update_and_draw_all(fov_recompute, player)
+        game_map.current_level.update_and_draw_all()
 
-        '''
-        render_all(map_console, panel, player, game_map, fov_recompute, message_log,
-                   constants['screen_width'], constants['screen_height'], constants['bar_width'],
-                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state, quest_request)
-        '''
-        fov_recompute = False
 
         #---------------------------------------------------------------------
         # Render infomation panels.
@@ -126,7 +121,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
         if action == InputTypes.GAME_RESTART:
             player, game_map, message_log, game_state = get_game_variables(constants)
-            fov_map = initialize_fov(game_map)
             fov_recompute = True
 
             continue
@@ -205,7 +199,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             if left_click:
                 target_x, target_y = left_click
 
-                item_use_results = player.inventory.use(targeting_item, entities=game_map.entities, fov_map=fov_map,
+                item_use_results = player.inventory.use(targeting_item, entities=game_map.entities, game_map=game_map,
                                                         target_x=target_x, target_y=target_y)
                 player_turn_results.extend(item_use_results)
             elif right_click:
@@ -233,17 +227,17 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                 point = Point(player.x + dx, player.y + dy)
 
                 if game_map.current_level.walkable[player.x + dx, player.y + dy]:
-                    target = game_map.get_blocking_entities_at_location(point)
+                    if game_map.current_level.blocked[player.x + dx, player.y + dy]:
+                        target = game_map.current_level.entities.get_entities_in_position((player.x + dx, player.y + dy))
 
-                    if target:
-                        if target.questgiver:
-                            quest_results = target.questgiver.talk(player)
+                        if target[0].questgiver:
+                            quest_results = target[0].questgiver.talk(player)
                             player_turn_results.extend(quest_results)
-                        elif target.defence:
-                            attack_results = player.offence.attack(target)
+                        elif target[0].defence:
+                            attack_results = player.offence.attack(target[0])
                             player_turn_results.extend(attack_results)
                     else:
-                        player.movement.move(dx, dy)
+                        player.movement.move(dx, dy, game_map.current_level)
                         quest_results = quest.check_quest_for_location(player.point)
                         player_turn_results.extend(quest_results)
 
@@ -261,7 +255,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             elif action == InputTypes.TAKE_STAIRS:
                 if (game_map.check_for_stairs(player.x, player.y)):
                         game_map.next_floor(player, message_log, constants)
-                        fov_map = initialize_fov(game_map)
                         fov_recompute = True
 
                         break
@@ -344,7 +337,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             if result_type == GameStates.QUEST_RESPONSE:
                 pass
 
-
+            '''
             if targeting:
                 previous_game_state = GameStates.PLAYER_TURN
                 game_state = GameStates.TARGETING
@@ -357,9 +350,9 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                 game_state = previous_game_state
 
                 message_log.add_message(Message('Targeting cancelled'))
-
+            '''
         pubsub.pubsub.process_queue(game_map)
-        '''
+
         #-------------------------------------------------------------------
         # All enemies and terrain take their turns.
         #-------------------------------------------------------------------
@@ -375,12 +368,10 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                         enemy_turn_results.extend(entity.ai.take_turn(player, game_map))
 
             game_state = GameStates.PLAYER_TURN
-
+        '''
         #---------------------------------------------------------------------
         # Process all result actions of enemy turns.
         #---------------------------------------------------------------------
-        entity_map_needs_update = False
-
         while enemy_turn_results != []:
 
             enemy_turn_results = sorted(
@@ -394,13 +385,11 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             if result_type == ResultTypes.MOVE_TOWARDS:
                monster, target_x, target_y = result_data
                monster.movable.move_towards(game_map, target_x, target_y)
-               entity_map_needs_update = True
             # Handle a move random adjacent action.  Move to a random adjacent
             # square.
             if result_type == ResultTypes.MOVE_RANDOM_ADJACENT:
                monster = result_data
                monster.movable.move_to_random_adjacent(game_map)
-               entity_map_needs_update = True
             # Handle a simple message.
             if result_type == ResultTypes.MESSAGE:
                 message = result_data
@@ -409,12 +398,10 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             if result_type == ResultTypes.ADD_ENTITY:
                 entity = result_data
                 entity.commitable.commit(game_map)
-                entity_map_needs_update = True
             # Remove an entity from the game.
             if result_type == ResultTypes.REMOVE_ENTITY:
                 entity = result_data
                 entity.commitable.delete(game_map)
-                entity_map_needs_update = True
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
                 dead_entity = result_data
@@ -423,10 +410,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                     game_state = GameStates.GAME_OVER
 
                 dead_entity.death.npc_death(game_map)
-                entity_map_needs_update = True
-
-            if entity_map_needs_update:
-                entity_map_needs_update = False
         '''
         #---------------------------------------------------------------------
         # And done...so broadcast a tick
