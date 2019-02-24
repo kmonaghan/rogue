@@ -130,6 +130,8 @@ class LevelMap(Map):
 
     def remove_entity(self, entity):
         self.entities.remove(entity)
+        if (entity.blocks):
+            self.blocked[entity.x, entity.y] = False
 
     def move_entity(self, entity, point):
         self.entities.update_position(entity, (entity.x, entity.y), (point.x, point.y))
