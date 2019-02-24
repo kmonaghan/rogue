@@ -64,10 +64,8 @@ INVENTORY_STATES = {
 INPUT_STATES = {
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
-    GameStates.QUEST_LIST,
-    #GameStates.CURSOR_INPUT,
-    GameStates.GAME_PAUSED, GameStates.GAME_OVER,
-    GameStates.PLAYER_TURN}
+    GameStates.QUEST_LIST, GameStates.GAME_PAUSED,
+    GameStates.GAME_OVER}
 
 class InputTypes(Enum):
     CHARACTER_SCREEN = auto()

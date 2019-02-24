@@ -1,4 +1,4 @@
-import tcod as libtcod
+import tcod
 
 import quest
 
@@ -6,36 +6,84 @@ def menu(con, header, options, width, screen_width, screen_height):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
 
     # calculate total height for the header (after auto-wrap) and one line per option
-    header_height = libtcod.console_get_height_rect(con, 0, 0, width, screen_height, header)
+    header_height = tcod.console_get_height_rect(con, 0, 0, width, screen_height, header)
     height = len(options) + header_height
 
     # create an off-screen console that represents the menu's window
-    window = libtcod.console_new(width, height)
+    window = tcod.console_new(width, height)
 
     # print the header, with auto-wrap
-    libtcod.console_set_default_foreground(window, libtcod.white)
-    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+    tcod.console_set_default_foreground(window, tcod.white)
+    tcod.console_print_rect_ex(window, 0, 0, width, height, tcod.BKGND_NONE, tcod.LEFT, header)
 
     # print all the options
     y = header_height
     letter_index = ord('a')
     for option_text, color in options:
-        libtcod.console_set_default_foreground(window, color)
+        tcod.console_set_default_foreground(window, color)
         text = '(' + chr(letter_index) + ') ' + option_text
-        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
+        tcod.console_print_ex(window, 0, y, tcod.BKGND_NONE, tcod.LEFT, text)
         y += 1
         letter_index += 1
 
     # blit the contents of "window" to the root console
     x = int(screen_width / 2 - width / 2)
     y = int(screen_height / 2 - height / 2)
-    libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
+    tcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
+def menu2(title, header, options, width, screen_width, screen_height):
+    header_height = 2 #tcod.console_get_height_rect(con, 0, 0, width - 2, screen_height, header)
+    height = len(options) + header_height + 1
 
-def inventory_menu(con, header, player, inventory_width, screen_width, screen_height):
+    text = ''
+    letter_index = ord('a')
+    for option_text, color in options:
+        text += '(' + chr(letter_index) + ') ' + option_text + "\n"
+        letter_index += 1
+
+    con = tcod.console.Console(width, height + 5, 'F')
+
+    con.draw_frame(
+        0,
+        0,
+        con.width,
+        con.height,
+        title,
+        False,
+        fg=tcod.white,
+        bg=tcod.black,
+    )
+
+    con.print_box(
+        1,
+        1,
+        con.width - 2,
+        header_height,
+        header,
+        fg=tcod.white,
+        bg=None,
+        alignment=tcod.LEFT,
+    )
+
+    con.draw_rect(1, header_height+1, con.width - 2, 1, ord('_'), tcod.white)
+
+    con.print_box(
+        1,
+        header_height + 3,
+        con.width - 2,
+        len(options),
+        text,
+        fg=tcod.white,
+        bg=None,
+        alignment=tcod.LEFT,
+    )
+
+    return con
+
+def inventory_menu(header, player, width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
     if len(player.inventory.items) == 0:
-        options = [['Inventory is empty.', libtcod.white]]
+        options = [['Inventory is empty.', tcod.white]]
     else:
         options = []
 
@@ -55,96 +103,96 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
             else:
                 options.append([item.name, item.color])
 
-    menu(con, header, options, inventory_width, screen_width, screen_height)
+    return menu2('Inventory', header, options, width, screen_width, screen_height)
 
-def quest_menu(con, header, quest, inventory_width, screen_width, screen_height):
+def quest_menu(header, quest, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
     header = quest.title + "\n" + quest.description
-    options = [['Let\'s go do it!', libtcod.white],
-                ['Not right now', libtcod.white]]
+    options = [['Let\'s go do it!', tcod.white],
+                ['Not right now', tcod.white]]
 
-    menu(con, header, options, inventory_width, screen_width, screen_height)
+    return menu2('Quest', header, options, inventory_width, screen_width, screen_height)
 
-def quest_list_menu(con, header, player, inventory_width, screen_width, screen_height):
+def quest_list_menu(header, player, inventory_width, screen_width, screen_height):
     # show a menu with each item of the inventory as an option
     if len(quest.active_quests) == 0:
-        options = [['No active quests.', libtcod.white]]
+        options = [['No active quests.', tcod.white]]
     else:
         options = []
 
         for q in quest.active_quests:
-            options.append([q.title, libtcod.white])
+            options.append([q.title, tcod.white])
 
-    menu(con, header, options, inventory_width, screen_width, screen_height)
+    return menu2('Quest', header, options, inventory_width, screen_width, screen_height)
 
 def main_menu(con, background_image, screen_width, screen_height):
-    #libtcod.image_blit_2x(background_image, 0, 0, 0)
+    #tcod.image_blit_2x(background_image, 0, 0, 0)
 
-    libtcod.console_set_default_foreground(0, libtcod.light_yellow)
-    libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height / 2) - 4, libtcod.BKGND_NONE, libtcod.CENTER,
-                             'TOMBS OF THE ANCIENT KINGS')
-    libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), libtcod.BKGND_NONE, libtcod.CENTER,
+    tcod.console_set_default_foreground(0, tcod.light_yellow)
+    tcod.console_print_ex(0, int(screen_width / 2), int(screen_height / 2) - 4, tcod.BKGND_NONE, tcod.CENTER,
+                             'Diablo inspired Roguelike')
+    tcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), tcod.BKGND_NONE, tcod.CENTER,
                              'By Karl Monaghan')
 
-    menu(con, '', [['Play a new game', libtcod.white], ['Continue last game', libtcod.white], ['Quit', libtcod.white]], 24, screen_width, screen_height)
+    menu(con, '', [['Play a new game', tcod.white], ['Continue last game', tcod.white], ['Quit', tcod.white]], 24, screen_width, screen_height)
 
 
-def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
-    options = [['Constitution (+20 HP, from {0})'.format(player.health.max_hp), libtcod.white],
-               ['Strength (+1 attack, from {0})'.format(player.offence.power), libtcod.white],
-               ['Agility (+1 defence, from {0})'.format(player.defence.defence), libtcod.white]]
+def level_up_menu(header, player, menu_width, screen_width, screen_height):
+    options = [['Constitution (+20 HP, from {0})'.format(player.health.max_hp), tcod.white],
+               ['Strength (+1 attack, from {0})'.format(player.offence.power), tcod.white],
+               ['Agility (+1 defence, from {0})'.format(player.defence.defence), tcod.white]]
 
-    menu(con, header, options, menu_width, screen_width, screen_height)
+    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
 
 
 def character_screen(player, character_screen_width, character_screen_height, screen_width, screen_height):
-    window = libtcod.console_new(character_screen_width, character_screen_height)
+    window = tcod.console_new(character_screen_width, character_screen_height)
 
-    libtcod.console_set_default_foreground(window, libtcod.white)
+    tcod.console_set_default_foreground(window, tcod.white)
 
-    libtcod.console_print_rect_ex(window, 0, 1, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Character Information')
-    libtcod.console_print_rect_ex(window, 0, 2, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Level: {0}'.format(player.level.current_level))
-    libtcod.console_print_rect_ex(window, 0, 3, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Experience: {0}'.format(player.level.current_xp))
-    libtcod.console_print_rect_ex(window, 0, 4, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Experience to Level: {0}'.format(player.level.experience_to_next_level))
-    libtcod.console_print_rect_ex(window, 0, 6, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Maximum HP: {0}'.format(player.health.max_hp))
-    libtcod.console_print_rect_ex(window, 0, 7, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Attack: {0}'.format(player.offence.power))
-    libtcod.console_print_rect_ex(window, 0, 8, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Defense: {0}'.format(player.defence.defence))
+    tcod.console_print_rect_ex(window, 0, 1, character_screen_width, character_screen_height, tcod.BKGND_NONE,
+                                  tcod.LEFT, 'Character Information')
+    tcod.console_print_rect_ex(window, 0, 2, character_screen_width, character_screen_height, tcod.BKGND_NONE,
+                                  tcod.LEFT, 'Level: {0}'.format(player.level.current_level))
+    tcod.console_print_rect_ex(window, 0, 3, character_screen_width, character_screen_height, tcod.BKGND_NONE,
+                                  tcod.LEFT, 'Experience: {0}'.format(player.level.current_xp))
+    tcod.console_print_rect_ex(window, 0, 4, character_screen_width, character_screen_height, tcod.BKGND_NONE,
+                                  tcod.LEFT, 'Experience to Level: {0}'.format(player.level.experience_to_next_level))
+    tcod.console_print_rect_ex(window, 0, 6, character_screen_width, character_screen_height, tcod.BKGND_NONE,
+                                  tcod.LEFT, 'Maximum HP: {0}'.format(player.health.max_hp))
+    tcod.console_print_rect_ex(window, 0, 7, character_screen_width, character_screen_height, tcod.BKGND_NONE,
+                                  tcod.LEFT, 'Attack: {0}'.format(player.offence.power))
+    tcod.console_print_rect_ex(window, 0, 8, character_screen_width, character_screen_height, tcod.BKGND_NONE,
+                                  tcod.LEFT, 'Defense: {0}'.format(player.defence.defence))
 
     x = screen_width // 2 - character_screen_width // 2
     y = screen_height // 2 - character_screen_height // 2
-    libtcod.console_blit(window, 0, 0, character_screen_width, character_screen_height, 0, x, y, 1.0, 0.7)
+    tcod.console_blit(window, 0, 0, character_screen_width, character_screen_height, 0, x, y, 1.0, 0.7)
 
-def game_over(con, menu_width, screen_width, screen_height):
+def game_over(menu_width, screen_width, screen_height):
     header = "You have failed. Death's cold embrace envelops you. Loser."
-    options = [['Start from scratch', libtcod.white],
-                ['View Stats', libtcod.white],
-                ['View Inventory', libtcod.white],
-                ['View Quests', libtcod.white],
-                ['Quit', libtcod.white]]
+    options = [['Start from scratch', tcod.white],
+                ['View Stats', tcod.white],
+                ['View Inventory', tcod.white],
+                ['View Quests', tcod.white],
+                ['Quit', tcod.white]]
 
-    menu(con, header, options, menu_width, screen_width, screen_height)
+    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
 
-def game_paused(con, menu_width, screen_width, screen_height):
+def game_paused(menu_width, screen_width, screen_height):
     header = ""
-    options = [['Restart', libtcod.white],
-                ['Quit', libtcod.white]]
+    options = [['Restart', tcod.white],
+                ['Quit', tcod.white]]
 
-    menu(con, header, options, menu_width, screen_width, screen_height)
+    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
 
 def game_completed(con, menu_width, screen_width, screen_height):
     header = 'Congratulations - You have defeated the King Under the Hill'
-    options = [['Restart with higher level encounters', libtcod.white],
-                ['Start from scratch', libtcod.white],
-                ['Quit while the going is good', libtcod.white]]
+    options = [['Restart with higher level encounters', tcod.white],
+                ['Start from scratch', tcod.white],
+                ['Quit while the going is good', tcod.white]]
 
-    menu(con, header, options, menu_width, screen_width, screen_height)
+    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
 
 def message_box(con, header, width, screen_width, screen_height):
     menu(con, header, [], width, screen_width, screen_height)

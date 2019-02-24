@@ -42,15 +42,15 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     panel.print(x + (total_width // 2), y, '{0}: {1}/{2}'.format(name, value, maximum),
                 fg=tcod.white, alignment=tcod.CENTER)
 
-def render_menu_console(con, game_state, screen_width, screen_height, player):
+def render_menu_console(game_state, screen_width, screen_height, player):
     if game_state == GameStates.GAME_PAUSED:
-        game_paused(con, 60, screen_width, screen_height)
+        return game_paused(60, screen_width, screen_height)
     elif game_state == GameStates.GAME_OVER:
-        game_over(con, 60, screen_width, screen_height)
+        return game_over(60, screen_width, screen_height)
     elif game_state == GameStates.GAME_COMPLETE:
-        game_completed(con, 60, screen_width, screen_height)
+        return game_completed(60, screen_width, screen_height)
     elif game_state == GameStates.CHARACTER_SCREEN:
-        character_screen(player, 30, 10, screen_width, screen_height)
+        return character_screen(player, 30, 10, screen_width, screen_height)
     elif game_state in INVENTORY_STATES:
         if game_state == GameStates.INVENTORY_USE:
             inventory_title = 'Press the key next to an item to use it, or Esc to cancel.\n'
@@ -61,13 +61,13 @@ def render_menu_console(con, game_state, screen_width, screen_height, player):
         else:
             inventory_title = 'Esc to cancel.\n'
 
-        inventory_menu(con, inventory_title, player, 50, screen_width, screen_height)
+        return inventory_menu(inventory_title, player, 50, screen_width, screen_height)
     elif game_state == GameStates.QUEST_ONBOARDING:
-        quest_menu(con, '', quest_request, 50, screen_width, screen_height)
+        return quest_menu('', quest_request, 50, screen_width, screen_height)
     elif game_state == GameStates.QUEST_LIST:
-        quest_list_menu(con, 'Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)
+        return quest_list_menu('Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)
     elif game_state == GameStates.LEVEL_UP:
-        level_up_menu(con, 'Level up! Choose a stat to raise:', player, 40, screen_width, screen_height)
+        return level_up_menu('Level up! Choose a stat to raise:', player, 40, screen_width, screen_height)
 
 def render_info_console(info_console, player, game_map):
     info_console.clear()
@@ -108,7 +108,10 @@ def render_message_console(message_console, message_log):
     # Print the game messages, one line at a time
     y = 2
     for message in message_log.messages:
-        message_console.print(1, y, message.text, message.color)
-        y += 1
+        #message_console.print(1, y, message.text, message.color)
+        height = message_console.print_box(1, y, message_console.width-2,
+                                            message_console.height, message.text,
+                                            message.color)
+        y += height
 
     return message_console

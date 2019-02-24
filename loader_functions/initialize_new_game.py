@@ -47,7 +47,6 @@ def get_constants():
 
     constants = {
         'window_title': window_title,
-        'screen_width': screen_width,
         'screen_height': screen_height,
         'bar_width': bar_width,
         'info_panel_width': info_panel_width,

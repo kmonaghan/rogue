@@ -36,7 +36,7 @@ class Inventory:
             equippable_component = item_entity.equippable
 
             if equippable_component:
-                results.append({'equip': item_entity})
+                results.append({ResultTypes.EQUIP: item_entity})
             else:
                 results.append({ResultTypes.MESSAGE: Message('The {0} cannot be used'.format(item_entity.name), libtcod.yellow)})
         else:

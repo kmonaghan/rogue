@@ -75,11 +75,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         render_message_console(message_console, message_log)
 
         #---------------------------------------------------------------------
-        # Render any menus.
-        #---------------------------------------------------------------------
-        render_menu_console(root_console, game_state, constants['screen_width'], constants['screen_height'], player)
-
-        #---------------------------------------------------------------------
         # Blit the subconsoles to the main console and flush all rendering.
         #---------------------------------------------------------------------
         game_map.console.blit(root_console, 0, 0, 0, 0,
@@ -88,11 +83,18 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                           constants['info_panel_width'], constants['panel_height'])
         message_console.blit(root_console, constants['info_panel_width'], constants['panel_y'], 0, 0,
                           constants['message_panel_width'], constants['panel_height'])
-        '''
-        if game_state in INVENTORY_STATES:
-            root_console.blit(menu_console, menu_x, menu_y,
-                              constants['screen_width'], constants['screen_height'], 0, 0)
-        '''
+
+        if game_state in INPUT_STATES:
+            #---------------------------------------------------------------------
+            # Render any menus.
+            #---------------------------------------------------------------------
+            menu_console = render_menu_console(game_state, CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'), player)
+
+            menu_console.blit(root_console,
+                                (root_console.width - menu_console.width) // 2,
+                                (root_console.height - menu_console.height) // 2, 
+                                0, 0,
+                                CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'))
 
         tcod.console_flush()
 
@@ -105,7 +107,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         mouse_action = handle_mouse(mouse)
 
         if (len(input_result) == 0):
-            print("No corresponding result for key press.")
+            if CONFIG.get('debug'):
+                print("No corresponding result for key press.")
             continue
 
         left_click = mouse_action.get('left_click')
@@ -245,7 +248,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
                     game_state = GameStates.ENEMY_TURN
             elif action == InputTypes.PICKUP:
-                for entity in game_map.entity_map[player.x][player.y]:
+                entities = game_map.current_level.entities.get_entities_in_position((player.x, player.y))
+                for entity in entities:
                     if entity.item:
                         pickup_results = player.inventory.add_item(entity)
                         player_turn_results.extend(pickup_results)
@@ -296,26 +300,27 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
                 #item.commitable.delete(game_map)
                 #entity.inventory.add(result_data)
-                game_map.entities.remove(result_data)
+                player.inventory.add_item(result_data)
+                game_map.current_level.remove_entity(result_data)
                 game_state = GameStates.ENEMY_TURN
 
             # Remove consumed items from inventory
             if result_type == ResultTypes.DISCARD_ITEM:
                 #item, consumed = result_data
                 #if consumed:
-                #    player.inventory.remove(item)
+                player.inventory.remove(result_data)
                 game_state = GameStates.ENEMY_TURN
 
             # Remove dropped items from inventory and place on the map
             if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
-                game_map.add_entity_to_map(result_data)
+                game_map.current_level.add_entity(result_data)
                 message = Message('You dropped the {0}'.format(result_data.name), tcod.yellow)
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
                 game_state = GameStates.ENEMY_TURN
 
             if result_type == ResultTypes.EQUIP:
-                equip_results = player.equipment.toggle_equip(equip)
+                equip_results = player.equipment.toggle_equip(result_data)
 
                 for equip_result in equip_results:
                     equipped = equip_result.get('equipped')
@@ -426,7 +431,7 @@ def main():
         tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
     )
 
-    root_console = tcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False, order='F')
+    root_console = tcod.console_init_root(CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'), constants['window_title'], False, order='F')
     map_console = tcod.console.Console(constants['map_width'], constants['map_height'], 'F')
     info_panel =  tcod.console.Console(constants['info_panel_width'], constants['panel_height'], 'F')
     message_panel = tcod.console.Console(constants['message_panel_width'], constants['panel_height'], 'F')
@@ -454,11 +459,11 @@ def main():
         tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse)
 
         if show_main_menu:
-            main_menu(root_console, main_menu_background_image, constants['screen_width'],
-                      constants['screen_height'])
+            main_menu(root_console, main_menu_background_image, CONFIG.get('full_screen_width'),
+                      CONFIG.get('full_screen_height'))
 
             if show_load_error_message:
-                message_box(map_console, 'No save game to load', 50, constants['screen_width'], constants['screen_height'])
+                message_box(map_console, 'No save game to load', 50, CONFIG.get('full_screen_width'), constants['screen_height'])
 
             tcod.console_flush()
 
