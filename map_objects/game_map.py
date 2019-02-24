@@ -447,9 +447,6 @@ class GameMap:
 
         return None
 
-    def update_entity_map(self):
-        print("Remove this: update_entity_map")
-
     def load_map(self):
         lmap = self.levels[self.dungeon_level - 1]
         self.down_stairs = lmap["down_stairs"]

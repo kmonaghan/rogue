@@ -248,8 +248,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
                         fov_recompute = True
 
-                        game_map.update_entity_map()
-
                     game_state = GameStates.ENEMY_TURN
             elif action == InputTypes.PICKUP:
                 for entity in game_map.entity_map[player.x][player.y]:
@@ -257,7 +255,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                         pickup_results = player.inventory.add_item(entity)
                         player_turn_results.extend(pickup_results)
 
-                        game_map.update_entity_map()
                     else:
                         message_log.add_message(Message('There is nothing here to pick up.', tcod.yellow))
             elif action == InputTypes.TAKE_STAIRS:
@@ -428,7 +425,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                 entity_map_needs_update = True
 
             if entity_map_needs_update:
-                game_map.update_entity_map()
                 entity_map_needs_update = False
         '''
         #---------------------------------------------------------------------
