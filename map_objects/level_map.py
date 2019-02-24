@@ -102,11 +102,8 @@ class LevelMap(Map):
             if self.walkable[x, y] and not self.blocked[x, y]:
                 return x, y
 
-    def update_and_draw_all(self, recompute, player):
+    def update_and_draw_all(self):
         self.console.clear()
-
-        if recompute:
-            self.compute_fov(player.x, player.y, 10, True, 0,)
 
         if not CONFIG.get('debug'):
             where_fov = np.where(self.fov[:])
@@ -118,23 +115,24 @@ class LevelMap(Map):
         self.console.bg[explored] = self.dark_map_bg[explored]
         self.console.bg[where_fov] = self.light_map_bg[where_fov]
 
-#        entities_in_render_order = sorted(game_map.entities, key=lambda x: x.render_order.value)
-
-#        # Draw all entities in the list
-#        for entity in entities_in_render_order:
-#            draw_entity(con, entity, fov_map, game_map)
-
-        self.console.ch[player.x, player.y] = ord(player.char)
-        self.console.fg[player.x, player.y] = player.display_color()
+        for idx, x in enumerate(where_fov[0]):
+            y = where_fov[1][idx]
+            current_entities = self.entities.get_entities_in_position((x, y))
+            entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
+            for entity in entities_in_render_order:
+                self.console.ch[x, y] = ord(entity.char)
+                self.console.fg[x, y] = entity.display_color()
 
     def add_entity(self, entity):
         self.entities.append(entity)
-        self.blocked[entity.x, entity.y] = True
+        if (entity.blocks):
+            self.blocked[entity.x, entity.y] = True
 
     def remove_entity(self, entity):
         self.entities.remove(entity)
 
     def move_entity(self, entity, point):
-        self.entities.update_position(entity, point.x, point.y)
-        self.blocked[entity.x, entity.y] = False
-        self.blocked[point.x, point.y] = True
+        self.entities.update_position(entity, (entity.x, entity.y), (point.x, point.y))
+        if (entity.blocks):
+            self.blocked[entity.x, entity.y] = False
+            self.blocked[point.x, point.y] = True

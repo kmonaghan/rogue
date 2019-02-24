@@ -368,7 +368,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                         enemy_turn_results.extend(entity.ai.take_turn(player, game_map))
 
             game_state = GameStates.PLAYER_TURN
-        '''
+
         #---------------------------------------------------------------------
         # Process all result actions of enemy turns.
         #---------------------------------------------------------------------
@@ -410,14 +410,10 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                     game_state = GameStates.GAME_OVER
 
                 dead_entity.death.npc_death(game_map)
-        '''
+
         #---------------------------------------------------------------------
         # And done...so broadcast a tick
         #---------------------------------------------------------------------
-
-        #TODO: Remove
-        game_state = GameStates.PLAYER_TURN
-
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.TICK))
 
         pubsub.pubsub.process_queue(game_map)
