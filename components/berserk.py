@@ -11,7 +11,7 @@ class Berserk:
         self.turns = turns
         pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.TICK, self.countdown))
 
-    def countdown(self, sub, message, fov_map, game_map):
+    def countdown(self, sub, message, game_map):
         self.turns -= 1
         if (self.turns < 1):
             self.end_berserker()

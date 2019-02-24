@@ -53,7 +53,7 @@ class BasicNPC:
 
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
-        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
+        if game_map.current_level.fov[npc.x, npc.y]:
 
             #move towards player if far away
             if npc.point.distance_to(target.point) >= 2:
@@ -73,12 +73,12 @@ class PatrollingNPC:
         self.next_target()
 
     #AI for a basic npc.
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
-        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
+        if game_map.current_level.fov[npc.x, npc.y]:
             self.owner.ai = self.old_ai
 
         else:
@@ -99,7 +99,7 @@ class ConfusedNPC:
         self.previous_ai = previous_ai
         self.number_of_turns = number_of_turns
 
-    def take_turn(self, target, fov_map, game_map):
+    def take_turn(self, target, game_map):
         results = []
 
         if self.number_of_turns > 0:
@@ -127,7 +127,7 @@ class StrollingNPC:
     def take_turn(self, target, game_map):
         results = []
 
-        if (self.aggressive and libtcod.map_is_in_fov(fov_map, self.owner.x, self.owner.y)):
+        if (self.aggressive and game_map.current_level.fov[self.owner.x, self.owner.y]):
             #move towards player if far away
             distance = self.owner.point.distance_to(target.point)
             if distance > self.pursue_distance:
@@ -168,7 +168,7 @@ class WarlordNPC:
         results = []
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
-        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
+        if game_map.current_level.fov[npc.x, npc.y]:
 
             if (self.summoned_orcs == False) or (self.summoned_goblins == False) or (self.summoned_trolls == False):
                 health = (npc.health.hp * 100.0) / npc.health.max_hp
@@ -218,7 +218,7 @@ class NecromancerNPC:
         results = []
 
         npc = self.owner
-        if libtcod.map_is_in_fov(fov_map, npc.x, npc.y):
+        if game_map.current_level.fov[npc.x, npc.y]:
             if not self.ritual_started:
                 self.ritual_started = True
 

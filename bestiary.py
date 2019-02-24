@@ -514,23 +514,23 @@ def goblin_observed_death(sub, message, game_map):
     if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):
         if (sub.entity.uuid == message.entity.uuid):
             pass
-        elif libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
+        elif game_map.current_level.fov[sub.entity.x, sub.entity.y]:
             if not hasattr(sub.entity, 'berserk'):
                 sub.entity.add_component(Berserk(), 'berserk')
                 sub.entity.berserk.start_berserker()
 
-def npc_become_aggressive(sub, message, fov_map, game_map):
+def npc_become_aggressive(sub, message, game_map):
     if (message.entity.species == Species.PLAYER) and (message.target.uuid == sub.entity.uuid):
         sub.entity.add_component(BasicNPC(), 'ai')
 
-def mimic_activate(sub, message, fov_map, game_map):
+def mimic_activate(sub, message, game_map):
     if (sub.entity.uuid == message.target.uuid):
         sub.entity.add_component(BasicNPC(), 'ai')
         sub.entity.char = 'M'
         sub.entity.base_name = 'Mimic'
         pubsub.pubsub.mark_subscription_for_removal(sub)
 
-def mimic_shimmer(sub, message, fov_map, game_map):
+def mimic_shimmer(sub, message, game_map):
     if sub.entity.ai:
         pubsub.pubsub.mark_subscription_for_removal(sub)
         return
@@ -546,7 +546,7 @@ def mimic_shimmer(sub, message, fov_map, game_map):
 
 def rat_swarm(sub, message, game_map):
     if (message.entity.species == Species.PLAYER) and ((message.target.species == Species.RAT) or (message.target.species == Species.RATNEST)):
-        if libtcod.map_is_in_fov(fov_map, sub.entity.x, sub.entity.y):
+        if game_map.current_level.fov[sub.entity.x, sub.entity.y]:
             sub.entity.add_component(BasicNPC(), 'ai')
 
 def earn_death_xp(sub, message, game_map):

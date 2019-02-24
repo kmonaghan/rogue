@@ -92,13 +92,13 @@ def get_game_variables(constants):
 
     return player, game_map, message_log, game_state
 
-def add_to_messages(sub, message, fov_map, game_map):
+def add_to_messages(sub, message, game_map):
     sub.entity.add_message(message.message)
 
-def entity_spawn(sub, message, fov_map, game_map):
+def entity_spawn(sub, message, game_map):
     npc = message.entity.spawn.spawn()
     if npc:
         game_map.add_entity_to_map(npc)
 
-def on_entity_death(sub, message, fov_map, game_map):
+def on_entity_death(sub, message, game_map):
     pubsub.pubsub.unsubscribe_entity(message.entity)

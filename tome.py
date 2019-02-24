@@ -36,8 +36,7 @@ def heal(*args, **kwargs):
 
 def cast_lightning(*args, **kwargs):
     caster = args[0]
-    entities = kwargs.get('entities')
-    fov_map = kwargs.get('fov_map')
+    game_map = kwargs.get('game_map')
     number_of_dice = kwargs.get('number_of_dice')
     type_of_dice = kwargs.get('type_of_dice')
     maximum_range = kwargs.get('maximum_range')
@@ -47,8 +46,8 @@ def cast_lightning(*args, **kwargs):
     target = None
     closest_distance = maximum_range + 1
 
-    for entity in entities:
-        if entity.fighter and entity != caster and libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+    for entity in game_map.current_level.entities:
+        if entity.fighter and entity != caster and game_map.current_level.fov[entity.x, entity.y]:
             distance = caster.point.distance_to(entity.point)
 
             if distance < closest_distance:
@@ -67,8 +66,7 @@ def cast_lightning(*args, **kwargs):
 
 def cast_fireball(*args, **kwargs):
     caster = args[0]
-    entities = kwargs.get('entities')
-    fov_map = kwargs.get('fov_map')
+    gmae_map = kwargs.get('game_map')
     number_of_dice = kwargs.get('number_of_dice')
     type_of_dice = kwargs.get('type_of_dice')
     radius = kwargs.get('radius')
@@ -77,7 +75,7 @@ def cast_fireball(*args, **kwargs):
 
     results = []
 
-    if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
+    if not game_map.current_level.fov[target_x, target_y]:
         results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
         return results
 
@@ -93,14 +91,13 @@ def cast_fireball(*args, **kwargs):
 
 
 def cast_confuse(*args, **kwargs):
-    entities = kwargs.get('entities')
-    fov_map = kwargs.get('fov_map')
+    game_map = kwargs.get('game_map')
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
 
     results = []
 
-    if not libtcod.map_is_in_fov(fov_map, target_x, target_y):
+    if not game_map.current_level.fov[target_x, target_y]:
         results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
         return results
 

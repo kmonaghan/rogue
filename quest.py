@@ -9,7 +9,7 @@ import pubsub
 
 active_quests = []
 
-def kill_quest_npc_death(sub, message, fov_map, game_map):
+def kill_quest_npc_death(sub, message, game_map):
     if (message.entity.species == sub.entity.kill_type) and (message.target.species == Species.PLAYER):
         sub.entity.kill_count(message.entity)
 
