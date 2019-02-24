@@ -1,7 +1,6 @@
 import tcod as libtcod
 
-import game_states
-
+from etc.configuration import CONFIG
 from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed, game_over, game_paused
@@ -21,7 +20,7 @@ def get_names_under_mouse(mouse, game_map):
     tile_description = ''
     names = ''
 
-    if (game_map.current_level.fov[x, y] or game_states.debug):
+    if (game_map.current_level.fov[x, y] or CONFIG.get('debug')):
         tile_description = game_map.map[x][y].describe() + ' '
 
         names = [entity.describe() for entity in game_map.entity_map[x][y]]
@@ -113,12 +112,3 @@ def render_message_console(message_console, message_log):
         y += 1
 
     return message_console
-
-def draw_entity(con, entity, fov_map, game_map):
-    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.map[entity.x][entity.y].explored) or entity.always_visible or game_states.debug:
-        libtcod.console_set_default_foreground(con, entity.display_color())
-        libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
-
-def clear_entity(con, entity, game_map):
-    # erase the character that represents this object
-    libtcod.console_put_char(con, entity.x, entity.y, ' ', libtcod.BKGND_NONE)

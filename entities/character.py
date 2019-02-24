@@ -10,8 +10,8 @@ from components.equipment import Equipment
 from components.inventory import Inventory
 from components.level import Level
 
+from etc.configuration import CONFIG
 from etc.enum import RenderOrder, Species
-from game_states import debug
 
 class Character(Entity):
     def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None, act_energy=2):
@@ -52,7 +52,7 @@ class Character(Entity):
         if hasattr(self, 'level'):
             desc += " (Level " + str(self.level.current_level) + ")"
 
-        if debug:
+        if CONFIG.get('debug'):
             if self.offence:
                 desc += " O:" + str(self.offence.power)
             if self.defence:

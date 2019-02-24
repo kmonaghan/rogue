@@ -7,6 +7,7 @@ from tcod.map import Map
 from entities.entity_list import EntityList
 
 from etc.colors import COLORS
+from etc.configuration import CONFIG
 from etc.enum import Tiles
 
 from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, EmptyTile
@@ -107,8 +108,11 @@ class LevelMap(Map):
         if recompute:
             self.compute_fov(player.x, player.y, 10, True, 0,)
 
-        where_fov = np.where(self.fov[:])
-        self.explored[where_fov] = True
+        if not CONFIG.get('debug'):
+            where_fov = np.where(self.fov[:])
+            self.explored[where_fov] = True
+        else:
+            where_fov = np.where(self.light_map_bg[:])
 
         explored = np.where(self.explored[:])
         self.console.bg[explored] = self.dark_map_bg[explored]
@@ -125,9 +129,12 @@ class LevelMap(Map):
 
     def add_entity(self, entity):
         self.entities.append(entity)
+        self.blocked[entity.x, entity.y] = True
 
     def remove_entity(self, entity):
         self.entities.remove(entity)
 
     def move_entity(self, entity, point):
         self.entities.update_position(entity, point.x, point.y)
+        self.blocked[entity.x, entity.y] = False
+        self.blocked[point.x, point.y] = True

@@ -10,6 +10,7 @@ from map_objects.point import Point
 import quest
 import pubsub
 
+from etc.configuration import CONFIG
 from etc.enum import (
     ResultTypes, InputTypes, GameStates, LevelUp,
     INVENTORY_STATES, INPUT_STATES, CANCEL_STATES)
@@ -131,11 +132,11 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             continue
 
         if action == InputTypes.DEBUG_ON:
-            game_states.debug = True
+            CONFIG.update({'debug': True})
             fov_recompute = True
 
         if action == InputTypes.DEBUG_OFF:
-            game_states.debug = False
+            CONFIG.update({'debug': False})
             fov_recompute = True
 
         if player.level.can_level_up():

@@ -6,7 +6,7 @@ import equipment
 
 from game_messages import Message
 
-from game_states import debug
+from etc.configuration import CONFIG
 
 import quest
 
@@ -138,7 +138,7 @@ def create_player():
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
 
-    if debug:
+    if CONFIG.get('debug'):
         player.level.random_level_up(20)
         weapon = equipment.random_magic_weapon()
         player.inventory.add_item(weapon)
