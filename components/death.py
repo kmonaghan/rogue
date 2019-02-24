@@ -38,9 +38,10 @@ class BasicDeath:
 
     def decompose(self, game_map):
         self.rotting_time -= 1
+        print("decompsoing: " + str(self.rotting_time))
         if (self.rotting_time <= 0):
             game_map.current_level.remove_entity(self.owner)
-        elif (self.rotting_time <= 25):
+        elif (self.rotting_time <= 25) and not self.skeletal:
             self.skeletonize()
 
     def skeletonize(self):
