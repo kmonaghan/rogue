@@ -42,7 +42,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     panel.print(x + (total_width // 2), y, '{0}: {1}/{2}'.format(name, value, maximum),
                 fg=tcod.white, alignment=tcod.CENTER)
 
-def render_menu_console(game_state, screen_width, screen_height, player):
+def render_menu_console(game_state, screen_width, screen_height, player, quest_request = None):
     if game_state == GameStates.GAME_PAUSED:
         return game_paused(60, screen_width, screen_height)
     elif game_state == GameStates.GAME_OVER:
@@ -63,7 +63,7 @@ def render_menu_console(game_state, screen_width, screen_height, player):
 
         return inventory_menu(inventory_title, player, 50, screen_width, screen_height)
     elif game_state == GameStates.QUEST_ONBOARDING:
-        return quest_menu('', quest_request, 50, screen_width, screen_height)
+        return quest_menu('Questing', quest_request, 50, screen_width, screen_height)
     elif game_state == GameStates.QUEST_LIST:
         return quest_list_menu('Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)
     elif game_state == GameStates.LEVEL_UP:

@@ -33,7 +33,7 @@ class Questgiver:
             self.quest.owner = self
             self.owner.char = "?"
             self.owner.color = libtcod.gold
-            results.append({'quest_onboarding': self.quest})
+            results.append({ResultTypes.QUEST_ONBOARDING: self.quest})
 
         return results
 

@@ -88,11 +88,11 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             #---------------------------------------------------------------------
             # Render any menus.
             #---------------------------------------------------------------------
-            menu_console = render_menu_console(game_state, CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'), player)
+            menu_console = render_menu_console(game_state, CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'), player, quest_request)
 
             menu_console.blit(root_console,
                                 (root_console.width - menu_console.width) // 2,
-                                (root_console.height - menu_console.height) // 2, 
+                                (root_console.height - menu_console.height) // 2,
                                 0, 0,
                                 CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'))
 
@@ -124,6 +124,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
         if action == InputTypes.GAME_RESTART:
             player, game_map, message_log, game_state = get_game_variables(constants)
+            game_map.console = map_console
+            game_map.create_floor(player, constants)
             fov_recompute = True
 
             continue
@@ -186,8 +188,9 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             game_state = GameStates.QUEST_LIST
 
         if action == InputTypes.QUEST_RESPONSE:
-            quest_request.owner.start_quest(game_map)
-            message_log.add_message(Message('Started quest: ' + quest_request.title, tcod.yellow))
+            if action_value:
+                quest_request.owner.start_quest(game_map)
+                message_log.add_message(Message('Started quest: ' + quest_request.title, tcod.yellow))
             quest_request = None
             game_state = previous_game_state
 
@@ -335,7 +338,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                 game_state = GameStates.ENEMY_TURN
             if result_type == ResultTypes.QUEST_ONBOARDING:
                 quest_request = result_data
-
                 previous_game_state = GameStates.PLAYER_TURN
                 game_state = GameStates.QUEST_ONBOARDING
 

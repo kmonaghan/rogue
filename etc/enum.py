@@ -65,6 +65,7 @@ INPUT_STATES = {
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
     GameStates.QUEST_LIST, GameStates.GAME_PAUSED,
+    GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
     GameStates.GAME_OVER}
 
 class InputTypes(Enum):

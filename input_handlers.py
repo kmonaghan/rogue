@@ -153,9 +153,9 @@ def handle_quests_onboarding(key):
         key_char = chr(key.c)
 
         if key_char == 'a':
-            return {InputTypes.QUEST_RESPONSE: 'accept'}
+            return {InputTypes.QUEST_RESPONSE: True}
         elif key_char == 'b':
-            return {InputTypes.QUEST_RESPONSE: 'reject'}
+            return {InputTypes.QUEST_RESPONSE: False}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {InputTypes.EXIT: True}
