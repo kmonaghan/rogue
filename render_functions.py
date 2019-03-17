@@ -10,10 +10,9 @@ def get_names_under_mouse(mouse, game_map):
 
     location = ''
 
-    try:
-        if game_map.map[x][y]:
+    if game_map.current_level.within_bounds(x, y):
             location = str(x) + ',' + str(y)
-    except IndexError:
+    else:
         print("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
         return ''
 
@@ -21,9 +20,9 @@ def get_names_under_mouse(mouse, game_map):
     names = ''
 
     if (game_map.current_level.fov[x, y] or CONFIG.get('debug')):
-        tile_description = game_map.map[x][y].describe() + ' '
-
-        names = [entity.describe() for entity in game_map.entity_map[x][y]]
+        #tile_description = game_map.map[x][y].describe() + ' '
+        #
+        names = [entity.describe() for entity in game_map.current_level.entities.get_entities_in_position((x, y))]
         names = ', '.join(names)
 
     return tile_description + location + ' ' + names
@@ -89,6 +88,8 @@ def render_info_console(info_console, player, game_map):
                    tcod.light_green, tcod.darker_green)
 
     info_console.print(1, 6, 'Dungeon level: {0}'.format(game_map.dungeon_level), tcod.white)
+
+    #info_console.print(1, 8, get_names_under_mouse(mouse, game_map), tcod.white)
 
     return info_console
 

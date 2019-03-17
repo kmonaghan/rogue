@@ -5,7 +5,7 @@ from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from loader_functions.initialize_new_game import get_constants, get_game_variables
 from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
-from render_functions import render_info_console, render_message_console, render_menu_console
+from render_functions import get_names_under_mouse, render_info_console, render_message_console, render_menu_console
 from map_objects.point import Point
 import quest
 import pubsub
@@ -14,8 +14,6 @@ from etc.configuration import CONFIG
 from etc.enum import (
     ResultTypes, InputTypes, GameStates, LevelUp,
     INVENTORY_STATES, INPUT_STATES, CANCEL_STATES)
-'''TODO: Move
-'''
 
 from utils.utils import (
     flatten_list_of_dictionaries,
@@ -84,6 +82,9 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
         game_map.console.blit(root_console, 0, 0, 0, 0,
                           game_map.console.width, game_map.console.height)
+
+        root_console.print(1, constants['panel_y'] - 1, get_names_under_mouse(mouse, game_map), tcod.white)
+
         info_console.blit(root_console, 0, constants['panel_y'], 0, 0,
                           constants['info_panel_width'], constants['panel_height'])
         message_console.blit(root_console, constants['info_panel_width'], constants['panel_y'], 0, 0,
