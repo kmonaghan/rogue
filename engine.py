@@ -30,6 +30,9 @@ def get_user_input(key, mouse):
 def play_game(player, game_map, message_log, game_state, consoles, constants):
     root_console, map_console, info_console, message_console, menu_console = consoles
 
+    for console in consoles:
+        console.clear(fg=(255, 255, 63))
+
     fov_recompute = True
 
     key = tcod.Key()
@@ -77,6 +80,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         #---------------------------------------------------------------------
         # Blit the subconsoles to the main console and flush all rendering.
         #---------------------------------------------------------------------
+        root_console.clear(fg=(255, 255, 63))
+
         game_map.console.blit(root_console, 0, 0, 0, 0,
                           game_map.console.width, game_map.console.height)
         info_console.blit(root_console, 0, constants['panel_y'], 0, 0,
@@ -262,102 +267,18 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             elif action == InputTypes.TAKE_STAIRS:
                 if (game_map.check_for_stairs(player.x, player.y)):
                         game_map.next_floor(player, message_log, constants)
+                        game_map.console.clear()
                         fov_recompute = True
-
                         break
                 else:
                     message_log.add_message(Message('There are no stairs here.', tcod.yellow))
 
-        #----------------------------------------------------------------------
-        # Process the results stack
-        #......................................................................
-        # We are done processing player inputs, and may have some results on
-        # the player turn stack.  Process the stack by popping off the top
-        # result from the queue.  There are many different possible results,
-        # so each is handled with a dedicated handler.
-        #
-        # Note: Handling a result may result in other results being added to
-        # the stack, so we continually process the results stack until it is
-        # empty.
-        #----------------------------------------------------------------------
-        while player_turn_results != []:
+        updated_game_state = process_results_stack(game_map, player, player_turn_results, pubsub)
 
-            # Sort the turn results stack by the priority order.
-            player_turn_results = sorted(
-                flatten_list_of_dictionaries(player_turn_results),
-                key = lambda d: get_key_from_single_key_dict(d))
+        if updated_game_state and updated_game_state != game_state:
+            previous_game_state = game_state
+            game_state = updated_game_state
 
-            result = player_turn_results.pop()
-            result_type, result_data = unpack_single_key_dict(result)
-
-            # Handle a simple message.
-            if result_type == ResultTypes.MESSAGE:
-                message = result_data
-                message_log.add_message(message)
-            # Handle death.
-            if result_type == ResultTypes.DEAD_ENTITY:
-                dead_entity = result_data
-                dead_entity.death.npc_death(game_map)
-
-            # Add an item to the inventory, and remove it from the game map.
-            if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
-                #item.commitable.delete(game_map)
-                #entity.inventory.add(result_data)
-                player.inventory.add_item(result_data)
-                game_map.current_level.remove_entity(result_data)
-                game_state = GameStates.ENEMY_TURN
-
-            # Remove consumed items from inventory
-            if result_type == ResultTypes.DISCARD_ITEM:
-                #item, consumed = result_data
-                #if consumed:
-                player.inventory.remove(result_data)
-                game_state = GameStates.ENEMY_TURN
-
-            # Remove dropped items from inventory and place on the map
-            if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
-                game_map.current_level.add_entity(result_data)
-                message = Message('You dropped the {0}'.format(result_data.name), tcod.yellow)
-                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
-
-                game_state = GameStates.ENEMY_TURN
-
-            if result_type == ResultTypes.EQUIP:
-                equip_results = player.equipment.toggle_equip(result_data)
-
-                for equip_result in equip_results:
-                    equipped = equip_result.get('equipped')
-                    dequipped = equip_result.get('dequipped')
-
-                    if equipped:
-                        message_log.add_message(Message('You equipped the {0}'.format(equipped.name)))
-
-                    if dequipped:
-                        message_log.add_message(Message('You dequipped the {0}'.format(dequipped.name)))
-
-                game_state = GameStates.ENEMY_TURN
-            if result_type == ResultTypes.QUEST_ONBOARDING:
-                quest_request = result_data
-                previous_game_state = GameStates.PLAYER_TURN
-                game_state = GameStates.QUEST_ONBOARDING
-
-            if result_type == GameStates.QUEST_RESPONSE:
-                pass
-
-            '''
-            if targeting:
-                previous_game_state = GameStates.PLAYER_TURN
-                game_state = GameStates.TARGETING
-
-                targeting_item = targeting
-
-                message_log.add_message(targeting_item.item.targeting_message)
-
-            if targeting_cancelled:
-                game_state = previous_game_state
-
-                message_log.add_message(Message('Targeting cancelled'))
-            '''
         pubsub.pubsub.process_queue(game_map)
 
         #-------------------------------------------------------------------
@@ -376,47 +297,11 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
             game_state = GameStates.PLAYER_TURN
 
-        #---------------------------------------------------------------------
-        # Process all result actions of enemy turns.
-        #---------------------------------------------------------------------
-        while enemy_turn_results != []:
+        updated_game_state = process_results_stack(game_map, player, enemy_turn_results, pubsub)
 
-            enemy_turn_results = sorted(
-                flatten_list_of_dictionaries(enemy_turn_results),
-                key = lambda d: get_key_from_single_key_dict(d))
-
-            result = enemy_turn_results.pop()
-            result_type, result_data = unpack_single_key_dict(result)
-
-            # Handle a move towards action.  Move towards a target.
-            if result_type == ResultTypes.MOVE_TOWARDS:
-               monster, target_x, target_y = result_data
-               monster.movable.move_towards(game_map, target_x, target_y)
-            # Handle a move random adjacent action.  Move to a random adjacent
-            # square.
-            if result_type == ResultTypes.MOVE_RANDOM_ADJACENT:
-               monster = result_data
-               monster.movable.move_to_random_adjacent(game_map)
-            # Handle a simple message.
-            if result_type == ResultTypes.MESSAGE:
-                message = result_data
-                message_log.add_message(message)
-            # Add a new entity to the game.
-            if result_type == ResultTypes.ADD_ENTITY:
-                entity = result_data
-                entity.commitable.commit(game_map)
-            # Remove an entity from the game.
-            if result_type == ResultTypes.REMOVE_ENTITY:
-                entity = result_data
-                entity.commitable.delete(game_map)
-            # Handle death.
-            if result_type == ResultTypes.DEAD_ENTITY:
-                dead_entity = result_data
-
-                if dead_entity == player:
-                    game_state = GameStates.GAME_OVER
-
-                dead_entity.death.npc_death(game_map)
+        if updated_game_state and updated_game_state != game_state:
+            previous_game_state = game_state
+            game_state = updated_game_state
 
         #---------------------------------------------------------------------
         # And done...so broadcast a tick
@@ -424,6 +309,128 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.TICK))
 
         pubsub.pubsub.process_queue(game_map)
+
+def process_results_stack(game_map, pc, turn_results, pubsub):
+    #----------------------------------------------------------------------
+    # Process the results stack
+    #......................................................................
+    # We are done processing player inputs, and may have some results on
+    # the player turn stack.  Process the stack by popping off the top
+    # result from the queue.  There are many different possible results,
+    # so each is handled with a dedicated handler.
+    #
+    # Note: Handling a result may result in other results being added to
+    # the stack, so we continually process the results stack until it is
+    # empty.
+    #----------------------------------------------------------------------
+    while turn_results != []:
+        update_game_state = None
+
+        # Sort the turn results stack by the priority order.
+        turn_results = sorted(
+            flatten_list_of_dictionaries(turn_results),
+            key = lambda d: get_key_from_single_key_dict(d))
+
+        result = turn_results.pop()
+        result_type, result_data = unpack_single_key_dict(result)
+
+        # Handle a simple message.
+        if result_type == ResultTypes.MESSAGE:
+            message = result_data
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+
+        # Handle death.
+        if result_type == ResultTypes.DEAD_ENTITY:
+            dead_entity = result_data
+            dead_entity.death.npc_death(game_map)
+
+        # Add an item to the inventory, and remove it from the game map.
+        if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
+            #item.commitable.delete(game_map)
+            #entity.inventory.add(result_data)
+            pc.inventory.add_item(result_data)
+            game_map.current_level.remove_entity(result_data)
+            update_game_state = GameStates.ENEMY_TURN
+
+        # Remove consumed items from inventory
+        if result_type == ResultTypes.DISCARD_ITEM:
+            #item, consumed = result_data
+            #if consumed:
+            pc.inventory.remove(result_data)
+            update_game_state = GameStates.ENEMY_TURN
+
+        # Remove dropped items from inventory and place on the map
+        if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
+            game_map.current_level.add_entity(result_data)
+            message = Message('{0} dropped the {1}'.format(pc.name, result_data.name), tcod.yellow)
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+
+            update_game_state = GameStates.ENEMY_TURN
+
+        if result_type == ResultTypes.EQUIP:
+            equip_results = player.equipment.toggle_equip(result_data)
+
+            for equip_result in equip_results:
+                equipped = equip_result.get('equipped')
+                dequipped = equip_result.get('dequipped')
+
+                if equipped:
+                    message = Message('{0} equipped the {1}'.format(pc.name, equipped.name))
+
+                if dequipped:
+                    message = Message('{0} dequipped the {1}'.format(pc.name, dequipped.name))
+
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+
+            update_game_state = GameStates.ENEMY_TURN
+        if result_type == ResultTypes.QUEST_ONBOARDING:
+            quest_request = result_data
+            update_game_state = GameStates.QUEST_ONBOARDING
+
+        if result_type == GameStates.QUEST_RESPONSE:
+            pass
+
+        # Handle a move towards action.  Move towards a target.
+        if result_type == ResultTypes.MOVE_TOWARDS:
+           npc, target_x, target_y = result_data
+           npc.movable.move_towards(game_map, target_x, target_y)
+        # Handle a move random adjacent action.  Move to a random adjacent
+        # square.
+        if result_type == ResultTypes.MOVE_RANDOM_ADJACENT:
+           npc = result_data
+           npc.movable.move_to_random_adjacent(game_map)
+
+        # Add a new entity to the game.
+        if result_type == ResultTypes.ADD_ENTITY:
+            entity = result_data
+            entity.commitable.commit(game_map)
+        # Remove an entity from the game.
+        if result_type == ResultTypes.REMOVE_ENTITY:
+            entity = result_data
+            entity.commitable.delete(game_map)
+        # Handle death.
+        if result_type == ResultTypes.DEAD_ENTITY:
+            dead_entity = result_data
+
+            if dead_entity == pc:
+                update_game_state = GameStates.GAME_OVER
+
+            dead_entity.death.npc_death(game_map)
+        '''
+        if targeting:
+            update_game_state = GameStates.TARGETING
+
+            targeting_item = targeting
+
+            message_log.add_message(targeting_item.item.targeting_message)
+
+        if targeting_cancelled:
+            game_state = previous_game_state
+
+            message_log.add_message(Message('Targeting cancelled'))
+        '''
+
+        return update_game_state
 
 def main():
     constants = get_constants()
