@@ -279,7 +279,7 @@ class Hatching:
             game_map.remove_entity_from_map(npc)
             self.hatches.x = npc.x
             self.hatches.y = npc.y
-            game_map.add_entity_to_map(self.hatches)
+            game_map.current_level.add_entity(self.hatches)
 
         return results
 
@@ -295,7 +295,7 @@ class SpawnNPC:
             npc = self.spawn(self.owner.point)
             if (game_map.find_closest(self.owner.point, npc.species, 1) == None):
                 self.turns_since_last_spawn = 0
-                game_map.add_entity_to_map(npc)
+                game_map.current_level.add_entity(npc)
                 #print("Spawned " + npc.name)
             else:
                 #print("Already " + npc.name + " nearby")

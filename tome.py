@@ -136,7 +136,7 @@ def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
         for y in range(start_y, start_y + offset):
             if not game_map.current_level.blocked[x, y]:
                 npc = ncp_type(Point(x, y))
-                game_map.add_entity_to_map(npc)
+                game_map.current_level.add_entity(npc)
                 dice -= 1
 
                 if dice < 1:

@@ -147,7 +147,7 @@ class Quest:
             aPoint = room.center()
             self.npc.x = aPoint.x
             self.npc.y = aPoint.y
-            game_map.add_entity_to_map(self.npc)
+            game_map.current_level.add_entity(self.npc)
 
         if (self.kill > 0):
             pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.DEATH, kill_quest_npc_death))

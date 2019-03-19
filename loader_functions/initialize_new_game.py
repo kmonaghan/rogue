@@ -76,14 +76,9 @@ def get_game_variables(constants):
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
     pubsub.pubsub.subscribe(pubsub.Subscription(message_log, pubsub.PubSubTypes.MESSAGE, add_to_messages))
 
-    map_height = constants['map_height']
-    map_width = constants['map_width']
-
     game_map = GameMap()
 
     player = create_player()
-
-    #game_map.create_floor(player, constants)
 
     game_state = GameStates.PLAYER_TURN
 
@@ -97,7 +92,7 @@ def add_to_messages(sub, message, game_map):
 def entity_spawn(sub, message, game_map):
     npc = message.entity.spawn.spawn()
     if npc:
-        game_map.add_entity_to_map(npc)
+        game_map.current_level.add_entity(npc)
 
 def on_entity_death(sub, message, game_map):
     pubsub.pubsub.unsubscribe_entity(message.entity)
