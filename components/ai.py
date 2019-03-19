@@ -242,7 +242,7 @@ class Hunter(StrollingNPC):
 
         npc = self.owner
 
-        target = game_map.find_closest(Point(npc.x, npc.y), self.hunting)
+        target = game_map.current_level.entities.find_closest(Point(npc.x, npc.y), self.hunting)
 
         if (target):
             dist = max(abs(target.x - npc.x), abs(target.y - npc.y))
@@ -276,7 +276,7 @@ class Hatching:
         if (self.incubate < 1):
             npc = self.owner
 
-            game_map.remove_entity_from_map(npc)
+            game_map.current_level.remove_entity(npc)
             self.hatches.x = npc.x
             self.hatches.y = npc.y
             game_map.current_level.add_entity(self.hatches)
@@ -293,7 +293,7 @@ class SpawnNPC:
 
         if ((randint(0, 10) + self.turns_since_last_spawn) > 18):
             npc = self.spawn(self.owner.point)
-            if (game_map.find_closest(self.owner.point, npc.species, 1) == None):
+            if (game_map.current_level.entities.find_closest(self.owner.point, npc.species, 1) == None):
                 self.turns_since_last_spawn = 0
                 game_map.current_level.add_entity(npc)
                 #print("Spawned " + npc.name)

@@ -464,25 +464,25 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
 
     return npc
 
-def place_chest(point, game_map):
-    chest = create_chest(point, game_map.dungeon_level)
-    game_map.add_entity_to_map(chest)
+def place_chest(point, level_map):
+    chest = create_chest(point, level_map.dungeon_level)
+    level_map.add_entity(chest)
 
     guards = libtcod.random_get_int(0, 1, 3)
 
     npc_chances = {}
-    npc_chances[Species.GOBLIN] = from_dungeon_level([[90, 1], [75, 2], [50, 3], [25, 4], [20, 5], [10, 6]], game_map.dungeon_level)
-    npc_chances[Species.ORC] = from_dungeon_level([[9, 1], [20,2], [40, 3], [60, 4], [60, 5], [65, 6]], game_map.dungeon_level)
-    npc_chances[Species.TROLL] = from_dungeon_level([[1, 1], [5,3], [10, 3], [15, 4], [20, 5], [25, 6]], game_map.dungeon_level)
+    npc_chances[Species.GOBLIN] = from_dungeon_level([[90, 1], [75, 2], [50, 3], [25, 4], [20, 5], [10, 6]], level_map.dungeon_level)
+    npc_chances[Species.ORC] = from_dungeon_level([[9, 1], [20,2], [40, 3], [60, 4], [60, 5], [65, 6]], level_map.dungeon_level)
+    npc_chances[Species.TROLL] = from_dungeon_level([[1, 1], [5,3], [10, 3], [15, 4], [20, 5], [25, 6]], level_map.dungeon_level)
     npc_choice = random_choice_from_dict(npc_chances)
 
     for i in range(guards):
-        npc = generate_npc(npc_choice, dungeon_level=game_map.dungeon_level, point=point)
+        npc = generate_npc(npc_choice, dungeon_level=level_map.dungeon_level, point=point)
         ai_component = StrollingNPC(tethered = point, tethered_distance = 2, aggressive = True)
         ai_component.attacked_ai = npc.ai
         npc.add_component(ai_component, 'ai')
 
-        game_map.add_entity_to_map(npc)
+        level_map.add_entity(npc)
 
 def tweak_npc(npc):
     dice = libtcod.random_get_int(0, 1, 100)
@@ -505,32 +505,40 @@ def upgrade_npc(npc):
 '''
 Subscription methods
 '''
-def eat_rat(sub, message, game_map):
+def eat_rat(sub, message, level_map):
     if (message.entity.species == Species.RAT) and (message.target.uuid == sub.entity.uuid):
         sub.entity.spawn.increase_energy()
         message.entity.death.skeletonize()
 
-def goblin_observed_death(sub, message, game_map):
+def goblin_observed_death(sub, message, level_map):
+    if message.target is None:
+        print("goblin_observed_death: the target is none?")
+        return
+
+    if sub.entity is None:
+        print("goblin_observed_death: the subscriber is none?")
+        return
+
     if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):
         if (sub.entity.uuid == message.entity.uuid):
             pass
-        elif game_map.current_level.fov[sub.entity.x, sub.entity.y]:
+        elif level_map.current_level.fov[sub.entity.x, sub.entity.y]:
             if not hasattr(sub.entity, 'berserk'):
                 sub.entity.add_component(Berserk(), 'berserk')
                 sub.entity.berserk.start_berserker()
 
-def npc_become_aggressive(sub, message, game_map):
+def npc_become_aggressive(sub, message, level_map):
     if (message.entity.species == Species.PLAYER) and (message.target.uuid == sub.entity.uuid):
         sub.entity.add_component(BasicNPC(), 'ai')
 
-def mimic_activate(sub, message, game_map):
+def mimic_activate(sub, message, level_map):
     if (sub.entity.uuid == message.target.uuid):
         sub.entity.add_component(BasicNPC(), 'ai')
         sub.entity.char = 'M'
         sub.entity.base_name = 'Mimic'
         pubsub.pubsub.mark_subscription_for_removal(sub)
 
-def mimic_shimmer(sub, message, game_map):
+def mimic_shimmer(sub, message, level_map):
     if sub.entity.ai:
         pubsub.pubsub.mark_subscription_for_removal(sub)
         return
@@ -544,24 +552,26 @@ def mimic_shimmer(sub, message, game_map):
             sub.entity.char = 'M'
             sub.entity.base_name = 'Mimic'
 
-def rat_swarm(sub, message, game_map):
+def rat_swarm(sub, message, level_map):
     if (message.entity.species == Species.PLAYER) and ((message.target.species == Species.RAT) or (message.target.species == Species.RATNEST)):
-        if game_map.current_level.fov[sub.entity.x, sub.entity.y]:
+        if level_map.current_level.fov[sub.entity.x, sub.entity.y]:
             sub.entity.add_component(BasicNPC(), 'ai')
 
-def earn_death_xp(sub, message, game_map):
+def earn_death_xp(sub, message, level_map):
     if message.target is None:
-        print("the target is none?")
+        print("earn_death_xp: the target is none?")
+        return
 
     if sub.entity is None:
-        print("the subscriber is none?")
+        print("earn_death_xp: the subscriber is none?")
+        return
 
     if (message.target.uuid == sub.entity.uuid) and hasattr(message.entity, 'level'):
         xp = message.entity.level.xp_worth(message.target)
         sub.entity.level.add_xp(xp)
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))
 
-def earn_quest_xp(sub, message, game_map):
+def earn_quest_xp(sub, message, level_map):
     print("earned xp for: ")
     print(message.target.uuid)
     print(sub.entity.uuid)

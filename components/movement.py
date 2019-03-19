@@ -10,6 +10,10 @@ class Movement:
             if not self.can_move:
                 return
 
+            if not current_level.within_bounds(self.owner.x + dx, self.owner.y + dy):
+                print(self.owner.name + " " + str(self.owner.x) + " " + str(self.owner.y) + " attempt to move out of bounds: " + str(self.owner.x + dx) + " " + str(self.owner.y + dy))
+                return
+
             #move by the given amount, if the destination is not blocked
             if current_level.walkable[self.owner.x + dx, self.owner.y + dy]:
                 self.place(self.owner.x + dx, self.owner.y + dy, current_level)
@@ -40,7 +44,7 @@ class Movement:
 
         def attempt_move(self, target_point, game_map):
             if game_map.current_level.walkable[target_point.x, target_point.y] and not game_map.current_level.blocked[target_point.x, target_point.y]:
-                self.move(target_point.x, target_point.y, game_map.current_level)
+                self.place(target_point.x, target_point.y, game_map.current_level)
 
                 return True
 

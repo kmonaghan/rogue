@@ -29,7 +29,6 @@ class BasicDeath:
                 #npc.inventory.drop_item(item)
                 game_map.current_level.add_entity(item)
 
-        print("unblocking because of death")
         game_map.current_level.blocked[self.owner.x, self.owner.y] = False
 
         self.rotting = True

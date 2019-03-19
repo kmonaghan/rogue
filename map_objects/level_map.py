@@ -39,7 +39,6 @@ class LevelMap(Map):
         self.dungeon_level = 1
 
         self.tiles = [[None for x in range(height)] for y in range(width)]
-        print(self.tiles)
 
         self.blit_floor()
 
