@@ -18,7 +18,7 @@ class BasicDeath:
         #attacked and doesn't move
         self.owner.char = '%'
         self.owner.color = libtcod.dark_red
-        self.owner.blocks = False
+
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
 
@@ -29,7 +29,9 @@ class BasicDeath:
                 #npc.inventory.drop_item(item)
                 game_map.current_level.add_entity(item)
 
-        game_map.current_level.blocked[self.owner.x, self.owner.y] = False
+        game_map.current_level.remove_entity(self.owner)
+        self.owner.blocks = False
+        game_map.current_level.add_entity(self.owner)
 
         self.rotting = True
 

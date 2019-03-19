@@ -139,8 +139,21 @@ class LevelMap(Map):
         if (entity.blocks):
             self.blocked[entity.x, entity.y] = False
 
+            current_entities = self.entities.get_entities_in_position((entity.x, entity.y))
+
+            for other_entity in current_entities:
+                if other_entity.blocks:
+                    self.blocked[entity.x, entity.y] = True
+
     def move_entity(self, entity, point):
         self.entities.update_position(entity, (entity.x, entity.y), (point.x, point.y))
         if (entity.blocks):
             self.blocked[entity.x, entity.y] = False
+
+            current_entities = self.entities.get_entities_in_position((entity.x, entity.y))
+
+            for other_entity in current_entities:
+                if other_entity.blocks:
+                    self.blocked[entity.x, entity.y] = True
+
             self.blocked[point.x, point.y] = True

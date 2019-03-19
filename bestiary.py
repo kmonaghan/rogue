@@ -100,6 +100,7 @@ def create_chest(point = None, dungeon_level = 1):
     else:
         npc.add_component(Health(10), 'health')
         npc.add_component(Defence(defence = 2), 'defence')
+        npc.add_component(Offence(base_power = 0), 'offence')
         #TODO: Generate random level appropriate loot in chest
         potion = equipment.random_potion(dungeon_level=dungeon_level)
         potion.lootable = True
@@ -466,7 +467,7 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
 
 def place_chest(point, level_map):
     chest = create_chest(point, level_map.dungeon_level)
-    level_map.add_entity(chest)
+    level_map.current_level.add_entity(chest)
 
     guards = libtcod.random_get_int(0, 1, 3)
 
@@ -482,7 +483,7 @@ def place_chest(point, level_map):
         ai_component.attacked_ai = npc.ai
         npc.add_component(ai_component, 'ai')
 
-        level_map.add_entity(npc)
+        level_map.current_level.add_entity(npc)
 
 def tweak_npc(npc):
     dice = libtcod.random_get_int(0, 1, 100)

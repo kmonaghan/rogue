@@ -14,13 +14,12 @@ class Inventory:
 
         if len(self.items) >= self.capacity:
             results.append({
-                ResultTypes.ADD_ITEM_TO_INVENTORY: None,
-                ResultTypes.MESSAGE: Message('You cannot carry any more, your inventory is full', libtcod.yellow)
+                ResultTypes.MESSAGE: Message('You cannot carry any more, your inventory is full.', libtcod.yellow)
             })
         else:
             results.append({
-                ResultTypes.ADD_ITEM_TO_INVENTORY: item,
-                ResultTypes.MESSAGE: Message('You pick up the {0}!'.format(item.name), libtcod.blue)
+                ResultTypes.REMOVE_ENTITY: item,
+                ResultTypes.MESSAGE: Message('{0} picked up the {1}.'.format(self.owner.name, item.name), libtcod.blue)
             })
 
             self.items.append(item)

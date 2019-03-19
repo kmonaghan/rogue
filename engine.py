@@ -133,6 +133,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
             game_map.console = map_console
             game_map.create_floor(player, constants)
             fov_recompute = True
+            game_state = GameStates.PLAYER_TURN
+            previous_game_state = game_state
 
             continue
 
@@ -250,8 +252,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                             player_turn_results.extend(attack_results)
                     else:
                         player.movement.move(dx, dy, game_map.current_level)
-                        quest_results = quest.check_quest_for_location(player.point)
-                        player_turn_results.extend(quest_results)
+                        player_turn_results.extend(quest.check_quest_for_location(player.point))
 
                         fov_recompute = True
 
@@ -260,11 +261,13 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                 entities = game_map.current_level.entities.get_entities_in_position((player.x, player.y))
                 for entity in entities:
                     if entity.item:
-                        pickup_results = player.inventory.add_item(entity)
-                        player_turn_results.extend(pickup_results)
+                        player_turn_results.extend([{
+                            ResultTypes.ADD_ITEM_TO_INVENTORY: entity
+                        }])
+                else:
+                    message = Message('There is nothing here to pick up.', tcod.yellow)
+                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
-                    else:
-                        message_log.add_message(Message('There is nothing here to pick up.', tcod.yellow))
             elif action == InputTypes.TAKE_STAIRS:
                 if (game_map.check_for_stairs(player.x, player.y)):
                         game_map.next_floor(player, message_log, constants)
@@ -272,7 +275,9 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                         fov_recompute = True
                         break
                 else:
-                    message_log.add_message(Message('There are no stairs here.', tcod.yellow))
+                    message = Message('There are no stairs here.', tcod.yellow)
+                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+
 
         updated_game_state = process_results_stack(game_map, player, player_turn_results, pubsub)
 
@@ -311,7 +316,9 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
         pubsub.pubsub.process_queue(game_map)
 
-def process_results_stack(game_map, pc, turn_results, pubsub):
+def process_results_stack(game_map, entity, turn_results, pubsub):
+    update_game_state = None
+
     #----------------------------------------------------------------------
     # Process the results stack
     #......................................................................
@@ -325,8 +332,6 @@ def process_results_stack(game_map, pc, turn_results, pubsub):
     # empty.
     #----------------------------------------------------------------------
     while turn_results != []:
-        update_game_state = None
-
         # Sort the turn results stack by the priority order.
         turn_results = sorted(
             flatten_list_of_dictionaries(turn_results),
@@ -342,44 +347,42 @@ def process_results_stack(game_map, pc, turn_results, pubsub):
 
         # Handle death.
         if result_type == ResultTypes.DEAD_ENTITY:
-            dead_entity = result_data
-            dead_entity.death.npc_death(game_map)
+            update_game_state = result_data.death.npc_death(game_map)
 
         # Add an item to the inventory, and remove it from the game map.
         if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
-            #item.commitable.delete(game_map)
-            #entity.inventory.add(result_data)
-            pc.inventory.add_item(result_data)
-            game_map.current_level.remove_entity(result_data)
+            turn_results.extend(entity.inventory.add_item(result_data))
+
             update_game_state = GameStates.ENEMY_TURN
 
         # Remove consumed items from inventory
         if result_type == ResultTypes.DISCARD_ITEM:
             #item, consumed = result_data
             #if consumed:
-            pc.inventory.remove(result_data)
+            entity.inventory.remove(result_data)
+            game_map.current_level.remove_entity(result_data)
             update_game_state = GameStates.ENEMY_TURN
 
         # Remove dropped items from inventory and place on the map
         if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
             game_map.current_level.add_entity(result_data)
-            message = Message('{0} dropped the {1}'.format(pc.name, result_data.name), tcod.yellow)
+            message = Message('{0} dropped the {1}'.format(entity.name, result_data.name), tcod.yellow)
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
             update_game_state = GameStates.ENEMY_TURN
 
         if result_type == ResultTypes.EQUIP:
-            equip_results = player.equipment.toggle_equip(result_data)
+            equip_results = entity.equipment.toggle_equip(result_data)
 
             for equip_result in equip_results:
                 equipped = equip_result.get('equipped')
                 dequipped = equip_result.get('dequipped')
 
                 if equipped:
-                    message = Message('{0} equipped the {1}'.format(pc.name, equipped.name))
+                    message = Message('{0} equipped the {1}'.format(entity.name, equipped.name))
 
                 if dequipped:
-                    message = Message('{0} dequipped the {1}'.format(pc.name, dequipped.name))
+                    message = Message('{0} dequipped the {1}'.format(entity.name, dequipped.name))
 
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
@@ -403,20 +406,12 @@ def process_results_stack(game_map, pc, turn_results, pubsub):
 
         # Add a new entity to the game.
         if result_type == ResultTypes.ADD_ENTITY:
-            entity = result_data
-            entity.commitable.commit(game_map)
+            result_data.commitable.commit(game_map)
         # Remove an entity from the game.
         if result_type == ResultTypes.REMOVE_ENTITY:
-            entity = result_data
-            entity.commitable.delete(game_map)
-        # Handle death.
-        if result_type == ResultTypes.DEAD_ENTITY:
-            dead_entity = result_data
+            game_map.current_level.remove_entity(result_data)
+            #entity.commitable.delete(game_map)
 
-            if dead_entity == pc:
-                update_game_state = GameStates.GAME_OVER
-
-            dead_entity.death.npc_death(game_map)
         '''
         if targeting:
             update_game_state = GameStates.TARGETING
@@ -431,7 +426,7 @@ def process_results_stack(game_map, pc, turn_results, pubsub):
             message_log.add_message(Message('Targeting cancelled'))
         '''
 
-        return update_game_state
+    return update_game_state
 
 def main():
     constants = get_constants()
