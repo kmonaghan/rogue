@@ -1,4 +1,5 @@
 import numpy as np
+from random import randint
 
 import tcod
 
@@ -10,7 +11,7 @@ from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import Tiles
 
-from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, EmptyTile
+from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, EmptyTile
 
 class LevelMap(Map):
     def __init__(self, floor, console):
@@ -34,6 +35,11 @@ class LevelMap(Map):
         self.light_map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('light_wall'), dtype=np.uint8
         )
+
+        self.dungeon_level = 1
+
+        self.tiles = [[None for x in range(height)] for y in range(width)]
+        print(self.tiles)
 
         self.blit_floor()
 
@@ -76,6 +82,7 @@ class LevelMap(Map):
             else:
                 current_tile = EmptyTile()
 
+            self.tiles[x][y] = current_tile
             self.dark_map_bg[x,y] = current_tile.out_of_fov_color
             self.light_map_bg[x,y] = current_tile.fov_color
 
