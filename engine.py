@@ -52,6 +52,9 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
     game_loop = -1
 
     while not tcod.console_is_window_closed():
+        player_turn_results.clear()
+        enemy_turn_results.clear()
+
         game_loop += 1
 
         #---------------------------------------------------------------------
@@ -114,7 +117,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
         if (len(input_result) == 0):
             if CONFIG.get('debug'):
-                print("No corresponding result for key press.")
+                #print("No corresponding result for key press.")
+                pass
             continue
 
         left_click = mouse_action.get('left_click')
@@ -333,6 +337,7 @@ def process_results_stack(game_map, entity, turn_results, pubsub):
     #----------------------------------------------------------------------
     while turn_results != []:
         # Sort the turn results stack by the priority order.
+        #print(turn_results)
         turn_results = sorted(
             flatten_list_of_dictionaries(turn_results),
             key = lambda d: get_key_from_single_key_dict(d))
@@ -397,12 +402,13 @@ def process_results_stack(game_map, entity, turn_results, pubsub):
         # Handle a move towards action.  Move towards a target.
         if result_type == ResultTypes.MOVE_TOWARDS:
            npc, target_x, target_y = result_data
-           npc.movable.move_towards(game_map, target_x, target_y)
+           #print("ResultTypes.MOVE_TOWARDS: " + npc.name)
+           npc.movement.move_astar(Point(target_x, target_y), game_map)
         # Handle a move random adjacent action.  Move to a random adjacent
         # square.
         if result_type == ResultTypes.MOVE_RANDOM_ADJACENT:
            npc = result_data
-           npc.movable.move_to_random_adjacent(game_map)
+           npc.movement.move_to_random_adjacent(game_map)
 
         # Add a new entity to the game.
         if result_type == ResultTypes.ADD_ENTITY:

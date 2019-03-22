@@ -23,16 +23,20 @@ class IsAdjacent(Node):
     def tick(self, owner, target, game_map):
         distance = owner.point.distance_to(target.point)
         if distance < 2:
+            print("IsAdjacent: SUCCESS")
             return TreeStates.SUCCESS, []
         else:
+            print("IsAdjacent: FAILURE")
             return TreeStates.FAILURE, []
 
 
 class WithinFov(Node):
     """Return success if owner is in the players fov."""
     def tick(self, owner, target, game_map):
-        if game_map.fov[owner.x, owner.y]:
+        if game_map.current_level.fov[owner.x, owner.y]:
+            print("WithinFov: SUCCESS")
             return TreeStates.SUCCESS, []
+        print("WithinFov: FAILURE")
         return TreeStates.FAILURE, []
 
 

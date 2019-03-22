@@ -35,7 +35,7 @@ class BasicDeath:
 
         self.rotting = True
 
-        return GameStates.ENEMY_TURN
+        return GameStates.PLAYER_TURN
 
     def decompose(self, game_map):
         self.rotting_time -= 1

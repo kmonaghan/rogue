@@ -22,7 +22,7 @@ from components.behaviour_trees.leaf import (
 from components.behaviour_trees.conditions import (
     IsAdjacent, WithinFov, InNamespace)
 
-class BasicMonster:
+class BasicNPC:
     """Simple monster ai.
 
     When in the players POV, attempt to move towards the player.  If adjacent
@@ -43,27 +43,8 @@ class BasicMonster:
                 TravelToRandomPosition()))
 
     def take_turn(self, target, game_map):
+        print("NPC Tick: " + self.owner.name)
         _, results = self.tree.tick(self.owner, target, game_map)
-        return results
-
-class BasicNPC:
-    #AI for a basic npc.
-    def take_turn(self, target, game_map):
-        results = []
-
-        #a basic npc takes its turn. if you can see it, it can see you
-        npc = self.owner
-        if game_map.current_level.fov[npc.x, npc.y]:
-
-            #move towards player if far away
-            if npc.point.distance_to(target.point) >= 2:
-                npc.movement.move_astar(target, game_map)
-
-            #close enough, attack! (if the player is still alive.)
-            elif target.health.hp > 0:
-                attack_results = npc.offence.attack(target)
-                results.extend(attack_results)
-
         return results
 
 class PatrollingNPC:

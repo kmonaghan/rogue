@@ -9,7 +9,7 @@ from entities.entity_list import EntityList
 
 from etc.colors import COLORS
 from etc.configuration import CONFIG
-from etc.enum import Tiles
+from etc.enum import RoutingOptions, Tiles
 
 from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, EmptyTile
 
@@ -28,6 +28,9 @@ class LevelMap(Map):
         self.illuminated = np.zeros((width, height), dtype=np.int8)
         self.door = np.zeros((width, height), dtype=np.int8)
         self.blocked = np.zeros((width, height), dtype=np.int8)
+        self.caves = np.zeros((width, height), dtype=np.int8)
+        self.corridors = np.zeros((width, height), dtype=np.int8)
+        self.floors = np.zeros((width, height), dtype=np.int8)
 
         self.dark_map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('dark_wall'), dtype=np.uint8
@@ -41,6 +44,8 @@ class LevelMap(Map):
         self.tiles = [[None for x in range(height)] for y in range(width)]
 
         self.blit_floor()
+
+        self.paths = []
 
     def blit_floor(self):
         self.walkable[:] = False
@@ -61,17 +66,21 @@ class LevelMap(Map):
             elif self.floor.grid[x][y] == Tiles.ROOM_WALL:
                 current_tile = RoomWall()
             elif self.floor.grid[x][y] == Tiles.DOOR:
+                self.door[x,y] = True
                 self.make_transparent_and_walkable(x, y)
                 current_tile = Door()
             elif self.floor.grid[x][y] == Tiles.DEADEND:
                 current_tile = CorridorWall()
             elif self.floor.grid[x][y] == Tiles.CAVERN_FLOOR:
+                self.caves[x,y] = True
                 self.make_transparent_and_walkable(x, y)
                 current_tile = CavernFloor()
             elif self.floor.grid[x][y] == Tiles.CORRIDOR_FLOOR:
+                self.corridors[x,y] = True
                 self.make_transparent_and_walkable(x, y)
                 current_tile = CorridorFloor()
             elif self.floor.grid[x][y] == Tiles.ROOM_FLOOR:
+                self.floors[x,y] = True
                 self.make_transparent_and_walkable(x, y)
                 current_tile = RoomFloor()
             elif self.floor.grid[x][y] == Tiles.SHALLOWWATER:
@@ -108,6 +117,9 @@ class LevelMap(Map):
             if self.walkable[x, y] and not self.blocked[x, y]:
                 return x, y
 
+    def current_walkable(self):
+        return self.walkable * (1 - self.blocked)
+
     def update_and_draw_all(self):
         self.console.clear()
 
@@ -120,6 +132,22 @@ class LevelMap(Map):
         explored = np.where(self.explored[:])
         self.console.bg[explored] = self.dark_map_bg[explored]
         self.console.bg[where_fov] = self.light_map_bg[where_fov]
+        if CONFIG.get('debug'):
+            #now_walk = self.current_walkable()
+            #for x, y, _ in self.floor:
+            #    if (now_walk[x, y]):
+            #        self.console.bg[x,y] = tcod.lighter_green
+                #if (self.blocked[x, y]):
+                #    self.console.bg[x,y] = tcod.lighter_red
+
+            for current_path in self.paths:
+                for x,y in current_path:
+                    self.console.bg[x,y] = tcod.lighter_green
+
+            self.paths.clear()
+            #for x, y, _ in self.floor:
+            #    if (self.print_walk[x, y]):
+            #        self.console.bg[x,y] = tcod.lighter_green
 
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
@@ -157,3 +185,45 @@ class LevelMap(Map):
                     self.blocked[entity.x, entity.y] = True
 
             self.blocked[point.x, point.y] = True
+
+    def make_walkable_array(self, routing_avoid=None):
+        """Return a boolean array indicating which squares are accable to be routed
+        through for some entity.
+
+        Parameters
+        ----------
+        game_map: GameMap object
+
+        routing_avoid: List of RoutingOptions
+          A list containing square types which need to be avoided during routing.
+
+        Returns
+        -------
+        valid_to_route: np.array or bool
+          A boolean array indicating which squares are valid to route through.
+        """
+        if not routing_avoid:
+            routing_avoid = []
+        walkable = self.walkable.copy()
+        #if RoutingOptions.AVOID_DOORS in routing_avoid:
+        #    walkable = walkable * (1 - game_map.door)
+        if RoutingOptions.AVOID_BLOCKERS in routing_avoid:
+            walkable = walkable * (1 - self.blocked)
+        if RoutingOptions.AVOID_CAVES in routing_avoid:
+            walkable = walkable * (1 - self.caves)
+        if RoutingOptions.AVOID_CORRIDORS in routing_avoid:
+            walkable = walkable * (1 - self.corridor)
+        if RoutingOptions.AVOID_FLOORS in routing_avoid:
+            walkable = walkable * (1 - self.floor)
+        #if RoutingOptions.AVOID_WATER in routing_avoid:
+        #    walkable = walkable * (1 - self.water)
+        #if RoutingOptions.AVOID_FIRE in routing_avoid:
+        #    walkable = walkable * (1 - self.fire)
+        #if RoutingOptions.AVOID_STEAM in routing_avoid:
+        #    walkable = walkable * (1 - self.steam)
+        #if RoutingOptions.AVOID_STAIRS in routing_avoid:
+        #    if self.upward_stairs_position:
+        #        walkable[self.upward_stairs_position] = False
+        #    if self.downward_stairs_position:
+        #        walkable[self.downward_stairs_position] = False
+        return walkable

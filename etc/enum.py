@@ -212,9 +212,12 @@ class RenderOrder(Enum):
     ACTOR = auto()
 
 class RoutingOptions(Enum):
+    AVOID_BLOCKERS = auto()
+    AVOID_CAVES = auto()
+    AVOID_CORRIDORS = auto()
     AVOID_DOORS = auto()
     AVOID_FIRE = auto()
-    AVOID_MONSTERS = auto()
+    AVOID_FLOORS = auto()
     AVOID_SHRUBS = auto()
     AVOID_STAIRS = auto()
     AVOID_STEAM = auto()

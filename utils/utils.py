@@ -125,12 +125,12 @@ def random_adjacent(center):
     return random.choice(candidates)
 
 def random_walkable_position(game_map, entity):
-    walkable_array =  make_walkable_array(game_map, entity.routing_avoid)
-    x, y = (random.choice(range(0, game_map.width)),
-            random.choice(range(0, game_map.height)))
+    walkable_array =  game_map.current_level.make_walkable_array(entity.movement.routing_avoid)
+    x, y = (random.choice(range(0, game_map.current_level.width)),
+            random.choice(range(0, game_map.current_level.height)))
     while not walkable_array[x, y]:
-        x, y = (random.choice(range(0, game_map.width)),
-                random.choice(range(0, game_map.height)))
+        x, y = (random.choice(range(0, game_map.current_level.width)),
+                random.choice(range(0, game_map.current_level.height)))
     return (x, y)
 
 #-----------------------------------------------------------------------------

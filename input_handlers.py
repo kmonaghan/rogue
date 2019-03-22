@@ -30,7 +30,7 @@ def handle_keys(key, game_state):
 
 
 def handle_player_turn_keys(key):
-    print(key)
+    #print(key)
     key_char = chr(key.c)
 
     # Movement keys

@@ -72,7 +72,7 @@ class TravelToRandomPosition(Node):
             game_map,
             (owner.x, owner.y),
             self.target_position,
-            routing_avoid=owner.routing_avoid)
+            routing_avoid=owner.movement.routing_avoid)
         if len(self.path) <= 2:
             self.target_position = None
             return TreeStates.SUCCESS, []
@@ -97,10 +97,12 @@ class DoNothing(Node):
 class Attack(Node):
     """The owner attackes the target."""
     def tick(self, owner, target, game_map):
-        if owner.attacker and target.harmable and target.harmable.hp > 0:
+        if owner.offence and target.defence:
+            print("Attack: SUCCESS")
             return (TreeStates.SUCCESS,
-                    owner.attacker.attack(game_map, target))
+                    owner.offence.attack(target))
         else:
+            print("Attack: FAILURE")
             return TreeStates.FAILURE, []
 
 '''

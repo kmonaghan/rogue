@@ -10,7 +10,6 @@ from etc.configuration import CONFIG
 
 import quest
 
-from components.ai import BasicMonster
 from components.ai import BasicNPC
 from components.ai import StrollingNPC
 from components.ai import WarlordNPC
@@ -467,7 +466,7 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
 
 def place_chest(point, level_map):
     chest = create_chest(point, level_map.dungeon_level)
-    level_map.current_level.add_entity(chest)
+    level_map.add_entity(chest)
 
     guards = libtcod.random_get_int(0, 1, 3)
 
@@ -483,7 +482,7 @@ def place_chest(point, level_map):
         ai_component.attacked_ai = npc.ai
         npc.add_component(ai_component, 'ai')
 
-        level_map.current_level.add_entity(npc)
+        level_map.add_entity(npc)
 
 def tweak_npc(npc):
     dice = libtcod.random_get_int(0, 1, 100)
