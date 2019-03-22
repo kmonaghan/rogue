@@ -15,7 +15,7 @@ import quest
 from etc.enum import GameStates
 
 def get_constants():
-    window_title = 'Roguelike Tutorial Revised'
+    window_title = 'Diablo inspired Roguelike'
 
     screen_width = 71
     screen_height = 51
@@ -28,8 +28,8 @@ def get_constants():
     message_panel_width = screen_width - info_panel_width
 
     message_x = bar_width + 2
-    message_width = screen_width - bar_width - 2
-    message_height = panel_height - 1
+    message_width = message_panel_width - 2
+    message_height = panel_height - 2
 
     map_width = screen_width
     map_height = screen_height - panel_height - 1
@@ -53,7 +53,6 @@ def get_constants():
         'message_panel_width': message_panel_width,
         'panel_height': panel_height,
         'panel_y': panel_y,
-        'message_x': message_x,
         'message_width': message_width,
         'message_height': message_height,
         'map_width': map_width,
@@ -73,7 +72,7 @@ def get_game_variables(constants):
     pubsub.pubsub.subscribe(pubsub.Subscription(None, pubsub.PubSubTypes.DEATH, on_entity_death))
     pubsub.pubsub.subscribe(pubsub.Subscription(None, pubsub.PubSubTypes.SPAWN, entity_spawn))
 
-    message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
+    message_log = MessageLog(constants['message_width'], constants['message_height'])
     pubsub.pubsub.subscribe(pubsub.Subscription(message_log, pubsub.PubSubTypes.MESSAGE, add_to_messages))
 
     game_map = GameMap()

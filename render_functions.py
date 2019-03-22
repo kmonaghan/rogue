@@ -89,8 +89,6 @@ def render_info_console(info_console, player, game_map):
 
     info_console.print(1, 6, 'Dungeon level: {0}'.format(game_map.dungeon_level), tcod.white)
 
-    #info_console.print(1, 8, get_names_under_mouse(mouse, game_map), tcod.white)
-
     return info_console
 
 def render_message_console(message_console, message_log):
@@ -106,13 +104,16 @@ def render_message_console(message_console, message_log):
                 fg=tcod.white,
                 bg=tcod.black,
             )
+
+    message_log_panel = tcod.console.Console(message_log.width, message_log.height, 'F')
+
     # Print the game messages, one line at a time
-    y = 2
+    y = 0
     for message in message_log.messages:
-        #message_console.print(1, y, message.text, message.color)
-        height = message_console.print_box(1, y, message_console.width-2,
-                                            message_console.height, message.text,
-                                            message.color)
-        y += height
+        message_log_panel.print(0, y, message.text, message.color)
+        y += 1
+
+    message_log_panel.blit(message_console, 1, 1, 0, 0,
+                            message_log_panel.width, message_log_panel.height)
 
     return message_console

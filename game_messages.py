@@ -10,9 +10,8 @@ class Message:
 
 
 class MessageLog:
-    def __init__(self, x, width, height):
+    def __init__(self, width, height):
         self.messages = []
-        self.x = x
         self.width = width
         self.height = height
 
