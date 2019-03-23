@@ -71,7 +71,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         #---------------------------------------------------------------------
         game_map.current_level.update_and_draw_all()
 
-
         #---------------------------------------------------------------------
         # Render infomation panels.
         #---------------------------------------------------------------------
@@ -259,7 +258,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                             player_turn_results.extend(attack_results)
                     else:
                         player.movement.move(dx, dy, game_map.current_level)
-                        player_turn_results.extend(quest.check_quest_for_location(player.point))
+                        player_turn_results.extend(quest.check_quest_for_location(player))
 
                         fov_recompute = True
 
@@ -286,7 +285,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
 
-        updated_game_state = process_results_stack(game_map, player, player_turn_results, pubsub)
+        updated_game_state, quest_request = process_results_stack(game_map, player, player_turn_results, pubsub)
 
         if updated_game_state and updated_game_state != game_state:
             previous_game_state = game_state
@@ -310,7 +309,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
             game_state = GameStates.PLAYER_TURN
 
-        updated_game_state = process_results_stack(game_map, player, enemy_turn_results, pubsub)
+        updated_game_state, _ = process_results_stack(game_map, player, enemy_turn_results, pubsub)
 
         if updated_game_state and updated_game_state != game_state:
             previous_game_state = game_state
@@ -325,7 +324,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
 def process_results_stack(game_map, entity, turn_results, pubsub):
     update_game_state = None
-
+    quest_request = None
     #----------------------------------------------------------------------
     # Process the results stack
     #......................................................................
@@ -435,7 +434,7 @@ def process_results_stack(game_map, entity, turn_results, pubsub):
             message_log.add_message(Message('Targeting cancelled'))
         '''
 
-    return update_game_state
+    return update_game_state, quest_request
 
 def main():
     constants = get_constants()

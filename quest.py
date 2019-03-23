@@ -3,7 +3,7 @@ import tcod as libtcod
 from random import choice
 
 from game_messages import Message
-from etc.enum import Species
+from etc.enum import ResultTypes, Species
 
 import pubsub
 
@@ -13,16 +13,17 @@ def kill_quest_npc_death(sub, message, game_map):
     if (message.entity.species == sub.entity.kill_type) and (message.target.species == Species.PLAYER):
         sub.entity.kill_count(message.entity)
 
-def check_quest_for_location(point):
+def check_quest_for_location(player):
     global active_quests
 
     results = []
 
     for quest in active_quests:
         if (quest.map_point):
-            if (point == quest.map_point):
-                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + self.title + ' completed!', libtcod.gold)))
-                results.append({ResultTypes.MESSAGE: Message('Quest ' + quest.title + ' completed!', libtcod.gold), 'xp': quest.xp})
+            if (player.point == quest.map_point):
+                quest.finish_quest()
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + quest.title + ' completed!', libtcod.gold)))
+                pubsub.pubsub.add_message(pubsub.Publish(quest, pubsub.PubSubTypes.EARNEDXP, target=player))
 
     return results
 
