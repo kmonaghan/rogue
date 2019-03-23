@@ -40,7 +40,7 @@ class Level:
         self.current_xp += xp
 
     def can_level_up(self):
-        if self.current_xp > self.experience_to_next_level:
+        if self.current_xp >= self.experience_to_next_level:
             return True
 
         return False
