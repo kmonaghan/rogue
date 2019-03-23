@@ -24,6 +24,7 @@ class Berserk:
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has gone berserk!'.format(self.owner.name.title()), libtcod.red)))
 
     def end_berserker(self):
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has regained their composure'.format(self.owner.name.title()), libtcod.green)))
-        self.owner.health.base_max_hp -= 10
-        self.owner.health.take_damage(10)
+        if not self.owner.health.dead:
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has regained their composure'.format(self.owner.name.title()), libtcod.green)))
+            self.owner.health.base_max_hp -= 10
+            self.owner.health.take_damage(10)
