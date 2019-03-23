@@ -46,6 +46,7 @@ class LevelMap(Map):
         self.blit_floor()
 
         self.paths = []
+        self.walkables = []
 
     def blit_floor(self):
         self.walkable[:] = False
@@ -133,21 +134,18 @@ class LevelMap(Map):
         self.console.bg[explored] = self.dark_map_bg[explored]
         self.console.bg[where_fov] = self.light_map_bg[where_fov]
         if CONFIG.get('debug'):
-            #now_walk = self.current_walkable()
-            #for x, y, _ in self.floor:
-            #    if (now_walk[x, y]):
-            #        self.console.bg[x,y] = tcod.lighter_green
-                #if (self.blocked[x, y]):
-                #    self.console.bg[x,y] = tcod.lighter_red
-
             for current_path in self.paths:
                 for x,y in current_path:
                     self.console.bg[x,y] = tcod.lighter_green
 
             self.paths.clear()
-            #for x, y, _ in self.floor:
-            #    if (self.print_walk[x, y]):
-            #        self.console.bg[x,y] = tcod.lighter_green
+
+            for current_walkable in self.walkables:
+                for x, y, _ in self.floor:
+                    if (current_walkable[x, y]):
+                        self.console.bg[x,y] = tcod.lighter_blue
+
+            self.walkables.clear()
 
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
@@ -205,16 +203,16 @@ class LevelMap(Map):
         if not routing_avoid:
             routing_avoid = []
         walkable = self.walkable.copy()
-        #if RoutingOptions.AVOID_DOORS in routing_avoid:
-        #    walkable = walkable * (1 - game_map.door)
         if RoutingOptions.AVOID_BLOCKERS in routing_avoid:
             walkable = walkable * (1 - self.blocked)
         if RoutingOptions.AVOID_CAVES in routing_avoid:
             walkable = walkable * (1 - self.caves)
         if RoutingOptions.AVOID_CORRIDORS in routing_avoid:
-            walkable = walkable * (1 - self.corridor)
+            walkable = walkable * (1 - self.corridors)
+        if RoutingOptions.AVOID_DOORS in routing_avoid:
+            walkable = walkable * (1 - self.door)
         if RoutingOptions.AVOID_FLOORS in routing_avoid:
-            walkable = walkable * (1 - self.floor)
+            walkable = walkable * (1 - self.floors)
         #if RoutingOptions.AVOID_WATER in routing_avoid:
         #    walkable = walkable * (1 - self.water)
         #if RoutingOptions.AVOID_FIRE in routing_avoid:
@@ -227,3 +225,11 @@ class LevelMap(Map):
         #    if self.downward_stairs_position:
         #        walkable[self.downward_stairs_position] = False
         return walkable
+
+    def walkable_for_entity_under_mouse(self, mouse):
+        print("walkable_for_entity_under_mouse: " + str(mouse.cx) + "," + str(mouse.cy))
+        if self.within_bounds(mouse.cx, mouse.cy):
+            current_entities = self.entities.get_entities_in_position((mouse.cx, mouse.cy))
+            for entity in current_entities:
+                entity_walkable = self.make_walkable_array(entity.movement.routing_avoid)
+                self.walkables.append(entity_walkable)

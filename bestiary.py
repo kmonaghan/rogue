@@ -35,7 +35,7 @@ from components.death import PlayerDeath, WarlordDeath
 
 from random_utils import from_dungeon_level, random_choice_from_dict
 
-from etc.enum import Species
+from etc.enum import RoutingOptions, Species
 
 import pubsub
 
@@ -243,6 +243,10 @@ def rat(point = None):
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
 
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
+    
     teeth = equipment.teeth()
     teeth.lootable = False
 
@@ -315,6 +319,10 @@ def snake(point = None):
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
     creature.add_component(Spawn(2, egg), 'spawn')
+
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
 
     teeth = equipment.teeth()
     teeth.lootable = False

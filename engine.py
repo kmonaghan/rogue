@@ -83,6 +83,9 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         #---------------------------------------------------------------------
         root_console.clear(fg=(255, 255, 63))
 
+        if CONFIG.get('debug'):
+            game_map.current_level.walkable_for_entity_under_mouse(mouse)
+
         game_map.console.blit(root_console, 0, 0, 0, 0,
                           game_map.console.width, game_map.console.height)
 
