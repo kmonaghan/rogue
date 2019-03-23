@@ -68,6 +68,8 @@ def bountyhunter(point = None):
 
     ai_component = StrollingNPC(tethered = point)
     npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component, species=Species.NONDESCRIPT, act_energy=2)
+    npc.add_component(Offence(base_power = 0), 'offence')
+    npc.add_component(Defence(defence = 0), 'defence')
 
     questgiver = Questgiver()
     questgiver.owner = npc
@@ -246,7 +248,7 @@ def rat(point = None):
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
-    
+
     teeth = equipment.teeth()
     teeth.lootable = False
 
