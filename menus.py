@@ -146,28 +146,41 @@ def level_up_menu(header, player, menu_width, screen_width, screen_height):
 
 
 def character_screen(player, character_screen_width, character_screen_height, screen_width, screen_height):
-    window = tcod.console_new(character_screen_width, character_screen_height)
+    options =['Level: {0}'.format(player.level.current_level),
+                'Experience: {0}'.format(player.level.current_xp),
+                'Experience to Level: {0}'.format(player.level.experience_to_next_level),
+                'Maximum HP: {0}'.format(player.health.max_hp),
+                'Attack: {0}'.format(player.offence.power),
+                'Defense: {0}'.format(player.defence.defence),
+            ]
 
-    tcod.console_set_default_foreground(window, tcod.white)
+    height = len(options) + 2
 
-    tcod.console_print_rect_ex(window, 0, 1, character_screen_width, character_screen_height, tcod.BKGND_NONE,
-                                  tcod.LEFT, 'Character Information')
-    tcod.console_print_rect_ex(window, 0, 2, character_screen_width, character_screen_height, tcod.BKGND_NONE,
-                                  tcod.LEFT, 'Level: {0}'.format(player.level.current_level))
-    tcod.console_print_rect_ex(window, 0, 3, character_screen_width, character_screen_height, tcod.BKGND_NONE,
-                                  tcod.LEFT, 'Experience: {0}'.format(player.level.current_xp))
-    tcod.console_print_rect_ex(window, 0, 4, character_screen_width, character_screen_height, tcod.BKGND_NONE,
-                                  tcod.LEFT, 'Experience to Level: {0}'.format(player.level.experience_to_next_level))
-    tcod.console_print_rect_ex(window, 0, 6, character_screen_width, character_screen_height, tcod.BKGND_NONE,
-                                  tcod.LEFT, 'Maximum HP: {0}'.format(player.health.max_hp))
-    tcod.console_print_rect_ex(window, 0, 7, character_screen_width, character_screen_height, tcod.BKGND_NONE,
-                                  tcod.LEFT, 'Attack: {0}'.format(player.offence.power))
-    tcod.console_print_rect_ex(window, 0, 8, character_screen_width, character_screen_height, tcod.BKGND_NONE,
-                                  tcod.LEFT, 'Defense: {0}'.format(player.defence.defence))
+    con = tcod.console.Console(character_screen_width, height, 'F')
 
-    x = screen_width // 2 - character_screen_width // 2
-    y = screen_height // 2 - character_screen_height // 2
-    tcod.console_blit(window, 0, 0, character_screen_width, character_screen_height, 0, x, y, 1.0, 0.7)
+    con.draw_frame(
+        0,
+        0,
+        con.width,
+        con.height,
+        'Character Profile',
+        False,
+        fg=tcod.white,
+        bg=tcod.black,
+    )
+
+    con.print_box(
+        1,
+        1,
+        con.width - 2,
+        len(options),
+        '\n'.join(options),
+        fg=tcod.white,
+        bg=None,
+        alignment=tcod.LEFT,
+    )
+
+    return con
 
 def game_over(menu_width, screen_width, screen_height):
     header = "You have failed. Death's cold embrace envelops you. Loser."
@@ -184,7 +197,7 @@ def game_paused(menu_width, screen_width, screen_height):
     options = [['Restart', tcod.white],
                 ['Quit', tcod.white]]
 
-    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
+    return menu2('Paused', header, options, menu_width, screen_width, screen_height)
 
 def game_completed(con, menu_width, screen_width, screen_height):
     header = 'Congratulations - You have defeated the King Under the Hill'

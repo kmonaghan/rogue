@@ -50,6 +50,7 @@ class GameStates(Enum):
 
 # Game states that can be canceled out of.
 CANCEL_STATES = {
+    GameStates.CHARACTER_SCREEN, GameStates.GAME_PAUSED,
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
     GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING}
@@ -62,6 +63,7 @@ INVENTORY_STATES = {
 
 # Game states accepting of user input.
 INPUT_STATES = {
+    GameStates.CHARACTER_SCREEN,
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
     GameStates.LEVEL_UP,
