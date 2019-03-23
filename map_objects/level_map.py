@@ -11,6 +11,7 @@ from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import RoutingOptions, Tiles
 
+from map_objects.point import Point
 from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, EmptyTile
 
 class LevelMap(Map):
@@ -111,15 +112,14 @@ class LevelMap(Map):
             return (not self.door[x, y]
                     and not self.transparent[x, y])
 
-    def find_random_open_position(self):
+    def find_random_open_position(self, routing_avoid=[]):
+        routing_avoid.append(RoutingOptions.AVOID_BLOCKERS)
+        possible_positions = self.make_walkable_array(routing_avoid)
         while True:
             x = randint(0, self.width - 1)
             y = randint(0, self.height - 1)
-            if self.walkable[x, y] and not self.blocked[x, y]:
-                return x, y
-
-    def current_walkable(self):
-        return self.walkable * (1 - self.blocked)
+            if possible_positions[x, y]:
+                return Point(x, y)
 
     def update_and_draw_all(self):
         self.console.clear()
