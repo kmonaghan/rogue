@@ -69,7 +69,7 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         #---------------------------------------------------------------------
         # Render and display the dungeon and its inhabitates.
         #---------------------------------------------------------------------
-        game_map.current_level.update_and_draw_all()
+        game_map.current_level.update_and_draw_all(map_console)
 
         #---------------------------------------------------------------------
         # Render infomation panels.
@@ -85,8 +85,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         if CONFIG.get('debug'):
             game_map.current_level.walkable_for_entity_under_mouse(mouse)
 
-        game_map.console.blit(root_console, 0, 0, 0, 0,
-                          game_map.console.width, game_map.console.height)
+        map_console.blit(root_console, 0, 0, 0, 0,
+                          map_console.width, map_console.height)
 
         root_console.print(1, constants['panel_y'] - 1, get_names_under_mouse(mouse, game_map), tcod.white)
 
@@ -136,7 +136,6 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
         if action == InputTypes.GAME_RESTART:
             player, game_map, message_log, game_state = get_game_variables(constants)
-            game_map.console = map_console
             game_map.create_floor(player, constants)
             fov_recompute = True
             game_state = GameStates.PLAYER_TURN
@@ -276,10 +275,12 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
             elif action == InputTypes.TAKE_STAIRS:
                 if (game_map.check_for_stairs(player.x, player.y)):
-                        game_map.next_floor(player, message_log, constants)
-                        game_map.console.clear()
+                        game_map.next_floor(player, constants)
                         fov_recompute = True
-                        break
+                        message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
+                        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+
+                        continue
                 else:
                     message = Message('There are no stairs here.', tcod.yellow)
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
@@ -488,7 +489,6 @@ def main():
                     show_load_error_message = False
                 elif result_type == InputTypes.GAME_NEW:
                     player, game_map, message_log, game_state = get_game_variables(constants)
-                    game_map.console = map_console
                     game_map.create_floor(player, constants)
 
                     show_main_menu = False

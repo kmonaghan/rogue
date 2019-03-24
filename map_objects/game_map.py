@@ -19,9 +19,7 @@ from map_objects.dungeonGenerator import *
 from map_objects.prefab import *
 from map_objects.level_map import LevelMap
 
-from etc.enum import RenderOrder, Species
-
-from game_messages import Message
+from etc.enum import RenderOrder, RoutingOptions, Species
 
 class GameMap:
     def __init__(self, dungeon_level=1):
@@ -29,9 +27,7 @@ class GameMap:
         self.levels = [{},{},{},{},{},{}]
         self.down_stairs_room = None
         self.up_stairs_room = None
-        #TODO Better name for this
         self.current_level = None
-        self.console = None
 
     def make_map(self, map_width, map_height, player):
 
@@ -68,8 +64,8 @@ class GameMap:
         #self.current_level.add_down_stairs(self.down_stairs)
 
         point = room.center_tile()
-        player.x = point.x
-        player.y = point.y
+        player.x = point.x - 3
+        player.y = point.y - 3
         self.current_level.add_entity(player)
 
         # npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level, room.random_tile(self))
@@ -78,9 +74,9 @@ class GameMap:
         #    snake = bestiary.generate_creature(Species.SNAKE, self.dungeon_level, player.level.current_level, room.random_tile(self))
         #    self.current_level.add_entity(snake)
         #
-        for i in range(5):
-            rat = bestiary.generate_creature(Species.RAT, self.dungeon_level, player.level.current_level, room.random_tile(self))
-            self.current_level.add_entity(rat)
+        #for i in range(5):
+        #    rat = bestiary.generate_creature(Species.RAT, self.dungeon_level, player.level.current_level, room.random_tile(self))
+        #    self.current_level.add_entity(rat)
         #
         #for i in range(5):
         #    rat = bestiary.generate_creature(Species.RATNEST, self.dungeon_level, player.level.current_level, room.random_tile(self))
@@ -90,12 +86,16 @@ class GameMap:
         #    egg = bestiary.generate_creature(Species.EGG, self.dungeon_level, player.level.current_level, room.random_tile(self))
         #    self.current_level.add_entity(egg)
 
-        #for i in range(1):
-        #    npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level, room.random_tile(self))
-        #    bestiary.upgrade_npc(npc)
-        #    self.current_level.add_entity(npc)
+        #pt = room.random_tile(self)
+        for i in range(3):
+            pt = room.random_tile(self)
+            npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level, pt)
+            bestiary.upgrade_npc(npc)
+            self.current_level.add_entity(npc)
 
         #for i in range(1):
+        #    #chest = bestiary.create_chest(room.random_tile(self), self.dungeon_level)
+        #    #self.current_level.add_entity(chest)
         #    bestiary.place_chest(room.random_tile(self), self)
 
         '''
@@ -121,6 +121,7 @@ class GameMap:
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.current_level.add_entity(self.down_stairs)
+        self.current_level.downward_stairs_position = (self.down_stairs.x, self.down_stairs.y)
 
         room = self.current_level.floor.rooms[0]
         point = room.random_tile(self)
@@ -145,37 +146,29 @@ class GameMap:
 
         #Snakes and Rats
         for i in range(10):
-            point = choice(self.current_level.floor.caves)
+            point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
+                                                                    RoutingOptions.AVOID_DOORS,
+                                                                    RoutingOptions.AVOID_FLOORS])
             snake = bestiary.generate_creature(Species.SNAKE, self.dungeon_level, player.level.current_level, point)
             self.current_level.add_entity(snake)
 
-            point = choice(self.current_level.floor.caves)
+            point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
+                                                                    RoutingOptions.AVOID_DOORS,
+                                                                    RoutingOptions.AVOID_FLOORS])
             rat = bestiary.generate_creature(Species.RAT, self.dungeon_level, player.level.current_level, point)
             self.current_level.add_entity(rat)
 
-        '''
-        alcoves = self.generator.alcoves
+        for i in range(6):
+            point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
+                                                                    RoutingOptions.AVOID_DOORS,
+                                                                    RoutingOptions.AVOID_FLOORS])
+            nest = bestiary.generate_creature(Species.RATNEST, self.dungeon_level, player.level.current_level, point)
+            self.current_level.add_entity(nest)
 
-        total_alcoves = len(alcoves)
-
-        if (total_alcoves):
-            nests = 6
-            if (total_alcoves < nests):
-                nests = total_alcoves
-
-            for i in range(nests):
-                point = choice(alcoves)
-                alcoves.remove(point)
-                nest = bestiary.generate_creature(Species.RATNEST, self.dungeon_level, player.level.current_level, point)
-                self.current_level.add_entity(nest)
-
-        if (len(alcoves)):
-            point = choice(alcoves)
-            bestiary.place_chest(point, self.current_level)
-        '''
-
-        (x, y) = self.current_level.find_random_open_position()
-        bestiary.place_chest(Point(x,y), self.current_level)
+        point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
+                                                                RoutingOptions.AVOID_DOORS,
+                                                                RoutingOptions.AVOID_FLOORS])
+        bestiary.place_chest(point, self.current_level)
 
         num_rooms = len(self.current_level.floor.rooms)
         for room in self.current_level.floor.rooms[1:num_rooms]:
@@ -191,48 +184,38 @@ class GameMap:
 
     def level_generic(self, player):
         if (len(self.current_level.floor.rooms)):
-            '''
-            room = self.current_level.floor.rooms[-1]
-            downStairsPoint = room.random_tile(self)
-            '''
             room = self.current_level.floor.rooms[0]
 
             playerStartPoint = room.random_tile(self)
         else:
-            '''
-            if (len(self.generator.alcoves)):
-                alcoves = self.generator.alcoves
-                downStairsPoint = choice(alcoves)
-                alcoves.remove(downStairsPoint)
+            playerStartPoint = self.current_level.find_random_open_position()
 
-                playerStartPoint = choice(alcoves)
-                alcoves.remove(playerStartPoint)
-            else:
-                print("No alcoves?!?!?")
-            '''
-            downStairsPoint = choice(self.current_level.floor.caves)
-            playerStartPoint = choice(self.current_level.floor.caves)
+        downStairsPoint = self.current_level.find_random_open_position()
 
-        '''
         stairs_component = Stairs(self.dungeon_level + 1)
         self.down_stairs = Entity(downStairsPoint, '>', 'Down Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=stairs_component)
         self.current_level.add_entity(self.down_stairs)
-        '''
+
         player.x = playerStartPoint.x
         player.y = playerStartPoint.y
+        self.current_level.add_entity(player)
 
         up_stairs_component = Stairs(self.dungeon_level - 1)
         self.up_stairs = Entity(playerStartPoint, '<', 'Up Stairs', libtcod.silver, render_order=RenderOrder.STAIRS, stairs=up_stairs_component)
         self.current_level.add_entity(self.up_stairs)
 
-        '''
-        self.place_creatures()
+        self.current_level.downward_stairs_position = (self.down_stairs.x, self.down_stairs.y)
+        self.current_level.upward_stairs_position = (self.up_stairs.x, self.up_stairs.y)
 
+        '''
+        if len(self.current_level.floor.caves) > 0:
+            self.place_creatures(player)
+        '''
         #Add npcs and items
         for room in self.current_level.floor.rooms:
             self.place_npc(room, player)
             self.place_object(room)
-        '''
+
         '''
         if (len(self.current_level.floor.rooms) > 4):
             num_to_select = 4                           # set the number to select here.
@@ -278,12 +261,12 @@ class GameMap:
             self.place_npc(room, player)
             self.place_object(room)
 
-    def place_creatures(self):
+    def place_creatures(self, player):
         npc_chances = {}
         npc_chances[Species.RAT] = random_utils.from_dungeon_level([[95, 1], [95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
         npc_chances[Species.SNAKE] = random_utils.from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
         npc_chances[Species.EGG] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        #npc_chances[Species.RATNEST] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.RATNEST] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
         npc_chances[Species.BAT] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         max_npcs = len(self.current_level.floor.caves) // 100
@@ -292,24 +275,18 @@ class GameMap:
 
         print ("Max NPCs: " + str(max_npcs) + ", number of NPCs: " + str(num_npcs))
 
-        alcoves = [] #self.generator.alcoves
-
         for i in range(num_npcs):
             #choose random spot for this npc
             creature_choice = random_utils.random_choice_from_dict(npc_chances)
 
-            if (creature_choice == Species.RATNEST) and len(alcoves):
-                point = choice(alcoves)
-                alcoves.remove(point)
-                nest = bestiary.generate_creature(Species.RATNEST, self.dungeon_level, player.level.current_level, point)
-                self.current_level.add_entity(nest)
-            else:
-                point = choice(self.current_level.floor.caves)
+            print(creature_choice)
 
-                #only place it if the tile is not blocked
-                if not self.current_level.blocked[point.x, point.y]:
-                    bestiary.generate_creature(creature_choice, dungeon_level = 1, player_level = 1, point = None)
-                    self.current_level.add_entity(npc)
+            point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
+                                                                    RoutingOptions.AVOID_DOORS,
+                                                                    RoutingOptions.AVOID_FLOORS])
+
+            npc = bestiary.generate_creature(creature_choice, self.dungeon_level, player.level.current_level, point)
+            self.current_level.add_entity(npc)
 
     def place_npc(self, room, player):
         #this is where we decide the chance of each npc or item appearing.
@@ -327,14 +304,11 @@ class GameMap:
         num_npcs = libtcod.random_get_int(0, 0, max_npcs)
 
         for i in range(num_npcs):
-            #choose random spot for this npc
-            point = room.random_tile(self)
-
-            #only place it if the tile is not blocked
-            if not self.current_level.blocked[point.x, point.y]:
-                choice = random_utils.random_choice_from_dict(npc_chances)
-                npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level, point)
-                self.current_level.add_entity(npc)
+            point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
+                                                                    RoutingOptions.AVOID_DOORS])
+            choice = random_utils.random_choice_from_dict(npc_chances)
+            npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level, point)
+            self.current_level.add_entity(npc)
 
     def place_object(self, room):
         #maximum number of items per room
@@ -375,7 +349,7 @@ class GameMap:
 
         self.make_map(constants['map_width'], constants['map_height'], player)
 
-    def next_floor(self, player, message_log, constants):
+    def next_floor(self, player, constants):
         #TODO: Re-implement loading/unloading of maps
         '''
         if (self.dungeon_level != 0):
@@ -410,8 +384,6 @@ class GameMap:
         if (self.dungeon_level > 1):
             player.health.heal(player.health.max_hp // 2)
 
-            message_log.add_message(Message('You take a moment to rest and recover your strength.', libtcod.light_violet))
-
     def check_for_stairs(self, x, y):
         if (self.down_stairs):
             if (self.down_stairs.x == x) and (self.down_stairs.y == y):
@@ -422,11 +394,6 @@ class GameMap:
                 return True
 
         return False
-
-    def find_all_closest(self, point, species, max_distance=2):
-        print("Remove this: find_all_closest")
-
-        return None
 
     def load_map(self):
         lmap = self.levels[self.dungeon_level - 1]
@@ -448,8 +415,9 @@ class GameMap:
         self.levels[self.dungeon_level - 1] = umap
 
     def level_one_goblin(self):
-        print("calling level_one_goblin from quest")
-        point = self.current_level.find_random_open_position()
+        point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
+                                                                RoutingOptions.AVOID_DOORS,
+                                                                RoutingOptions.AVOID_FLOORS])
 
         self.current_level.add_entity(bestiary.generate_npc(Species.GOBLIN, 1, 1, point))
 
@@ -494,7 +462,7 @@ class GameMap:
         dm.placeWalls()
         dm.closeDeadDoors()
 
-        return LevelMap(dm.dungeon, self.console)
+        return LevelMap(dm.dungeon)
 
     def level_caverns(self, map_width, map_height):
         dm = dungeonGenerator(width=map_width, height=map_height)
@@ -597,7 +565,7 @@ class GameMap:
         self.down_stairs_room = self.place_stair_room(dm)
         self.up_stairs_room = self.place_stair_room(dm)
 
-        return LevelMap(dm.dungeon, self.console)
+        return LevelMap(dm.dungeon)
 
     def level_boss_generator(self, map_width, map_height):
         dm = dungeonGenerator(width=map_width, height=map_height)
@@ -628,7 +596,7 @@ class GameMap:
         dm.placeWalls()
         dm.closeDeadDoors()
 
-        return LevelMap(dm.dungeon, self.console)
+        return LevelMap(dm.dungeon)
 
     def random_lair(self, map_width, map_height):
         lair_chance = True
@@ -679,4 +647,4 @@ class GameMap:
 
         dm.placeWalls()
 
-        return LevelMap(dm.dungeon, self.console)
+        return LevelMap(dm.dungeon)

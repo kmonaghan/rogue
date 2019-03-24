@@ -15,11 +15,10 @@ from map_objects.point import Point
 from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, EmptyTile
 
 class LevelMap(Map):
-    def __init__(self, floor, console):
+    def __init__(self, floor):
         width, height = floor.width, floor.height
         super().__init__(width, height, order="F")
         self.floor = floor
-        self.console = console
         self.entities = EntityList(width, height)
         # TODO: Add to docstring
         self.upward_stairs_position = None
@@ -78,10 +77,12 @@ class LevelMap(Map):
                 self.make_transparent_and_walkable(x, y)
                 current_tile = CavernFloor()
             elif self.floor.grid[x][y] == Tiles.CORRIDOR_FLOOR:
+                self.caves[x,y] = False
                 self.corridors[x,y] = True
                 self.make_transparent_and_walkable(x, y)
                 current_tile = CorridorFloor()
             elif self.floor.grid[x][y] == Tiles.ROOM_FLOOR:
+                self.caves[x,y] = False
                 self.floors[x,y] = True
                 self.make_transparent_and_walkable(x, y)
                 current_tile = RoomFloor()
@@ -121,8 +122,8 @@ class LevelMap(Map):
             if possible_positions[x, y]:
                 return Point(x, y)
 
-    def update_and_draw_all(self):
-        self.console.clear()
+    def update_and_draw_all(self, map_console):
+        map_console.clear()
 
         if not CONFIG.get('debug'):
             where_fov = np.where(self.fov[:])
@@ -131,19 +132,19 @@ class LevelMap(Map):
             where_fov = np.where(self.light_map_bg[:])
 
         explored = np.where(self.explored[:])
-        self.console.bg[explored] = self.dark_map_bg[explored]
-        self.console.bg[where_fov] = self.light_map_bg[where_fov]
+        map_console.bg[explored] = self.dark_map_bg[explored]
+        map_console.bg[where_fov] = self.light_map_bg[where_fov]
         if CONFIG.get('debug'):
             for current_path in self.paths:
                 for x,y in current_path:
-                    self.console.bg[x,y] = tcod.lighter_green
+                    map_console.bg[x,y] = tcod.lighter_green
 
             self.paths.clear()
 
             for current_walkable in self.walkables:
                 for x, y, _ in self.floor:
                     if (current_walkable[x, y]):
-                        self.console.bg[x,y] = tcod.lighter_blue
+                        map_console.bg[x,y] = tcod.lighter_blue
 
             self.walkables.clear()
 
@@ -152,8 +153,8 @@ class LevelMap(Map):
             current_entities = self.entities.get_entities_in_position((x, y))
             entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
             for entity in entities_in_render_order:
-                self.console.ch[x, y] = ord(entity.char)
-                self.console.fg[x, y] = entity.display_color()
+                map_console.ch[x, y] = ord(entity.char)
+                map_console.fg[x, y] = entity.display_color()
 
     def add_entity(self, entity):
         self.entities.append(entity)
@@ -219,15 +220,14 @@ class LevelMap(Map):
         #    walkable = walkable * (1 - self.fire)
         #if RoutingOptions.AVOID_STEAM in routing_avoid:
         #    walkable = walkable * (1 - self.steam)
-        #if RoutingOptions.AVOID_STAIRS in routing_avoid:
-        #    if self.upward_stairs_position:
-        #        walkable[self.upward_stairs_position] = False
-        #    if self.downward_stairs_position:
-        #        walkable[self.downward_stairs_position] = False
+        if RoutingOptions.AVOID_STAIRS in routing_avoid:
+            if self.upward_stairs_position:
+                walkable[self.upward_stairs_position] = False
+            if self.downward_stairs_position:
+                walkable[self.downward_stairs_position] = False
         return walkable
 
     def walkable_for_entity_under_mouse(self, mouse):
-        print("walkable_for_entity_under_mouse: " + str(mouse.cx) + "," + str(mouse.cy))
         if self.within_bounds(mouse.cx, mouse.cy):
             current_entities = self.entities.get_entities_in_position((mouse.cx, mouse.cy))
             for entity in current_entities:
