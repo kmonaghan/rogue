@@ -195,6 +195,7 @@ def game_over(menu_width, screen_width, screen_height):
 def game_paused(menu_width, screen_width, screen_height):
     header = ""
     options = [['Restart', tcod.white],
+                ['Save Game', tcod.white],
                 ['Quit', tcod.white]]
 
     return menu2('Paused', header, options, menu_width, screen_width, screen_height)

@@ -1,5 +1,5 @@
 import itertools
-    
+
 from entities.character import Character
 
 class EntityList:
@@ -26,7 +26,10 @@ class EntityList:
         self.coordinate_map[(entity.x, entity.y)].remove(entity)
 
     def update_position(self, entity, old_position, new_position):
-        self.coordinate_map[old_position].remove(entity)
+        try:
+            self.coordinate_map[old_position].remove(entity)
+        except ValueError:
+            print("Could not remove entity: " + entity.name)
         self.coordinate_map[new_position].append(entity)
 
     def get_entities_in_position(self, position):

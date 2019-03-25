@@ -126,12 +126,14 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
         left_click = mouse_action.get('left_click')
         right_click = mouse_action.get('right_click')
 
-        player_turn_results = []
-
         action, action_value = unpack_single_key_dict(input_result)
 
         if action == InputTypes.GAME_EXIT:
             return GameStates.GAME_EXIT
+            break
+
+        if action == InputTypes.GAME_SAVE:
+            save_game(player, game_map, message_log, game_state, pubsub.pubsub)
             break
 
         if action == InputTypes.GAME_RESTART:
@@ -473,11 +475,13 @@ def main():
         tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse)
 
         if show_main_menu:
+            root_console.clear(fg=(255, 255, 255))
+
             main_menu(root_console, main_menu_background_image, CONFIG.get('full_screen_width'),
                       CONFIG.get('full_screen_height'))
 
             if show_load_error_message:
-                message_box(map_console, 'No save game to load', 50, CONFIG.get('full_screen_width'), constants['screen_height'])
+                message_box(map_console, 'No saved game to load', 50, CONFIG.get('full_screen_width'), constants['screen_height'])
 
             tcod.console_flush()
 
@@ -494,7 +498,7 @@ def main():
                     show_main_menu = False
                 elif result_type == InputTypes.GAME_LOAD:
                     try:
-                        player, game_map, message_log, game_state = load_game()
+                        player, game_map, message_log, game_state, pubsub.pubsub = load_game()
                         show_main_menu = False
                     except FileNotFoundError:
                         show_load_error_message = True

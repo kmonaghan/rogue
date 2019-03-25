@@ -207,6 +207,8 @@ def handle_game_paused_keys(key):
     if key_char == 'a':
         return {InputTypes.GAME_RESTART: True}
     elif key_char == 'b':
+        return {InputTypes.GAME_SAVE: True}
+    elif key_char == 'c':
         return {InputTypes.GAME_EXIT: True}
     elif key.vk == libtcod.KEY_ESCAPE:
         return {InputTypes.EXIT: True}
