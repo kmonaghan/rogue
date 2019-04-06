@@ -95,6 +95,7 @@ class InputTypes(Enum):
     QUEST_INDEX = auto()
     QUEST_LIST = auto()
     QUEST_RESPONSE = auto()
+    RELOAD_LEVEL = auto()
     TAKE_STAIRS = auto()
     WAIT = auto()
 
@@ -220,6 +221,7 @@ class RoutingOptions(Enum):
     AVOID_CORRIDORS = auto()
     AVOID_DOORS = auto()
     AVOID_FIRE = auto()
+    AVOID_FOV = auto()
     AVOID_FLOORS = auto()
     AVOID_SHRUBS = auto()
     AVOID_STAIRS = auto()
@@ -255,6 +257,7 @@ class Tiles(IntEnum):
     ROOM_FLOOR = auto()
     SHALLOWWATER = auto()
     DEEPWATER = auto()
+    STAIRSFLOOR = auto()
 
 class TreeStates(Enum):
     SUCCESS = auto()
