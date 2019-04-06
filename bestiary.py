@@ -146,6 +146,14 @@ def create_player():
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
 
+        armour = equipment.random_armour()
+        player.inventory.add_item(armour)
+        player.equipment.toggle_equip(armour)
+
+        ring = equipment.random_ring()
+        player.inventory.add_item(ring)
+        player.equipment.toggle_equip(ring)
+
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
@@ -361,6 +369,7 @@ def troll(point = None):
 def warlord(point = None):
     #create a warlord
     ai_component = WarlordNPC()
+    health_component = Health(50)
 
     npc = Character(point, 'W', 'Warlord', libtcod.black,
                     ai=ai_component, species=Species.ORC, death=WarlordDeath(),
@@ -582,11 +591,7 @@ def earn_death_xp(sub, message, level_map):
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))
 
 def earn_quest_xp(sub, message, level_map):
-    print("earned xp for: ")
-    print(message.target.uuid)
-    print(sub.entity.uuid)
     if (message.target.uuid == sub.entity.uuid):
-        print("adding XP")
         xp = message.entity.xp
         sub.entity.level.add_xp(xp)
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))
