@@ -1,5 +1,6 @@
 import tcod as libtcod
 
+from etc.configuration import CONFIG
 from etc.enum import GameStates, InputTypes, LevelUp, INVENTORY_STATES
 
 def handle_keys(key, game_state):
@@ -84,6 +85,9 @@ def handle_player_turn_keys(key):
     elif key.vk == libtcod.KEY_ESCAPE:
         # Exit the game
         return {InputTypes.EXIT: True}
+
+    if CONFIG.get('debug') and key_char == 'r':
+        return {InputTypes.RELOAD_LEVEL: True}
 
     # No key was pressed
     return {}

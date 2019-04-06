@@ -145,6 +145,10 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
 
             continue
 
+        if action == InputTypes.RELOAD_LEVEL:
+            game_map.next_floor(player, constants)
+            continue
+
         if action == InputTypes.DEBUG_ON:
             CONFIG.update({'debug': True})
             fov_recompute = True
