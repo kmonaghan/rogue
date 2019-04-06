@@ -18,6 +18,13 @@ class Tile:
         self.explored = False
         self.fov_color = libtcod.dark_grey
         self.out_of_fov_color = libtcod.darkest_grey
+        self.name = "Tile"
+
+    def __str__(self):
+        return f"{self.name}"
+
+    def __repr__(self):
+        return f"{self.name}"
 
     def isFloor(self):
         return not (self.blocked and self.block_sight)
@@ -25,18 +32,13 @@ class Tile:
     def isWall(self):
         return (self.blocked and self.block_sight)
 
-    def describe(self):
-        return "Tile"
-
 class CavernFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(CavernFloor, self).__init__(blocked, block_sight)
 
         self.fov_color = libtcod.lighter_sepia
         self.out_of_fov_color = libtcod.light_sepia
-
-    def describe(self):
-        return "Cavern floor"
+        self.name = "Cavern floor"
 
 class CavernWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
@@ -44,9 +46,7 @@ class CavernWall(Tile):
 
         self.fov_color = libtcod.dark_sepia
         self.out_of_fov_color = libtcod.darkest_sepia
-
-    def describe(self):
-        return "Cavern wall"
+        self.name = "Cavern wall"
 
 class CorridorWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
@@ -54,9 +54,7 @@ class CorridorWall(Tile):
 
         self.fov_color = libtcod.dark_sepia
         self.out_of_fov_color = libtcod.darkest_sepia
-
-    def describe(self):
-        return "Cavern wall"
+        self.name = "Cavern wall"
 
 class Door(Tile):
     def __init__(self, blocked=False, block_sight=False):
@@ -64,9 +62,7 @@ class Door(Tile):
 
         self.fov_color = libtcod.orange
         self.out_of_fov_color = libtcod.darker_orange
-
-    def describe(self):
-        return "Door"
+        self.name = "Door"
 
 class RoomFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
@@ -74,9 +70,7 @@ class RoomFloor(Tile):
 
         self.fov_color = libtcod.light_grey
         self.out_of_fov_color = libtcod.grey
-
-    def describe(self):
-        return "Room floor"
+        self.name = "Room floor"
 
 class CorridorFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
@@ -84,9 +78,7 @@ class CorridorFloor(Tile):
 
         self.fov_color = libtcod.sepia
         self.out_of_fov_color = libtcod.darker_sepia
-
-    def describe(self):
-        return "Corridor floor"
+        self.name = "Corridor floor"
 
 class RoomWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
@@ -94,9 +86,15 @@ class RoomWall(Tile):
 
         self.fov_color = libtcod.dark_grey
         self.out_of_fov_color = libtcod.darkest_grey
+        self.name = "Wall"
 
-    def describe(self):
-        return "Wall"
+class StairsFloor(Tile):
+    def __init__(self, blocked=False, block_sight=False):
+        super(RoomFloor, self).__init__(blocked, block_sight)
+
+        self.fov_color = libtcod.light_grey
+        self.out_of_fov_color = libtcod.grey
+        self.name = "Stairs floor"
 
 class ShallowWater(Tile):
     def __init__(self, blocked=False, block_sight=False):
@@ -104,9 +102,7 @@ class ShallowWater(Tile):
 
         self.fov_color = libtcod.lighter_blue
         self.out_of_fov_color = libtcod.light_blue
-
-    def describe(self):
-        return "Shallow water"
+        self.name = "Shallow water"
 
 class DeepWater(Tile):
     def __init__(self, blocked=True, block_sight=False):
@@ -114,9 +110,7 @@ class DeepWater(Tile):
 
         self.fov_color = libtcod.dark_blue
         self.out_of_fov_color = libtcod.darkest_blue
-
-    def describe(self):
-        return "Deep water"
+        self.name = "Deep water"
 
 class EmptyTile(Tile):
     def __init__(self, blocked=False, block_sight=False):
@@ -124,6 +118,4 @@ class EmptyTile(Tile):
 
         self.fov_color = libtcod.black
         self.out_of_fov_color = libtcod.black
-
-    def describe(self):
-        return "An empty void that fills you with dispair as you stare into it."
+        self.name = "An empty void that fills you with dispair as you stare into it."
