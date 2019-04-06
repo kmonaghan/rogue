@@ -1,6 +1,8 @@
-import tcod as libtcod
+import tcod
 
 from etc.enum import LevelUp
+from random import choice
+
 #experience and level-ups
 LEVEL_UP_BASE = 100
 LEVEL_UP_FACTOR = 1.5
@@ -65,6 +67,5 @@ class Level:
             return
 
         for x in range(total_levels):
-            choice = libtcod.random_get_int(0, 0, 2)
-            self.level_up_stats(choice)
+            self.level_up_stats(choice(list(LevelUp)))
             self.current_level += 1
