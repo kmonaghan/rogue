@@ -34,6 +34,13 @@ def necromancer_lair():
                 "######.######"]
 '''
 
+def stair_room():
+    room_map = ["SSS",
+                "SSS",
+                "SSS"]
+
+    return room_map
+
 def necromancer_lair():
     room_map = ["...........",
                 "...........",

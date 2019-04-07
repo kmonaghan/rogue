@@ -12,7 +12,7 @@ from etc.configuration import CONFIG
 from etc.enum import RoutingOptions, Tiles
 
 from map_objects.point import Point
-from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, EmptyTile
+from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, StairsFloor, EmptyTile
 
 class LevelMap(Map):
     def __init__(self, floor):
@@ -31,6 +31,7 @@ class LevelMap(Map):
         self.caves = np.zeros((width, height), dtype=np.int8)
         self.corridors = np.zeros((width, height), dtype=np.int8)
         self.floors = np.zeros((width, height), dtype=np.int8)
+        self.allowed_stairs_tiles = np.zeros((width, height), dtype=np.int8)
 
         self.dark_map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('dark_wall'), dtype=np.uint8
@@ -90,6 +91,9 @@ class LevelMap(Map):
                 current_tile = ShallowWater()
             elif self.floor.grid[x][y] == Tiles.DEEPWATER:
                 current_tile = DeepWater()
+            elif self.floor.grid[x][y] == Tiles.STAIRSFLOOR:
+                self.allowed_stairs_tiles[x,y] = True
+                current_tile = RoomFloor()
             else:
                 current_tile = EmptyTile()
 
@@ -113,12 +117,24 @@ class LevelMap(Map):
             return (not self.door[x, y]
                     and not self.transparent[x, y])
 
-    def find_random_open_position(self, routing_avoid=[]):
+    def find_random_open_position(self, routing_avoid=[], room = None):
         routing_avoid.append(RoutingOptions.AVOID_BLOCKERS)
         possible_positions = self.make_walkable_array(routing_avoid)
+
+        start_x = 0
+        end_x = self.width - 1
+        start_y = 0
+        end_y = self.height - 1
+
+        if room:
+            start_x = room.x
+            end_x = room.x+room.width
+            start_y = room.y
+            end_y = room.y+room.height
+
         while True:
-            x = randint(0, self.width - 1)
-            y = randint(0, self.height - 1)
+            x = randint(start_x, end_x)
+            y = randint(start_y, end_y)
             if possible_positions[x, y]:
                 return Point(x, y)
 
@@ -214,6 +230,8 @@ class LevelMap(Map):
             walkable = walkable * (1 - self.door)
         if RoutingOptions.AVOID_FLOORS in routing_avoid:
             walkable = walkable * (1 - self.floors)
+        if RoutingOptions.AVOID_FOV in routing_avoid:
+            walkable = walkable * (1 - self.fov)
         #if RoutingOptions.AVOID_WATER in routing_avoid:
         #    walkable = walkable * (1 - self.water)
         #if RoutingOptions.AVOID_FIRE in routing_avoid:

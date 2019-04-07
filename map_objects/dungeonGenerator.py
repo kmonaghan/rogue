@@ -30,6 +30,7 @@ floor_to_wall = {
     Tiles.DEADEND: Tiles.CORRIDOR_WALL,
     Tiles.CORRIDOR_FLOOR: Tiles.CORRIDOR_WALL,
     Tiles.ROOM_FLOOR: Tiles.ROOM_WALL,
+    Tiles.STAIRSFLOOR: Tiles.ROOM_WALL,
     Tiles.DEEPWATER: Tiles.CAVERN_WALL,
     Tiles.SHALLOWWATER: Tiles.CAVERN_WALL
 }
@@ -64,8 +65,12 @@ class Prefab:
                     map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.ROOM_WALL
                 elif (self.layout[xoffset][yoffset] == "I"):
                     map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.IMPENETRABLE
+                elif (self.layout[xoffset][yoffset] == "E"):
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.EMPTY
                 elif (self.layout[xoffset][yoffset] == "W"):
                     map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.SHALLOWWATER
+                elif (self.layout[xoffset][yoffset] == "S"):
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.STAIRSFLOOR
                 elif (self.layout[xoffset][yoffset] == "D"):
                     map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.ROOM_FLOOR
                     self.door = Point(self.room.x + xoffset, self.room.y + yoffset)
@@ -94,8 +99,11 @@ class dungeonRoom:
         self.width = width
         self.height = height
 
-    def describe(self):
-        return "Room: " + str(self.x) + ',' + str(self.y) + ',' + str(self.width) + ',' + str(self.height)
+    def __str__(self):
+        return f"{self.x},{self.y}  w:{self.width} h:{self.height}"
+
+    def __repr__(self):
+        return f"{self.x},{self.y}  w:{self.width} h:{self.height}"
 
     def random_tile(self, map):
         point = None
@@ -399,6 +407,15 @@ class dungeonGenerator:
 
     ##### GENERATION FUNCTIONS #####
 
+    def placeRoomRandomly(self, roomWidth, roomHeight, margin = 1, attempts = 500):
+        for attempt in range(attempts):
+            startX = randint(0, self.dungeon.width)
+            startY = randint(0, self.dungeon.height)
+            if self.quadFits(startX, startY, roomWidth, roomHeight, margin):
+                return startX, startY
+
+        return False, False
+
     def placeRoom(self, startX, startY, roomWidth, roomHeight, ignoreOverlap = False):
         """
         place a defined quad within the grid and add it to self.dungeon.rooms
@@ -460,13 +477,16 @@ class dungeonGenerator:
             None
         """
 
-        for x in range(self.dungeon.width):
-            for y in range(self.dungeon.height):
-                if randint(0, 100) < p:
-                    self.dungeon.grid[x][y] = Tiles.CAVERN_FLOOR
+        for x in range(1, self.dungeon.width - 1):
+            for y in range(1, self.dungeon.height - 1):
+                if self.dungeon.grid[x][y] == Tiles.EMPTY:
+                    if randint(0, 100) < p:
+                        self.dungeon.grid[x][y] = Tiles.CAVERN_FLOOR
         for i in range(smoothing):
-            for x in range(self.dungeon.width):
-                for y in range(self.dungeon.height):
+            for x in range(1, self.dungeon.width - 1):
+                for y in range(1, self.dungeon.height - 1):
+                    if self.dungeon.grid[x][y] not in (Tiles.EMPTY, Tiles.CAVERN_FLOOR):
+                        continue
                     if x == 0 or x == self.dungeon.width or y == 0 or y == self.dungeon.height:
                         self.dungeon.grid[x][y] = Tiles.EMPTY
                     touchingEmptySpace = 0
@@ -614,7 +634,7 @@ class dungeonGenerator:
                 unconnectedRooms.append(room)
         return unconnectedRooms
 
-    def joinUnconnectedAreas(self, unconnectedAreas):
+    def joinUnconnectedAreas(self, unconnectedAreas, connecting_tile = Tiles.CORRIDOR_FLOOR):
         """
         Forcibly connect areas not joined together
         This will work nearly every time (I've seen one test case where an area was still unjoined)
@@ -639,15 +659,24 @@ class dungeonGenerator:
                             bestDistance = distance
                             c[0] = (x,y)
                             c[1] = (xi,yi)
-            c.sort()
-            x, y = c[0]
-            for x in range(c[0][0]+1, c[1][0]):
-                if self.dungeon.grid[x][y] == Tiles.EMPTY:
-                    self.dungeon.grid[x][y] = Tiles.CORRIDOR_FLOOR
-            for y in range(c[0][1]+1, c[1][1]):
-                if self.dungeon.grid[x][y] == Tiles.EMPTY:
-                    self.dungeon.grid[x][y] = Tiles.CORRIDOR_FLOOR
-            self.dungeon.corridors.append((x,y))
+            try:
+                c.sort()
+                x, y = c[0]
+                for x in range(c[0][0]+1, c[1][0]):
+                    if self.dungeon.grid[x][y] == Tiles.EMPTY:
+                        self.dungeon.grid[x][y] = connecting_tile
+                for y in range(c[0][1]+1, c[1][1]):
+                    if self.dungeon.grid[x][y] == Tiles.EMPTY:
+                        self.dungeon.grid[x][y] = connecting_tile
+                self.dungeon.corridors.append((x,y))
+            except TypeError as e:
+                '''
+                There seems to be a case where it fails to find 2 uncconected
+                areas within the paramaters and a crash occurs when None is
+                compared to None. The resulting map ends up with 2 islands.
+                '''
+
+                print(c)
 
     def closeDeadDoors(self):
         """
