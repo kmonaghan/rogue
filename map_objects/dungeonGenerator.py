@@ -108,8 +108,8 @@ class dungeonRoom:
     def random_tile(self, map):
         point = None
         while (point == None):
-            x = libtcod.random_get_int(None, self.x + 1, self.x + self.width - 2)
-            y = libtcod.random_get_int(None, self.y + 1, self.y + self.height - 2)
+            x = randint(self.x + 1, self.x + self.width - 2)
+            y = randint(self.y + 1, self.y + self.height - 2)
 
             if not map.current_level.blocked[x, y]:
                 point = Point(x,y)
