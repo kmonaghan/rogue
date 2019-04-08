@@ -210,7 +210,7 @@ def necromancer(point = None):
                     health=health_component, act_energy=1)
 
     npc.add_component(Offence(base_power = 12), 'offence')
-    npc.add_component(Defence(defence = 8), "defense")
+    npc.add_component(Defence(defence = 8), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
     item = equipment.longsword()
@@ -333,6 +333,7 @@ def snake(point = None):
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_STAIRS)
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -355,7 +356,7 @@ def troll(point = None):
                     health=health_component, act_energy=3)
 
     npc.add_component(Offence(base_power = 12), 'offence')
-    npc.add_component(Defence(defence = 8), "defense")
+    npc.add_component(Defence(defence = 8), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
     item = equipment.longsword()
@@ -376,7 +377,7 @@ def warlord(point = None):
                     health=health_component)
 
     npc.add_component(Offence(base_power = 10), 'offence')
-    npc.add_component(Defence(defence = 4), "defense")
+    npc.add_component(Defence(defence = 4), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
     item = equipment.longsword()
@@ -420,7 +421,7 @@ def zombie(point = None, old_npc = None):
                         health=health_component)
 
         npc.add_component(Offence(base_power = 10), 'offence')
-        npc.add_component(Defence(defence = 4), "defense")
+        npc.add_component(Defence(defence = 4), 'defence')
 
         item = equipment.longsword()
         item.lootable = False

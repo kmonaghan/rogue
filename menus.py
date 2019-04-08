@@ -151,7 +151,7 @@ def character_screen(player, character_screen_width, character_screen_height, sc
                 'Experience to Level: {0}'.format(player.level.experience_to_next_level),
                 'Maximum HP: {0}'.format(player.health.max_hp),
                 'Attack: {0}'.format(player.offence.power),
-                'Defense: {0}'.format(player.defence.defence),
+                'Defence: {0}'.format(player.defence.defence),
             ]
 
     height = len(options) + 2
