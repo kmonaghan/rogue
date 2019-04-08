@@ -6,6 +6,8 @@ COLORS = {
     'light_wall': tcod.dark_sepia,
     'light_ground': tcod.sepia,
 
+    'stairs': tcod.silver,
+    
     'orc': (46, 139, 87),
     'troll': (128, 128, 0),
     'kruthik': (160, 82, 45),
