@@ -12,8 +12,11 @@ class Point:
 
         return NotImplemented
 
-    def describe(self):
-        return str(self.x) + ', ' + str(self.y)
+    def __str__(self):
+        return f"{self.x}, {self.y}"
+
+    def __repr__(self):
+        return f"{self.x}, {self.y}"
 
     def distance_to(self, other):
         #return the distance to another point

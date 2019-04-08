@@ -127,7 +127,7 @@ class StrollingNPC:
         if not self.moved:
             if self.tethered:
                 if (self.owner.point.distance_to(self.tethered) > self.tethered_distance):
-                    #print("too far from tethered point: " + self.tethered.describe())
+                    #print(f"too far from tethered point: {self.tethered}")
                     self.owner.movement.move_towards(self.tethered, game_map)
                     return results
 

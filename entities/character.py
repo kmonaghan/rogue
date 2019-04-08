@@ -29,6 +29,38 @@ class Character(Entity):
 
         self.subspecies = None
 
+    def __str__(self):
+        desc = self.name.title()
+
+        desc += self.species_describe()
+
+        if hasattr(self, 'level'):
+            desc += " (Level " + str(self.level.current_level) + ")"
+
+        if CONFIG.get('debug'):
+            if self.offence:
+                desc += " O:" + str(self.offence.power)
+            if self.defence:
+                desc += " D:" + str(self.defence.defence)
+
+        return f"{desc}"
+
+    def __repr__(self):
+        desc = self.name.title()
+
+        desc += self.species_describe()
+
+        if hasattr(self, 'level'):
+            desc += " (Level " + str(self.level.current_level) + ")"
+
+        if CONFIG.get('debug'):
+            if self.offence:
+                desc += " O:" + str(self.offence.power)
+            if self.defence:
+                desc += " D:" + str(self.defence.defence)
+
+        return f"{desc}"
+
     def species_describe(self):
         desc = ""
 
@@ -43,22 +75,6 @@ class Character(Entity):
             desc = self.subspecies.name + " " + desc
 
         return " (" + desc + ")"
-
-    def describe(self):
-        desc = self.name.title()
-
-        desc += self.species_describe()
-
-        if hasattr(self, 'level'):
-            desc += " (Level " + str(self.level.current_level) + ")"
-
-        if CONFIG.get('debug'):
-            if self.offence:
-                desc += " O:" + str(self.offence.power)
-            if self.defence:
-                desc += " D:" + str(self.defence.defence)
-
-        return desc
 
     def display_color(self):
         if self.health and not self.health.dead and (self.health.health_percentage < 100):

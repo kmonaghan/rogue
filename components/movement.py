@@ -49,7 +49,7 @@ class Movement:
             self.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
 
         def attempt_move(self, target_point, game_map):
-            print("attempting to move " + self.owner.name + " from " + self.owner.point.describe() + " to " + target_point.describe())
+            print(f"attempting to move {self.owner.name} from {self.owner.point} to {target_point}")
             if game_map.current_level.walkable[target_point.x, target_point.y] and not game_map.current_level.blocked[target_point.x, target_point.y]:
                 self.place(target_point.x, target_point.y, game_map.current_level)
 
@@ -60,8 +60,6 @@ class Movement:
             return False
 
         def move_astar(self, target, game_map):
-            print("move_astar")
-
             walkable = game_map.current_level.make_walkable_array(self.routing_avoid)
             walkable[target.x, target.y] = True
             walkable[self.owner.x, self.owner.y] = True

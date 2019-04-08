@@ -22,7 +22,7 @@ def get_names_under_mouse(mouse, game_map):
     if (game_map.current_level.fov[x, y] or CONFIG.get('debug')):
         tile_description = str(game_map.current_level.tiles[x][y]) + ' '
 
-        names = [entity.describe() for entity in game_map.current_level.entities.get_entities_in_position((x, y))]
+        names = [str(entity) for entity in game_map.current_level.entities.get_entities_in_position((x, y))]
         names = ', '.join(names)
 
     return tile_description + location + ' ' + names

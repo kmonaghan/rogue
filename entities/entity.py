@@ -22,15 +22,14 @@ class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
-                 ai=None, item=None, stairs=None, equippable=None,
+                 ai=None, item=None, equippable=None,
                  render_order=RenderOrder.CORPSE, death=None, health=None,
                  act_energy=2):
 
         self.x = None
         self.y = None
         if point is not None:
-            self.x = point.x
-            self.y = point.y
+            self.set_point(point)
         self.char = char
         self.base_name = name
         self.color = color
@@ -43,7 +42,6 @@ class Entity:
 
         self.add_component(ai, "ai")
         self.add_component(item, "item")
-        self.add_component(stairs, "stairs")
         self.add_component(Energy(act_energy), "energy")
         self.add_component(Movement(), "movement")
 
@@ -70,9 +68,19 @@ class Entity:
 
         self.uuid = str(uuid.uuid4())
 
+    def __str__(self):
+        return f"{self.name.title()}"
+
+    def __repr__(self):
+        return f"{self.name.title()}"
+
     @property
     def point(self):
         return Point(self.x,self.y)
+
+    def set_point(self, point):
+        self.x = point.x
+        self.y = point.y
 
     @property
     def name(self):
@@ -102,9 +110,6 @@ class Entity:
             return self.health.display_color()
 
         return self.color
-
-    def describe(self):
-        return self.name.title()
 
     def add_component(self, component, component_name):
         """Add a component as an attribute of the current object, and set the
