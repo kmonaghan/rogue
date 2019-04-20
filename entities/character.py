@@ -28,6 +28,8 @@ class Character(Entity):
         self.species = species
 
         self.subspecies = None
+        self.offence = None
+        self.defence = None
 
     def __str__(self):
         desc = self.name.title()
@@ -42,6 +44,8 @@ class Character(Entity):
                 desc += " O:" + str(self.offence.power)
             if self.defence:
                 desc += " D:" + str(self.defence.defence)
+            desc += " " + str(self.point)
+            desc += " " + str(self.uuid)
 
         return f"{desc}"
 
@@ -58,6 +62,8 @@ class Character(Entity):
                 desc += " O:" + str(self.offence.power)
             if self.defence:
                 desc += " D:" + str(self.defence.defence)
+            desc += " " + str(self.point)
+            desc += " " + str(self.uuid)
 
         return f"{desc}"
 
@@ -70,6 +76,8 @@ class Character(Entity):
             desc += "Orc"
         elif (self.species == Species.TROLL):
             desc += "Troll"
+        else:
+            return desc
 
         if self.subspecies:
             desc = self.subspecies.name + " " + desc
