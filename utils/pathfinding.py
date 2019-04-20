@@ -10,10 +10,10 @@ def get_shortest_path(level_map, source, target, routing_avoid=None):
     ----------
     level_map: LevelMap object
 
-    source: (int, int)
+    source: Point
       The source position.
 
-    target: (int, int)
+    target: Point
       The target position.
 
     routing_avoid: List[RoutingOptions]
@@ -28,8 +28,8 @@ def get_shortest_path(level_map, source, target, routing_avoid=None):
     walkable = level_map.current_level.make_walkable_array(routing_avoid=routing_avoid)
     # The cell the the source and target occupy needs to manually be set to
     # walkable, else the entity will be frozen in place.
-    walkable[source[0], source[1]] = True
-    walkable[target[0], target[1]] = True
+    walkable[source.x, source.y] = True
+    walkable[target.x, target.y] = True
     pathfinder = tcod.path.AStar(walkable.T, diagonal=1.0)
-    path = pathfinder.get_path(source[0], source[1], target[0], target[1])
+    path = pathfinder.get_path(source.x, source.y, target.x, target.y)
     return path
