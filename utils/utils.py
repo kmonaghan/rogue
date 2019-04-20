@@ -2,8 +2,7 @@ import math
 import random
 import numpy as np
 
-#from pathfinding import make_walkable_array
-
+from map_objects.point import Point
 
 def flatten_list_of_dictionaries(list_of_dictionaries):
     ret = []
@@ -66,7 +65,7 @@ def _bresenham_ray(game_map, source, target):
 
     https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#Python
 
-    Returns a list of tuples for the ray, and the index into the ray at witch
+    Returns a list of tuples for the ray, and the index into the ray at which
     the target position lies.
     """
     ray = []
@@ -131,7 +130,7 @@ def random_walkable_position(game_map, entity):
     while not walkable_array[x, y]:
         x, y = (random.choice(range(0, game_map.current_level.width)),
                 random.choice(range(0, game_map.current_level.height)))
-    return (x, y)
+    return Point(x, y)
 
 #-----------------------------------------------------------------------------
 # Entity Finders
