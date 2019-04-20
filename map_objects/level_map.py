@@ -251,3 +251,6 @@ class LevelMap(Map):
             for entity in current_entities:
                 entity_walkable = self.make_walkable_array(entity.movement.routing_avoid)
                 self.walkables.append(entity_walkable)
+
+    def find_closest_entity(self, point, range = 2, species_type = None):
+        return self.entities.find_closest(point, species_type, max_distance=range)
