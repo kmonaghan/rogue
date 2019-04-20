@@ -1,5 +1,7 @@
 import tcod
 
+from random import choice
+
 from etc.enum import RoutingOptions
 
 from map_objects.point import Point
@@ -76,3 +78,11 @@ class Movement:
                 # it will still try to move towards the player (closer to the corridor opening)
                 self.move_towards(target, game_map)
                 game_map.current_level.path = None
+
+        def move_to_random_adjacent(self, game_map):
+            """Move the owner to a random adjacent tile."""
+            dx, dy = choice([
+                (-1, 1), (0, 1), (1, 1),
+                (-1, 0),         (1, 0),
+                (-1, -1), (0, -1), (1, -1)])
+            self.move(dx, dy, game_map.current_level)
