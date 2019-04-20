@@ -5,7 +5,6 @@ import bestiary
 import quest
 import random_utils
 
-from components.ai import PatrollingNPC
 from components.stairs import Stairs
 
 from entities.entity import Entity
@@ -13,7 +12,7 @@ from entities.character import Character
 
 from etc.colors import COLORS
 
-from map_objects.level_generation import level_one_generator, level_generator, level_boss_generator
+from map_objects.level_generation import level_one_generator, level_generator, level_boss_generator, arena
 from map_objects.point import Point
 from map_objects.level_map import LevelMap
 
@@ -27,7 +26,7 @@ class GameMap:
     def make_map(self, map_width, map_height, player):
         '''
         #Testing maps
-        self.current_level = self.arena(map_width, map_height)
+        self.current_level = arena(map_width, map_height)
         self.test_popluate_map(player)
 
         #self.current_level = self.level_generator(map_width, map_height)
@@ -63,9 +62,7 @@ class GameMap:
         #self.down_stairs = Entity(room.random_tile(self), '>', 'Stairs', COLORS.get('stairs'), render_order=RenderOrder.STAIRS, stairs=stairs_component)
         #self.current_level.add_down_stairs(self.down_stairs)
 
-        point = room.center_tile()
-        player.x = point.x
-        player.y = point.y
+        player.set_point(room.center_tile())
         self.current_level.add_entity(player)
 
         # npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level, room.random_tile(self))
@@ -93,15 +90,16 @@ class GameMap:
             npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level, pt)
             bestiary.upgrade_npc(npc)
             self.current_level.add_entity(npc)
-        '''
+
         #Add npcs and items
         for room in self.current_level.floor.rooms:
             self.place_npc(room, player)
             self.place_object(room)
-        #for i in range(1):
-        #    #chest = bestiary.create_chest(room.random_tile(self), self.dungeon_level)
-        #    #self.current_level.add_entity(chest)
-        #    bestiary.place_chest(room.random_tile(self), self)
+        '''
+        for i in range(1):
+            room = self.current_level.floor.rooms[-1]
+            point = self.current_level.find_random_open_position([], room=room)
+            bestiary.place_chest(point, self.current_level, player)
 
         '''
         #Potions, scrolls and rings
@@ -173,7 +171,7 @@ class GameMap:
                                                                 RoutingOptions.AVOID_DOORS,
                                                                 RoutingOptions.AVOID_FLOORS,
                                                                 RoutingOptions.AVOID_STAIRS])
-        bestiary.place_chest(point, self.current_level)
+        bestiary.place_chest(point, self.current_level, player)
 
         num_rooms = len(self.current_level.floor.rooms)
         for room in self.current_level.floor.rooms[1:num_rooms]:
@@ -187,7 +185,7 @@ class GameMap:
 
         room = choice(self.current_level.floor.rooms[1:num_rooms])
         point = self.current_level.find_random_open_position([], room=room)
-        bestiary.place_chest(point, self.current_level)
+        bestiary.place_chest(point, self.current_level, player)
 
     def level_generic(self, player):
         self.down_stairs = Entity(self.current_level.floor.rooms[-1].center_tile(), '>', 'Down Stairs',
@@ -209,25 +207,6 @@ class GameMap:
 
         if len(self.current_level.floor.caves) > 0:
             self.place_creatures(player)
-
-        '''
-        for room in self.current_level.floor.rooms:
-            self.place_npc(room, player)
-            self.place_object(room)
-
-
-        if (len(self.current_level.floor.rooms) > 4):
-            num_to_select = 4                           # set the number to select here.
-            list_of_random_items = sample(self.current_level.floor.rooms, num_to_select)
-
-            room = list_of_random_items[0]
-            point = room.random_tile(self)
-            npc = bestiary.goblin(point)
-            npc.ai = PatrollingNPC(list_of_random_items, npc.ai)
-            npc.ai.owner = npc
-            bestiary.upgrade_npc(npc)
-            self.current_level.add_entity(npc)
-        '''
 
     def level_boss(self, player):
         room = self.current_level.floor.rooms[0]
@@ -299,6 +278,7 @@ class GameMap:
             point = self.current_level.find_random_open_position(npc.movement.routing_avoid,
                                                                     room = room)
             npc.set_point(point)
+            npc.ai.set_target(player)
             self.current_level.add_entity(npc)
 
     def place_object(self, room):

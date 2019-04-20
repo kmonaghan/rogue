@@ -210,7 +210,7 @@ def place_prefab(prefab, dm):
 def arena(map_width, map_height):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    prefab = self.circle_shaped_room(circle_size = 15)
+    prefab = circle_shaped_room(circle_size = 15)
     startX = (map_width // 2) - (prefab.room.width // 2)
     startY = (map_height // 2) - (prefab.room.height // 2)
     dm.placeRoom(startX, startY, prefab.room.width, prefab.room.height, ignoreOverlap = False)
@@ -219,20 +219,24 @@ def arena(map_width, map_height):
     prefab.carve(dm.dungeon.grid)
 
     for x in range(3):
-        prefab = self.circle_shaped_room()
+        prefab = circle_shaped_room()
         startX, startY = dm.placeRoomRandomly(prefab.room.width, prefab.room.height)
         dm.placeRoom(startX, startY, prefab.room.width, prefab.room.height, ignoreOverlap = False)
         prefab.room.x = startX
         prefab.room.y = startY
         prefab.carve(dm.dungeon.grid)
-
+    '''
     for x in range(5):
-        prefab = self.curved_side_shaped_room()
+        prefab = curved_side_shaped_room()
         startX, startY = dm.placeRoomRandomly(prefab.room.width, prefab.room.height)
         dm.placeRoom(startX, startY, prefab.room.width, prefab.room.height, ignoreOverlap = True)
         prefab.room.x = startX
         prefab.room.y = startY
         prefab.carve(dm.dungeon.grid)
+    '''
+
+    unconnected = dm.findUnconnectedAreas()
+    dm.joinUnconnectedAreas(unconnected)
 
     dm.placeWalls()
 
@@ -280,7 +284,7 @@ def circle_shaped_room(donut=False, circle_size = 0):
 
     return prefab
 
-def curved_side_shaped_room(self):
+def curved_side_shaped_room():
 
     corner_to_round = randint(1,2)
 
