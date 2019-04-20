@@ -11,133 +11,245 @@ from game_messages import Message
 
 from map_objects.point import Point
 
-from etc.enum import ResultTypes
+from etc.enum import ResultTypes, Species
 
 from components.behaviour_trees.root import Root
 from components.behaviour_trees.composite import (
     Selection, Sequence, Negate)
 from components.behaviour_trees.leaf import (
      Attack, MoveTowardsTargetEntity, TravelToRandomPosition,
-     MoveTowardsPointInNamespace)
+     MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, PointToTarget)
 from components.behaviour_trees.conditions import (
-    IsAdjacent, WithinFov, InNamespace)
+    IsAdjacent, WithinPlayerFov, InNamespace, CoinFlip, FindNearestTargetEntity,
+    OutsideL2Radius)
 
-class BasicNPC:
-    """Simple monster ai.
+class BaseAI:
+    """Base class for NPC AI.
 
-    When in the players POV, attempt to move towards the player.  If adjacent
-    to the player, attack.
+    NPC's behaviour is defined by a behaviour tree, stored in the tree
+    attribute.  Behaviour trees have a tick method, which is called when the
+    reature takes a turn.  The tick method returns a turn result dictionary
+    that summarizes the turn's effect on the game state.
+    """
+    def take_turn(self, game_map):
+        _, results = self.tree.tick(self.owner, game_map)
+        return results
+
+    def set_target(self, target):
+        self.tree.namespace["target"] = target
+
+class StrollingNPC(BaseAI):
+    """Simple NPC ai.
+
+    When in the targets POV, attempt to move towards the target.  If adjacent
+    to the target, attack.
     """
     def __init__(self):
         self.tree = Root(
             Selection(
                 Sequence(
+                    InNamespace(name="target"),
                     IsAdjacent(),
                     Attack()),
                 Sequence(
-                    WithinFov(),
+                    WithinPlayerFov(),
                     MoveTowardsTargetEntity(target_point_name="target_point")),
                 Sequence(
                     InNamespace(name="target_point"),
                     MoveTowardsPointInNamespace(name="target_point")),
                 TravelToRandomPosition()))
 
-    def take_turn(self, target, game_map):
-        print("NPC Tick: " + self.owner.name)
-        _, results = self.tree.tick(self.owner, target, game_map)
-        return results
+class BasicNPC(BaseAI):
+    """Simple NPC ai.
 
-class PatrollingNPC:
-    def __init__(self, rooms, old_ai):
-        self.rooms = rooms
-        self.old_ai = old_ai
-        self.next_target()
+    When in the targets POV, attempt to move towards the target.  If adjacent
+    to the target, attack.
+    """
+    def __init__(self):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinPlayerFov(),
+                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                Sequence(
+                    InNamespace(name="target_point"),
+                    MoveTowardsPointInNamespace(name="target_point")),
+                TravelToRandomPosition()))
 
-    #AI for a basic npc.
-    def take_turn(self, target, game_map):
-        results = []
+class GuardNPC(BaseAI):
+    """An ai for a NPC which guards a point.
 
-        #a basic npc takes its turn. if you can see it, it can see you
-        npc = self.owner
-        if game_map.current_level.fov[npc.x, npc.y]:
-            self.owner.ai = self.old_ai
+    If adjacent to the target, attack.
+    When in the targets POV, and inside the guard radius, attempt to move
+    towards the target.
+    When outside the guard radius, return to radius
+    Move randomly within guard radius
+    """
+    def __init__(self, radius=4, guard_point=None):
+        self.radius = radius
 
-        else:
-            if (npc.x == self.target.x) and (npc.y == self.target.y):
-                self.next_target()
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    PointToTarget(guard_point, "radius_point"),
+                    OutsideL2Radius(self.radius),
+                    MoveTowardsPointInNamespace(name="radius_point")
+                ),
+                Sequence(
+                    WithinPlayerFov(),
+                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                Skitter()))
 
-            npc.movement.move_astar(self.target, game_map)
+class FrozenNPC(BaseAI):
+    """AI for a frozen NPC.
 
-        return results
+    Always passes the turn without acting.
+    """
+    def __init__(self):
+        self.tree = Root(DoNothing())
 
-    def next_target(self):
-        room = self.rooms.pop(0)
-        self.target = room.center()
-        self.rooms.append(room)
 
-class ConfusedNPC:
+class NecromancerNPC(BaseAI):
+    """AI for a necromancer.
+
+    Necromancers attempt to always stay at exactly a given radius of the
+    target.  If they fall within the radius, they will move away, if they fall
+    outside the radius, they will move towards.  When they are at exactly the
+    desired radius, they will spawn a zombie with a certain probability.
+    """
+    def __init__(self, move_towards_radius=6, seeking_radius=3):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    AtLInfinityRadius(radius=seeking_radius),
+                    CoinFlip(p=0.3),
+                    #SpawnEntity(game_objects.monsters.Zombie)
+                    ),
+                Sequence(
+                    WithinL2Radius(radius=move_towards_radius),
+                    SeekTowardsLInfinityRadius(radius=seeking_radius)),
+                TravelToRandomPosition()))
+
+class HunterNPC(BaseAI):
+    def __init__(self, sensing_range=12):
+        self.sensing_range = sensing_range
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinL2Radius(radius=sensing_range),
+                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                TravelToRandomPosition()))
+
+class HuntingNPC(BaseAI):
+    """A more dangerous monster.
+
+    Attempts to move towards the target even if not in the targets POV.
+    """
+    def __init__(self, sensing_range=12):
+        self.sensing_range = sensing_range
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinL2Radius(radius=sensing_range),
+                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                TravelToRandomPosition()))
+
+
+class ZombieNPC(BaseAI):
+    """Similar to a HuntingNPC, but will not wander."""
+    def __init__(self, move_towards_radius=6):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinL2Radius(radius=move_towards_radius),
+                    MoveTowardsTargetEntity(target_point_name="target_point"))))
+
+
+class SkitteringNPC(BaseAI):
+    """An impatient NPC.
+
+    When close by, attempts to move towards the target.  Otherwise, moves to a
+    random adjacent square.
+    """
+    def __init__(self, skittering_range=3):
+        self.skittering_range = skittering_range
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinL2Radius(radius=skittering_range),
+                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                Skitter()))
+
+class ConfusedNPC(BaseAI):
+    """A confused NPC.
+
+    Will randomly wander and attack random entities
+    """
     def __init__(self, previous_ai, number_of_turns=10):
         self.previous_ai = previous_ai
         self.number_of_turns = number_of_turns
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsFinished(number_of_turns),
+                    ChangeAI(self.previous_ai)
+                ),
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Skitter()))
 
-    def take_turn(self, target, game_map):
-        results = []
+class SpawningNPC(BaseAI):
+    """AI for an entity that spawns other entities.
 
-        if self.number_of_turns > 0:
-            dx = libtcod.random_get_int(0, -1, 1)
-            dy = libtcod.random_get_int(0, -1, 1)
+    """
+    def __init__(self, spawn=None):
+        self.spawn = spawn
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    CoinFlip(),
+                    SpawnEntity(spawn)),
+                DoNothing()))
 
-            self.owner.movement.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
+class PredatorNPC(BaseAI):
+    """A NPC which hunts other NPCs.
 
-            self.number_of_turns -= 1
-        else:
-            self.owner.ai = self.previous_ai
-            results.append({ResultTypes.MESSAGE: Message('The {0} is no longer confused!'.format(self.owner.name), libtcod.red)})
+    Will randomly wander until it encounters a NPC of the correct type
+    """
+    def __init__(self, species=Species.NONDESCRIPT):
 
-        return results
+        self.target_species= species
 
-class StrollingNPC:
-    def __init__(self, attacked_ai = None, tethered = None, tethered_distance = 4, aggressive = False, pursue_distance = 10):
-        self.moved = False
-        self.attacked_ai = attacked_ai
-        self.tethered = tethered
-        self.tethered_distance = tethered_distance
-        self.aggressive = aggressive
-        self.pursue_distance = pursue_distance
-
-    def take_turn(self, target, game_map):
-        results = []
-
-        if (self.aggressive and game_map.current_level.fov[self.owner.x, self.owner.y]):
-            #move towards player if far away
-            distance = self.owner.point.distance_to(target.point)
-            if distance > self.pursue_distance:
-                print("returning to patrol point")
-                self.owner.movement.move_towards(self.tethered, game_map)
-                return results
-            elif distance >= 2:
-                self.owner.movement.move_astar(target, game_map)
-                self.moved = True
-            #close enough, attack! (if the player is still alive.)
-            elif target.health.hp > 0:
-                attack_results = self.owner.offence.attack(target)
-                results.extend(attack_results)
-                self.moved = True
-
-        if not self.moved:
-            if self.tethered:
-                if (self.owner.point.distance_to(self.tethered) > self.tethered_distance):
-                    #print(f"too far from tethered point: {self.tethered}")
-                    self.owner.movement.move_towards(self.tethered, game_map)
-                    return results
-
-            dx = libtcod.random_get_int(0, -1, 1)
-            dy = libtcod.random_get_int(0, -1, 1)
-            self.moved = self.owner.movement.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
-        else:
-            self.moved = False
-
-        return results
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    FindNearestTargetEntity(range=2,species_type=self.target_species),
+                    MoveTowardsTargetEntity(target_point_name="target_point"),
+                ),
+                TravelToRandomPosition()))
 
 class WarlordNPC:
     def __init__(self):
@@ -145,7 +257,7 @@ class WarlordNPC:
         self.summoned_orcs = False
         self.summoned_trolls = False
 
-    def take_turn(self, target, game_map):
+    def take_turn(self, game_map):
         results = []
         #a basic npc takes its turn. if you can see it, it can see you
         npc = self.owner
@@ -195,7 +307,7 @@ class NecromancerNPC:
         self.ritual_started = False
         self.ritual_turns = 50
 
-    def take_turn(self, target, game_map):
+    def take_turn(self, game_map):
         results = []
 
         npc = self.owner
@@ -213,43 +325,12 @@ class NecromancerNPC:
 
         return results
 
-class Hunter(StrollingNPC):
-    def __init__(self, attacked_ai = None, hunting = None):
-        super(Hunter, self).__init__(attacked_ai = attacked_ai)
-        self.hunting = hunting
-
-    def take_turn(self, target, game_map):
-        results = []
-
-        npc = self.owner
-
-        target = game_map.current_level.entities.find_closest(Point(npc.x, npc.y), self.hunting)
-
-        if (target):
-            dist = max(abs(target.x - npc.x), abs(target.y - npc.y))
-
-            if dist > 1:
-                npc.movement.move_astar(target, game_map)
-                return results
-            elif not target.health.dead and (dist == 1):
-                attack_results = npc.offence.attack(target)
-                dead_entity = None
-                for turn_result in attack_results:
-                    dead_entity = turn_result.get(ResultTypes.DEAD_ENTITY)
-
-                if (dead_entity):
-                    results.append({ResultTypes.DEAD_ENTITY: target})
-
-                return results
-
-        return super(Hunter, self).take_turn(target, game_map)
-
 class Hatching:
     def __init__(self, hatches):
         self.incubate = randint(5, 15)
         self.hatches = hatches
 
-    def take_turn(self, target, game_map):
+    def take_turn(self, game_map):
         results = []
 
         self.incubate -= 1
@@ -261,45 +342,5 @@ class Hatching:
             self.hatches.x = npc.x
             self.hatches.y = npc.y
             game_map.current_level.add_entity(self.hatches)
-
-        return results
-
-class SpawnNPC:
-    def __init__(self, spawn):
-        self.spawn = spawn
-        self.turns_since_last_spawn = 0
-
-    def take_turn(self, target, game_map):
-        results = []
-
-        if ((randint(0, 10) + self.turns_since_last_spawn) > 18):
-            npc = self.spawn(self.owner.point)
-            if (game_map.current_level.entities.find_closest(self.owner.point, npc.species, 1) == None):
-                self.turns_since_last_spawn = 0
-                game_map.current_level.add_entity(npc)
-                #print("Spawned " + npc.name)
-            else:
-                #print("Already " + npc.name + " nearby")
-                pass
-        else:
-            self.turns_since_last_spawn += 1
-
-        return results
-
-class ScreamerNPC:
-    def __init__(self, alert_npc_type, alert_range = 1):
-        self.alert_npc_type = alert_npc_type
-        self.alert_range = alert_range
-
-    def take_turn(self, target, game_map):
-        results = []
-
-        npcs = game_map.find_all_closest(self.owner.point, self.alert_npc_type, self.alert_range)
-
-        if len(npcs):
-            for npc in npcs:
-                npc.add_component(BasicNPC(), "ai")
-
-            results.append({ResultTypes.MESSAGE: Message('Alert nearby creatures!', libtcod.red)})
 
         return results

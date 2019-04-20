@@ -11,12 +11,13 @@ from etc.configuration import CONFIG
 import quest
 
 from components.ai import BasicNPC
+from components.ai import GuardNPC
 from components.ai import StrollingNPC
 from components.ai import WarlordNPC
 from components.ai import NecromancerNPC
-from components.ai import Hunter
+from components.ai import PredatorNPC
 from components.ai import Hatching
-from components.ai import SpawnNPC
+from components.ai import SpawningNPC
 
 from components.berserk import Berserk
 from components.health import Health
@@ -49,7 +50,7 @@ def bat(point = None):
     health_component = Health(4)
 
     creature = Character(point, 'B', 'bat', libtcod.darker_red,
-                    ai=StrollingNPC(attacked_ai=BasicNPC()),
+                    ai=StrollingNPC(),
                     species=Species.BAT, health=health_component, act_energy=2)
 
     creature.add_component(Offence(base_power = 1), 'offence')
@@ -66,7 +67,7 @@ def bat(point = None):
 def bountyhunter(point = None):
     #create a questgiver
 
-    ai_component = StrollingNPC(tethered = point)
+    ai_component = StrollingNPC()
     npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component, species=Species.NONDESCRIPT, act_energy=2)
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')
@@ -246,7 +247,7 @@ def rat(point = None):
     health_component = Health(4)
 
     creature = Character(point, 'R', 'rat', libtcod.darker_green,
-                    ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.EGG),
+                    ai=PredatorNPC(species=Species.EGG),
                     species=Species.RAT, health=health_component, act_energy=2)
 
     creature.add_component(Offence(base_power = 1), 'offence')
@@ -256,6 +257,8 @@ def rat(point = None):
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_STAIRS)
+    #creature.movement.routing_avoid.append(RoutingOptions.AVOID_FOV)
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -271,7 +274,7 @@ def ratsnest(point = None):
     health_component = Health(4)
 
     creature = Character(point, 'N', 'rat\'s nest', libtcod.darker_green,
-                    ai=SpawnNPC(rat),
+                    ai=SpawningNPC(rat),
                     species=Species.RATNEST, health=health_component, act_energy=1)
 
     creature.add_component(Defence(defence = 4), 'defence')
@@ -322,7 +325,7 @@ def snake(point = None):
     health_component = Health(8)
 
     creature = Character(point, 'S', 'snake', libtcod.darker_green,
-                    ai=Hunter(attacked_ai=BasicNPC(), hunting=Species.RAT),
+                    ai=PredatorNPC(species=Species.RAT),
                     species=Species.SNAKE, health=health_component, act_energy=2)
 
     creature.add_component(Offence(base_power = 1), 'offence')
@@ -484,11 +487,11 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
 
     return npc
 
-def place_chest(point, level_map):
+def place_chest(point, level_map, player):
     chest = create_chest(point, level_map.dungeon_level)
     level_map.add_entity(chest)
 
-    guards = libtcod.random_get_int(0, 1, 3)
+    guards = randint(1, 3)
 
     npc_chances = {}
     npc_chances[Species.GOBLIN] = from_dungeon_level([[90, 1], [75, 2], [50, 3], [25, 4], [20, 5], [10, 6]], level_map.dungeon_level)
@@ -498,8 +501,9 @@ def place_chest(point, level_map):
 
     for i in range(guards):
         npc = generate_npc(npc_choice, dungeon_level=level_map.dungeon_level, point=point)
-        ai_component = StrollingNPC(tethered = point, tethered_distance = 2, aggressive = True)
-        ai_component.attacked_ai = npc.ai
+        print("Going to guard: " +str(chest.point))
+        ai_component = GuardNPC(guard_point = chest.point)
+        ai_component.set_target(player)
         npc.add_component(ai_component, 'ai')
 
         level_map.add_entity(npc)

@@ -312,7 +312,8 @@ def play_game(player, game_map, message_log, game_state, consoles, constants):
                     # Enemies move and attack if possible.
                     entity.energy.increase_energy()
                     if entity.energy.take_action():
-                        enemy_turn_results.extend(entity.ai.take_turn(player, game_map))
+                        print("Taking turn for " + str(entity))
+                        enemy_turn_results.extend(entity.ai.take_turn(game_map))
 
             game_state = GameStates.PLAYER_TURN
 
@@ -421,11 +422,10 @@ def process_results_stack(game_map, entity, turn_results, pubsub):
 
         # Add a new entity to the game.
         if result_type == ResultTypes.ADD_ENTITY:
-            result_data.commitable.commit(game_map)
+            game_map.current_level.add_entity(result_data)
         # Remove an entity from the game.
         if result_type == ResultTypes.REMOVE_ENTITY:
             game_map.current_level.remove_entity(result_data)
-            #entity.commitable.delete(game_map)
 
         '''
         if targeting:

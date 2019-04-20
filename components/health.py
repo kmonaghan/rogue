@@ -40,6 +40,9 @@ class Health:
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = death_message))
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
 
+        if npc and self.owner.ai:
+            self.owner.ai.set_target(npc)
+
         if self.dead:
             results.append({ResultTypes.DEAD_ENTITY: self.owner})
 
