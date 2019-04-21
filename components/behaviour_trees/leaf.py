@@ -18,6 +18,10 @@ class MoveTowardsTargetEntity(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
+        if not target:
+            print("No target set")
+            return TreeStates.FAILURE, []
+            
         print("MoveTowardsTargetEntity Setting to point:" + self.name)
         print(str(target))
         self.namespace[self.name] = target.point
