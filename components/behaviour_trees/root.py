@@ -23,3 +23,6 @@ class Node:
     @property
     def namespace(self):
         return self.parent.namespace
+
+    def tick(self, owner, game_map):
+        print(self.__class__.__name__)

@@ -13,7 +13,7 @@ def get_names_under_mouse(mouse, game_map):
     if game_map.current_level.within_bounds(x, y):
             location = str(x) + ',' + str(y)
     else:
-        print("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
+        #print("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
         return ''
 
     tile_description = ''

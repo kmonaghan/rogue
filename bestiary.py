@@ -501,7 +501,6 @@ def place_chest(point, level_map, player):
 
     for i in range(guards):
         npc = generate_npc(npc_choice, dungeon_level=level_map.dungeon_level, point=point)
-        print("Going to guard: " +str(chest.point))
         ai_component = GuardNPC(guard_point = chest.point)
         ai_component.set_target(player)
         npc.add_component(ai_component, 'ai')
