@@ -38,7 +38,7 @@ class BaseAI:
     def set_target(self, target):
         self.tree.namespace["target"] = target
 
-class StrollingNPC(BaseAI):
+class PatrollingNPC(BaseAI):
     """Simple NPC ai.
 
     When in the targets POV, attempt to move towards the target.  If adjacent
@@ -58,6 +58,20 @@ class StrollingNPC(BaseAI):
                     InNamespace(name="target_point"),
                     MoveTowardsPointInNamespace(name="target_point")),
                 TravelToRandomPosition()))
+
+class TetheredNPC(BaseAI):
+    """Simple NPC ai.
+
+    """
+    def __init__(self, radius=4, tether_point=None):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    PointToTarget(tether_point, "radius_point"),
+                    OutsideL2Radius(radius),
+                    MoveTowardsPointInNamespace(name="radius_point")
+                ),
+                Skitter()))
 
 class BasicNPC(BaseAI):
     """Simple NPC ai.
@@ -98,13 +112,13 @@ class GuardNPC(BaseAI):
                     IsAdjacent(),
                     Attack()),
                 Sequence(
+                    WithinPlayerFov(),
+                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                Sequence(
                     PointToTarget(guard_point, "radius_point"),
                     OutsideL2Radius(self.radius),
                     MoveTowardsPointInNamespace(name="radius_point")
                 ),
-                Sequence(
-                    WithinPlayerFov(),
-                    MoveTowardsTargetEntity(target_point_name="target_point")),
                 Skitter()))
 
 class FrozenNPC(BaseAI):

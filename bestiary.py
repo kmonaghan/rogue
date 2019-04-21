@@ -12,12 +12,13 @@ import quest
 
 from components.ai import BasicNPC
 from components.ai import GuardNPC
-from components.ai import StrollingNPC
+from components.ai import PatrollingNPC
 from components.ai import WarlordNPC
 from components.ai import NecromancerNPC
 from components.ai import PredatorNPC
 from components.ai import Hatching
 from components.ai import SpawningNPC
+from components.ai import TetheredNPC
 
 from components.berserk import Berserk
 from components.health import Health
@@ -50,7 +51,7 @@ def bat(point = None):
     health_component = Health(4)
 
     creature = Character(point, 'B', 'bat', libtcod.darker_red,
-                    ai=StrollingNPC(),
+                    ai=PatrollingNPC(),
                     species=Species.BAT, health=health_component, act_energy=2)
 
     creature.add_component(Offence(base_power = 1), 'offence')
@@ -64,11 +65,12 @@ def bat(point = None):
 
     return creature
 
-def bountyhunter(point = None):
+def bountyhunter(point):
     #create a questgiver
 
-    ai_component = StrollingNPC()
-    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component, species=Species.NONDESCRIPT, act_energy=2)
+    ai_component = TetheredNPC(4, point)
+    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component,
+                    species=Species.NONDESCRIPT, act_energy=2)
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')
 
