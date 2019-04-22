@@ -21,7 +21,7 @@ class MoveTowardsTargetEntity(Node):
         if not target:
             print("No target set")
             return TreeStates.FAILURE, []
-            
+
         print("MoveTowardsTargetEntity Setting to point:" + self.name)
         print(str(target))
         self.namespace[self.name] = target.point
@@ -47,6 +47,7 @@ class MoveTowardsPointInNamespace(Node):
             return TreeStates.SUCCESS, []
         results = [{ResultTypes.MOVE_TOWARDS: (owner, point.x, point.y)}]
         self.namespace[self.name + '_previous'] = (owner.x, owner.y)
+        print("MoveTowardsPointInNamespace Move towards:" + str(point))
         return TreeStates.SUCCESS, results
 
 
@@ -67,7 +68,7 @@ class SeekTowardsLInfinityRadius(Node):
         if len(path) <= 1:
             return TreeStates.SUCCESS, []
         results = [{
-            ResultTypes.SET_POSITION: (owner, path[1][0], path[1][1])}]
+            ResultTypes.SET_POSITION: (owner, path[0][0], path[0][1])}]
         return TreeStates.SUCCESS, results
 
 class TravelToRandomPosition(Node):
@@ -82,16 +83,17 @@ class TravelToRandomPosition(Node):
         super().tick(owner, game_map)
         if not self.target_position:
             self.target_position = random_walkable_position(game_map, owner)
+        print("TravelToRandomPosition travelling to: " + str(self.target_position))
         self.path = get_shortest_path(
             game_map,
             owner.point,
             self.target_position,
             routing_avoid=owner.movement.routing_avoid)
-        if len(self.path) <= 2:
+        if len(self.path) < 1:
             self.target_position = None
             return TreeStates.SUCCESS, []
         results = [{
-            ResultTypes.MOVE_TOWARDS: (owner, self.path[1][0], self.path[1][1])}]
+            ResultTypes.MOVE_WITH_PATH: (owner, self.path)}]
         return TreeStates.SUCCESS, results
 
 class Skitter(Node):

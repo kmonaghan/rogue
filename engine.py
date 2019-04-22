@@ -412,8 +412,12 @@ def process_results_stack(game_map, entity, turn_results, pubsub):
         # Handle a move towards action.  Move towards a target.
         if result_type == ResultTypes.MOVE_TOWARDS:
            npc, target_x, target_y = result_data
-           #print("ResultTypes.MOVE_TOWARDS: " + npc.name)
-           npc.movement.move_astar(Point(target_x, target_y), game_map)
+           npc.movement.attempt_move(Point(target_x, target_y), game_map)
+        # Handle a move towards action.  Move towards a target following a particular path.
+        if result_type == ResultTypes.MOVE_WITH_PATH:
+           npc, path = result_data
+           game_map.current_level.paths.append(path)
+           npc.movement.attempt_move(Point(path[0][0], path[0][1]), game_map)
         # Handle a move random adjacent action.  Move to a random adjacent
         # square.
         if result_type == ResultTypes.MOVE_RANDOM_ADJACENT:
