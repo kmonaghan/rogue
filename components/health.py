@@ -44,6 +44,8 @@ class Health:
             self.owner.ai.set_target(npc)
 
         if self.dead:
+            if npc:
+                npc.ai.remove_target()
             results.append({ResultTypes.DEAD_ENTITY: self.owner})
 
         return results

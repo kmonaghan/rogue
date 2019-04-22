@@ -2,7 +2,7 @@ import tcod as libtcod
 
 from game_messages import Message
 
-from etc.enum import GameStates, RenderOrder
+from etc.enum import GameStates, RenderOrder, Species
 
 import pubsub
 
@@ -18,7 +18,7 @@ class BasicDeath:
         #attacked and doesn't move
         self.owner.char = '%'
         self.owner.color = libtcod.dark_red
-
+        self.owner.species = Species.CORPSE
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
 

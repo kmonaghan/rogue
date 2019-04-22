@@ -22,10 +22,17 @@ class MoveTowardsTargetEntity(Node):
             print("No target set")
             return TreeStates.FAILURE, []
 
-        print("MoveTowardsTargetEntity Setting to point:" + self.name)
-        print(str(target))
-        self.namespace[self.name] = target.point
-        results = [{ResultTypes.MOVE_TOWARDS: (owner, target.x, target.y)}]
+        print("MoveTowardsTargetEntity Targeting: " + str(target))
+        self.path = get_shortest_path(
+            game_map,
+            owner.point,
+            target.point,
+            routing_avoid=owner.movement.routing_avoid)
+        if len(self.path) < 1:
+            self.target_position = None
+            return TreeStates.SUCCESS, []
+        results = [{
+            ResultTypes.MOVE_WITH_PATH: (owner, self.path)}]
         return TreeStates.SUCCESS, results
 
 
@@ -42,7 +49,7 @@ class MoveTowardsPointInNamespace(Node):
         if ((owner.x, owner.y) == self.namespace.get(self.name + '_previous')
             or (owner.x, owner.y) == point):
             self.namespace[self.name + '_previous'] = None
-            print("MoveTowardsPointInNamespace Setting none to point:" + self.name)
+            print("MoveTowardsPointInNamespace Setting to none: " + self.name)
             self.namespace[self.name] = None
             return TreeStates.SUCCESS, []
         results = [{ResultTypes.MOVE_TOWARDS: (owner, point.x, point.y)}]
@@ -138,17 +145,22 @@ class PointToTarget(Node):
 
 class SpawnEntity(Node):
 
-    def __init__(self, maker):
+    def __init__(self, maker, repeat = True):
         self.maker = maker
+        self.repeat = repeat
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         x, y = random_adjacent((owner.x, owner.y))
+
         if (game_map.current_level.walkable[x, y]
             and not game_map.current_level.blocked[x, y]):
             #and not game_map.current_level.water[x, y]):
             entity = self.maker(Point(x, y))
             if entity:
                 #print("Will spawn " + str(entity))
-                return TreeStates.SUCCESS, [{ResultTypes.ADD_ENTITY: entity}]
+                results = [{ResultTypes.ADD_ENTITY: entity}]
+                if not repeat:
+                    results.append({ResultTypes.REMOVE_ENTITY: owner})
+                return TreeStates.SUCCESS, results
         return TreeStates.FAILURE, []

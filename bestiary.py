@@ -16,8 +16,8 @@ from components.ai import PatrollingNPC
 from components.ai import WarlordNPC
 from components.ai import NecromancerNPC
 from components.ai import PredatorNPC
-from components.ai import Hatching
 from components.ai import SpawningNPC
+from components.ai import HatchingNPC
 from components.ai import TetheredNPC
 
 from components.berserk import Berserk
@@ -163,7 +163,7 @@ def egg(point = None):
     health_component = Health(4)
 
     creature = Character(point, 'E', 'Snake Egg', libtcod.darker_gray,
-                    ai=Hatching(snake()),
+                    ai=HatchingNPC(snake()),
                     species=Species.EGG, health=health_component)
 
     creature.add_component(Offence(base_power = 1), 'offence')

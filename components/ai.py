@@ -20,7 +20,7 @@ from components.behaviour_trees.leaf import (
      Attack, MoveTowardsTargetEntity, TravelToRandomPosition,
      MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, PointToTarget)
 from components.behaviour_trees.conditions import (
-    IsAdjacent, WithinPlayerFov, InNamespace, CoinFlip, FindNearestTargetEntity,
+    IsAdjacent, IsFinished, WithinPlayerFov, InNamespace, CoinFlip, FindNearestTargetEntity,
     OutsideL2Radius)
 
 class BaseAI:
@@ -37,6 +37,9 @@ class BaseAI:
 
     def set_target(self, target):
         self.tree.namespace["target"] = target
+
+    def remove_target(self):
+        del self.tree.namespace["target"]
 
 class PatrollingNPC(BaseAI):
     """Simple NPC ai.
@@ -219,13 +222,12 @@ class ConfusedNPC(BaseAI):
     Will randomly wander and attack random entities
     """
     def __init__(self, previous_ai, number_of_turns=10):
-        self.previous_ai = previous_ai
-        self.number_of_turns = number_of_turns
+        self.number_of_turns
         self.tree = Root(
             Selection(
                 Sequence(
                     IsFinished(number_of_turns),
-                    ChangeAI(self.previous_ai)
+                    ChangeAI(previous_ai)
                 ),
                 Sequence(
                     IsAdjacent(),
@@ -264,6 +266,21 @@ class PredatorNPC(BaseAI):
                     MoveTowardsTargetEntity(target_point_name="target_point"),
                 ),
                 TravelToRandomPosition()))
+
+class HatchingNPC(BaseAI):
+    """A confused NPC.
+
+    Will randomly wander and attack random entities
+    """
+    def __init__(self, spawn, min=5, max=15):
+        self.number_of_turns = randint(min, max)
+        spawn = spawn
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsFinished(self.number_of_turns),
+                    SpawnEntity(spawn)
+                )))
 
 class WarlordNPC:
     def __init__(self):
@@ -336,25 +353,5 @@ class NecromancerNPC:
             tome.resurrect_all_npc(bestiary.reanmimate, game_map, target)
             results.append({ResultTypes.MESSAGE: Message('Rise and serve me again, now and forever!', libtcod.red)})
             self.ritual_cast = True
-
-        return results
-
-class Hatching:
-    def __init__(self, hatches):
-        self.incubate = randint(5, 15)
-        self.hatches = hatches
-
-    def take_turn(self, game_map):
-        results = []
-
-        self.incubate -= 1
-
-        if (self.incubate < 1):
-            npc = self.owner
-
-            game_map.current_level.remove_entity(npc)
-            self.hatches.x = npc.x
-            self.hatches.y = npc.y
-            game_map.current_level.add_entity(self.hatches)
 
         return results
