@@ -73,10 +73,7 @@ def bountyhunter(point):
                     species=Species.NONDESCRIPT, act_energy=2)
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')
-
-    questgiver = Questgiver()
-    questgiver.owner = npc
-    npc.questgiver = questgiver
+    npc.add_component(Questgiver(), 'questgiver')
 
     return npc
 
