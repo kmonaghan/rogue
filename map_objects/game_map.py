@@ -11,6 +11,7 @@ from entities.entity import Entity
 from entities.character import Character
 
 from etc.colors import COLORS
+from etc.configuration import CONFIG
 
 from map_objects.level_generation import level_one_generator, level_generator, level_boss_generator, arena
 from map_objects.point import Point
@@ -72,16 +73,17 @@ class GameMap:
         #    self.current_level.add_entity(snake)
         #
         #for i in range(5):
-        #    rat = bestiary.generate_creature(Species.RAT, self.dungeon_level, player.level.current_level, room.random_tile(self))
-        #    self.current_level.add_entity(rat)
+        rat = bestiary.generate_creature(Species.RAT, self.dungeon_level, player.level.current_level, room.random_tile(self))
+        self.current_level.add_entity(rat)
         #
         #for i in range(5):
         #    rat = bestiary.generate_creature(Species.RATNEST, self.dungeon_level, player.level.current_level, room.random_tile(self))
         #    self.current_level.add_entity(rat)
         #
-        #for i in range(5):
-        #    egg = bestiary.generate_creature(Species.EGG, self.dungeon_level, player.level.current_level, room.random_tile(self))
-        #    self.current_level.add_entity(egg)
+        for i in range(5):
+            point = self.current_level.find_random_open_position([], room = room)
+            egg = bestiary.generate_creature(Species.EGG, self.dungeon_level, player.level.current_level, point)
+            self.current_level.add_entity(egg)
 
         #pt = room.random_tile(self)
         '''
@@ -95,13 +97,13 @@ class GameMap:
         for room in self.current_level.floor.rooms:
             self.place_npc(room, player)
             self.place_object(room)
-        '''
+
         for i in range(1):
             room = self.current_level.floor.rooms[-1]
             point = self.current_level.find_random_open_position([], room=room)
             bestiary.place_chest(point, self.current_level, player)
 
-        '''
+
         #Potions, scrolls and rings
         potion = equipment.healing_potion(Point(1,1))
         self.current_level.add_entity(potion)
@@ -313,11 +315,11 @@ class GameMap:
 
             self.current_level.add_entity(item)
 
-    def create_floor(self, player, constants):
+    def create_floor(self, player):
         self.down_stairs = None
         self.up_stairs = None
 
-        self.make_map(constants['map_width'], constants['map_height'], player)
+        self.make_map(CONFIG.get('map_width'), CONFIG.get('map_height'), player)
 
     def next_floor(self, player, constants):
         self.dungeon_level += 1

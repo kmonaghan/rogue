@@ -14,6 +14,8 @@ from etc.enum import RoutingOptions, Tiles
 from map_objects.point import Point
 from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, StairsFloor, EmptyTile
 
+SQUARED_TORCH_RADIUS = CONFIG.get('fov_radius') * CONFIG.get('fov_radius')
+
 class LevelMap(Map):
     def __init__(self, floor):
         width, height = floor.width, floor.height
@@ -39,6 +41,9 @@ class LevelMap(Map):
         self.light_map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('light_wall'), dtype=np.uint8
         )
+        self.map_bg = np.full(
+            self.walkable.shape + (3,), COLORS.get('console_background'), dtype=np.uint8
+        )
 
         self.dungeon_level = 1
 
@@ -48,6 +53,12 @@ class LevelMap(Map):
 
         self.paths = []
         self.walkables = []
+
+        self.torch = True
+        self.noise = None
+        self.torchx = 0.0
+        # 1d noise for the torch flickering
+        self.noise = tcod.noise_new(1, 1.0, 1.0)
 
     def blit_floor(self):
         self.walkable[:] = False
@@ -138,7 +149,7 @@ class LevelMap(Map):
             if possible_positions[x, y]:
                 return Point(x, y)
 
-    def update_and_draw_all(self, map_console):
+    def update_and_draw_all(self, map_console, player):
         map_console.clear()
 
         if not CONFIG.get('debug'):
@@ -148,14 +159,51 @@ class LevelMap(Map):
             where_fov = np.where(self.light_map_bg[:])
 
         explored = np.where(self.explored[:])
-        map_console.bg[explored] = self.dark_map_bg[explored]
-        map_console.bg[where_fov] = self.light_map_bg[where_fov]
+        self.map_bg[explored] = self.dark_map_bg[explored]
+
+        dx = 0.0
+        dy = 0.0
+        di = 0.0
+
+        if self.torch:
+            # slightly change the perlin noise parameter
+            self.torchx += 0.1
+            # randomize the light position between -1.5 and 1.5
+            tdx = [self.torchx + 20.0]
+            dx = tcod.noise_get(self.noise, tdx, tcod.NOISE_SIMPLEX) * 1.5
+            tdx[0] += 30.0
+            dy = tcod.noise_get(self.noise, tdx, tcod.NOISE_SIMPLEX) * 1.5
+            di = 0.2 * tcod.noise_get(
+                self.noise, [self.torchx], tcod.NOISE_SIMPLEX
+            )
+
+            mgrid = np.mgrid[:self.width, :self.height]
+            # get squared distance
+            light = (mgrid[0] - player.x + dx) ** 2 + (
+                mgrid[1] - player.y + dy
+            ) ** 2
+            light = light.astype(np.float16)
+            visible = (light < SQUARED_TORCH_RADIUS) & self.fov[:]
+            light[...] = SQUARED_TORCH_RADIUS - light
+            light[...] /= SQUARED_TORCH_RADIUS
+            light[...] += di
+            light[...] = light.clip(0, 1)
+            light[~visible] = 0
+
+            map_console.bg[...] = (
+                self.light_map_bg.astype(np.float16) - self.map_bg
+            ) * light[..., np.newaxis] + self.map_bg
+
+        else:
+            map_console.bg[explored] = self.dark_map_bg[explored]
+            map_console.bg[where_fov] = self.light_map_bg[where_fov]
+
         if CONFIG.get('debug'):
             for current_path in self.paths:
                 for x,y in current_path:
                     map_console.bg[x,y] = tcod.lighter_green
 
-            self.paths.clear()
+            #self.paths.clear()
 
             for current_walkable in self.walkables:
                 for x, y, _ in self.floor:
@@ -171,6 +219,9 @@ class LevelMap(Map):
             for entity in entities_in_render_order:
                 map_console.ch[x, y] = ord(entity.char)
                 map_console.fg[x, y] = entity.display_color()
+
+    def clear_paths(self):
+        self.paths.clear()
 
     def add_entity(self, entity):
         self.entities.append(entity)
@@ -245,9 +296,9 @@ class LevelMap(Map):
                 walkable[self.downward_stairs_position] = False
         return walkable
 
-    def walkable_for_entity_under_mouse(self, mouse):
-        if self.within_bounds(mouse.cx, mouse.cy):
-            current_entities = self.entities.get_entities_in_position((mouse.cx, mouse.cy))
+    def walkable_for_entity_under_mouse(self, x, y):
+        if self.within_bounds(x,y):
+            current_entities = self.entities.get_entities_in_position((x, y))
             for entity in current_entities:
                 entity_walkable = self.make_walkable_array(entity.movement.routing_avoid)
                 self.walkables.append(entity_walkable)

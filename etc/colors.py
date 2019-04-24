@@ -7,7 +7,7 @@ COLORS = {
     'light_ground': tcod.sepia,
 
     'stairs': tcod.silver,
-    
+
     'orc': (46, 139, 87),
     'troll': (128, 128, 0),
     'kruthik': (160, 82, 45),
@@ -19,6 +19,8 @@ COLORS = {
 
     'cursor': (255, 215, 0),
     'cursor_tail': (220, 180, 0),
+
+    'console_background': (0, 0, 0),
 }
 
 STATUS_BAR_COLORS = {

@@ -5,9 +5,7 @@ from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed, game_over, game_paused
 
-def get_names_under_mouse(mouse, game_map):
-    (x, y) = (mouse.cx, mouse.cy)
-
+def get_names_under_mouse(x, y, game_map):
     location = ''
 
     if game_map.current_level.within_bounds(x, y):

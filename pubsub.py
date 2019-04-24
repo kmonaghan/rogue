@@ -30,6 +30,9 @@ class PubSub:
         self.queue = []
         self.for_removal = []
 
+        self.subscribe(Subscription(None, PubSubTypes.DEATH, on_entity_death))
+        self.subscribe(Subscription(None, PubSubTypes.SPAWN, entity_spawn))
+
     def subscribe(self, sub):
         if not sub.type in self.subscriptions:
             self.subscriptions[sub.type] = []
@@ -69,3 +72,17 @@ class PubSub:
 
         for sub in self.for_removal:
             self.remove_subscription(sub)
+
+'''
+Some default subscriptions
+'''
+def add_to_messages(sub, message, game_map):
+    sub.entity.add_message(message.message)
+
+def entity_spawn(sub, message, game_map):
+    npc = message.entity.spawn.spawn()
+    if npc:
+        game_map.current_level.add_entity(npc)
+
+def on_entity_death(sub, message, game_map):
+    pubsub.unsubscribe_entity(message.entity)
