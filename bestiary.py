@@ -279,6 +279,11 @@ def ratsnest(point = None):
     creature.add_component(Defence(defence = 4), 'defence')
     creature.add_component(Level(xp_value = 1), 'level')
 
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
+    creature.movement.routing_avoid.append(RoutingOptions.AVOID_STAIRS)
+    
     # potion = equipment.random_potion(dungeon_level = dungeon_level)
     # potion.lootable = True
     #
