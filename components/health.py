@@ -5,17 +5,21 @@ import pubsub
 from game_messages import Message
 
 from etc.colors import COLORS
-from etc.enum import ResultTypes
+from etc.enum import ResultTypes, HealthStates
 
 class Health:
     def __init__(self, hp):
         self.base_max_hp = hp
         self.hp = hp
-        self.dead = False
+
+
+    @property
+    def dead(self):
+        return (self.hp <= 0)
 
     @property
     def health_percentage(self):
-        return ((self.hp * 100) / self.max_hp)
+        return ((self.hp * 100) // self.max_hp)
 
     @property
     def max_hp(self):
@@ -29,29 +33,26 @@ class Health:
     def take_damage(self, amount, npc = None):
         results = []
 
-        if (self.dead):
+        if self.dead:
             return results
 
         self.hp -= amount
-        if (self.hp <= 0):
-            self.dead = True
+        if self.dead:
             self.hp = 0
-            death_message = Message('{0} is dead!'.format(self.owner.name.title()), tcod.orange)
+            death_message = Message(f"{self.owner.name.title()} is dead!'", tcod.orange)
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = death_message))
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
-
-        if npc and self.owner.ai:
-            self.owner.ai.set_target(npc)
-
-        if self.dead:
-            if npc:
+            if npc and npc.ai:
                 npc.ai.remove_target()
             results.append({ResultTypes.DEAD_ENTITY: self.owner})
+        elif npc and self.owner.ai:
+            print("Set the attacker")
+            self.owner.ai.set_target(npc)
 
         return results
 
     def heal(self, amt):
-        if (self.dead):
+        if self.dead:
             return
 
         self.hp += amt
@@ -60,11 +61,11 @@ class Health:
 
     def display_color(self):
 
-        if (self.health_percentage <= 20):
+        if (self.health_percentage <= HealthStates.NEAR_DEATH):
             return tcod.red
-        elif (self.health_percentage <= 60):
+        elif (self.health_percentage <= HealthStates.INJURED):
             return tcod.orange
-        elif (self.health_percentage <= 80):
+        elif (self.health_percentage <= HealthStates.BARELY_INJURED):
             return tcod.yellow
 
         return self.owner.color

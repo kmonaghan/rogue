@@ -283,7 +283,7 @@ def ratsnest(point = None):
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
     creature.movement.routing_avoid.append(RoutingOptions.AVOID_STAIRS)
-    
+
     # potion = equipment.random_potion(dungeon_level = dungeon_level)
     # potion.lootable = True
     #
@@ -348,7 +348,6 @@ def snake(point = None):
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
 
-    pubsub.pubsub.subscribe(pubsub.Subscription(creature, pubsub.PubSubTypes.ATTACKED, npc_become_aggressive))
     pubsub.pubsub.subscribe(pubsub.Subscription(creature, pubsub.PubSubTypes.DEATH, eat_rat))
 
     return creature
@@ -553,10 +552,6 @@ def goblin_observed_death(sub, message, level_map):
             if not hasattr(sub.entity, 'berserk'):
                 sub.entity.add_component(Berserk(), 'berserk')
                 sub.entity.berserk.start_berserker()
-
-def npc_become_aggressive(sub, message, level_map):
-    if (message.entity.species == Species.PLAYER) and (message.target.uuid == sub.entity.uuid):
-        sub.entity.add_component(BasicNPC(), 'ai')
 
 def mimic_activate(sub, message, level_map):
     if (sub.entity.uuid == message.target.uuid):

@@ -270,3 +270,10 @@ class LevelUp(Enum):
     HEALTH = auto()
     STRENGTH = auto()
     DEFENCE = auto()
+
+class HealthStates(IntEnum):
+    FULL = 100
+    BARELY_INJURED = 80
+    INJURED = 60
+    BADLY_INJURED = 40
+    NEAR_DEATH = 20
