@@ -19,6 +19,7 @@ class InNamespace(Node):
         self.name = name
 
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         if self.namespace.get(self.name):
             return TreeStates.SUCCESS, []
         else:
@@ -28,6 +29,7 @@ class InNamespace(Node):
 class IsAdjacent(Node):
     """Return sucess is owner is adjacent to target."""
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         target = self.namespace.get("target")
         if not target:
             return TreeStates.FAILURE, []
@@ -42,6 +44,7 @@ class IsAdjacent(Node):
 class WithinPlayerFov(Node):
     """Return success if owner is in the player's fov."""
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         if game_map.current_level.fov[owner.x, owner.y]:
             return TreeStates.SUCCESS, []
         return TreeStates.FAILURE, []
@@ -55,6 +58,7 @@ class WithinL2Radius(Node):
         self.radius = radius
 
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         target = self.namespace.get("target")
         distance = owner.point.distance_to(target.point)
         if distance <= self.radius:
@@ -71,6 +75,7 @@ class AtLInfinityRadius(Node):
         self.radius = radius
 
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         target = self.namespace.get("target")
         l_inf_distance = max(abs(owner.x - target.x), abs(owner.y - target.y))
         if l_inf_distance == self.radius:
@@ -85,6 +90,7 @@ class CoinFlip(Node):
         self.p = p
 
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         if random.uniform(0, 1) < self.p:
             return TreeStates.SUCCESS, []
         else:
@@ -99,6 +105,7 @@ class OutsideL2Radius(Node):
         self.radius = radius
 
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         radius_point = self.namespace.get("radius_point")
 
         if not radius_point:
@@ -117,6 +124,7 @@ class IsFinished(Node):
         self.number_of_turns = number_of_turns
 
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         if self.number_of_turns <= 0:
             return TreeStates.SUCCESS, []
         else:
@@ -129,6 +137,7 @@ class ChangeAI(Node):
         self.ai = ai
 
     def tick(self, owner, game_map):
+        super().tick(owner, game_map)
         owner.del_component('ai')
         owner.add_component(ai, 'ai')
         return TreeStates.SUCCESS, []
@@ -140,6 +149,7 @@ class FindNearestTargetEntity(Node):
             self.species = species_type
 
         def tick(self, owner, game_map):
+            super().tick(owner, game_map)
             target = game_map.current_level.find_closest_entity(owner, self.range, self.species)
 
             if target:

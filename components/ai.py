@@ -36,6 +36,7 @@ class BaseAI:
         return results
 
     def set_target(self, target):
+        print("setting the target: " + str(target))
         self.tree.namespace["target"] = target
 
     def remove_target(self):
@@ -56,7 +57,7 @@ class PatrollingNPC(BaseAI):
                     Attack()),
                 Sequence(
                     WithinPlayerFov(),
-                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                    MoveTowardsTargetEntity()),
                 Sequence(
                     InNamespace(name="target_point"),
                     MoveTowardsPointInNamespace(name="target_point")),
@@ -91,7 +92,7 @@ class BasicNPC(BaseAI):
                     Attack()),
                 Sequence(
                     WithinPlayerFov(),
-                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                    MoveTowardsTargetEntity()),
                 Sequence(
                     InNamespace(name="target_point"),
                     MoveTowardsPointInNamespace(name="target_point")),
@@ -112,11 +113,12 @@ class GuardNPC(BaseAI):
         self.tree = Root(
             Selection(
                 Sequence(
+                    InNamespace(name="target"),
                     IsAdjacent(),
                     Attack()),
                 Sequence(
                     WithinPlayerFov(),
-                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                    MoveTowardsTargetEntity()),
                 Sequence(
                     PointToTarget(guard_point, "radius_point"),
                     OutsideL2Radius(self.radius),
@@ -164,7 +166,7 @@ class HunterNPC(BaseAI):
                     Attack()),
                 Sequence(
                     WithinL2Radius(radius=sensing_range),
-                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                    MoveTowardsTargetEntity()),
                 TravelToRandomPosition()))
 
 class HuntingNPC(BaseAI):
@@ -181,7 +183,7 @@ class HuntingNPC(BaseAI):
                     Attack()),
                 Sequence(
                     WithinL2Radius(radius=sensing_range),
-                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                    MoveTowardsTargetEntity()),
                 TravelToRandomPosition()))
 
 
@@ -195,7 +197,7 @@ class ZombieNPC(BaseAI):
                     Attack()),
                 Sequence(
                     WithinL2Radius(radius=move_towards_radius),
-                    MoveTowardsTargetEntity(target_point_name="target_point"))))
+                    MoveTowardsTargetEntity())))
 
 
 class SkitteringNPC(BaseAI):
@@ -213,7 +215,7 @@ class SkitteringNPC(BaseAI):
                     Attack()),
                 Sequence(
                     WithinL2Radius(radius=skittering_range),
-                    MoveTowardsTargetEntity(target_point_name="target_point")),
+                    MoveTowardsTargetEntity()),
                 Skitter()))
 
 class ConfusedNPC(BaseAI):
@@ -259,11 +261,15 @@ class PredatorNPC(BaseAI):
         self.tree = Root(
             Selection(
                 Sequence(
+                    InNamespace(name="target"),
                     IsAdjacent(),
                     Attack()),
                 Sequence(
+                    InNamespace(name="target"),
+                    MoveTowardsTargetEntity()),
+                Sequence(
                     FindNearestTargetEntity(range=2,species_type=self.target_species),
-                    MoveTowardsTargetEntity(target_point_name="target_point"),
+                    MoveTowardsTargetEntity(),
                 ),
                 TravelToRandomPosition()))
 

@@ -314,13 +314,16 @@ class Rogue(tcod.event.EventDispatch):
 
                 if self.game_map.current_level.walkable[self.player.x + dx, self.player.y + dy]:
                     if self.game_map.current_level.blocked[self.player.x + dx, self.player.y + dy]:
-                        target = self.game_map.current_level.entities.get_entities_in_position((self.player.x + dx, self.player.y + dy))
+                        targets = self.game_map.current_level.entities.get_entities_in_position((self.player.x + dx, self.player.y + dy))
 
-                        if target[0].questgiver:
-                            quest_results = target[0].questgiver.talk(self.player)
+                        targets_in_render_order = sorted(targets, key=lambda x: x.render_order.value)
+                        print(targets_in_render_order)
+                        target = targets[-1]
+                        if target.questgiver:
+                            quest_results = target.questgiver.talk(self.player)
                             player_turn_results.extend(quest_results)
-                        elif target[0].defence:
-                            attack_results = self.player.offence.attack(target[0])
+                        elif not target.health.dead:
+                            attack_results = self.player.offence.attack(target)
                             player_turn_results.extend(attack_results)
                     else:
                         self.player.movement.move(dx, dy, self.game_map.current_level)

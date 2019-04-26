@@ -12,9 +12,6 @@ from map_objects.point import Point
 
 class MoveTowardsTargetEntity(Node):
     """Move the owner towards a target and remember the target's point."""
-    def __init__(self, target_point_name):
-        self.name = target_point_name
-
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
@@ -88,19 +85,20 @@ class TravelToRandomPosition(Node):
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        if not self.target_position:
+        if not self.target_position or (self.target_position == owner.point):
             self.target_position = random_walkable_position(game_map, owner)
         print("TravelToRandomPosition travelling to: " + str(self.target_position))
-        self.path = get_shortest_path(
+        print(owner.movement.routing_avoid)
+        self.target_path = get_shortest_path(
             game_map,
             owner.point,
             self.target_position,
             routing_avoid=owner.movement.routing_avoid)
-        if len(self.path) < 1:
+        if len(self.target_path) < 1:
             self.target_position = None
             return TreeStates.SUCCESS, []
         results = [{
-            ResultTypes.MOVE_WITH_PATH: (owner, self.path)}]
+            ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
         return TreeStates.SUCCESS, results
 
 class Skitter(Node):
@@ -122,13 +120,13 @@ class Attack(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
-        if owner.offence and target.defence:
-            print("Attack: SUCCESS")
-            return (TreeStates.SUCCESS,
-                    owner.offence.attack(target))
-        else:
-            print("Attack: FAILURE")
+        if target.health.dead:
+            print("Attack: FAILURE - target dead")
             return TreeStates.FAILURE, []
+
+        print("Attack: SUCCESS " + str(target))
+        return (TreeStates.SUCCESS,
+                    owner.offence.attack(target))
 
 class PointToTarget(Node):
     def __init__(self, target_point, target_point_name):
@@ -160,7 +158,7 @@ class SpawnEntity(Node):
             if entity:
                 #print("Will spawn " + str(entity))
                 results = [{ResultTypes.ADD_ENTITY: entity}]
-                if not repeat:
+                if not self.repeat:
                     results.append({ResultTypes.REMOVE_ENTITY: owner})
                 return TreeStates.SUCCESS, results
         return TreeStates.FAILURE, []
