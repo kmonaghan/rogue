@@ -239,14 +239,16 @@ class ConfusedNPC(BaseAI):
 class SpawningNPC(BaseAI):
     """AI for an entity that spawns other entities.
 
+    Args:
+        spawn: the method to generate the spawn entity.
+        min_time = Mininum number of turns before attempting to spawn. Default: 5
+        max_time = Maximium number of turns before spawning. Default: 10
     """
-    def __init__(self, spawn=None):
-        self.spawn = spawn
+    def __init__(self, spawn=None, min_time = 5, max_time = 10):
         self.tree = Root(
             Selection(
                 Sequence(
-                    CoinFlip(),
-                    SpawnEntity(spawn)),
+                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)),
                 DoNothing()))
 
 class PredatorNPC(BaseAI):

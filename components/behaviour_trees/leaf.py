@@ -1,14 +1,16 @@
 '''via https://github.com/madrury/roguelike
 '''
-from utils.pathfinding import get_shortest_path
 
-from etc.enum import TreeStates
-from etc.enum import ResultTypes
-from utils.utils import random_walkable_position, random_adjacent
+from random import uniform
+
 from components.behaviour_trees.root import Node
+
+from etc.enum import TreeStates, ResultTypes
 
 from map_objects.point import Point
 
+from utils.pathfinding import get_shortest_path
+from utils.utils import random_walkable_position, random_adjacent
 
 class MoveTowardsTargetEntity(Node):
     """Move the owner towards a target and remember the target's point."""
@@ -77,7 +79,11 @@ class SeekTowardsLInfinityRadius(Node):
 
 class TravelToRandomPosition(Node):
     """Pick a random position on the map and walk towards it until getting
-    there.
+    there. Once there, a new target is picked.
+
+    Attributes:
+        target_position: the target point
+        target_path: the current path the entity is following
     """
     def __init__(self):
         self.target_position = None
@@ -87,8 +93,13 @@ class TravelToRandomPosition(Node):
         super().tick(owner, game_map)
         if not self.target_position or (self.target_position == owner.point):
             self.target_position = random_walkable_position(game_map, owner)
-        print("TravelToRandomPosition travelling to: " + str(self.target_position))
-        print(owner.movement.routing_avoid)
+
+        if self.target_path and len(self.target_path) > 1 and (Point(self.target_path[0][0], self.target_path[0][1]) == owner.point):
+            self.target_path.pop(0)
+
+            if not game_map.current_level.blocked[self.target_path[0][0], self.target_path[0][1]]:
+                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
+
         self.target_path = get_shortest_path(
             game_map,
             owner.point,
@@ -97,9 +108,8 @@ class TravelToRandomPosition(Node):
         if len(self.target_path) < 1:
             self.target_position = None
             return TreeStates.SUCCESS, []
-        results = [{
-            ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
-        return TreeStates.SUCCESS, results
+
+        return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
 
 class Skitter(Node):
     """Move the owner to a random adjacent tile."""
@@ -142,23 +152,47 @@ class PointToTarget(Node):
         return TreeStates.SUCCESS, []
 
 class SpawnEntity(Node):
+    """Spawn an entity beside the current enity.
 
-    def __init__(self, maker, repeat = True):
+    Args:
+        maker: the method to generate the spawn entity.
+        repeat: Set to true to continue spawning entities. Default: True
+        min_time = Mininum number of turns before attempting to spawn. Default: 5
+        max_time = Maximium number of turns before spawning. Default: 10
+
+    Attributes:
+        maker: the method to generate the entity.
+        repeat: While true, the owner will continue to spawn entities.
+        min_time: Mininum number of turns before attempting to spawn.
+        max_time: Maximium number of turns before spawning.
+        current_time: Number of turns since last spawn.
+
+    """
+    def __init__(self, maker, repeat = True, min_time = 5, max_time = 10):
         self.maker = maker
         self.repeat = repeat
+        self.min_time = min_time
+        self.max_time = max_time
+        self.current_time = 0
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        x, y = random_adjacent((owner.x, owner.y))
+        self.current_time += 1
+        if self.current_time < self.min_time:
+            return TreeStates.FAILURE, []
 
-        if (game_map.current_level.walkable[x, y]
-            and not game_map.current_level.blocked[x, y]):
-            #and not game_map.current_level.water[x, y]):
-            entity = self.maker(Point(x, y))
-            if entity:
-                #print("Will spawn " + str(entity))
-                results = [{ResultTypes.ADD_ENTITY: entity}]
-                if not self.repeat:
-                    results.append({ResultTypes.REMOVE_ENTITY: owner})
-                return TreeStates.SUCCESS, results
+        if self.current_time > self.max_time or (uniform(0, 1) , (self.current_time/self.max_time)):
+            x, y = random_adjacent((owner.x, owner.y))
+
+            if (game_map.current_level.walkable[x, y]
+                and not game_map.current_level.blocked[x, y]):
+                #and not game_map.current_level.water[x, y]):
+                entity = self.maker(Point(x, y))
+                if entity:
+                    results = [{ResultTypes.ADD_ENTITY: entity}]
+                    if not self.repeat:
+                        results.append({ResultTypes.REMOVE_ENTITY: owner})
+
+                    self.current_time = 0
+                    return TreeStates.SUCCESS, results
         return TreeStates.FAILURE, []
