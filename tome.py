@@ -6,7 +6,7 @@ from map_objects.point import Point
 
 from game_messages import Message
 
-from random_utils import die_roll
+from utils.random_utils import die_roll
 
 from etc.enum import ResultTypes
 

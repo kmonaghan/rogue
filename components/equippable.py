@@ -1,6 +1,6 @@
 import tcod as libtcod
 
-from random_utils import die_roll
+from utils.random_utils import die_roll
 
 class Equippable:
     def __init__(self, slot, power_bonus=0, defence_bonus=0, max_hp_bonus=0, bonus_damage=0):

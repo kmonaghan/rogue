@@ -35,7 +35,7 @@ from map_objects.point import Point
 
 from components.death import PlayerDeath, WarlordDeath
 
-from random_utils import from_dungeon_level, random_choice_from_dict
+from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
 from etc.enum import RoutingOptions, Species
 

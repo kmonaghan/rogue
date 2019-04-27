@@ -3,7 +3,6 @@ from random import choice, sample, randint, getrandbits
 
 import bestiary
 import quest
-import random_utils
 
 from components.stairs import Stairs
 
@@ -18,6 +17,8 @@ from map_objects.point import Point
 from map_objects.level_map import LevelMap
 
 from etc.enum import RenderOrder, RoutingOptions, Species
+
+from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
 class GameMap:
     def __init__(self, dungeon_level=1):
@@ -237,11 +238,11 @@ class GameMap:
 
     def place_creatures(self, player):
         npc_chances = {}
-        npc_chances[Species.RAT] = random_utils.from_dungeon_level([[95, 1], [95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances[Species.SNAKE] = random_utils.from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances[Species.EGG] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        npc_chances[Species.RATNEST] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        npc_chances[Species.BAT] = random_utils.from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.RAT] = from_dungeon_level([[95, 1], [95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances[Species.SNAKE] = from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances[Species.EGG] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.RATNEST] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.BAT] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         max_npcs = len(self.current_level.floor.caves) // 100
 
@@ -251,7 +252,7 @@ class GameMap:
 
         for i in range(num_npcs):
             #choose random spot for this npc
-            creature_choice = random_utils.random_choice_from_dict(npc_chances)
+            creature_choice = random_choice_from_dict(npc_chances)
 
             npc = bestiary.generate_creature(creature_choice, self.dungeon_level, player.level.current_level)
             point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
@@ -262,20 +263,20 @@ class GameMap:
         #this is where we decide the chance of each npc or item appearing.
 
         #maximum number of npcs per room
-        max_npcs = 4# random_utils.from_dungeon_level([[1,2], [2, 2], [3, 4], [5, 5]], self.dungeon_level)
+        max_npcs = 4# from_dungeon_level([[1,2], [2, 2], [3, 4], [5, 5]], self.dungeon_level)
 
         #chance of each npc
         npc_chances = {}
-        npc_chances[Species.GOBLIN] = random_utils.from_dungeon_level([[95, 1],[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances[Species.ORC] = random_utils.from_dungeon_level([[95, 1],[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances[Species.TROLL] = random_utils.from_dungeon_level([[95, 1],[95, 2], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.GOBLIN] = from_dungeon_level([[95, 1],[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
+        npc_chances[Species.ORC] = from_dungeon_level([[95, 1],[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
+        npc_chances[Species.TROLL] = from_dungeon_level([[95, 1],[95, 2], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         #choose random number of npcs
         num_npcs = randint(1, max_npcs)
 
         for i in range(num_npcs):
 
-            choice = random_utils.random_choice_from_dict(npc_chances)
+            choice = random_choice_from_dict(npc_chances)
             npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level)
             point = self.current_level.find_random_open_position(npc.movement.routing_avoid,
                                                                     room = room)
@@ -286,12 +287,12 @@ class GameMap:
     def place_object(self, room):
         return
         #maximum number of items per room
-        max_items = random_utils.from_dungeon_level([[2, 1], [3, 4]], self.dungeon_level)
+        max_items = from_dungeon_level([[2, 1], [3, 4]], self.dungeon_level)
 
         #chance of each item (by default they have a chance of 0 at level 1, which then goes up)
         item_chances = {}
         item_chances['potion'] = 25  #healing potion always shows up, even if all other items have 0 chance
-        item_chances['scroll'] = random_utils.from_dungeon_level([[25, 2]], self.dungeon_level)
+        item_chances['scroll'] = from_dungeon_level([[25, 2]], self.dungeon_level)
         item_chances['weapon'] = 25
         item_chances['armour'] = 25
 
@@ -303,7 +304,7 @@ class GameMap:
 
             point = self.current_level.find_random_open_position([RoutingOptions.AVOID_STAIRS], room=room)
 
-            choice = random_utils.random_choice_from_dict(item_chances)
+            choice = random_choice_from_dict(item_chances)
             if choice == 'potion':
                 item = equipment.random_potion(point, self.dungeon_level)
             elif choice == 'scroll':
@@ -321,10 +322,10 @@ class GameMap:
 
         self.make_map(CONFIG.get('map_width'), CONFIG.get('map_height'), player)
 
-    def next_floor(self, player, constants):
+    def next_floor(self, player):
         self.dungeon_level += 1
 
-        self.create_floor(player, constants)
+        self.create_floor(player)
 
         if (self.dungeon_level > 1):
             player.health.heal(player.health.max_hp // 2)

@@ -1,5 +1,3 @@
-import tcod as libtcod
-
 from random import randint
 
 def from_dungeon_level(table, dungeon_level):
@@ -33,6 +31,6 @@ def die_roll(number_of_dice=1, type_of_dice=1, bonus=0):
     total = 0
 
     for x in range(0, number_of_dice):
-        total += libtcod.random_get_int(0, 1, type_of_dice)
+        total += randint(1, type_of_dice)
 
     return total + bonus

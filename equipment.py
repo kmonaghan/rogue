@@ -1,6 +1,6 @@
 import tcod as libtcod
 
-import random_utils
+from utils.random_utils import from_dungeon_level, random_choice_from_dict
 import tome
 
 from components.equippable import Equippable
@@ -17,14 +17,14 @@ from etc.enum import RenderOrder
 
 def random_armour(point = None, dungeon_level = 1):
     item_chances = {}
-    item_chances['shield'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
-    item_chances['helmet'] = random_utils.from_dungeon_level([[30, 2], [15, 3], [10, 4]], dungeon_level)
-    item_chances['leather shirt'] = random_utils.from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
-    item_chances['scalemail'] = random_utils.from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]], dungeon_level)
-    item_chances['chainmail'] = random_utils.from_dungeon_level([[40, 3], [30, 4]], dungeon_level)
-    item_chances['breastplate'] = random_utils.from_dungeon_level([[15, 4]], dungeon_level)
+    item_chances['shield'] = from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
+    item_chances['helmet'] = from_dungeon_level([[30, 2], [15, 3], [10, 4]], dungeon_level)
+    item_chances['leather shirt'] = from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
+    item_chances['scalemail'] = from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]], dungeon_level)
+    item_chances['chainmail'] = from_dungeon_level([[40, 3], [30, 4]], dungeon_level)
+    item_chances['breastplate'] = from_dungeon_level([[15, 4]], dungeon_level)
 
-    choice = random_utils.random_choice_from_dict(item_chances)
+    choice = random_choice_from_dict(item_chances)
     if choice == 'shield':
         item = shield(point)
 
@@ -49,7 +49,7 @@ def random_potion(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['heal'] = 40
 
-    choice = random_utils.random_choice_from_dict(item_chances)
+    choice = random_choice_from_dict(item_chances)
     if choice == 'heal':
         item = healing_potion(point)
 
@@ -60,7 +60,7 @@ def random_ring(point = None, dungeon_level = 1):
     item_chances['power'] = 50
     item_chances['defence'] = 50
 
-    choice = random_utils.random_choice_from_dict(item_chances)
+    choice = random_choice_from_dict(item_chances)
     if choice == 'power':
         item = ring_of_power(point)
 
@@ -76,7 +76,7 @@ def random_scroll(point = None, dungeon_level = 1):
     item_chances['confuse'] = 30
     item_chances['map_scroll'] = 20
 
-    choice = random_utils.random_choice_from_dict(item_chances)
+    choice = random_choice_from_dict(item_chances)
     if choice == 'lightning':
         item = lighting_scroll(point)
 
@@ -93,11 +93,11 @@ def random_scroll(point = None, dungeon_level = 1):
 
 def random_weapon(point = None, dungeon_level = 1):
     item_chances = {}
-    item_chances['dagger'] = random_utils.from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]], dungeon_level)
-    item_chances['short sword'] = random_utils.from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], dungeon_level)
-    item_chances['long sword'] = random_utils.from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
+    item_chances['dagger'] = from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]], dungeon_level)
+    item_chances['short sword'] = from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], dungeon_level)
+    item_chances['long sword'] = from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
 
-    choice = random_utils.random_choice_from_dict(item_chances)
+    choice = random_choice_from_dict(item_chances)
     if choice == 'dagger':
         item = dagger(point)
 
