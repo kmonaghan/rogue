@@ -26,7 +26,6 @@ class Movement:
                 print("can't move as blocked")
 
         def place(self, x, y, current_level):
-            print("placed: " + self.owner.name)
             current_level.move_entity(self.owner, Point(x, y))
             self.owner.x = x
             self.owner.y = y

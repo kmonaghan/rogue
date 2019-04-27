@@ -416,7 +416,7 @@ class dungeonGenerator:
 
         return False, False
 
-    def placeRoom(self, startX, startY, roomWidth, roomHeight, ignoreOverlap = False):
+    def placeRoom(self, startX, startY, roomWidth, roomHeight, ignoreOverlap = False, tile = Tiles.ROOM_FLOOR):
         """
         place a defined quad within the grid and add it to self.dungeon.rooms
 
@@ -433,7 +433,7 @@ class dungeonGenerator:
         if self.quadFits(startX, startY, roomWidth, roomHeight, 0) or ignoreOverlap:
             for x in range(roomWidth):
                 for y in range(roomHeight):
-                    self.dungeon.grid[startX+x][startY+y] = Tiles.ROOM_FLOOR
+                    self.dungeon.grid[startX+x][startY+y] = tile
             self.dungeon.rooms.append(dungeonRoom(startX, startY, roomWidth, roomHeight))
             return True
 

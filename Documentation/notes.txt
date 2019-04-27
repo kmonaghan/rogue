@@ -26,3 +26,7 @@ Other Roguelikes:
 https://github.com/Maugrift/GeneriCrawl See for nice FOV
 
 https://www.reddit.com/r/roguelikedev/wiki/faq_friday
+
+Behaviour Trees
+http://www.gamasutra.com/blogs/ChrisSimpson/20140717/221339/Behavior_trees_for_AI_How_they_work.php
+https://py-trees.readthedocs.io/en/devel/background.html
