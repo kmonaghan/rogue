@@ -9,21 +9,21 @@ from map_objects.point import Point
 class Movement:
         def __init__(self, can_move=True):
             self.can_move = can_move
-            self.routing_avoid = routing_avoid=[RoutingOptions.AVOID_BLOCKERS]
+            self.routing_avoid = [RoutingOptions.AVOID_BLOCKERS]
 
         def move(self, dx, dy, current_level):
             if not self.can_move:
                 return
 
             if not current_level.within_bounds(self.owner.x + dx, self.owner.y + dy):
-                print(self.owner.name + " " + str(self.owner.x) + " " + str(self.owner.y) + " attempt to move out of bounds: " + str(self.owner.x + dx) + " " + str(self.owner.y + dy))
+                print(f"{self.owner.name} {self.owner.point} attempt to move out of bounds: {self.owner.x + dx} {self.owner.y + dy}")
                 return
 
             #move by the given amount, if the destination is not blocked
             if current_level.walkable[self.owner.x + dx, self.owner.y + dy] and not current_level.blocked[self.owner.x + dx, self.owner.y + dy]:
                 self.place(self.owner.x + dx, self.owner.y + dy, current_level)
             else:
-                print("can't move as blocked")
+                print(f"{self.owner.name} can't move as blocked")
 
         def place(self, x, y, current_level):
             current_level.move_entity(self.owner, Point(x, y))
@@ -56,7 +56,7 @@ class Movement:
 
                 return True
 
-            print("can't move " + self.owner.name)
+            print(f"attempt_move: Can't move {self.owner.name}")
 
             return False
 

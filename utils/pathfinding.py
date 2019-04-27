@@ -30,6 +30,6 @@ def get_shortest_path(level_map, source, target, routing_avoid=None):
     # walkable, else the entity will be frozen in place.
     walkable[source.x, source.y] = True
     walkable[target.x, target.y] = True
-    pathfinder = tcod.path.AStar(walkable.T, diagonal=1.0)
+    pathfinder = tcod.path.AStar(walkable, diagonal=1.0)
     path = pathfinder.get_path(source.x, source.y, target.x, target.y)
     return path
