@@ -15,8 +15,10 @@ class Sequence(Node):
         self.children = children
 
     def tick(self, owner, game_map):
+        results = []
         for child in self.children:
-            state, results = child.tick(owner, game_map)
+            state, updated_results = child.tick(owner, game_map)
+            results.extend(updated_results)
             if state == TreeStates.FAILURE:
                 return state, results
         return state, results

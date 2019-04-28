@@ -3,7 +3,7 @@
 
 import random
 
-from etc.enum import TreeStates
+from etc.enum import TreeStates, HealthStates
 from components.behaviour_trees.root import Node
 from map_objects.point import Point
 
@@ -20,6 +20,7 @@ class InNamespace(Node):
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
+        print("Checking for: " + str(self.name))
         if self.namespace.get(self.name):
             return TreeStates.SUCCESS, []
         else:
@@ -159,3 +160,50 @@ class FindNearestTargetEntity(Node):
                 return TreeStates.SUCCESS, []
             else:
                 return TreeStates.FAILURE, []
+
+class CheckHealthStatus(Node):
+    """Check if an entity's health is under a given level.
+
+    Parameters
+    ----------
+    health_level: enum HealthStates
+      What level of health to check against.
+
+    Attributes
+    ----------
+    health_level: enum HealthStates
+      What level of health to check against.
+    """
+    def __init__(self, health_level):
+        self.health_level = health_level
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        print(f"Current health: {owner.health.health_percentage} against {self.health_level}")
+        if owner.health.health_percentage <= self.health_level:
+            return TreeStates.SUCCESS, []
+        else:
+            return TreeStates.FAILURE, []
+
+class SetNamespace(Node):
+    """Set a variable is set within the tree's namespace.
+
+    Parameters
+    ----------
+    name: str
+        Name to enter into namespace.
+
+    Attributes
+    ----------
+    name: str
+      The name of the variable in the tree's namespace.
+    """
+    def __init__(self, name):
+        self.name = name
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        print(f"Setting {self.name}")
+        self.namespace[self.name] = self.name
+
+        return TreeStates.SUCCESS, []

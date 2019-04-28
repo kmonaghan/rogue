@@ -11,7 +11,7 @@ from game_messages import Message
 
 from map_objects.point import Point
 
-from etc.enum import ResultTypes, Species
+from etc.enum import HealthStates, ResultTypes, Species
 
 from components.behaviour_trees.root import Root
 from components.behaviour_trees.composite import (
@@ -21,7 +21,7 @@ from components.behaviour_trees.leaf import (
      MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, PointToTarget)
 from components.behaviour_trees.conditions import (
     IsAdjacent, IsFinished, WithinPlayerFov, InNamespace, CoinFlip, FindNearestTargetEntity,
-    OutsideL2Radius)
+    OutsideL2Radius, CheckHealthStatus, SetNamespace)
 
 class BaseAI:
     """Base class for NPC AI.
@@ -32,7 +32,8 @@ class BaseAI:
     that summarizes the turn's effect on the game state.
     """
     def take_turn(self, game_map):
-        _, results = self.tree.tick(self.owner, game_map)
+        asdf, results = self.tree.tick(self.owner, game_map)
+        print(f"and the other: {asdf}")
         return results
 
     def set_target(self, target):
@@ -237,12 +238,18 @@ class ConfusedNPC(BaseAI):
                 Skitter()))
 
 class SpawningNPC(BaseAI):
-    """AI for an entity that spawns other entities.
+    """AI for an entity that spawns another entity.
 
-    Args:
-        spawn: the method to generate the spawn entity.
-        min_time = Mininum number of turns before attempting to spawn. Default: 5
-        max_time = Maximium number of turns before spawning. Default: 10
+    Parameters
+    ----------
+    spawn: method
+        The method to generate the spawned entity.
+    min_time: int
+        Mininum number of turns before attempting to spawn.
+        Default: 5
+    max_time: int
+        Maximium number of turns before spawning.
+        Default: 10
     """
     def __init__(self, spawn=None, min_time = 5, max_time = 10):
         self.tree = Root(
@@ -276,69 +283,76 @@ class PredatorNPC(BaseAI):
                 TravelToRandomPosition()))
 
 class HatchingNPC(BaseAI):
-    """A confused NPC.
+    """AI for an entity that turns into another entity.
 
-    Will randomly wander and attack random entities
+    Parameters
+    ----------
+    spawn: method
+        The method to generate the spawned entity.
+    min_time: int
+        Mininum number of turns before attempting to spawn.
+        Default: 5
+    max_time: int
+        Maximium number of turns before spawning.
+        Default: 10
     """
-    def __init__(self, spawn, min=5, max=15):
-        self.number_of_turns = randint(min, max)
-        spawn = spawn
+    def __init__(self, spawn, min_time=5, max_time=15):
+        number_of_turns = randint(min_time, max_time)
         self.tree = Root(
             Selection(
                 Sequence(
-                    IsFinished(self.number_of_turns),
-                    SpawnEntity(spawn)
+                    IsFinished(number_of_turns),
+                    SpawnEntity(spawn, hatch=True)
                 )))
 
-class WarlordNPC:
+class WarlordNPC(BaseAI):
+    """AI for a warlord.
+
+    The warlord will stay in the one spot unti the payer comes into view and will
+    then attack.
+
+    When injured, will summon 2 minions to help, scaling with the amount of
+    damage taken.
+    Injured: Goblins
+    Badly injured: Orcs
+    Near death: Trolls
+
+    """
     def __init__(self):
-        self.summoned_goblins = False
-        self.summoned_orcs = False
-        self.summoned_trolls = False
-
-    def take_turn(self, game_map):
-        results = []
-        #a basic npc takes its turn. if you can see it, it can see you
-        npc = self.owner
-        if game_map.current_level.fov[npc.x, npc.y]:
-
-            if (self.summoned_orcs == False) or (self.summoned_goblins == False) or (self.summoned_trolls == False):
-                health = (npc.health.hp * 100.0) / npc.health.max_hp
-
-                if (health < 40):
-                    if (self.summoned_trolls == False):
-                        self.summoned_trolls = True
-                        results.append({ResultTypes.MESSAGE: Message('Trolls! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.troll, game_map, 2)
-
-                        return results
-
-                elif (health < 60):
-                    if (self.summoned_orcs == False):
-                        self.summoned_orcs = True
-                        results.append({ResultTypes.MESSAGE: Message('Orcs! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.orc, game_map, 4)
-
-                        return results
-
-                elif (health < 80):
-                    if (self.summoned_goblins == False):
-                        self.summoned_goblins = True
-                        results.append({ResultTypes.MESSAGE: Message('Goblins! To me!', libtcod.red)})
-                        tome.cast_summon_npc(Point(npc.x, npc.y), bestiary.goblin, game_map, 6)
-
-                        return results
-
-            #move towards player if far away
-            if npc.point.distance_to(target.point) >= 2:
-                npc.movement.move_astar(target, game_map)
-
-            #close enough, attack! (if the player is still alive.)
-            elif target.health.hp > 0:
-                attack_results = npc.attack.attack(target)
-                results.extend(attack_results)
-
-        return results
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    Negate(InNamespace(name="summoned_goblins")),
+                    CheckHealthStatus(HealthStates.INJURED),
+                    SpawnEntity(bestiary.goblin, min_time=0, max_time=0),
+                    SpawnEntity(bestiary.goblin, min_time=0, max_time=0),
+                    SetNamespace(name="summoned_goblins")
+                ),
+                Sequence(
+                    Negate(InNamespace(name="summoned_orcs")),
+                    CheckHealthStatus(HealthStates.BADLY_INJURED),
+                    SpawnEntity(bestiary.orc, min_time=0, max_time=0),
+                    SpawnEntity(bestiary.orc, min_time=0, max_time=0),
+                    SetNamespace(name="summoned_orcs")
+                ),
+                Sequence(
+                    Negate(InNamespace(name="summoned_trolls")),
+                    CheckHealthStatus(HealthStates.NEAR_DEATH),
+                    SpawnEntity(bestiary.troll, min_time=0, max_time=0),
+                    SpawnEntity(bestiary.troll, min_time=0, max_time=0),
+                    SetNamespace(name="summoned_trolls")
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()
+                ),
+                Sequence(
+                    WithinPlayerFov(),
+                    MoveTowardsTargetEntity()
+                )
+            )
+        )
 
 class NecromancerNPC:
     def __init__(self):

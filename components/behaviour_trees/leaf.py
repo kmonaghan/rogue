@@ -154,26 +154,40 @@ class PointToTarget(Node):
 class SpawnEntity(Node):
     """Spawn an entity beside the current enity.
 
-    Args:
-        maker: the method to generate the spawn entity.
-        repeat: Set to true to continue spawning entities. Default: True
-        min_time = Mininum number of turns before attempting to spawn. Default: 5
-        max_time = Maximium number of turns before spawning. Default: 10
+    Parameters
+    ----------
+    maker: method
+        The method to generate the spawn entity.
+    hatch: bool
+        Set to true if the new entity should replace the current entity.
+        Default: False
+    min_time: int
+         Mininum number of turns before attempting to spawn.
+         Default: 5
+    max_time: int
+        Maximium number of turns before spawning.
+        Default: 10
 
-    Attributes:
-        maker: the method to generate the entity.
-        repeat: While true, the owner will continue to spawn entities.
-        min_time: Mininum number of turns before attempting to spawn.
-        max_time: Maximium number of turns before spawning.
-        current_time: Number of turns since last spawn.
+    Attributes
+    ----------
+    maker: method
+        The method to generate the spawn entity.
+    current_time: int
+        Number of turns since last spawn.
+    hatch: bool
+        If the new entity should replace the current entity.
+    min_time: int
+         Mininum number of turns before attempting to spawn.
+    max_time: int
+        Maximium number of turns before spawning.
 
     """
-    def __init__(self, maker, repeat = True, min_time = 5, max_time = 10):
+    def __init__(self, maker, hatch = False, min_time = 5, max_time = 10):
+        self.current_time = 0
+        self.hatch = hatch
         self.maker = maker
-        self.repeat = repeat
         self.min_time = min_time
         self.max_time = max_time
-        self.current_time = 0
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
@@ -188,11 +202,17 @@ class SpawnEntity(Node):
                 and not game_map.current_level.blocked[x, y]):
                 #and not game_map.current_level.water[x, y]):
                 entity = self.maker(Point(x, y))
-                if entity:
-                    results = [{ResultTypes.ADD_ENTITY: entity}]
-                    if not self.repeat:
-                        results.append({ResultTypes.REMOVE_ENTITY: owner})
+                target = self.namespace.get("target")
+                if target:
+                    entity.ai.set_target(target)
 
-                    self.current_time = 0
-                    return TreeStates.SUCCESS, results
+                #print(f"Spawning: {entity}")
+                results = [{ResultTypes.ADD_ENTITY: entity}]
+                if self.hatch:
+                    results.append({ResultTypes.REMOVE_ENTITY: owner})
+
+                self.current_time = 0
+                return TreeStates.SUCCESS, results
+            #else:
+            #    print("Can't spawn as no room.")
         return TreeStates.FAILURE, []
