@@ -438,7 +438,7 @@ class Rogue(tcod.event.EventDispatch):
             # Remove dropped items from inventory and place on the map
             if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
                 self.game_map.current_level.add_entity(result_data)
-                message = Message('{0} dropped the {1}'.format(entity.name, result_data.name), tcod.yellow)
+                message = Message(f"{entity.name} dropped the {result_data.name}", tcod.yellow)
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
                 self.game_state = GameStates.ENEMY_TURN
@@ -451,10 +451,10 @@ class Rogue(tcod.event.EventDispatch):
                     dequipped = equip_result.get('dequipped')
 
                     if equipped:
-                        message = Message('{0} equipped the {1}'.format(entity.name, equipped.name))
+                        message = Message(f"{entity.name} equipped the {equipped.name}")
 
                     if dequipped:
-                        message = Message('{0} dequipped the {1}'.format(entity.name, dequipped.name))
+                        message = Message(f"{entity.name} dequipped the {dequipped.name}")
 
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
