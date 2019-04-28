@@ -22,6 +22,10 @@ https://whatjaysaid.wordpress.com/2016/01/15/1228
 http://pcg.wikidot.com/pcg-algorithm:dungeon-generation
 https://www.reddit.com/r/roguelikedev/comments/6df0aw/my_implementation_of_a_bunch_of_dungeon_algorithms/
 
+http://www.roguebasin.com/index.php?title=Dijkstra_Maps_Visualized
+
+https://gitlab.com/Procedural-Generation/DungeonGenerator
+
 Other Roguelikes:
 https://github.com/Maugrift/GeneriCrawl See for nice FOV
 
