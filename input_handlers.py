@@ -86,6 +86,12 @@ def handle_player_turn_keys(event):
     if CONFIG.get('debug') and event.sym == ord('r'):
         return {InputTypes.RELOAD_LEVEL: True}
 
+    if CONFIG.get('debug') and event.sym == ord('o'):
+        return {InputTypes.SHOW_DIJKSTRA_PLAYER: True}
+
+    if CONFIG.get('debug') and event.sym == ord('p'):
+        return {InputTypes.SHOW_DIJKSTRA_FLEE: True}
+
     # No key was pressed
     return {}
 

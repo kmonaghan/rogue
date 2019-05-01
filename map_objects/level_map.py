@@ -15,6 +15,8 @@ from map_objects.point import Point
 from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, StairsFloor, EmptyTile
 
 SQUARED_TORCH_RADIUS = CONFIG.get('fov_radius') * CONFIG.get('fov_radius')
+DARK_GROUND = (0, 0, 255)
+LIGHT_GROUND = (255, 255, 0)
 
 class LevelMap(Map):
     def __init__(self, floor):
@@ -59,6 +61,9 @@ class LevelMap(Map):
         self.torchx = 0.0
         # 1d noise for the torch flickering
         self.noise = tcod.noise_new(1, 1.0, 1.0)
+
+        self.dijkstra_player = None
+        self.dijkstra_flee = None
 
     def blit_floor(self):
         self.walkable[:] = False
@@ -165,7 +170,7 @@ class LevelMap(Map):
         dy = 0.0
         di = 0.0
 
-        if self.torch:
+        if not CONFIG.get('debug'):
             # slightly change the perlin noise parameter
             self.torchx += 0.1
             # randomize the light position between -1.5 and 1.5
@@ -212,6 +217,18 @@ class LevelMap(Map):
 
             self.walkables.clear()
 
+            if CONFIG.get('show_dijkstra_player'):
+                max_distance = np.amax(self.dijkstra_player)
+                for x, y, _ in self.floor:
+                    if self.dijkstra_player[x,y] != 0:
+                        map_console.bg[x,y] = tcod.color_lerp(LIGHT_GROUND, DARK_GROUND, 0.9 * self.dijkstra_player[x,y] / max_distance)
+            '''
+            elif CONFIG.get('show_dijkstra_flee'):
+                max_distance = np.amax(self.dijkstra_flee)
+                for x, y, _ in self.floor:
+                    if self.dijkstra_flee[x,y] != 0:
+                        map_console.bg[x,y] = tcod.color_lerp(LIGHT_GROUND, DARK_GROUND, 0.9 * self.dijkstra_player[x,y] / max_distance)
+            '''
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
             current_entities = self.entities.get_entities_in_position((x, y))

@@ -96,6 +96,8 @@ class InputTypes(Enum):
     QUEST_LIST = auto()
     QUEST_RESPONSE = auto()
     RELOAD_LEVEL = auto()
+    SHOW_DIJKSTRA_PLAYER = auto()
+    SHOW_DIJKSTRA_FLEE = auto()
     TAKE_STAIRS = auto()
     WAIT = auto()
 

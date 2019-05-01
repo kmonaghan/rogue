@@ -3,6 +3,8 @@ import tcod.event
 
 from bestiary import create_player
 
+from utils.dijkstra_maps import generate_dijkstra_player_map, generate_dijkstra_flee_map
+
 from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import (
@@ -106,6 +108,7 @@ class Rogue(tcod.event.EventDispatch):
                                                 algorithm=CONFIG.get('fov_algorithm'),
                                                 radius=CONFIG.get('fov_radius'),
                                                 light_walls=CONFIG.get('fov_light_walls'))
+            generate_dijkstra_player_map(self.game_map, self.player)
             self.fov_recompute = False
 
         #---------------------------------------------------------------------
@@ -213,6 +216,14 @@ class Rogue(tcod.event.EventDispatch):
 
         if action == InputTypes.DEBUG_OFF:
             CONFIG.update({'debug': False})
+            self.fov_recompute = True
+
+        if action == InputTypes.SHOW_DIJKSTRA_PLAYER:
+            CONFIG.update({'show_dijkstra_player': not CONFIG.get('show_dijkstra_player')})
+            self.fov_recompute = True
+
+        if action == InputTypes.SHOW_DIJKSTRA_FLEE:
+            CONFIG.update({'show_dijkstra_flee': not CONFIG.get('show_dijkstra_flee')})
             self.fov_recompute = True
 
         if self.player.level.can_level_up():
@@ -467,6 +478,9 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == GameStates.QUEST_RESPONSE:
                 pass
 
+            if result_type == ResultTypes.SET_POSITION:
+                npc, x, y = result_data
+                npc.movement.attempt_move(Point(x, y), self.game_map)
             # Handle a move towards action.  Move towards a target.
             if result_type == ResultTypes.MOVE_TOWARDS:
                npc, target_x, target_y = result_data

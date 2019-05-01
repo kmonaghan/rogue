@@ -24,10 +24,11 @@ CONFIG = {
     'map_width': screen_width,
     'map_height': screen_height - panel_height - 1,
 
-    'debug': False,
-
     'fov_algorithm': tcod.FOV_RESTRICTIVE,
     'fov_light_walls': True,
     'fov_radius': 10,
 
+    'debug': True,
+    'show_dijkstra_player': False,
+    'show_dijkstra_flee': False,
 }
