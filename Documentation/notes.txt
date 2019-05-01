@@ -28,9 +28,20 @@ https://gitlab.com/Procedural-Generation/DungeonGenerator
 
 Other Roguelikes:
 https://github.com/Maugrift/GeneriCrawl See for nice FOV
+https://bitbucket.org/Lewatw/ticronem
 
 https://www.reddit.com/r/roguelikedev/wiki/faq_friday
 
 Behaviour Trees
 http://www.gamasutra.com/blogs/ChrisSimpson/20140717/221339/Behavior_trees_for_AI_How_they_work.php
 https://py-trees.readthedocs.io/en/devel/background.html
+
+Pathfinding
+https://www.reddit.com/r/roguelikedev/comments/3slu9c/faq_friday_25_pathfinding/
+http://www.roguebasin.com/index.php?title=Dijkstra_Maps_Visualized#--_Fleeing_AI_--
+https://www.reddit.com/r/roguelikedev/comments/698rcv/stuck_trying_to_make_enemies_flee_with_dijkstra/
+http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps
+
+Profiling:
+python3 -m cProfile -s time engine.py
+https://docs.python.org/3/library/profile.html
