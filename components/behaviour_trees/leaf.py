@@ -9,7 +9,7 @@ from etc.enum import TreeStates, ResultTypes
 
 from map_objects.point import Point
 
-from utils.pathfinding import get_shortest_path
+from utils.pathfinding import get_shortest_path, move_to_radius_of_target
 from utils.utils import random_walkable_position, random_adjacent
 
 class MoveTowardsTargetEntity(Node):
@@ -65,16 +65,17 @@ class SeekTowardsLInfinityRadius(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
-        path = get_path_to_radius_of_target(
+        point = move_to_radius_of_target(
             game_map,
             owner.point,
             target.point,
             radius=self.radius,
-            routing_avoid=owner.routing_avoid)
-        if len(path) <= 1:
-            return TreeStates.SUCCESS, []
-        results = [{
-            ResultTypes.SET_POSITION: (owner, path[0][0], path[0][1])}]
+            routing_avoid=owner.movement.routing_avoid)
+
+        if point == owner.point:
+            return TreeStates.FAILURE, []
+
+        results = [{ResultTypes.SET_POSITION: (owner, point)}]
         return TreeStates.SUCCESS, results
 
 class TravelToRandomPosition(Node):

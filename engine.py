@@ -208,6 +208,7 @@ class Rogue(tcod.event.EventDispatch):
 
         if action == InputTypes.RELOAD_LEVEL:
             self.game_map.next_floor(self.player)
+            self.fov_recompute = True
             return
 
         if action == InputTypes.DEBUG_ON:
@@ -479,8 +480,8 @@ class Rogue(tcod.event.EventDispatch):
                 pass
 
             if result_type == ResultTypes.SET_POSITION:
-                npc, x, y = result_data
-                npc.movement.attempt_move(Point(x, y), self.game_map)
+                npc, point = result_data
+                npc.movement.attempt_move(point, self.game_map)
             # Handle a move towards action.  Move towards a target.
             if result_type == ResultTypes.MOVE_TOWARDS:
                npc, target_x, target_y = result_data

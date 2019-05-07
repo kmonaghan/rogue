@@ -3,9 +3,10 @@
 
 import random
 
-from etc.enum import TreeStates, HealthStates
+from etc.enum import TreeStates, HealthStates, Species
 from components.behaviour_trees.root import Node
 from map_objects.point import Point
+from utils.utils import coordinates_within_circle
 
 class InNamespace(Node):
     """Check if a variable is set within the tree's namespace.
@@ -207,3 +208,27 @@ class SetNamespace(Node):
         self.namespace[self.name] = self.name
 
         return TreeStates.SUCCESS, []
+
+class NumberOfEntities(Node):
+    def __init__(self, radius=3, species=Species.ZOMBIE, number_of_entities=0):
+        self.radius = radius
+        self.species = species
+        self.number_of_entities = number_of_entities
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        set_a = coordinates_within_circle([owner.x, owner.y], self.radius)
+
+        count = 0
+        for (x, y) in set_a:
+            current_entities = game_map.current_level.entities.get_entities_in_position((x, y))
+            for entity in current_entities:
+                if entity.species == self.species:
+                    count += 1
+
+        print("entity count: " + str(count))
+
+        if count >= self.number_of_entities:
+            return TreeStates.SUCCESS, []
+        else:
+            return TreeStates.FAILURE, []

@@ -17,11 +17,11 @@ from components.behaviour_trees.root import Root
 from components.behaviour_trees.composite import (
     Selection, Sequence, Negate)
 from components.behaviour_trees.leaf import (
-     Attack, MoveTowardsTargetEntity, TravelToRandomPosition,
+     Attack, MoveTowardsTargetEntity, TravelToRandomPosition, SeekTowardsLInfinityRadius,
      MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, PointToTarget)
 from components.behaviour_trees.conditions import (
     IsAdjacent, IsFinished, WithinPlayerFov, InNamespace, CoinFlip, FindNearestTargetEntity,
-    OutsideL2Radius, CheckHealthStatus, SetNamespace)
+    WithinL2Radius, OutsideL2Radius, CheckHealthStatus, SetNamespace, NumberOfEntities)
 
 class BaseAI:
     """Base class for NPC AI.
@@ -32,8 +32,8 @@ class BaseAI:
     that summarizes the turn's effect on the game state.
     """
     def take_turn(self, game_map):
-        asdf, results = self.tree.tick(self.owner, game_map)
-        print(f"and the other: {asdf}")
+        _, results = self.tree.tick(self.owner, game_map)
+
         return results
 
     def set_target(self, target):
@@ -148,14 +148,21 @@ class NecromancerNPC(BaseAI):
         self.tree = Root(
             Selection(
                 Sequence(
-                    AtLInfinityRadius(radius=seeking_radius),
+                    Negate(NumberOfEntities(radius=2, species=Species.ZOMBIE, number_of_entities=4)),
                     CoinFlip(p=0.3),
-                    #SpawnEntity(game_objects.monsters.Zombie)
-                    ),
+                    SpawnEntity(bestiary.zombie, min_time=0, max_time=0),
+                ),
                 Sequence(
-                    WithinL2Radius(radius=move_towards_radius),
-                    SeekTowardsLInfinityRadius(radius=seeking_radius)),
-                TravelToRandomPosition()))
+                    #WithinL2Radius(radius=move_towards_radius),
+                    SeekTowardsLInfinityRadius(radius=seeking_radius)
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()
+                ),
+            )
+        )
 
 class HunterNPC(BaseAI):
     def __init__(self, sensing_range=12):
@@ -353,27 +360,3 @@ class WarlordNPC(BaseAI):
                 )
             )
         )
-
-class NecromancerNPC:
-    def __init__(self):
-        self.ritual_cast = False
-        self.ritual_started = False
-        self.ritual_turns = 50
-
-    def take_turn(self, game_map):
-        results = []
-
-        npc = self.owner
-        if game_map.current_level.fov[npc.x, npc.y]:
-            if not self.ritual_started:
-                self.ritual_started = True
-
-        if self.ritual_started and (self.ritual_turns > 0):
-             self.ritual_turns -= 1
-
-        if not self.ritual_cast and (self.ritual_turns == 0):
-            tome.resurrect_all_npc(bestiary.reanmimate, game_map, target)
-            results.append({ResultTypes.MESSAGE: Message('Rise and serve me again, now and forever!', libtcod.red)})
-            self.ritual_cast = True
-
-        return results
