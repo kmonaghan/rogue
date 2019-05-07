@@ -10,15 +10,9 @@ from etc.configuration import CONFIG
 
 import quest
 
-from components.ai import BasicNPC
-from components.ai import GuardNPC
-from components.ai import PatrollingNPC
-from components.ai import WarlordNPC
-from components.ai import NecromancerNPC
-from components.ai import PredatorNPC
-from components.ai import SpawningNPC
-from components.ai import HatchingNPC
-from components.ai import TetheredNPC
+from components.ai import (BasicNPC, GuardNPC, PatrollingNPC, WarlordNPC,
+                            NecromancerNPC, PredatorNPC, SpawningNPC,
+                            HatchingNPC, TetheredNPC, ZombieNPC)
 
 from components.berserk import Berserk
 from components.health import Health
@@ -410,20 +404,21 @@ def warlord(point = None):
     return npc
 
 def zombie(point = None, old_npc = None):
-    ai_component = BasicNPC()
+    ai_component = ZombieNPC()
     health_component = Health(30)
 
     if old_npc:
         old_npc.blocks = True
         old_npc.char = 'Z'
         old_npc.base_name = 'Zombie ' + old_npc.base_name
+        old_npc.species=Species.ZOMBIE
         old_npc.add_component(ai_component, 'ai')
         old_npc.add_component(Health(old_npc.health.max_hp // 2), 'health')
 
         return old_npc
     else:
         npc = Character(point, 'Z', 'zombie', libtcod.darker_green,
-                        ai=ai_component, species=Species.NONDESCRIPT,
+                        ai=ai_component, species=Species.ZOMBIE,
                         health=health_component)
 
         npc.add_component(Offence(base_power = 10), 'offence')

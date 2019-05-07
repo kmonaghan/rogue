@@ -246,6 +246,7 @@ class Species(Enum):
     BAT = auto()
     PLAYER = auto()
     CORPSE = auto()
+    ZOMBIE = auto()
 
 class Tiles(IntEnum):
     EMPTY = 0
