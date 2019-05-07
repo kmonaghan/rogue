@@ -9,14 +9,12 @@ def generate_dijkstra_player_map(game_map, player):
     dijk = tcod.dijkstra_new(walkable)
     tcod.dijkstra_compute(dijk, player.x, player.y)
 
-    dijk_dist = np.zeros((game_map.current_level.width, game_map.current_level.height), dtype=np.float32)
+    dijk_dist = np.zeros((game_map.current_level.width, game_map.current_level.height), dtype=np.int8)
     for y in range(game_map.current_level.height):
         for x in range(game_map.current_level.width):
             dijk_dist[x, y] = tcod.dijkstra_get_distance(dijk, x, y)
 
     dijk_dist[np.where(dijk_dist == -1)] = 0
-
-    matprint(dijk_dist)
 
     game_map.current_level.dijkstra_player = dijk_dist
 
@@ -39,7 +37,5 @@ def generate_dijkstra_flee_map(game_map, player):
             flee_dist[x, y] = tcod.dijkstra_get_distance(updated_dijk, x, y)
 
     flee_dist[np.where(flee_dist == -1)] = 0
-
-    matprint(flee_dist)
 
     game_map.current_level.dijkstra_flee = flee_dist

@@ -15,8 +15,8 @@ from map_objects.point import Point
 from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, StairsFloor, EmptyTile
 
 SQUARED_TORCH_RADIUS = CONFIG.get('fov_radius') * CONFIG.get('fov_radius')
-DARK_GROUND = (0, 0, 255)
-LIGHT_GROUND = (255, 255, 0)
+DIJKSTRA_FAR = (0, 0, 255)
+DIJKSTRA_NEAR = (255, 0, 0)
 
 class LevelMap(Map):
     def __init__(self, floor):
@@ -220,14 +220,18 @@ class LevelMap(Map):
             if CONFIG.get('show_dijkstra_player'):
                 max_distance = np.amax(self.dijkstra_player)
                 for x, y, _ in self.floor:
+                    map_console.ch[x, y] = ord(str(int(self.dijkstra_player[x,y] % 10)))
                     if self.dijkstra_player[x,y] != 0:
-                        map_console.bg[x,y] = tcod.color_lerp(LIGHT_GROUND, DARK_GROUND, 0.9 * self.dijkstra_player[x,y] / max_distance)
+                        map_console.bg[x,y] = tcod.color_lerp(DIJKSTRA_NEAR, DIJKSTRA_FAR, 0.9 * self.dijkstra_player[x,y] / max_distance)
+                    #else:
+                    #    map_console.ch[x, y] = ord('0')
+                    #    map_console.fg[x, y] = (0,255,0)
             '''
             elif CONFIG.get('show_dijkstra_flee'):
                 max_distance = np.amax(self.dijkstra_flee)
                 for x, y, _ in self.floor:
                     if self.dijkstra_flee[x,y] != 0:
-                        map_console.bg[x,y] = tcod.color_lerp(LIGHT_GROUND, DARK_GROUND, 0.9 * self.dijkstra_player[x,y] / max_distance)
+                        map_console.bg[x,y] = tcod.color_lerp(DIJKSTRA_NEAR, DIJKSTRA_FAR, 0.9 * self.dijkstra_player[x,y] / max_distance)
             '''
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
