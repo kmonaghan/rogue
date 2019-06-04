@@ -50,7 +50,7 @@ class Movement:
             self.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
 
         def attempt_move(self, target_point, game_map):
-            print(f"attempting to move {self.owner.name} from {self.owner.point} to {target_point}")
+            print(f"attempt_move: {self.owner.name} from {self.owner.point} to {target_point}")
             if game_map.current_level.walkable[target_point.x, target_point.y] and not game_map.current_level.blocked[target_point.x, target_point.y]:
                 self.place(target_point.x, target_point.y, game_map.current_level)
 

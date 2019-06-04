@@ -133,7 +133,7 @@ class Rogue(tcod.event.EventDispatch):
         self.map_console.blit(root_console, 0, 0, 0, 0,
                           self.map_console.width, self.map_console.height)
 
-        root_console.print(1, CONFIG.get('panel_y') - 1, get_names_under_mouse(self.motion.tile.x, self.motion.tile.y, self.game_map), tcod.white)
+        root_console.print(1, CONFIG.get('panel_y') - 1, get_names_under_mouse(self.motion.tile.x, self.motion.tile.y, self.game_map.current_level), tcod.white)
 
         self.info_console.blit(root_console, 0, CONFIG.get('panel_y'), 0, 0,
                           CONFIG.get('info_panel_width'), CONFIG.get('panel_height'))

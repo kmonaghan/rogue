@@ -5,10 +5,10 @@ from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed, game_over, game_paused
 
-def get_names_under_mouse(x, y, game_map):
+def get_names_under_mouse(x, y, current_level):
     location = ''
 
-    if game_map.current_level.within_bounds(x, y):
+    if current_level.within_bounds(x, y):
             location = str(x) + ',' + str(y)
     else:
         #print("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
@@ -17,10 +17,10 @@ def get_names_under_mouse(x, y, game_map):
     tile_description = ''
     names = ''
 
-    if (game_map.current_level.fov[x, y] or CONFIG.get('debug')):
-        tile_description = str(game_map.current_level.tiles[x][y]) + ' '
+    if (current_level.fov[x, y] or CONFIG.get('debug')):
+        tile_description = str(current_level.tiles[x][y]) + ' '
 
-        names = [str(entity) for entity in game_map.current_level.entities.get_entities_in_position((x, y))]
+        names = [str(entity) for entity in current_level.entities.get_entities_in_position((x, y))]
         names = ', '.join(names)
 
     return tile_description + location + ' ' + names
