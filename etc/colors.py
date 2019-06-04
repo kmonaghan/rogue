@@ -21,6 +21,9 @@ COLORS = {
     'cursor_tail': (220, 180, 0),
 
     'console_background': (0, 0, 0),
+
+    'dijkstra_far': (0, 0, 255),
+    'dijkstra_near': (255, 0, 0),
 }
 
 STATUS_BAR_COLORS = {

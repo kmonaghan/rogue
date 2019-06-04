@@ -135,81 +135,8 @@ def random_walkable_position(game_map, entity):
 #-----------------------------------------------------------------------------
 # Entity Finders
 #-----------------------------------------------------------------------------
-def get_closest_entity_of_type(position, game_map, entity_type):
-    """Get the closest entity of a given type from a list of entities."""
-    closest = None
-    closest_distance = math.inf
-    for entity in game_map.entities:
-        distance = l2_distance(position, (entity.x, entity.y))
-        if (entity.entity_type == entity_type and
-            distance < closest_distance):
-            closest = entity
-            closest_distance = distance
-    return closest
 
-def get_n_closest_entities_of_type(position, game_map, entity_type, n):
-    entities_of_type = [
-        e for e in game_map.entities if e.entity_type == entity_type]
-    entities_of_type = sorted(
-        entities_of_type, key=lambda e: l2_distance(position, (e.x, e.y)))
-    if len(entities_of_type) < n:
-        return entities_of_type
-    else:
-        return entities_of_type[:n]
-
-def get_all_entities_of_type_within_radius(
-    position, game_map, entity_type, radius):
-    """Get all the entities of a given type within a given range."""
-    within_radius = []
-    for entity in game_map.entities:
-        if (l2_distance(position, (entity.x, entity.y)) <= radius and
-            entity.entity_type == entity_type):
-            within_radius.append(entity)
-    return within_radius
-
-def get_all_entities_of_type_in_position(position, game_map, entity_type):
-    entities = game_map.entities.get_entities_in_position(position)
-    return [e for e in entities if e.entity_type == entity_type]
-
-def get_all_entities_with_component_within_radius(
-    position, game_map, component, radius):
-    """Get all the entities of a given type within a given range."""
-    within_radius = []
-    for entity in game_map.entities:
-        if (l2_distance(position, (entity.x, entity.y)) <= radius
-            and getattr(entity, component)):
-            within_radius.append(entity)
-    return within_radius
-
-def get_all_entities_with_component_in_position(position, game_map, component):
-    entities = game_map.entities.get_entities_in_position(position)
-    return [e for e in entities if getattr(e, component)]
-
-def get_blocking_entity_in_position(game_map, position):
-    entities = game_map.entities.get_entities_in_position(position)
-    blockers = [e for e in entities if e.blocks]
-    if len(blockers) >= 2:
-        raise RuntimeError(
-            f"More than one blocking entity {blockers[0].name, blockers[1].name} "
-            f"in position {position}")
-    if blockers == []:
-        return None
-    entity = blockers[0]
-    if entity.blocks:
-        return entity
-
-def get_first_blocking_entity_along_ray(game_map, source, target):
-    path = bresenham_ray(
-        game_map, (source[0], source[1]), (target[0], target[1]))
-    for p in path[1:]:
-        entity = get_blocking_entity_in_position(game_map, (p[0], p[1]))
-        if entity:
-            return entity
-    return None
 
 def matprint(mat, fmt="g"):
-    col_maxes = [max([len(("{:"+fmt+"}").format(x)) for x in col]) for col in mat.T]
-    for x in mat:
-        for i, y in enumerate(x):
-            print(("{:"+str(col_maxes[i])+fmt+"}").format(y), end="  ")
-        print("")
+    with np.printoptions(threshold=np.inf, linewidth=2000):
+        print(mat)

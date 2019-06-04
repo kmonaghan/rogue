@@ -12,29 +12,27 @@ from etc.configuration import CONFIG
 from etc.enum import RoutingOptions, Tiles
 
 from map_objects.point import Point
-from map_objects.tile import CavernFloor, CavernWall, CorridorFloor, CorridorWall, Door, RoomFloor, RoomWall, ShallowWater, StairsFloor, EmptyTile
+from map_objects.tile import (CavernFloor, CavernWall, CorridorFloor,
+                                CorridorWall, DeepWater, Door, ImpenetrableTile,
+                                RoomFloor, RoomWall, ShallowWater, StairsFloor,
+                                EmptyTile, PotentialCorridorFloor)
 
 SQUARED_TORCH_RADIUS = CONFIG.get('fov_radius') * CONFIG.get('fov_radius')
-DIJKSTRA_FAR = (0, 0, 255)
-DIJKSTRA_NEAR = (255, 0, 0)
 
 class LevelMap(Map):
-    def __init__(self, floor):
-        width, height = floor.width, floor.height
+    def __init__(self, grid):
+        width, height = grid.shape
         super().__init__(width, height, order="F")
-        self.floor = floor
         self.entities = EntityList(width, height)
         # TODO: Add to docstring
         self.upward_stairs_position = None
         self.downward_stairs_position = None
         # These need to be int8's to work with the tcod pathfinder
+        self.grid = np.zeros(self.walkable.shape, dtype=np.int8)
         self.explored = np.zeros(self.walkable.shape, dtype=np.int8)
         self.illuminated = np.zeros(self.walkable.shape, dtype=np.int8)
-        self.door = np.zeros(self.walkable.shape, dtype=np.int8)
         self.blocked = np.zeros(self.walkable.shape, dtype=np.int8)
-        self.caves = np.zeros(self.walkable.shape, dtype=np.int8)
-        self.corridors = np.zeros(self.walkable.shape, dtype=np.int8)
-        self.floors = np.zeros(self.walkable.shape, dtype=np.int8)
+
         self.allowed_stairs_tiles = np.zeros(self.walkable.shape, dtype=np.int8)
 
         self.dark_map_bg = np.full(
@@ -47,11 +45,13 @@ class LevelMap(Map):
             self.walkable.shape + (3,), COLORS.get('console_background'), dtype=np.uint8
         )
 
+        self.map_char = np.zeros(self.walkable.shape, dtype=np.int8)
+
         self.dungeon_level = 1
 
         self.tiles = [[None for x in range(height)] for y in range(width)]
 
-        self.blit_floor()
+        self.blit_floor(grid)
 
         self.paths = []
         self.walkables = []
@@ -65,57 +65,75 @@ class LevelMap(Map):
         self.dijkstra_player = None
         self.dijkstra_flee = None
 
-    def blit_floor(self):
+    @property
+    def caves(self):
+        return self.grid[np.where(self.grid == Tiles.CAVERN_FLOOR)]
+
+    @property
+    def corridors(self):
+        return self.grid[np.where(self.grid == Tiles.CAVERN_FLOOR)]
+
+    @property
+    def doors(self):
+        return self.grid[np.where(self.grid == Tiles.DOOR)]
+
+    @property
+    def floors(self):
+        return self.grid[np.where(self.grid == Tiles.CAVERN_FLOOR)]
+
+    def tiles_of_type(self, tile):
+        return np.where(self.grid == tile)
+
+    def blit_floor(self, grid):
         self.walkable[:] = False
         self.transparent[:] = False
         self.explored[:] = False
 
-        for x, y, tile in self.floor:
-            if self.floor.grid[x][y] == Tiles.EMPTY:
+        for (x,y), value in np.ndenumerate(grid):
+            if grid[x,y] == Tiles.EMPTY:
                 current_tile = EmptyTile()
-            elif self.floor.grid[x][y] == Tiles.OBSTACLE:
+            elif grid[x,y] == Tiles.OBSTACLE:
                 current_tile = EmptyTile()
-            elif self.floor.grid[x][y] == Tiles.IMPENETRABLE:
-                current_tile = EmptyTile()
-            elif self.floor.grid[x][y] == Tiles.CAVERN_WALL:
+            elif grid[x,y] == Tiles.IMPENETRABLE:
+                current_tile = ImpenetrableTile()
+            elif grid[x,y] == Tiles.CAVERN_WALL:
                 current_tile = CavernWall()
-            elif self.floor.grid[x][y] == Tiles.CORRIDOR_WALL:
+            elif grid[x,y] == Tiles.CORRIDOR_WALL:
                 current_tile = CorridorWall()
-            elif self.floor.grid[x][y] == Tiles.ROOM_WALL:
+            elif grid[x,y] == Tiles.ROOM_WALL:
                 current_tile = RoomWall()
-            elif self.floor.grid[x][y] == Tiles.DOOR:
-                self.door[x,y] = True
+            elif grid[x,y] == Tiles.DOOR:
                 self.make_transparent_and_walkable(x, y)
                 current_tile = Door()
-            elif self.floor.grid[x][y] == Tiles.DEADEND:
+            elif grid[x,y] == Tiles.DEADEND:
                 current_tile = CorridorWall()
-            elif self.floor.grid[x][y] == Tiles.CAVERN_FLOOR:
-                self.caves[x,y] = True
+            elif grid[x,y] == Tiles.CAVERN_FLOOR:
                 self.make_transparent_and_walkable(x, y)
                 current_tile = CavernFloor()
-            elif self.floor.grid[x][y] == Tiles.CORRIDOR_FLOOR:
-                self.caves[x,y] = False
-                self.corridors[x,y] = True
+            elif grid[x,y] == Tiles.CORRIDOR_FLOOR:
                 self.make_transparent_and_walkable(x, y)
                 current_tile = CorridorFloor()
-            elif self.floor.grid[x][y] == Tiles.ROOM_FLOOR:
-                self.caves[x,y] = False
-                self.floors[x,y] = True
+            elif grid[x,y] == Tiles.ROOM_FLOOR:
                 self.make_transparent_and_walkable(x, y)
                 current_tile = RoomFloor()
-            elif self.floor.grid[x][y] == Tiles.SHALLOWWATER:
+            elif grid[x,y] == Tiles.SHALLOWWATER:
                 current_tile = ShallowWater()
-            elif self.floor.grid[x][y] == Tiles.DEEPWATER:
+            elif grid[x,y] == Tiles.DEEPWATER:
                 current_tile = DeepWater()
-            elif self.floor.grid[x][y] == Tiles.STAIRSFLOOR:
+            elif grid[x,y] == Tiles.STAIRSFLOOR:
                 self.allowed_stairs_tiles[x,y] = True
-                current_tile = RoomFloor()
+                current_tile = StairsFloor()
+            elif grid[x,y] == Tiles.POTENTIAL_CORRIDOR_FLOOR:
+                current_tile = PotentialCorridorFloor()
             else:
                 current_tile = EmptyTile()
 
+            self.grid = grid
             self.tiles[x][y] = current_tile
             self.dark_map_bg[x,y] = current_tile.out_of_fov_color
             self.light_map_bg[x,y] = current_tile.fov_color
+            if current_tile.char:
+                self.map_char[x,y] = ord(current_tile.char)
 
     def make_transparent_and_walkable(self, x, y):
         self.walkable[x, y] = True
@@ -203,6 +221,7 @@ class LevelMap(Map):
             map_console.bg[explored] = self.dark_map_bg[explored]
             map_console.bg[where_fov] = self.light_map_bg[where_fov]
 
+        map_console.ch[:] = self.map_char[:]
         if CONFIG.get('debug'):
             for current_path in self.paths:
                 for x,y in current_path:
@@ -211,7 +230,7 @@ class LevelMap(Map):
             #self.paths.clear()
 
             for current_walkable in self.walkables:
-                for x, y, _ in self.floor:
+                for (x,y), value in np.ndenumerate(self.grid):
                     if (current_walkable[x, y]):
                         map_console.bg[x,y] = tcod.lighter_blue
 
@@ -219,20 +238,16 @@ class LevelMap(Map):
 
             if CONFIG.get('show_dijkstra_player'):
                 max_distance = np.amax(self.dijkstra_player)
-                for x, y, _ in self.floor:
+                for (x,y), value in np.ndenumerate(self.grid):
                     map_console.ch[x, y] = ord(str(int(self.dijkstra_player[x,y] % 10)))
                     if self.dijkstra_player[x,y] != 0:
-                        map_console.bg[x,y] = tcod.color_lerp(DIJKSTRA_NEAR, DIJKSTRA_FAR, 0.9 * self.dijkstra_player[x,y] / max_distance)
-                    #else:
-                    #    map_console.ch[x, y] = ord('0')
-                    #    map_console.fg[x, y] = (0,255,0)
-            '''
-            elif CONFIG.get('show_dijkstra_flee'):
+                        map_console.bg[x,y] = tcod.color_lerp(COLORS.get('dijkstra_near'), COLORS.get('dijkstra_far'), 0.9 * self.dijkstra_player[x,y] / max_distance)
+            elif CONFIG.get('show_dijkstra_flee') and type(self.dijkstra_flee) is np.ndarray:
                 max_distance = np.amax(self.dijkstra_flee)
-                for x, y, _ in self.floor:
+                for (x,y), value in np.ndenumerate(self.grid):
                     if self.dijkstra_flee[x,y] != 0:
-                        map_console.bg[x,y] = tcod.color_lerp(DIJKSTRA_NEAR, DIJKSTRA_FAR, 0.9 * self.dijkstra_player[x,y] / max_distance)
-            '''
+                        map_console.bg[x,y] = tcod.color_lerp(COLORS.get('dijkstra_near'), COLORS.get('dijkstra_far'), 0.9 * self.dijkstra_player[x,y] / max_distance)
+
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
             current_entities = self.entities.get_entities_in_position((x, y))

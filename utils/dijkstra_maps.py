@@ -9,7 +9,7 @@ def generate_dijkstra_player_map(game_map, player):
     dijk = tcod.dijkstra_new(walkable)
     tcod.dijkstra_compute(dijk, player.x, player.y)
 
-    dijk_dist = np.zeros((game_map.current_level.width, game_map.current_level.height), dtype=np.int8)
+    dijk_dist = np.zeros(game_map.current_level.walkable.shape, dtype=np.int8)
     for y in range(game_map.current_level.height):
         for x in range(game_map.current_level.width):
             dijk_dist[x, y] = tcod.dijkstra_get_distance(dijk, x, y)

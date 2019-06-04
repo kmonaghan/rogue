@@ -258,11 +258,24 @@ class Tiles(IntEnum):
     DOOR = auto()
     DEADEND = auto()
     CAVERN_FLOOR = auto()
+    POTENTIAL_CORRIDOR_FLOOR = auto()
     CORRIDOR_FLOOR = auto()
     ROOM_FLOOR = auto()
     SHALLOWWATER = auto()
     DEEPWATER = auto()
     STAIRSFLOOR = auto()
+
+WALKABLE_TILES = {
+    Tiles.DOOR, Tiles.CAVERN_FLOOR,
+    Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR,
+    Tiles.SHALLOWWATER, Tiles.DEEPWATER,
+    Tiles.STAIRSFLOOR,}
+
+BLOCKING_TILES = {
+    Tiles.OBSTACLE, Tiles.CAVERN_WALL,
+    Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL,
+    Tiles.DEEPWATER, Tiles.IMPENETRABLE
+}
 
 class TreeStates(Enum):
     SUCCESS = auto()

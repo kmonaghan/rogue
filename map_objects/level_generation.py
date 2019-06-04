@@ -1,7 +1,9 @@
 import tcod
+from random import randint
 
-from map_objects.dungeonGenerator import *
-from map_objects.level_map import LevelMap
+from map_objects.np_dungeonGeneration import *
+from map_objects.np_level_map import LevelMap
+from map_objects.np_prefab import Prefab
 from map_objects.prefab import *
 
 def level_one_generator(map_width, map_height):
@@ -48,19 +50,13 @@ def level_one_generator(map_width, map_height):
     return LevelMap(dm.dungeon)
 
 def level_caverns(dm):
-    dm.generateCaves(45, 4)
-    # clear away small islands
-    unconnected = dm.findUnconnectedAreas()
-    for area in unconnected:
-        if len(area) < 10:
-            for x, y in area:
-                dm.dungeon.grid[x][y] = Tiles.EMPTY
+    dm.generateCaves(50, 3)
 
-    unconnected = dm.findUnconnectedAreas()
-    dm.joinUnconnectedAreas(unconnected, Tiles.CAVERN_FLOOR)
+    dm.removeAreasSmallerThan(35)
 
-    dm.findCaves()
-    dm.placeWalls()
+    #dm.waterFeature()
+
+    #dm.placeWalls()
 
     return dm
 
@@ -99,12 +95,13 @@ def level_cavern_rooms(map_width, map_height):
 
 def level_rooms(dm):
     # generate rooms and corridors
-    dm.placeRandomRooms(8, 12, 1, 1, 1000)
+    dm.placeRandomRooms(5, 7, 1, 1, 2000)
+
     x, y = dm.findEmptySpace(3)
     while x:
         dm.generateCorridors('f', x, y)
         x, y = dm.findEmptySpace(3)
-
+    '''
     # join it all together
     dm.connectAllRooms(0)
 
@@ -112,6 +109,7 @@ def level_rooms(dm):
     dm.findDeadends()
     while dm.dungeon.deadends:
         dm.pruneDeadends(1)
+    '''
 
 def level_generator(map_width, map_height):
 
@@ -126,9 +124,9 @@ def level_generator(map_width, map_height):
 
     place_stair_room(dm)
     place_stair_room(dm)
-    level_rooms(dm)
+    level_caverns(dm)
 
-    return LevelMap(dm.dungeon)
+    return LevelMap(dm.grid)
 
     chance = randint(0,100)
     '''
@@ -184,12 +182,13 @@ def level_boss_generator(map_width, map_height):
 def random_lair(dm):
     lair_chance = True
 
+    make_room_slice(barracks())
+
     if (lair_chance):
-        prefab = Prefab(necromancer_lair())
+        prefab = Prefab(barracks())
 
         place_prefab(prefab, dm)
 
-        #point = prefab.room.random_tile(self)
         #necro = bestiary.necromancer(point)
         #self.current_map.add_entity(necro)
 
@@ -199,6 +198,7 @@ def place_stair_room(dm):
     place_prefab(prefab, dm)
 
 def place_prefab(prefab, dm):
+    '''
     startX, startY = dm.placeRoomRandomly(prefab.room.width, prefab.room.height)
 
     prefab.room.x = startX
@@ -206,10 +206,20 @@ def place_prefab(prefab, dm):
 
     dm.placeRoom(prefab.room.x, prefab.room.y, prefab.room.width, prefab.room.height)
     prefab.carve(dm.dungeon.grid)
+    '''
+
+    dm.placeRoomRandomly(prefab)
 
 def arena(map_width, map_height):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
+    dm.placeRoom(1, 1, 20, 20)
+
+    dm.placeRoom(25, 15, 10, 10)
+
+    #dm.placeRandomRooms(8, 12, 5, 5, 1000)
+
+    '''
     prefab = circle_shaped_room(circle_size = 15)
     startX = (map_width // 2) - (prefab.room.width // 2)
     startY = (map_height // 2) - (prefab.room.height // 2)
@@ -217,7 +227,8 @@ def arena(map_width, map_height):
     prefab.room.x = startX
     prefab.room.y = startY
     prefab.carve(dm.dungeon.grid)
-
+    '''
+    '''
     for x in range(3):
         prefab = circle_shaped_room()
         startX, startY = dm.placeRoomRandomly(prefab.room.width, prefab.room.height)
@@ -225,7 +236,7 @@ def arena(map_width, map_height):
         prefab.room.x = startX
         prefab.room.y = startY
         prefab.carve(dm.dungeon.grid)
-    '''
+
     for x in range(5):
         prefab = curved_side_shaped_room()
         startX, startY = dm.placeRoomRandomly(prefab.room.width, prefab.room.height)
@@ -235,8 +246,18 @@ def arena(map_width, map_height):
         prefab.carve(dm.dungeon.grid)
     '''
 
-    unconnected = dm.findUnconnectedAreas()
-    dm.joinUnconnectedAreas(unconnected)
+    x, y = dm.findEmptySpace(3)
+    while x:
+        dm.generateCorridors('f', x, y)
+        x, y = dm.findEmptySpace(3)
+
+    # join it all together
+    dm.connectAllRooms(0)
+
+    #clear all dead ends
+    dm.findDeadends()
+    while dm.dungeon.deadends:
+        dm.pruneDeadends(1)
 
     dm.placeWalls()
 
@@ -347,12 +368,3 @@ def curved_side_shaped_room():
     prefab = Prefab(room_layout)
 
     return prefab
-'''
-import numpy as np
-m = np.array([[1,2,3],
-     [2,3,3],
-     [5,4,3]])
-
-def rotate_matrix(mat):
-return np.rot90(mat)
-'''

@@ -36,15 +36,21 @@ floor_to_wall = {
 }
 
 class Prefab:
-    def __init__(self, room_map):
+    def __init__(self, room_map, randomly_rotate=True):
         self.room_map = room_map
         self.room = None
         self.layout = []
         self.door = None
+        self.randomly_rotate = randomly_rotate
 
         self.parse_map()
 
     def parse_map(self):
+        if self.randomly_rotate:
+            rotations = randint(0, 3)
+            for idx in range(rotations):
+                self.room_map = list(zip(*reversed(self.room_map)))
+
         self.layout = [["#"
         			for y in range(len(self.room_map))]
         				for x in range(len(self.room_map[0]))]
@@ -72,8 +78,10 @@ class Prefab:
                 elif (self.layout[xoffset][yoffset] == "S"):
                     map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.STAIRSFLOOR
                 elif (self.layout[xoffset][yoffset] == "D"):
-                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.ROOM_FLOOR
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.DOOR
                     self.door = Point(self.room.x + xoffset, self.room.y + yoffset)
+                elif (self.layout[xoffset][yoffset] == "V"):
+                    map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.EMPTY
                 else:
                     map[self.room.x + xoffset][self.room.y + yoffset] = Tiles.ROOM_FLOOR
 
@@ -104,17 +112,6 @@ class dungeonRoom:
 
     def __repr__(self):
         return f"{self.x},{self.y}  w:{self.width} h:{self.height}"
-
-    def random_tile(self, map):
-        point = None
-        while (point == None):
-            x = randint(self.x + 1, self.x + self.width - 2)
-            y = randint(self.y + 1, self.y + self.height - 2)
-
-            if not map.current_level.blocked[x, y]:
-                point = Point(x,y)
-
-        return point
 
     def center_tile(self):
         point = Point(self.x + int(self.width / 2), int(self.y + self.height / 2))
@@ -234,6 +231,7 @@ class dungeonGenerator:
                     return False
         return True
 
+    #ported
     def getPossibleMoves(self, x, y):
         """
         searchs for potential directions that a corridor can expand in
@@ -255,6 +253,7 @@ class dungeonGenerator:
                 availableSquares.append((nx, ny))
         return availableSquares
 
+    #ported
     def quadFits(self, sx, sy, rx, ry, margin):
         """
         looks to see if a quad shape will fit in the grid without colliding with any other tiles
@@ -336,6 +335,7 @@ class dungeonGenerator:
                     return x, y
         return None, None
 
+    #ported
     def findUnconnectedAreas(self):
         """
         Checks through the grid to find islands/unconnected rooms
@@ -398,6 +398,7 @@ class dungeonGenerator:
                     if (walls == 3):
                         self.dungeon.alcoves.append(Point(xi, yi))
 
+    #ported
     def findCaves(self):
         self.dungeon.caves = []
         for xi in range(self.dungeon.width):
@@ -465,6 +466,7 @@ class dungeonGenerator:
                         self.dungeon.grid[startX+x][startY+y] = Tiles.ROOM_FLOOR
                 self.dungeon.rooms.append(dungeonRoom(startX, startY, roomWidth, roomHeight))
 
+    #ported
     def generateCaves(self, p = 45, smoothing = 4):
         """
         Generates more organic shapes using cellular automata
@@ -522,7 +524,7 @@ class dungeonGenerator:
         if not x and not y:
             x = randint(1, self.dungeon.width-2)
             y = randint(1, self.dungeon.height-2)
-            while not self.dungeon.canCarve(x, y, 0, 0):
+            while not self.canCarve(x, y, 0, 0):
                 x = randint(1, self.dungeon.width-2)
                 y = randint(1, self.dungeon.height-2)
         self.dungeon.grid[x][y] = Tiles.CORRIDOR_FLOOR

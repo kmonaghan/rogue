@@ -19,6 +19,7 @@ class Tile:
         self.fov_color = libtcod.dark_grey
         self.out_of_fov_color = libtcod.darkest_grey
         self.name = "Tile"
+        self.char = None
 
     def __str__(self):
         return f"{self.name}"
@@ -64,6 +65,14 @@ class Door(Tile):
         self.out_of_fov_color = libtcod.darker_orange
         self.name = "Door"
 
+class ImpenetrableTile(Tile):
+    def __init__(self, blocked=False, block_sight=False):
+        super(ImpenetrableTile, self).__init__(blocked, block_sight)
+
+        self.fov_color = libtcod.red
+        self.out_of_fov_color = libtcod.darker_red
+        self.name = "Impenetrable"
+
 class RoomFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(RoomFloor, self).__init__(blocked, block_sight)
@@ -80,6 +89,14 @@ class CorridorFloor(Tile):
         self.out_of_fov_color = libtcod.darker_sepia
         self.name = "Corridor floor"
 
+class PotentialCorridorFloor(Tile):
+    def __init__(self, blocked=False, block_sight=False):
+        super(PotentialCorridorFloor, self).__init__(blocked, block_sight)
+
+        self.fov_color = libtcod.lightest_green
+        self.out_of_fov_color = libtcod.lightest_green
+        self.name = "Potential Corridor floor"
+
 class RoomWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
         super(RoomWall, self).__init__(blocked, block_sight)
@@ -87,13 +104,14 @@ class RoomWall(Tile):
         self.fov_color = libtcod.dark_grey
         self.out_of_fov_color = libtcod.darkest_grey
         self.name = "Wall"
+        self.char = '#'
 
 class StairsFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
-        super(RoomFloor, self).__init__(blocked, block_sight)
+        super(StairsFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.light_grey
-        self.out_of_fov_color = libtcod.grey
+        self.fov_color = libtcod.light_yellow
+        self.out_of_fov_color = libtcod.yellow
         self.name = "Stairs floor"
 
 class ShallowWater(Tile):
@@ -103,6 +121,7 @@ class ShallowWater(Tile):
         self.fov_color = libtcod.lighter_blue
         self.out_of_fov_color = libtcod.light_blue
         self.name = "Shallow water"
+        self.char = '~'
 
 class DeepWater(Tile):
     def __init__(self, blocked=True, block_sight=False):
@@ -111,6 +130,7 @@ class DeepWater(Tile):
         self.fov_color = libtcod.dark_blue
         self.out_of_fov_color = libtcod.darkest_blue
         self.name = "Deep water"
+        self.char = '~'
 
 class EmptyTile(Tile):
     def __init__(self, blocked=False, block_sight=False):
