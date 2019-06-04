@@ -45,3 +45,9 @@ http://www.roguebasin.com/index.php?title=The_Incredible_Power_of_Dijkstra_Maps
 Profiling:
 python3 -m cProfile -s time engine.py
 https://docs.python.org/3/library/profile.html
+
+Dice rolling:
+https://pypi.org/project/dice/
+
+Auto-explore:
+https://www.reddit.com/r/roguelikedev/comments/brp0hw/i_finally_managed_to_get_autoexplore_working/
