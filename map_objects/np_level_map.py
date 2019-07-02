@@ -121,6 +121,7 @@ class LevelMap(Map):
             elif grid[x,y] == Tiles.DEEPWATER:
                 current_tile = DeepWater()
             elif grid[x,y] == Tiles.STAIRSFLOOR:
+                self.make_transparent_and_walkable(x, y)
                 self.allowed_stairs_tiles[x,y] = True
                 current_tile = StairsFloor()
             elif grid[x,y] == Tiles.POTENTIAL_CORRIDOR_FLOOR:
