@@ -153,8 +153,6 @@ class Rogue(tcod.event.EventDispatch):
                                 CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'))
 
     def ev_keydown(self, event: tcod.event.KeyDown):
-        print(event)
-
         #---------------------------------------------------------------------
         # Get key input from the self.player.
         #---------------------------------------------------------------------
@@ -356,8 +354,8 @@ class Rogue(tcod.event.EventDispatch):
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
             elif action == InputTypes.TAKE_STAIRS:
-                if (game_map.check_for_stairs(self.player.x, self.player.y)):
-                        self.game_map.next_floor(self.player, constants)
+                if (self.game_map.check_for_stairs(self.player.x, self.player.y)):
+                        self.game_map.next_floor(self.player)
                         self.fov_recompute = True
                         message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
                         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
