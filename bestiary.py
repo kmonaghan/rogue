@@ -577,7 +577,8 @@ def mimic_shimmer(sub, message, level_map):
 def rat_swarm(sub, message, level_map):
     if (message.entity.species == Species.PLAYER) and ((message.target.species == Species.RAT) or (message.target.species == Species.RATNEST)):
         if level_map.current_level.fov[sub.entity.x, sub.entity.y]:
-            sub.entity.add_component(BasicNPC(), 'ai')
+            if sub.entity.ai:
+                sub.entity.ai.set_target(message.entity)
 
 def earn_death_xp(sub, message, level_map):
     if message.target is None:
