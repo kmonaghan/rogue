@@ -4,6 +4,7 @@ https://www.reddit.com/r/roguelikedev/comments/6imw2p/libtcod_on_os_x_sierra/
 Roguelike tutorial:
 http://www.roguebasin.com/index.php?title=Complete_Roguelike_Tutorial,_using_python%2Blibtcod
 Updated/Python 3 version: http://rogueliketutorials.com/libtcod/3
+https://hexworks.org/posts/tutorials/
 
 List of Resources
 https://github.com/marukrap/RoguelikeDevResources
@@ -51,3 +52,7 @@ https://pypi.org/project/dice/
 
 Auto-explore:
 https://www.reddit.com/r/roguelikedev/comments/brp0hw/i_finally_managed_to_get_autoexplore_working/
+
+Fonts/Character sets
+https://www.reddit.com/r/roguelikedev/comments/c56928/combining_characters_for_status_effects/
+http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/console_ascii.html?c=false&cpp=false&cs=false&py=false&lua=false
