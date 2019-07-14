@@ -130,7 +130,7 @@ class IsFinished(Node):
         if self.number_of_turns <= 0:
             return TreeStates.SUCCESS, []
         else:
-            owner.ai.number_of_turns -= 1
+            self.number_of_turns -= 1
             return TreeStates.FAILURE, []
 
 class ChangeAI(Node):

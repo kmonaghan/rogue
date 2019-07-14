@@ -31,7 +31,7 @@ from components.death import PlayerDeath, WarlordDeath
 
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
-from etc.enum import RoutingOptions, Species
+from etc.enum import Species, Tiles
 
 import pubsub
 
@@ -157,7 +157,7 @@ def egg(point = None):
     health_component = Health(4)
 
     creature = Character(point, 'E', 'Snake Egg', libtcod.darker_gray,
-                    ai=HatchingNPC(snake()),
+                    ai=HatchingNPC(snake),
                     species=Species.EGG, health=health_component)
 
     creature.add_component(Offence(base_power = 1), 'offence')
@@ -247,11 +247,12 @@ def rat(point = None):
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
 
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_STAIRS)
-    #creature.movement.routing_avoid.append(RoutingOptions.AVOID_FOV)
+    creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.DOOR)
+    creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.STAIRSFLOOR)
+    creature.movement.routing_avoid.append(Tiles.DEEPWATER)
+    creature.movement.routing_avoid.append(Tiles.SHALLOWWATER)
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -273,10 +274,12 @@ def ratsnest(point = None):
     creature.add_component(Defence(defence = 4), 'defence')
     creature.add_component(Level(xp_value = 1), 'level')
 
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_STAIRS)
+    creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.DOOR)
+    creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.STAIRSFLOOR)
+    creature.movement.routing_avoid.append(Tiles.DEEPWATER)
+    creature.movement.routing_avoid.append(Tiles.SHALLOWWATER)
 
     # potion = equipment.random_potion(dungeon_level = dungeon_level)
     # potion.lootable = True
@@ -331,10 +334,12 @@ def snake(point = None):
     creature.add_component(Level(xp_value = 10), 'level')
     creature.add_component(Spawn(2, egg), 'spawn')
 
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_CORRIDORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_DOORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_FLOORS)
-    creature.movement.routing_avoid.append(RoutingOptions.AVOID_STAIRS)
+    creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.DOOR)
+    creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.STAIRSFLOOR)
+    creature.movement.routing_avoid.append(Tiles.DEEPWATER)
+    creature.movement.routing_avoid.append(Tiles.SHALLOWWATER)
 
     teeth = equipment.teeth()
     teeth.lootable = False
