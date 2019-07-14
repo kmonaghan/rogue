@@ -76,7 +76,7 @@ class dungeonGenerator:
 
     @property
     def height(self):
-        return self.grid.shape[0]
+        return self.grid.shape[1]
 
     def quadFits(self, sx, sy, rx, ry, margin):
         top_x = sx-margin
@@ -182,6 +182,55 @@ class dungeonGenerator:
                 if unconnectedAreas[nx, ny] != fillWith:
                     toFill.add((nx, ny))
 
+    def emptyFloodFill(self, x, y, fillWith, checked = None, unconnectedAreas = None, grid = None):
+        #if not grid: grid = self.grid
+        toFill = set()
+        toFill.add((x,y))
+
+        while toFill:
+            x, y = toFill.pop()
+            if grid[x, y] == Tiles.EMPTY:
+                unconnectedAreas[x, y] = fillWith
+                checked[x, y] = 1
+                for nx, ny in self.findNeighboursDirect(x, y, grid):
+                    if unconnectedAreas[nx, ny] != fillWith:
+                        toFill.add((nx, ny))
+
+    def findEmptyAreas(self, tilesToFill = []):
+        """
+        Checks through the grid to find islands/unconnected rooms
+        Note, this can be slow for large grids and memory intensive since it needs to create a deep copy of the grid
+        in order to use joinUnconnectedAreas() this needs to be called first and the returned list passed to joinUnconnectedAreas()
+
+        Args:
+            none
+
+        Returns:
+            A list of unconnected cells, where each group of cells is in its own list and each cell indice is stored as a tuple, ie [[(x1,y1), (x2,y2), (x3,y3)], [(xi1,yi1), (xi2,yi2), (xi3,yi3)]]
+        """
+        areaCount = 0
+
+        unconnectedAreas = np.zeros(self.grid.shape, dtype=np.int8)
+        checked_cells = np.zeros(self.grid.shape, dtype=np.int8)
+
+        gridCopy = self.grid.copy()
+
+        gridCopy[0] = Tiles.EMPTY
+        gridCopy[-1] = Tiles.EMPTY
+        gridCopy[:, 0] = Tiles.EMPTY
+        gridCopy[:, -1] = Tiles.EMPTY
+
+        checked_cells[np.where(gridCopy > 0)] = 1
+        choices = np.where(checked_cells == 0)
+
+        while len(choices[0]) > 0:
+            areaCount += 1
+            self.emptyFloodFill(choices[0][0], choices[1][0], areaCount, checked = checked_cells, unconnectedAreas = unconnectedAreas, grid = gridCopy)
+
+            choices = np.where(checked_cells == 0)
+
+        return unconnectedAreas
+
     def findUnconnectedAreas(self, tilesToFill = []):
         """
         Checks through the grid to find islands/unconnected rooms
@@ -199,8 +248,6 @@ class dungeonGenerator:
         unconnectedAreas = np.zeros(self.grid.shape, dtype=np.int8)
         checked_cells = np.zeros(self.grid.shape, dtype=np.int8)
 
-        choices = np.where(checked_cells == 0)
-
         gridCopy = self.grid.copy()
 
         gridCopy[0] = Tiles.EMPTY
@@ -209,6 +256,7 @@ class dungeonGenerator:
         gridCopy[:, -1] = Tiles.EMPTY
 
         checked_cells[np.where(gridCopy == 0)] = 1
+        choices = np.where(checked_cells == 0)
 
         while len(choices[0]) > 0:
             areaCount += 1
@@ -222,6 +270,8 @@ class dungeonGenerator:
         currentAreaCount = np.amax(unconnectedAreas)
         currentTiles = np.where(unconnectedAreas == currentAreaCount)
 
+        weights = [(Tiles.EMPTY, 9)]
+
         while currentAreaCount > 1:
             nextAreaCount = currentAreaCount - 1
             nextTiles = np.where(unconnectedAreas == nextAreaCount)
@@ -229,7 +279,9 @@ class dungeonGenerator:
             if len(nextTiles[0]) > 0:
                 currentIdx = randint(0, len(currentTiles[0]) - 1)
                 nextIdx = randint(0, len(nextTiles[0]) - 1)
-                self.route_between(currentTiles[0][currentIdx], currentTiles[1][currentIdx], nextTiles[0][nextIdx], nextTiles[1][nextIdx], tile=connecting_tile)
+                self.route_between(currentTiles[0][currentIdx], currentTiles[1][currentIdx],
+                                    nextTiles[0][nextIdx], nextTiles[1][nextIdx],
+                                    weights=weights, tile=connecting_tile)
                 currentTiles = nextTiles
 
             currentAreaCount -= 1
@@ -387,7 +439,7 @@ class dungeonGenerator:
                     print(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
                     return None
 
-                room = dungeonRoom(x, y, prefab.layout.copy)
+                room = dungeonRoom(start_x, start_y, prefab.layout.copy)
 
                 return room
 
@@ -453,10 +505,10 @@ class dungeonGenerator:
 
         for i in range(tcod.dijkstra_size(dijk)):
             x, y = tcod.dijkstra_get(dijk, i)
-            if overwrite or self.grid[x,y] == 0:
-                if self.grid[x,y] == Tiles.DOOR:
-                    continue
-                self.grid[x,y] = tile
+            #if overwrite or self.grid[x,y] == Tiles.EMPTY:
+                #if self.grid[x,y] == Tiles.DOOR:
+                #    continue
+            self.grid[x,y] = tile
 
         return dijk_dist
 
@@ -479,7 +531,7 @@ class dungeonGenerator:
         for (x,y), value in np.ndenumerate(dijk_dist):
             dijk_dist[x, y] = tcod.dijkstra_get_distance(dijk, x, y)
 
-        dijk_dist[np.where(dijk_dist == -1)] = 0
+        #dijk_dist[np.where(dijk_dist == -1)] = 0
 
         return dijk, dijk_dist
 
