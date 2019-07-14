@@ -9,7 +9,7 @@ from entities.entity_list import EntityList
 
 from etc.colors import COLORS
 from etc.configuration import CONFIG
-from etc.enum import RoutingOptions, Tiles
+from etc.enum import RoutingOptions, Tiles, WALKABLE_TILES
 
 from map_objects.point import Point
 from map_objects.tile import (CavernFloor, CavernWall, CorridorFloor,
@@ -71,7 +71,7 @@ class LevelMap(Map):
 
     @property
     def corridors(self):
-        return self.grid[np.where(self.grid == Tiles.CAVERN_FLOOR)]
+        return self.grid[np.where(self.grid == Tiles.CORRIDOR_FLOOR)]
 
     @property
     def doors(self):
@@ -79,7 +79,7 @@ class LevelMap(Map):
 
     @property
     def floors(self):
-        return self.grid[np.where(self.grid == Tiles.CAVERN_FLOOR)]
+        return self.grid[np.where(self.grid == Tiles.ROOM_FLOOR)]
 
     def tiles_of_type(self, tile):
         return np.where(self.grid == tile)
@@ -103,31 +103,29 @@ class LevelMap(Map):
             elif grid[x,y] == Tiles.ROOM_WALL:
                 current_tile = RoomWall()
             elif grid[x,y] == Tiles.DOOR:
-                self.make_transparent_and_walkable(x, y)
                 current_tile = Door()
             elif grid[x,y] == Tiles.DEADEND:
                 current_tile = CorridorWall()
             elif grid[x,y] == Tiles.CAVERN_FLOOR:
-                self.make_transparent_and_walkable(x, y)
                 current_tile = CavernFloor()
             elif grid[x,y] == Tiles.CORRIDOR_FLOOR:
-                self.make_transparent_and_walkable(x, y)
                 current_tile = CorridorFloor()
             elif grid[x,y] == Tiles.ROOM_FLOOR:
-                self.make_transparent_and_walkable(x, y)
                 current_tile = RoomFloor()
             elif grid[x,y] == Tiles.SHALLOWWATER:
                 current_tile = ShallowWater()
             elif grid[x,y] == Tiles.DEEPWATER:
                 current_tile = DeepWater()
             elif grid[x,y] == Tiles.STAIRSFLOOR:
-                self.make_transparent_and_walkable(x, y)
                 self.allowed_stairs_tiles[x,y] = True
                 current_tile = StairsFloor()
             elif grid[x,y] == Tiles.POTENTIAL_CORRIDOR_FLOOR:
                 current_tile = PotentialCorridorFloor()
             else:
                 current_tile = EmptyTile()
+
+            if (grid[x,y] in WALKABLE_TILES):
+                self.make_transparent_and_walkable(x, y)
 
             self.grid = grid
             self.tiles[x][y] = current_tile
@@ -233,7 +231,7 @@ class LevelMap(Map):
             for current_walkable in self.walkables:
                 for (x,y), value in np.ndenumerate(self.grid):
                     if (current_walkable[x, y]):
-                        map_console.bg[x,y] = tcod.lighter_blue
+                        map_console.bg[x,y] = tcod.lighter_yellow
 
             self.walkables.clear()
 
