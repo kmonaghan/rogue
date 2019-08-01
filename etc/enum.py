@@ -69,7 +69,7 @@ INPUT_STATES = {
     GameStates.LEVEL_UP,
     GameStates.QUEST_LIST, GameStates.GAME_PAUSED,
     GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
-    GameStates.GAME_OVER}
+    GameStates.GAME_OVER, GameStates.GAME_COMPLETE}
 
 class InputTypes(Enum):
     CHARACTER_SCREEN = auto()
@@ -82,6 +82,7 @@ class InputTypes(Enum):
     GAME_EXIT = auto()
     GAME_LOAD = auto()
     GAME_NEW = auto()
+    GAME_RESET = auto()
     GAME_RESTART = auto()
     GAME_SAVE = auto()
     INVENTORY_DROP = auto()

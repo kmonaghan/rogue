@@ -9,16 +9,50 @@ from map_objects.np_level_map import LevelMap
 from map_objects.np_prefab import Prefab
 from map_objects.prefab import boss_room
 
+from utils.utils import matprint
+
 def levelOneGenerator(map_width, map_height):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    level_caverns(dm)
+    addCaves(dm)
 
-    x, y = placeStairAlongEdge(dm)
+    number_of_water_areas = randint(0,3)
+    for i in range(number_of_water_areas):
+        dm.waterFeature()
 
-    placeExitRoom(dm, x, y)
+    x1, y1 = placeStairAlongEdge(dm)
 
-    dm.placeWalls()
+    stairs = np.where(dm.grid == Tiles.STAIRSFLOOR)
+    cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
+
+    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+                (Tiles.ROOM_WALL, 8),
+                (Tiles.EMPTY, 9),
+                (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
+
+    #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
+    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+
+    x2, y2 = placeExitRoom(dm, x1, y1)
+
+    if not x2:
+        print("No exit, just start again")
+        return levelOneGenerator(map_width, map_height)
+
+    #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
+    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+
+    dm.cleanUpMap()
+
+    dm.grid[0] = Tiles.CAVERN_WALL
+    dm.grid[-1] = Tiles.CAVERN_WALL
+    dm.grid[:, 0] = Tiles.CAVERN_WALL
+    dm.grid[:, -1] = Tiles.CAVERN_WALL
+
+    if not dm.validateMap():
+        print("Bad map===========D")
+        return levelOneGenerator(map_width, map_height)
 
     return dm
 
@@ -31,16 +65,37 @@ def addCaves(dm):
 
     dm.joinUnconnectedAreas(unconnected, connecting_tile = Tiles.CAVERN_FLOOR)
 
+def cavernLevel(dm, x, y):
+    addCaves(dm)
+
     number_of_water_areas = randint(0,3)
     for i in range(number_of_water_areas):
         dm.waterFeature()
 
-def cavernLevel(dm):
+    x1, y1 = placeStairRoom(dm, x, y)
 
-    addCaves(dm)
+    stairs = np.where(dm.grid == Tiles.STAIRSFLOOR)
+    cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
 
-    x, y = placeStairRoom(dm, x, y)
-    placeExitRoom(dm, x, y)
+    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+                (Tiles.ROOM_WALL, 8),
+                (Tiles.EMPTY, 9),
+                (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
+
+    #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
+    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+
+    x2, y2 = placeExitRoom(dm, x1, y1)
+
+    if not x2:
+        print("No exit, just start again")
+        return levelOneGenerator(map_width, map_height)
+
+    #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
+    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+
+    dm.cleanUpMap()
 
     return dm
 
@@ -49,15 +104,25 @@ def level_cavern_rooms(map_width, map_height):
 
     return dm
 
-def level_rooms(dm):
+def roomsLevel(dm, x, y):
     pass
 
-def levelGenerator(map_width, map_height):
+def levelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    cavernLevel(dm)
+    if randint(0,1) == 0:
+        cavernLevel(dm, x, y)
+    else:
+        roomsLevel(dm, x, y)
 
-    dm.placeWalls()
+    if not dm.validateMap():
+        print("Bad map===========D")
+        return levelGenerator(map_width, map_height, x, y)
+
+    dm.grid[0] = Tiles.CAVERN_WALL
+    dm.grid[-1] = Tiles.CAVERN_WALL
+    dm.grid[:, 0] = Tiles.CAVERN_WALL
+    dm.grid[:, -1] = Tiles.CAVERN_WALL
 
     return dm
 
@@ -85,15 +150,22 @@ def bossLevelGenerator(map_width, map_height):
 def arena(map_width, map_height):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    dm.addRoom(2, 2, 20, 20)
+    dm.addRoom(2, 2, 10, 10)
 
     dm.grid[5,5] = Tiles.STAIRSFLOOR
 
-    dm.addRoom(25, 15, 10, 10)
+    dm.addRoom(25, 15, 3, 3)
 
     dm.grid[28,20] = Tiles.STAIRSFLOOR
 
-    dm.connectDoors()
+    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+                (Tiles.ROOM_WALL, 8),
+                (Tiles.EMPTY, 9),
+                (Tiles.ROOM_FLOOR, 1),
+                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
+
+    #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
+    dm.route_between(5, 5, 28, 20, avoid=[], weights = weights, overwrite = True, tile=Tiles.ROOM_FLOOR)
 
     dm.placeWalls()
 
@@ -121,6 +193,8 @@ def placeStairAlongEdge(dm):
         x = 1
         y = randint(1, dm.height - 4)
 
+    print(f"{dm.width},{dm.height} placing on side: {side} at {x},{y}")
+
     return placeStairRoom(dm, x, y)
 
 def placeExitRoom(dm, x, y):
@@ -132,7 +206,7 @@ def placeExitRoom(dm, x, y):
 
     min_distance = randint(min, max)
 
-    possible_positions = np.where(dijkstra[0:dm.width - 4,0:dm.height - 4] >= min_distance)
+    possible_positions = np.where(dijkstra[1:dm.width - 5,1:dm.height - 5] >= min_distance)
 
     if (len(possible_positions) < 1):
         print('Nowhere to place exit')
@@ -161,15 +235,16 @@ def placeExitRoom(dm, x, y):
 
     if not placed:
         print('Failed to place exit')
-        return False
-
-    return placed
-
-def placeStairRoom(dm, x, y):
-    placed = dm.addRoom(x,y,3,3, overlap = True, add_walls = True)
-
-    if placed:
-        dm.grid[x+1,y+1] = Tiles.STAIRSFLOOR
         return False, False
+
+    return x, y
+
+def placeStairRoom(dm, x, y, overlap = True):
+    placed = dm.addRoom(x,y,3,3, overlap = overlap, add_walls = True)
+
+    if not placed:
+        return False, False
+
+    dm.grid[x+1,y+1] = Tiles.STAIRSFLOOR
 
     return x, y

@@ -166,9 +166,11 @@ def handle_character_screen(event):
 
 def handle_game_complete_keys(event):
     if event.sym == ord('a'):
+        return {InputTypes.GAME_RESET: True}
+    elif event.sym == ord('b'):
         return {InputTypes.GAME_RESTART: True}
-    elif event.sym == ord('b') or event.sym == tcod.event.K_ESCAPE:
-        return {InputTypes.EXIT: True}
+    elif event.sym == ord('c') or event.sym == tcod.event.K_ESCAPE:
+        return {InputTypes.GAME_EXIT: True}
 
     return {}
 

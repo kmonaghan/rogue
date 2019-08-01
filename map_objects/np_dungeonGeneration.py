@@ -449,13 +449,20 @@ class dungeonGenerator:
         for attempt in range(attempts):
             roomWidth = randrange(minRoomSize, maxRoomSize, roomStep)
             roomHeight = randrange(minRoomSize, maxRoomSize, roomStep)
-            startX = randint(1, self.grid.shape[0] - roomWidth)
-            startY = randint(1, self.grid.shape[1] - roomHeight)
+
+            voids = np.where(self.grid == Tiles.EMPTY)
+
+            pick = randint(0,len(voids[0]))
+            startX = voids[0][pick]
+            startY = voids[1][pick]
+
+            #startX = randint(1, self.grid.shape[0] - roomWidth)
+            #startY = randint(1, self.grid.shape[1] - roomHeight)
 
             if roomWidth == roomHeight:
-                room = self.addCircleShapedRoom(startX, startY, roomWidth, margin = margin, add_door = add_door, add_walls = add_walls)
+                room = self.addCircleShapedRoom(startX, startY, roomWidth, overlap = True, margin = margin, add_door = add_door, add_walls = add_walls)
             else:
-                room = self.addRoom(startX, startY, roomWidth, roomHeight, margin = margin, add_door = add_door, add_walls = add_walls)
+                room = self.addRoom(startX, startY, roomWidth, roomHeight, overlap = True, margin = margin, add_door = add_door, add_walls = add_walls)
 
             if room:
                 self.rooms.append(room)

@@ -27,21 +27,7 @@ class GameMap:
 
     def make_map(self, map_width, map_height, player):
         '''
-        valid = False
-        count = 1
-        while not valid:
-            print('Map Attempt: ' + str(count))
-            dm = levelGenerator(map_width, map_height)
-
-            valid = dm.validateMap()
-
-            if valid:
-                self.current_level = LevelMap(dm.grid)
-            else:
-                valid = self.make_map()
-                count += 1
-        '''
-        dm = bossLevelGenerator(map_width, map_height)
+        dm = arena(map_width, map_height)
         self.current_level = LevelMap(dm.grid)
         self.test_popluate_map(player)
 
@@ -50,17 +36,19 @@ class GameMap:
 
         #self.level_generic(player)
         return
-
+        '''
         boss_chance = randint(0,3) + self.dungeon_level
 
         if (self.dungeon_level == 1):
-            self.current_level = level_one_generator(map_width, map_height)
+            dm = levelOneGenerator(map_width, map_height)
         else:
-            if (boss_chance >= 6):
-                self.current_level = level_boss_generator(map_width, map_height)
+            #if (boss_chance >= 6):
+            if self.dungeon_level == 6:
+                dm = level_boss_generator(map_width, map_height, player.x, player.y)
             else:
-                self.current_level = level_generator(map_width, map_height)
+                dm = levelGenerator(map_width, map_height, player.x, player.y)
 
+        self.current_level = LevelMap(dm.grid)
         self.current_level.dungeon_level = self.dungeon_level
 
         if (self.dungeon_level == 1):
@@ -72,31 +60,33 @@ class GameMap:
                 self.level_generic(player)
 
     def test_popluate_map(self, player):
-
         stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
-        print(stairoptions)
+        print(f"stairs: {stairoptions}")
 
         x = stairoptions[0][0]
         y = stairoptions[1][0]
         player.set_point(Point(x,y))
         self.current_level.add_entity(player)
 
+        '''
         x = stairoptions[0][1]
         y = stairoptions[1][1]
         self.down_stairs = Entity(Point(x,y), '>', 'Stairs', COLORS.get('stairs'),
                                     render_order=RenderOrder.STAIRS)
         self.down_stairs.add_component(Stairs(self.dungeon_level + 1), "stairs")
         self.current_level.add_entity(self.down_stairs)
-
-        #for i in range(5):
-        #    point = self.current_level.find_random_open_position([], room = room)
-        #    egg = bestiary.generate_creature(Species.EGG, self.dungeon_level, player.level.current_level, point)
-        #    self.current_level.add_entity(egg)
-
-        #point = self.current_level.find_random_open_position([], room = self.current_level.floor.rooms[0])
-        #warlord = bestiary.warlord(point)
-        #warlord.ai.set_target(player)
-        #self.current_level.add_entity(warlord)
+        '''
+        '''
+        for i in range(5):
+            rat = bestiary.generate_creature(Species.RAT, self.dungeon_level, player.level.current_level)
+            point = self.current_level.find_random_open_position(rat.movement.routing_avoid)
+            rat.set_point(point)
+            self.current_level.add_entity(rat)
+        '''
+        point = self.current_level.find_random_open_position()
+        warlord = bestiary.warlord(point)
+        warlord.ai.set_target(player)
+        self.current_level.add_entity(warlord)
 
         #necromancer = bestiary.necromancer(point)
         #necromancer.ai.set_target(player)
@@ -138,21 +128,23 @@ class GameMap:
         '''
 
     def level_one(self, player):
-        room = self.current_level.floor.rooms[-1]
-        point = self.current_level.find_random_open_position([], room = room)
-        self.down_stairs = Entity(point, '>', 'Stairs', COLORS.get('stairs'),
+        stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
+        print(f"stairs: {stairoptions}")
+
+        x = stairoptions[0][0]
+        y = stairoptions[1][0]
+        player.set_point(Point(x,y))
+        self.current_level.add_entity(player)
+
+        x = stairoptions[0][1]
+        y = stairoptions[1][1]
+        self.down_stairs = Entity(Point(x,y), '>', 'Stairs', COLORS.get('stairs'),
                                     render_order=RenderOrder.STAIRS)
         self.down_stairs.add_component(Stairs(self.dungeon_level + 1), "stairs")
         self.current_level.add_entity(self.down_stairs)
-        self.current_level.downward_stairs_position = (self.down_stairs.x, self.down_stairs.y)
 
-        room = self.current_level.floor.rooms[0]
-        point = self.current_level.find_random_open_position([], room = room)
-        player.set_point(point)
-        self.current_level.add_entity(player)
-
-        point = self.current_level.find_random_open_position([RoutingOptions.AVOID_STAIRS], room = room)
-        npc = bestiary.bountyhunter(point)
+        #point = self.current_level.find_random_open_position([Tiles.STAIRSFLOOR], room = room)
+        npc = bestiary.bountyhunter(Point(player.x-1, player.y-1))
 
         q = quest.kill_rats_nests()
         q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100, start_func=self.level_one_goblin)
@@ -185,12 +177,13 @@ class GameMap:
             nest.set_point(point)
             self.current_level.add_entity(nest)
 
-        point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
-                                                                RoutingOptions.AVOID_DOORS,
-                                                                RoutingOptions.AVOID_FLOORS,
-                                                                RoutingOptions.AVOID_STAIRS])
+        point = self.current_level.find_random_open_position([Tiles.CORRIDOR_FLOOR,
+                                                                Tiles.DOOR,
+                                                                Tiles.ROOM_FLOOR,
+                                                                Tiles.STAIRSFLOOR])
         bestiary.place_chest(point, self.current_level, player)
 
+        '''
         num_rooms = len(self.current_level.floor.rooms)
         for room in self.current_level.floor.rooms[1:num_rooms]:
             num_npcs = randint(0, 2)
@@ -204,6 +197,7 @@ class GameMap:
         room = choice(self.current_level.floor.rooms[1:num_rooms])
         point = self.current_level.find_random_open_position([], room=room)
         bestiary.place_chest(point, self.current_level, player)
+        '''
 
     def level_generic(self, player):
         self.down_stairs = Entity(self.current_level.floor.rooms[-1].center_tile(), '>', 'Down Stairs',
@@ -222,6 +216,9 @@ class GameMap:
 
         player.set_point(self.up_stairs)
         self.current_level.add_entity(player)
+
+        if len(self.current_level.floor.caves) > 0:
+            self.place_creatures(player)
 
         if len(self.current_level.floor.caves) > 0:
             self.place_creatures(player)
@@ -317,7 +314,7 @@ class GameMap:
         for i in range(num_items):
             #choose random spot for this item
 
-            point = self.current_level.find_random_open_position([RoutingOptions.AVOID_STAIRS], room=room)
+            point = self.current_level.find_random_open_position([Tiles.STAIRSFLOOR], room=room)
 
             choice = random_choice_from_dict(item_chances)
             if choice == 'potion':
@@ -336,6 +333,11 @@ class GameMap:
         self.up_stairs = None
 
         self.make_map(CONFIG.get('map_width'), CONFIG.get('map_height'), player)
+
+    def first_floor(self, player):
+        self.dungeon_level = 1
+
+        self.create_floor(player)
 
     def next_floor(self, player):
         self.dungeon_level += 1
@@ -357,10 +359,10 @@ class GameMap:
         return False
 
     def level_one_goblin(self):
-        point = self.current_level.find_random_open_position([RoutingOptions.AVOID_CORRIDORS,
-                                                                RoutingOptions.AVOID_DOORS,
-                                                                RoutingOptions.AVOID_FLOORS,
-                                                                RoutingOptions.AVOID_STAIRS,
+        point = self.current_level.find_random_open_position([Tiles.CORRIDOR_FLOOR,
+                                                                Tiles.DOOR,
+                                                                Tiles.ROOM_FLOOR,
+                                                                Tiles.STAIRSFLOOR,
                                                                 RoutingOptions.AVOID_FOV])
 
         self.current_level.add_entity(bestiary.generate_npc(Species.GOBLIN, 1, 1, point))

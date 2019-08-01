@@ -200,13 +200,13 @@ def game_paused(menu_width, screen_width, screen_height):
 
     return menu2('Paused', header, options, menu_width, screen_width, screen_height)
 
-def game_completed(con, menu_width, screen_width, screen_height):
+def game_completed(menu_width, screen_width, screen_height):
     header = 'Congratulations - You have defeated the King Under the Hill'
     options = [['Restart with higher level encounters', tcod.white],
                 ['Start from scratch', tcod.white],
                 ['Quit while the going is good', tcod.white]]
 
-    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
+    return menu2('Game Complete', header, options, menu_width, screen_width, screen_height)
 
 def message_box(con, header, width, screen_width, screen_height):
     menu(con, header, [], width, screen_width, screen_height)

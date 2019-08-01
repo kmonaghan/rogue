@@ -75,7 +75,7 @@ class Rogue(tcod.event.EventDispatch):
         self.lbut = self.mbut = self.rbut = 0
         self.quest_request = None
 
-    def start_game(self):
+    def start_fresh_game(self):
         pubsub.pubsub = pubsub.PubSub()
 
         self.message_log = MessageLog(CONFIG.get('message_width'), CONFIG.get('message_height'))
@@ -86,7 +86,9 @@ class Rogue(tcod.event.EventDispatch):
         self.game_map = GameMap()
         self.game_map.create_floor(self.player)
 
-        self.game_state = GameStates.PLAYER_TURN
+        self.start_game()
+
+    def start_game(self):
         self.fov_recompute = True
 
         quest.active_quests = []
@@ -201,6 +203,11 @@ class Rogue(tcod.event.EventDispatch):
             return
 
         if action == InputTypes.GAME_RESTART:
+            self.start_fresh_game()
+            return
+
+        if action == InputTypes.GAME_RESET:
+            self.game_map.first_floor(self.player)
             self.start_game()
             return
 
@@ -531,7 +538,7 @@ def main():
                                             CONFIG.get('full_screen_height'),
                                             CONFIG.get('window_title'), False, order='F')
 
-    current_game.start_game()
+    current_game.start_fresh_game()
 
     while not tcod.console_is_window_closed():
         root_console.clear(fg=COLORS.get('console_background'))
