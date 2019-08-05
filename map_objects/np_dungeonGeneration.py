@@ -40,10 +40,11 @@ class dungeonRoom:
         height: the ammount of cells the room spans
     """
 
-    def __init__(self, x, y, slice):
+    def __init__(self, x, y, slice, name=""):
         self.x = x
         self.y = y
-        self.slice = slice
+        self.slice = slice.copy()
+        self.name = name
 
     def __str__(self):
         return f"{self.x},{self.y} {self.slice.shape}"
@@ -57,7 +58,11 @@ class dungeonRoom:
 
     @property
     def height(self):
-        return self.slice.shape[0]
+        return self.slice.shape[1]
+
+    @property
+    def center(self):
+        return (self.x + (self.width // 2), self.y + (self.height // 2))
 
 class dungeonGenerator:
     def __init__(self, width, height):
@@ -374,7 +379,9 @@ class dungeonGenerator:
 
             final_room_slice = outline_slice
 
-        room = dungeonRoom(x, y, final_room_slice.copy)
+        room = dungeonRoom(x, y, final_room_slice)
+
+        self.rooms.append(room)
 
         return room
 
@@ -424,22 +431,26 @@ class dungeonGenerator:
                     del possible_door_place[idx]
             final_room_slice = outline_slice
 
-        room = dungeonRoom(x, y, final_room_slice.copy)
+        room = dungeonRoom(x, y, final_room_slice)
+
+        self.rooms.append(room)
 
         return room
 
-    def placeRoomRandomly(self, prefab, margin = 1, attempts = 500):
+    def placeRoomRandomly(self, prefab, margin = 1, attempts = 500, overwrite = True):
         for attempt in range(attempts):
             start_x, start_y = self.randomPoint(tile=Tiles.EMPTY, x_inset = prefab.layout.shape[0] + (margin * 2), y_inset = prefab.layout.shape[1] + (margin * 2))
 
-            if self.quadFits(start_x, start_y, prefab.layout.shape[0], prefab.layout.shape[1], margin):
+            if overwrite or self.quadFits(start_x, start_y, prefab.layout.shape[0], prefab.layout.shape[1], margin):
                 try:
                     self.grid[start_x:start_x+prefab.layout.shape[0], start_y:start_y+prefab.layout.shape[1]] = prefab.layout
                 except ValueError:
                     print(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
                     return None
 
-                room = dungeonRoom(start_x, start_y, prefab.layout.copy)
+                room = dungeonRoom(start_x, start_y, prefab.layout)
+
+                self.rooms.append(room)
 
                 return room
 
@@ -455,9 +466,6 @@ class dungeonGenerator:
             pick = randint(0,len(voids[0]))
             startX = voids[0][pick]
             startY = voids[1][pick]
-
-            #startX = randint(1, self.grid.shape[0] - roomWidth)
-            #startY = randint(1, self.grid.shape[1] - roomHeight)
 
             if roomWidth == roomHeight:
                 room = self.addCircleShapedRoom(startX, startY, roomWidth, overlap = True, margin = margin, add_door = add_door, add_walls = add_walls)
