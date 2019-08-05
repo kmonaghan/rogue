@@ -32,5 +32,6 @@ class Prefab:
 
         if self.randomly_rotate:
             rotations = randint(0, 3)
+
             if rotations > 0:
-                np.rot90(self.layout, rotations)
+                self.layout = np.rot90(self.layout, rotations)
