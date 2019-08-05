@@ -17,10 +17,12 @@ from map_objects.tile import (CavernFloor, CavernWall, CorridorFloor,
                                 RoomFloor, RoomWall, ShallowWater, StairsFloor,
                                 EmptyTile, PotentialCorridorFloor)
 
+from utils.utils import matprint
+
 SQUARED_TORCH_RADIUS = CONFIG.get('fov_radius') * CONFIG.get('fov_radius')
 
 class LevelMap(Map):
-    def __init__(self, grid):
+    def __init__(self, grid, rooms = []):
         width, height = grid.shape
         super().__init__(width, height, order="F")
         self.entities = EntityList(width, height)
@@ -64,6 +66,8 @@ class LevelMap(Map):
 
         self.dijkstra_player = None
         self.dijkstra_flee = None
+
+        self.rooms = rooms
 
     @property
     def caves(self):
@@ -154,22 +158,21 @@ class LevelMap(Map):
         routing_avoid.append(RoutingOptions.AVOID_BLOCKERS)
         possible_positions = self.make_walkable_array(routing_avoid)
 
-        start_x = 0
-        end_x = self.width - 1
-        start_y = 0
-        end_y = self.height - 1
-
         if room:
-            start_x = room.x
-            end_x = room.x+room.width
-            start_y = room.y
-            end_y = room.y+room.height
+            search_grid = np.zeros(self.walkable.shape, dtype=np.int8)
 
-        while True:
-            x = randint(start_x, end_x)
-            y = randint(start_y, end_y)
-            if possible_positions[x, y]:
-                return Point(x, y)
+            search_grid[room.x:room.x+room.width, room.y:room.y+room.height] = room.slice
+
+            possible_positions[search_grid == 0] = 0
+
+        available = np.where(possible_positions == 1)
+
+        if (len(available) < 1):
+            return None
+
+        position = randint(0, len(available[0]) - 1)
+
+        return Point(available[0][position], available[1][position])
 
     def update_and_draw_all(self, map_console, player):
         map_console.clear()

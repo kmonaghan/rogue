@@ -90,7 +90,7 @@ def cavernLevel(dm, x, y):
 
     if not x2:
         print("No exit, just start again")
-        return levelOneGenerator(map_width, map_height)
+        return cavernLevel(dm, x, y)
 
     #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
     dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
@@ -110,7 +110,8 @@ def roomsLevel(dm, x, y):
 def levelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    if randint(0,1) == 0:
+    caveOrRooms = 0 #randint(0,1)
+    if caveOrRooms == 0:
         cavernLevel(dm, x, y)
     else:
         roomsLevel(dm, x, y)
@@ -126,24 +127,35 @@ def levelGenerator(map_width, map_height, x, y):
 
     return dm
 
-def bossLevelGenerator(map_width, map_height):
+def bossLevelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
+
+    x1, y1 = placeStairRoom(dm, x, y)
+
+    addCaves(dm)
 
     prefab = Prefab(boss_room())
 
-    dm.placeRoomRandomly(prefab)
+    room = dm.placeRoomRandomly(prefab)
 
-    dm.placeRandomRooms(3, 15, 2, 2, 500)
+    door = np.where(room.slice == Tiles.DOOR)
 
-    dm.generateCorridors()
+    x2 = room.x + door[0][0]
+    y2 = room.y + door[1][0]
 
-    dm.connectDoors()
+    cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
 
-    stair = np.where(dm.grid == Tiles.STAIRSFLOOR)
+    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+                (Tiles.ROOM_WALL, 8),
+                (Tiles.EMPTY, 9),
+                (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
-    placeExitRoom(dm, stair[0][0], stair[1][0])
+    dm.route_between(x, y, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
 
-    dm.placeWalls()
+    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[Tiles.ROOM_WALL, Tiles.ROOM_FLOOR], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+
+    dm.cleanUpMap()
 
     return dm
 

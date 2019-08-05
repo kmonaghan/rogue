@@ -31,10 +31,15 @@ class GameMap:
         self.current_level = LevelMap(dm.grid)
         self.test_popluate_map(player)
 
-        #self.current_level = self.level_generator(map_width, map_height)
-        #self.current_level.dungeon_level = self.dungeon_level
+        self.current_level = self.level_generator(map_width, map_height)
+        self.current_level.dungeon_level = self.dungeon_level
+        '''
 
-        #self.level_generic(player)
+        '''
+        player.set_point(Point(5,5))
+        dm = bossLevelGenerator(map_width, map_height, player.x, player.y)
+        self.current_level = LevelMap(dm.grid, dm.rooms)
+        self.levelBoss(player)
         return
         '''
         boss_chance = randint(0,3) + self.dungeon_level
@@ -42,22 +47,21 @@ class GameMap:
         if (self.dungeon_level == 1):
             dm = levelOneGenerator(map_width, map_height)
         else:
-            #if (boss_chance >= 6):
-            if self.dungeon_level == 6:
-                dm = level_boss_generator(map_width, map_height, player.x, player.y)
+            if (boss_chance >= 6):
+                dm = bossLevelGenerator(map_width, map_height, player.x, player.y)
             else:
                 dm = levelGenerator(map_width, map_height, player.x, player.y)
 
-        self.current_level = LevelMap(dm.grid)
+        self.current_level = LevelMap(dm.grid, dm.rooms)
         self.current_level.dungeon_level = self.dungeon_level
 
         if (self.dungeon_level == 1):
             self.level_one(player)
         else:
             if (boss_chance >= 6):
-                self.level_boss(player)
+                self.levelBoss(player)
             else:
-                self.level_generic(player)
+                self.levelGeneric(player)
 
     def test_popluate_map(self, player):
         stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
@@ -127,7 +131,7 @@ class GameMap:
         self.current_level.add_entity(ring2)
         '''
 
-    def level_one(self, player):
+    def place_stairs(self, player):
         stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
         print(f"stairs: {stairoptions}")
 
@@ -142,6 +146,9 @@ class GameMap:
                                     render_order=RenderOrder.STAIRS)
         self.down_stairs.add_component(Stairs(self.dungeon_level + 1), "stairs")
         self.current_level.add_entity(self.down_stairs)
+
+    def level_one(self, player):
+        self.place_stairs(player)
 
         #point = self.current_level.find_random_open_position([Tiles.STAIRSFLOOR], room = room)
         npc = bestiary.bountyhunter(Point(player.x-1, player.y-1))
@@ -199,54 +206,32 @@ class GameMap:
         bestiary.place_chest(point, self.current_level, player)
         '''
 
-    def level_generic(self, player):
-        self.down_stairs = Entity(self.current_level.floor.rooms[-1].center_tile(), '>', 'Down Stairs',
-                                        COLORS.get('stairs'), render_order=RenderOrder.STAIRS)
-        self.down_stairs.add_component(Stairs(self.dungeon_level + 1), "stairs")
+    def levelGeneric(self, player):
+        self.place_stairs(player)
 
-        self.up_stairs = Entity(self.current_level.floor.rooms[-1].center_tile(), '<', 'Up Stairs',
-                                    COLORS.get('stairs'), render_order=RenderOrder.STAIRS)
-        self.up_stairs.add_component(Stairs(self.dungeon_level - 1), "stairs")
+        if len(self.current_level.caves) > 0:
+            self.place_creatures(player)
 
-        self.current_level.add_entity(self.down_stairs)
-        self.current_level.add_entity(self.up_stairs)
+    def levelBoss(self, player):
+        stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
+        print(f"stairs: {stairoptions}")
 
-        self.current_level.downward_stairs_position = (self.down_stairs.x, self.down_stairs.y)
-        self.current_level.upward_stairs_position = (self.up_stairs.x, self.up_stairs.y)
-
-        player.set_point(self.up_stairs)
+        x = stairoptions[0][0]
+        y = stairoptions[1][0]
+        player.set_point(Point(x,y))
         self.current_level.add_entity(player)
 
-        if len(self.current_level.floor.caves) > 0:
-            self.place_creatures(player)
-
-        if len(self.current_level.floor.caves) > 0:
-            self.place_creatures(player)
-
-    def level_boss(self, player):
-        room = self.current_level.floor.rooms[0]
-        warlord = bestiary.warlord(Point(room.x+5, room.y + 2))
-        self.current_level.add_entity(warlord)
-
-        room = self.current_level.floor.rooms[-1]
-        self.up_stairs = Entity(self.current_level.floor.rooms[-1].center_tile(), '<', 'Up Stairs',
-                                    COLORS.get('stairs'), render_order=RenderOrder.STAIRS)
-        self.up_stairs.add_component(Stairs(self.dungeon_level - 1), "stairs")
-        self.current_level.add_entity(self.up_stairs)
-
-        player.set_point(self.up_stairs.point)
-
-        npc = bestiary.bountyhunter()
-        npc.point = self.current_level.find_random_open_position(npc.movement.routing_avoid, room=room)
+        npc = bestiary.bountyhunter(Point(player.x-1,player.y-1))
 
         q = quest.kill_warlord()
         npc.questgiver.add_quest(q)
         self.current_level.add_entity(npc)
 
-        #Add npcs and items
-        for room in self.current_level.floor.rooms:
-            self.place_npc(room, player)
-            self.place_object(room)
+        point = self.current_level.find_random_open_position(room=self.current_level.rooms[1])
+        print(point)
+        warlord = bestiary.warlord(point)
+        warlord.ai.set_target(player)
+        self.current_level.add_entity(warlord)
 
     def place_creatures(self, player):
         npc_chances = {}
@@ -256,7 +241,7 @@ class GameMap:
         npc_chances[Species.RATNEST] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
         npc_chances[Species.BAT] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
-        max_npcs = len(self.current_level.floor.caves) // 100
+        max_npcs = len(self.current_level.caves) // 100
 
         num_npcs = randint(1, max_npcs)
 
