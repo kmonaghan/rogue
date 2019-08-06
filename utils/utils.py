@@ -133,10 +133,22 @@ def random_walkable_position(game_map, entity):
     return Point(target[0], target[1])
 
 #-----------------------------------------------------------------------------
-# Entity Finders
+# Numpy helper functions
 #-----------------------------------------------------------------------------
-
 
 def matprint(mat, fmt="g"):
     with np.printoptions(threshold=np.inf, linewidth=2000):
         print(mat)
+
+#-----------------------------------------------------------------------------
+# Helper functions.
+#-----------------------------------------------------------------------------
+
+def find(f, seq):
+    """via https://tomayko.com/blog/2004/cleanest-python-find-in-list-function """
+    """Return first item in sequence where f(item) == True."""
+    for item in seq:
+        if f(item):
+            return item
+
+    return None

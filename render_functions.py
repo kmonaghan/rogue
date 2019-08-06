@@ -1,7 +1,7 @@
 import tcod
 
 from etc.configuration import CONFIG
-from etc.enum import (GameStates, RenderOrder, INVENTORY_STATES)
+from etc.enum import (GameStates, INVENTORY_STATES)
 
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed, game_over, game_paused
 

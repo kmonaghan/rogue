@@ -16,14 +16,16 @@ from map_objects.np_level_generation import arena, levelOneGenerator, levelGener
 from map_objects.point import Point
 from map_objects.np_level_map import LevelMap
 
-from etc.enum import RenderOrder, RoutingOptions, Species, Tiles
+from etc.enum import RenderOrder, RoutingOptions, Species, StairOption, Tiles
 
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
+from utils.utils import find
 
 class GameMap:
     def __init__(self, dungeon_level=1):
         self.dungeon_level = dungeon_level
         self.current_level = None
+        self.levels = []
 
     def make_map(self, map_width, map_height, player):
         '''
@@ -55,6 +57,9 @@ class GameMap:
         self.current_level = LevelMap(dm.grid, dm.rooms)
         self.current_level.dungeon_level = self.dungeon_level
 
+        self.place_stairs(player)
+        self.current_level.add_entity(player)
+
         if (self.dungeon_level == 1):
             self.level_one(player)
         else:
@@ -64,14 +69,6 @@ class GameMap:
                 self.levelGeneric(player)
 
     def test_popluate_map(self, player):
-        stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
-        print(f"stairs: {stairoptions}")
-
-        x = stairoptions[0][0]
-        y = stairoptions[1][0]
-        player.set_point(Point(x,y))
-        self.current_level.add_entity(player)
-
         '''
         x = stairoptions[0][1]
         y = stairoptions[1][1]
@@ -132,24 +129,31 @@ class GameMap:
         '''
 
     def place_stairs(self, player):
-        stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
-        print(f"stairs: {stairoptions}")
+        exit = find(lambda room: room.name == 'exit', self.current_level.rooms)
 
-        x = stairoptions[0][0]
-        y = stairoptions[1][0]
-        player.set_point(Point(x,y))
-        self.current_level.add_entity(player)
+        if (exit):
+            x,y = exit.center
 
-        x = stairoptions[0][1]
-        y = stairoptions[1][1]
-        self.down_stairs = Entity(Point(x,y), '>', 'Stairs', COLORS.get('stairs'),
-                                    render_order=RenderOrder.STAIRS)
-        self.down_stairs.add_component(Stairs(self.dungeon_level + 1), "stairs")
-        self.current_level.add_entity(self.down_stairs)
+            self.down_stairs = Entity(Point(x,y), '>', 'Stairs', COLORS.get('stairs'),
+                                                render_order=RenderOrder.STAIRS)
+            self.down_stairs.add_component(Stairs(self.dungeon_level + 1), "stairs")
+
+            self.current_level.add_entity(self.down_stairs)
+
+        entrance = find(lambda room: room.name == 'entrance', self.current_level.rooms)
+
+        if (entrance):
+            x,y = entrance.center
+
+            self.up_stairs = Entity(Point(x,y), '<', 'Stairs', COLORS.get('stairs'),
+                                                render_order=RenderOrder.STAIRS)
+            self.up_stairs.add_component(Stairs(self.dungeon_level - 1), "stairs")
+
+            self.current_level.add_entity(self.up_stairs)
+
+            player.set_point(self.up_stairs.point)
 
     def level_one(self, player):
-        self.place_stairs(player)
-
         #point = self.current_level.find_random_open_position([Tiles.STAIRSFLOOR], room = room)
         npc = bestiary.bountyhunter(Point(player.x-1, player.y-1))
 
@@ -207,20 +211,10 @@ class GameMap:
         '''
 
     def levelGeneric(self, player):
-        self.place_stairs(player)
-
         if len(self.current_level.caves) > 0:
             self.place_creatures(player)
 
     def levelBoss(self, player):
-        stairoptions = self.current_level.tiles_of_type(Tiles.STAIRSFLOOR)
-        print(f"stairs: {stairoptions}")
-
-        x = stairoptions[0][0]
-        y = stairoptions[1][0]
-        player.set_point(Point(x,y))
-        self.current_level.add_entity(player)
-
         npc = bestiary.bountyhunter(Point(player.x-1,player.y-1))
 
         q = quest.kill_warlord()
@@ -325,6 +319,8 @@ class GameMap:
         self.create_floor(player)
 
     def next_floor(self, player):
+        #Need to reset pubsub
+
         self.dungeon_level += 1
 
         self.create_floor(player)
@@ -332,16 +328,24 @@ class GameMap:
         if (self.dungeon_level > 1):
             player.health.heal(player.health.max_hp // 2)
 
+    def previous_floor(self, player):
+        #Need to reset pubsub
+        self.dungeon_level -= 1
+
+        self.create_floor(player)
+
     def check_for_stairs(self, x, y):
         if (self.down_stairs):
             if (self.down_stairs.x == x) and (self.down_stairs.y == y):
-                return True
+                return StairOption.GODOWN
 
         if (self.up_stairs):
             if (self.up_stairs.x == x) and (self.up_stairs.y == y):
-                return True
+                if self.dungeon_level == 1:
+                    return StairOption.EXIT
+                return StairOption.GOUP
 
-        return False
+        return StairOption.NOSTAIR
 
     def level_one_goblin(self):
         point = self.current_level.find_random_open_position([Tiles.CORRIDOR_FLOOR,

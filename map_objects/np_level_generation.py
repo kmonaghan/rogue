@@ -72,7 +72,7 @@ def cavernLevel(dm, x, y):
     for i in range(number_of_water_areas):
         dm.waterFeature()
 
-    x1, y1 = placeStairRoom(dm, x, y)
+    x1, y1 = placeStairRoom(dm, x, y, name="entrance")
 
     stairs = np.where(dm.grid == Tiles.STAIRSFLOOR)
     cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
@@ -207,7 +207,7 @@ def placeStairAlongEdge(dm):
 
     print(f"{dm.width},{dm.height} placing on side: {side} at {x},{y}")
 
-    return placeStairRoom(dm, x, y)
+    return placeStairRoom(dm, x, y, name="entrance")
 
 def placeExitRoom(dm, x, y):
     _, dijkstra = dm.create_dijkstra_map(x+1,y+1, avoid = [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.DEEPWATER])
@@ -236,7 +236,7 @@ def placeExitRoom(dm, x, y):
         x, y = possible_tuples[idx]
 
         print(f"Attempting to place at: {x},{y}")
-        placed = placeStairRoom(dm, x, y)
+        placed = placeStairRoom(dm, x, y, name="exit")
 
         if placed:
             possible_tuples = []
@@ -251,8 +251,8 @@ def placeExitRoom(dm, x, y):
 
     return x, y
 
-def placeStairRoom(dm, x, y, overlap = True):
-    placed = dm.addRoom(x,y,3,3, overlap = overlap, add_walls = True)
+def placeStairRoom(dm, x, y, overlap = True, name=""):
+    placed = dm.addRoom(x,y,3,3, overlap = overlap, add_walls = True, name = name)
 
     if not placed:
         return False, False

@@ -288,3 +288,9 @@ class HealthStates(IntEnum):
     INJURED = 60
     BADLY_INJURED = 40
     NEAR_DEATH = 20
+
+class StairOption(Enum):
+    GOUP = auto()
+    GODOWN = auto()
+    EXIT = auto()
+    NOSTAIR = auto()

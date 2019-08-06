@@ -27,8 +27,7 @@ class LevelMap(Map):
         super().__init__(width, height, order="F")
         self.entities = EntityList(width, height)
         # TODO: Add to docstring
-        self.upward_stairs_position = None
-        self.downward_stairs_position = None
+
         # These need to be int8's to work with the tcod pathfinder
         self.grid = np.zeros(self.walkable.shape, dtype=np.int8)
         self.explored = np.zeros(self.walkable.shape, dtype=np.int8)
@@ -323,10 +322,8 @@ class LevelMap(Map):
         walkable[mask] = 0
 
         if Tiles.STAIRSFLOOR in routing_avoid:
-            if self.upward_stairs_position:
-                walkable[self.upward_stairs_position] = False
-            if self.downward_stairs_position:
-                walkable[self.downward_stairs_position] = False
+            pass
+            
         return walkable
 
     def walkable_for_entity_under_mouse(self, x, y):

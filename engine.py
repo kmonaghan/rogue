@@ -8,7 +8,7 @@ from utils.dijkstra_maps import generate_dijkstra_player_map, generate_dijkstra_
 from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import (
-    ResultTypes, InputTypes, GameStates, LevelUp,
+    ResultTypes, InputTypes, GameStates, LevelUp, StairOption,
     INVENTORY_STATES, INPUT_STATES, CANCEL_STATES)
 
 from game_messages import MessageLog
@@ -361,7 +361,8 @@ class Rogue(tcod.event.EventDispatch):
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
             elif action == InputTypes.TAKE_STAIRS:
-                if (self.game_map.check_for_stairs(self.player.x, self.player.y)):
+                stair_state = self.game_map.check_for_stairs(self.player.x, self.player.y)
+                if stair_state == StairOption.GODOWN:
                         self.game_map.next_floor(self.player)
                         self.fov_recompute = True
                         message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
@@ -369,6 +370,13 @@ class Rogue(tcod.event.EventDispatch):
 
                         #continue
                         return
+                elif stair_state == StairOption.GOUP:
+                    self.game_map.previous_floor(self.player)
+                    self.fov_recompute = True
+
+                    return
+                elif stair_state == StairOption.EXIT:
+                    self.game_state = GameStates.GAME_PAUSED
                 else:
                     message = Message('There are no stairs here.', tcod.yellow)
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))

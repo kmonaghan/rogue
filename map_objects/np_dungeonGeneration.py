@@ -47,10 +47,10 @@ class dungeonRoom:
         self.name = name
 
     def __str__(self):
-        return f"{self.x},{self.y} {self.slice.shape}"
+        return f"{self.name} {self.x},{self.y} {self.slice.shape}"
 
     def __repr__(self):
-        return f"{self.x},{self.y} {self.slice.shape}"
+        return f"{self.name} {self.x},{self.y} {self.slice.shape}"
 
     @property
     def width(self):
@@ -62,7 +62,7 @@ class dungeonRoom:
 
     @property
     def center(self):
-        return (self.x + (self.width // 2), self.y + (self.height // 2))
+        return (self.x + (self.width // 2) - 1, self.y + (self.height // 2) - 1)
 
 class dungeonGenerator:
     def __init__(self, width, height):
@@ -330,7 +330,7 @@ class dungeonGenerator:
 
         self.grid[np.where(cells == 1)] = Tiles.CAVERN_FLOOR
 
-    def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR):
+    def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR, name = ""):
         room_slice = self.grid[x:x+width, y:y+height]
 
         final_room_slice = room_slice
@@ -379,7 +379,7 @@ class dungeonGenerator:
 
             final_room_slice = outline_slice
 
-        room = dungeonRoom(x, y, final_room_slice)
+        room = dungeonRoom(x, y, final_room_slice, name)
 
         self.rooms.append(room)
 
