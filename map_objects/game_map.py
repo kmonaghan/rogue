@@ -68,6 +68,8 @@ class GameMap:
             else:
                 self.levelGeneric(player)
 
+        self.fill_prefab(player)
+
     def test_popluate_map(self, player):
         '''
         x = stairoptions[0][1]
@@ -188,11 +190,7 @@ class GameMap:
             nest.set_point(point)
             self.current_level.add_entity(nest)
 
-        point = self.current_level.find_random_open_position([Tiles.CORRIDOR_FLOOR,
-                                                                Tiles.DOOR,
-                                                                Tiles.ROOM_FLOOR,
-                                                                Tiles.STAIRSFLOOR])
-        bestiary.place_chest(point, self.current_level, player)
+
 
         '''
         num_rooms = len(self.current_level.floor.rooms)
@@ -274,6 +272,12 @@ class GameMap:
             npc.set_point(point)
             npc.ai.set_target(player)
             self.current_level.add_entity(npc)
+
+    def fill_prefab(self, player):
+        for room in self.current_level.rooms:
+            if room.name == "treasure_room":
+                point = self.current_level.find_random_open_position(room=room)
+                bestiary.place_chest(point, self.current_level, player)
 
     def place_object(self, room):
         return

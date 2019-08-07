@@ -46,6 +46,16 @@ def stair_room():
 
     return room_map
 
+def treasure_room():
+    room_map = ["##D##",
+                "#...#",
+                "#...#",
+                "#...#",
+                "##.##",
+                "V###V"]
+
+    return room_map
+
 def necromancer_lair():
     room_map = ["...........",
                 "...........",

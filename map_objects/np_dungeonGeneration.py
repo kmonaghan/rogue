@@ -448,7 +448,7 @@ class dungeonGenerator:
                     print(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
                     return None
 
-                room = dungeonRoom(start_x, start_y, prefab.layout)
+                room = dungeonRoom(start_x, start_y, prefab.layout, prefab.name)
 
                 self.rooms.append(room)
 

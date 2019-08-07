@@ -7,7 +7,7 @@ from etc.enum import Tiles
 from map_objects.np_dungeonGeneration import dungeonGenerator
 from map_objects.np_level_map import LevelMap
 from map_objects.np_prefab import Prefab
-from map_objects.prefab import boss_room
+from map_objects.prefab import boss_room, treasure_room
 
 from utils.utils import matprint
 
@@ -42,6 +42,10 @@ def levelOneGenerator(map_width, map_height):
 
     #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
     dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+
+    prefab = Prefab(treasure_room)
+
+    room = dm.placeRoomRandomly(prefab)
 
     dm.cleanUpMap()
 
@@ -134,7 +138,7 @@ def bossLevelGenerator(map_width, map_height, x, y):
 
     addCaves(dm)
 
-    prefab = Prefab(boss_room())
+    prefab = Prefab(boss_room)
 
     room = dm.placeRoomRandomly(prefab)
 
