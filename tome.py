@@ -1,5 +1,7 @@
 import tcod as libtcod
 
+import numpy as np
+
 from components.ai import ConfusedNPC
 
 from map_objects.point import Point
@@ -148,15 +150,11 @@ def resurrect_all_npc(npc_type, game_map, target):
             npc_type(entity)
     return
 
-def cast_mapping(*args, **kwargs):
-    game_map = kwargs.get('game_map')
-
+def cast_mapping(game_map, caster, target):
     results = []
 
-    for y in range(game_map.height):
-        for x in range(game_map.width):
-            game_map.map[x][y].explored = True
+    game_map.current_level.explored = np.full(game_map.current_level.grid.shape, 1, dtype=np.int8)
 
-    results.append({'consumed': True, 'fov_recompute': True, ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', libtcod.gold)})
+    results.append({ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', libtcod.gold)})
 
     return results

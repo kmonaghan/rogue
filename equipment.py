@@ -5,7 +5,7 @@ import tome
 
 from components.equippable import Equippable
 from components.item import Item
-from components.usable import HealingPotionUsable
+from components.usable import HealingPotionUsable, ScrollUsable
 
 from entities.entity import Entity
 
@@ -195,9 +195,10 @@ def confusion_scroll(point = None):
     return item
 
 def map_scroll(point = None):
-    item_component = Item(use_function=cast_mapping)
-    item = Entity(point, '#', 'Mapping Scroll', libtcod.light_yellow, render_order=RenderOrder.ITEM,
-                    item=item_component)
+    usable = ScrollUsable(scroll_name="Mapping Scroll", scroll_spell=cast_mapping)
+
+    item = Entity(point, '#', usable.name, libtcod.light_yellow, render_order=RenderOrder.ITEM,
+                    usable=usable)
 
     return item
 
