@@ -47,6 +47,17 @@ def levelOneGenerator(map_width, map_height):
 
     room = dm.placeRoomRandomly(prefab)
 
+    x3, y3 = room.center
+
+    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+                (Tiles.ROOM_WALL, 0),
+                (Tiles.ROOM_FLOOR, 9),
+                (Tiles.EMPTY, 9),
+                (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
+
+    dm.route_between(x3, y3, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+
     dm.cleanUpMap()
 
     dm.grid[0] = Tiles.CAVERN_WALL
@@ -166,24 +177,11 @@ def bossLevelGenerator(map_width, map_height, x, y):
 def arena(map_width, map_height):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    dm.addRoom(2, 2, 10, 10)
+    room = dm.addCircleShapedRoom(10, 10, 10, add_door = False)
 
-    dm.grid[5,5] = Tiles.STAIRSFLOOR
+    room = dm.addRoom(10,35,3,3)
 
-    dm.addRoom(25, 15, 3, 3)
-
-    dm.grid[28,20] = Tiles.STAIRSFLOOR
-
-    weights = [(Tiles.CORRIDOR_FLOOR, 1),
-                (Tiles.ROOM_WALL, 8),
-                (Tiles.EMPTY, 9),
-                (Tiles.ROOM_FLOOR, 1),
-                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
-
-    #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
-    dm.route_between(5, 5, 28, 20, avoid=[], weights = weights, overwrite = True, tile=Tiles.ROOM_FLOOR)
-
-    dm.placeWalls()
+    dm.cleanUpMap()
 
     return dm
 

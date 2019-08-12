@@ -5,6 +5,7 @@ import tome
 
 from components.equippable import Equippable
 from components.item import Item
+from components.usable import HealingPotionUsable
 
 from entities.entity import Entity
 
@@ -20,6 +21,7 @@ def random_armour(point = None, dungeon_level = 1):
     item_chances['shield'] = from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
     item_chances['helmet'] = from_dungeon_level([[30, 2], [15, 3], [10, 4]], dungeon_level)
     item_chances['leather shirt'] = from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
+    item_chances['splint armour'] = from_dungeon_level([[40, 2], [20, 3], [15, 4]], dungeon_level)
     item_chances['scalemail'] = from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]], dungeon_level)
     item_chances['chainmail'] = from_dungeon_level([[40, 3], [30, 4]], dungeon_level)
     item_chances['breastplate'] = from_dungeon_level([[15, 4]], dungeon_level)
@@ -33,6 +35,9 @@ def random_armour(point = None, dungeon_level = 1):
 
     elif choice == 'leather shirt':
         item = leathershirt(point)
+
+    elif choice == 'splint armour':
+        item = splint(point)
 
     elif choice == 'scalemail':
         item = scalemail(point)
@@ -96,6 +101,8 @@ def random_weapon(point = None, dungeon_level = 1):
     item_chances['dagger'] = from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]], dungeon_level)
     item_chances['short sword'] = from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], dungeon_level)
     item_chances['long sword'] = from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
+    item_chances['axe'] = from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
+    item_chances['mace'] = from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'dagger':
@@ -106,6 +113,12 @@ def random_weapon(point = None, dungeon_level = 1):
 
     elif choice == 'long sword':
         item = longsword(point)
+
+    elif choice == 'axe':
+        item = axe(point)
+
+    elif choice == 'mace':
+        item = mace(point)
 
     return item
 
@@ -148,10 +161,9 @@ def ring_of_defence(point = None):
     return item
 
 def healing_potion(point = None):
-    item_component = Item(use_function=heal, number_of_dice=1, type_of_dice=8)
-
+    usable = HealingPotionUsable()
     item = Entity(point, '!', 'Healing Potion', libtcod.violet, render_order=RenderOrder.ITEM,
-                    item=item_component)
+                    usable=usable)
 
     return item
 
@@ -210,24 +222,39 @@ def leathershirt(point = None):
 
     return item
 
+def splint(point = None):
+    #create a breastplate
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=2)
+    item = Entity(point, '=', 'splint armour', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
+
+    return item
+
 def scalemail(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=2)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=3)
     item = Entity(point, '=', 'scalemail', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def chainmail(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=3)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=4)
     item = Entity(point, '=', 'chainmail', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def breastplate(point = None):
     #create a breastplate
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=4)
+    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=5)
     item = Entity(point, '=', 'breastplate', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
+
+    return item
+
+def axe(point = None):
+    #create a sword
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    equippable_component.type_of_dice = 8
+    item = Entity(point, '-', 'axe', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
@@ -252,6 +279,14 @@ def longsword(point = None):
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=4)
     equippable_component.type_of_dice = 8
     item = Entity(point, '\\', 'long sword', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
+
+    return item
+
+def mace(point = None):
+    #create a sword
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
+    equippable_component.type_of_dice = 10
+    item = Entity(point, '-', 'mace', libtcod.sky, equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 

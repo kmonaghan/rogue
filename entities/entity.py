@@ -22,9 +22,8 @@ class Entity:
     #this is a generic object: the game_state.player, a npc, an item, the stairs...
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
-                 ai=None, item=None, equippable=None,
-                 render_order=RenderOrder.CORPSE, death=None, health=None,
-                 act_energy=2):
+                 ai=None, item=None, equippable=None, render_order=RenderOrder.CORPSE,
+                 death=None, health=None, usable=None, act_energy=2):
 
         self.x = None
         self.y = None
@@ -36,14 +35,12 @@ class Entity:
         self.blocks = blocks
         self.always_visible = always_visible
 
-        self.health = health
-        if self.health:  #let the health component know who owns it
-            self.health.owner = self
-
+        self.add_component(health, "health")
         self.add_component(ai, "ai")
         self.add_component(item, "item")
         self.add_component(Energy(act_energy), "energy")
         self.add_component(Movement(), "movement")
+        self.add_component(usable, "usable")
 
         self.equippable = equippable
         if self.equippable:

@@ -89,17 +89,17 @@ def inventory_menu(header, player, width, screen_width, screen_height):
 
         for item in player.inventory.items:
             if player.equipment.main_hand == item:
-                options.append(['{0} (carried in main hand)'.format(item.name), item.color])
+                options.append(['{0} (in main hand)'.format(item.name), item.color])
             elif player.equipment.off_hand == item:
-                options.append(['{0} (carried in off hand)'.format(item.name), item.color])
+                options.append(['{0} (in off hand)'.format(item.name), item.color])
             elif player.equipment.chest == item:
-                options.append(['{0} (worn on chest)'.format(item.name), item.color])
+                options.append(['{0} (on chest)'.format(item.name), item.color])
             elif player.equipment.head == item:
-                options.append(['{0} (worn on head)'.format(item.name), item.color])
+                options.append(['{0} (on head)'.format(item.name), item.color])
             elif player.equipment.left_ring_finger == item:
-                options.append(['{0} (worn on left hand)'.format(item.name), item.color])
+                options.append(['{0} (on left hand)'.format(item.name), item.color])
             elif player.equipment.right_ring_finger == item:
-                options.append(['{0} (worn on right hand)'.format(item.name), item.color])
+                options.append(['{0} (on right hand)'.format(item.name), item.color])
             else:
                 options.append([item.name, item.color])
 

@@ -267,7 +267,8 @@ class Rogue(tcod.event.EventDispatch):
             item = self.player.inventory.items[action_value]
 
             if self.game_state == GameStates.INVENTORY_USE:
-                player_turn_results.extend(self.player.inventory.use(item, game_map=self.game_map))
+                if item.usable:
+                    player_turn_results.extend(item.usable.use(self.game_map, self.player))
             elif self.game_state == GameStates.INVENTORY_DROP:
                 player_turn_results.extend(self.player.inventory.drop_item(item))
             elif self.game_state == GameStates.INVENTORY_EXAMINE:
@@ -300,8 +301,7 @@ class Rogue(tcod.event.EventDispatch):
             if left_click:
                 target_x, target_y = left_click
 
-                item_use_results = self.player.inventory.use(targeting_item, entities=game_map.entities, game_map=self.game_map,
-                                                        target_x=target_x, target_y=target_y)
+                item_use_results = item.usable.use(self.game_map, self.player)
                 player_turn_results.extend(item_use_results)
             elif right_click:
                 player_turn_results.append({'targeting_cancelled': True})
@@ -351,12 +351,14 @@ class Rogue(tcod.event.EventDispatch):
                     self.game_state = GameStates.ENEMY_TURN
             elif action == InputTypes.PICKUP:
                 entities = self.game_map.current_level.entities.get_entities_in_position((self.player.x, self.player.y))
+                pickup = False
                 for entity in entities:
                     if entity.item:
                         player_turn_results.extend([{
                             ResultTypes.ADD_ITEM_TO_INVENTORY: entity
                         }])
-                else:
+                        pickup = True
+                if not pickup:
                     message = Message('There is nothing here to pick up.', tcod.yellow)
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
@@ -449,15 +451,11 @@ class Rogue(tcod.event.EventDispatch):
             # Add an item to the inventory, and remove it from the game map.
             if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
                 turn_results.extend(entity.inventory.add_item(result_data))
-
                 self.game_state = GameStates.ENEMY_TURN
 
             # Remove consumed items from inventory
             if result_type == ResultTypes.DISCARD_ITEM:
-                #item, consumed = result_data
-                #if consumed:
-                entity.inventory.remove(result_data)
-                self.game_map.current_level.remove_entity(result_data)
+                entity.inventory.remove_item(result_data)
                 self.game_state = GameStates.ENEMY_TURN
 
             # Remove dropped items from inventory and place on the map
