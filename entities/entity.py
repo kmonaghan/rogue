@@ -71,6 +71,12 @@ class Entity:
     def __repr__(self):
         return f"{self.name.title()}"
 
+    def __getattribute__(self, attr):
+        try:
+            return object.__getattribute__(self, attr)
+        except AttributeError:
+            return None
+            
     @property
     def point(self):
         return Point(self.x,self.y)

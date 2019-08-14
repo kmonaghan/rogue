@@ -15,6 +15,7 @@ from components.ai import (BasicNPC, GuardNPC, PatrollingNPC, WarlordNPC,
                             HatchingNPC, TetheredNPC, ZombieNPC)
 
 from components.berserk import Berserk
+from components.children import Children
 from components.health import Health
 from components.level import Level
 from components.offence import Offence
@@ -148,6 +149,12 @@ def create_player():
         player.inventory.add_item(ring)
         player.equipment.toggle_equip(ring)
 
+    potion = equipment.healing_potion()
+    player.inventory.add_item(potion)
+
+    scroll4 = equipment.map_scroll()
+    player.inventory.add_item(scroll4)
+
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
@@ -273,6 +280,7 @@ def ratsnest(point = None):
 
     creature.add_component(Defence(defence = 4), 'defence')
     creature.add_component(Level(xp_value = 1), 'level')
+    creature.add_component(Children(5), 'children')
 
     creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
     creature.movement.routing_avoid.append(Tiles.DOOR)
@@ -280,11 +288,6 @@ def ratsnest(point = None):
     creature.movement.routing_avoid.append(Tiles.STAIRSFLOOR)
     creature.movement.routing_avoid.append(Tiles.DEEPWATER)
     creature.movement.routing_avoid.append(Tiles.SHALLOWWATER)
-
-    # potion = equipment.random_potion(dungeon_level = dungeon_level)
-    # potion.lootable = True
-    #
-    # creature.inventory.add_item(potion)
 
     return creature
 
@@ -549,7 +552,7 @@ def goblin_observed_death(sub, message, level_map):
         if (sub.entity.uuid == message.entity.uuid):
             pass
         elif level_map.current_level.fov[sub.entity.x, sub.entity.y]:
-            if not hasattr(sub.entity, 'berserk'):
+            if not sub.entity.berserk:
                 sub.entity.add_component(Berserk(), 'berserk')
                 sub.entity.berserk.start_berserker()
 
@@ -589,7 +592,7 @@ def earn_death_xp(sub, message, level_map):
         print("earn_death_xp: the subscriber is none?")
         return
 
-    if (message.target.uuid == sub.entity.uuid) and hasattr(message.entity, 'level'):
+    if (message.target.uuid == sub.entity.uuid) and message.entity.level:
         xp = message.entity.level.xp_worth(message.target)
         sub.entity.level.add_xp(xp)
         pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))

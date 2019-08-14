@@ -196,6 +196,11 @@ class SpawnEntity(Node):
         if self.current_time < self.min_time:
             return TreeStates.FAILURE, []
 
+        if owner.children:
+            if not owner.children.can_have_children:
+                print("TOO MANY CHILDREN.")
+                return TreeStates.FAILURE, []
+
         if self.current_time > self.max_time or (uniform(0, 1) , (self.current_time/self.max_time)):
             x, y = random_adjacent((owner.x, owner.y))
 
@@ -212,6 +217,9 @@ class SpawnEntity(Node):
                 if self.hatch:
                     results.append({ResultTypes.REMOVE_ENTITY: owner})
 
+                if owner.children:
+                    owner.children.addChild(entity)
+                    
                 self.current_time = 0
                 return TreeStates.SUCCESS, results
             #else:

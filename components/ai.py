@@ -303,7 +303,7 @@ class HatchingNPC(BaseAI):
         Maximium number of turns before spawning.
         Default: 10
     """
-    def __init__(self, spawn, min_time=5, max_time=15):
+    def __init__(self, spawn, min_time=5, max_time=10):
         number_of_turns = randint(min_time, max_time)
         self.tree = Root(
             Selection(

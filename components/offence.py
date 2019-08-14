@@ -22,7 +22,7 @@ class Offence:
         if self.owner.subspecies:
             bonus += self.owner.subspecies.bonus_power
 
-        if hasattr(self.owner, 'berserk'):
+        if self.owner.berserk:
             multiplier = self.owner.berserk.power_modifier
 
         return (self.base_power + bonus) * multiplier

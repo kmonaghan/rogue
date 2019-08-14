@@ -36,7 +36,7 @@ class Character(Entity):
 
         desc += self.species_describe()
 
-        if hasattr(self, 'level'):
+        if self.level:
             desc += " (Level " + str(self.level.current_level) + ")"
 
         if CONFIG.get('debug'):
@@ -54,7 +54,7 @@ class Character(Entity):
 
         desc += self.species_describe()
 
-        if hasattr(self, 'level'):
+        if self.level:
             desc += " (Level " + str(self.level.current_level) + ")"
 
         if CONFIG.get('debug'):
