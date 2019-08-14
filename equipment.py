@@ -161,9 +161,8 @@ def ring_of_defence(point = None):
     return item
 
 def healing_potion(point = None):
-    usable = HealingPotionUsable()
     item = Entity(point, '!', 'Healing Potion', libtcod.violet, render_order=RenderOrder.ITEM,
-                    usable=usable)
+                    item=Item(), usable=HealingPotionUsable())
 
     return item
 
@@ -198,7 +197,7 @@ def map_scroll(point = None):
     usable = ScrollUsable(scroll_name="Mapping Scroll", scroll_spell=cast_mapping)
 
     item = Entity(point, '#', usable.name, libtcod.light_yellow, render_order=RenderOrder.ITEM,
-                    usable=usable)
+                    item=Item(), usable=usable)
 
     return item
 
