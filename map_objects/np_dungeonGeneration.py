@@ -500,10 +500,7 @@ class dungeonGenerator:
     def cleanUpMap(self):
         self.grid[np.where(self.grid == Tiles.POTENTIAL_CORRIDOR_FLOOR)] = Tiles.EMPTY
 
-        self.grid[0] = Tiles.EMPTY
-        self.grid[-1] = Tiles.EMPTY
-        self.grid[:, 0] = Tiles.EMPTY
-        self.grid[:, -1] = Tiles.EMPTY
+        self.grid[np.where(self.grid == Tiles.IMPENETRABLE)] = Tiles.EMPTY
 
         self.deepWater()
 
@@ -532,9 +529,10 @@ class dungeonGenerator:
                 replacement_tile = self.grid[x,y]
                 if self.grid[x,y] in BLOCKING_TILES:
                     replacement_tile = self.grid[x,y] = wall_to_floor.get(self.grid[x,y], tile)
-
+                elif self.grid[x,y] == Tiles.EMPTY:
+                    replacement_tile = tile
                 self.grid[x,y] = replacement_tile
-                
+
         return dijk_dist
 
     def create_dijkstra_map(self, x1, y1, default_weight = 1, avoid = [], weights = []):
@@ -783,6 +781,9 @@ class dungeonGenerator:
 
         if len(path) < 1:
             print("Can't route between stairs")
+            return False
+        elif len(path) < 60:
+            print("Path between stairs too short")
             return False
 
         return True

@@ -25,14 +25,17 @@ def levelOneGenerator(map_width, map_height):
     stairs = np.where(dm.grid == Tiles.STAIRSFLOOR)
     cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
 
+    tile_index = randint(0, len(cavern)-1)
+
     weights = [(Tiles.CORRIDOR_FLOOR, 1),
                 (Tiles.ROOM_WALL, 8),
                 (Tiles.EMPTY, 9),
                 (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.CAVERN_WALL, 3),
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
     #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
-    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][tile_index], cavern[1][tile_index], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     x2, y2 = placeExitRoom(dm, x1, y1)
 
@@ -40,30 +43,33 @@ def levelOneGenerator(map_width, map_height):
         print("No exit, just start again")
         return levelOneGenerator(map_width, map_height)
 
-    #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
-    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
+    #print(f"Route from {x2},{y2} to {cavern[0][tile_index]},{cavern[1][tile_index]}")
+    dm.route_between(x2, y2, cavern[0][tile_index], cavern[1][tile_index], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     prefab = Prefab(treasure_room)
 
     room = dm.placeRoomRandomly(prefab)
 
-    x3, y3 = room.center
+    doors = np.where(room.slice == Tiles.DOOR)
+
+    x3 = doors[0][0] + room.x
+    y3 = doors[1][0] + room.y
+
+    tile_index = randint(0, len(cavern)-1)
 
     weights = [(Tiles.CORRIDOR_FLOOR, 1),
-                (Tiles.ROOM_WALL, 0),
-                (Tiles.ROOM_FLOOR, 9),
+                (Tiles.ROOM_FLOOR, 1),
                 (Tiles.EMPTY, 9),
                 (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.CAVERN_WALL, 3),
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
-    dm.route_between(x3, y3, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
+    #print(f"Route from {x3},{y3} to {cavern[0][tile_index]},{cavern[1][tile_index]}")
+    dm.route_between(x3, y3, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
+    #print(f"Route from {x2},{y2} to {cavern[0][tile_index]},{cavern[1][tile_index]}")
+    dm.route_between(x2, y2, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     dm.cleanUpMap()
-
-    dm.grid[0] = Tiles.CAVERN_WALL
-    dm.grid[-1] = Tiles.CAVERN_WALL
-    dm.grid[:, 0] = Tiles.CAVERN_WALL
-    dm.grid[:, -1] = Tiles.CAVERN_WALL
 
     if not dm.validateMap():
         print("Bad map===========D")
@@ -134,11 +140,6 @@ def levelGenerator(map_width, map_height, x, y):
     if not dm.validateMap():
         print("Bad map===========D")
         return levelGenerator(map_width, map_height, x, y)
-
-    dm.grid[0] = Tiles.CAVERN_WALL
-    dm.grid[-1] = Tiles.CAVERN_WALL
-    dm.grid[:, 0] = Tiles.CAVERN_WALL
-    dm.grid[:, -1] = Tiles.CAVERN_WALL
 
     return dm
 
