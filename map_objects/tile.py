@@ -2,6 +2,8 @@ __metaclass__ = type
 
 import tcod as libtcod
 
+from etc.colors import COLORS
+
 class Tile:
     """
     A tile on a map. It may or may not be blocked, and may or may not block sight.
@@ -16,8 +18,8 @@ class Tile:
         self.block_sight = block_sight
 
         self.explored = False
-        self.fov_color = libtcod.dark_grey
-        self.out_of_fov_color = libtcod.darkest_grey
+        self.fov_color = COLORS.get('light_default')
+        self.out_of_fov_color = COLORS.get('dark_default')
         self.name = "Tile"
         self.char = None
 
@@ -37,72 +39,72 @@ class CavernFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(CavernFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.lighter_sepia
-        self.out_of_fov_color = libtcod.light_sepia
+        self.fov_color = COLORS.get('light_cavern_floor')
+        self.out_of_fov_color = COLORS.get('light_cavern_floor')
         self.name = "Cavern floor"
 
 class CavernWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
         super(CavernWall, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.dark_sepia
-        self.out_of_fov_color = libtcod.darkest_sepia
+        self.fov_color = COLORS.get('light_cavern_wall')
+        self.out_of_fov_color = COLORS.get('dark_cavern_wall')
         self.name = "Cavern wall"
 
 class CorridorWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
         super(CorridorWall, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.dark_sepia
-        self.out_of_fov_color = libtcod.darkest_sepia
+        self.fov_color = COLORS.get('light_cavern_wall')
+        self.out_of_fov_color = COLORS.get('dark_cavern_wall')
         self.name = "Cavern wall"
 
 class Door(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(Door, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.orange
-        self.out_of_fov_color = libtcod.darker_orange
+        self.fov_color = COLORS.get('light_door')
+        self.out_of_fov_color = COLORS.get('dark_door')
         self.name = "Door"
 
 class ImpenetrableTile(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(ImpenetrableTile, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.red
-        self.out_of_fov_color = libtcod.darker_red
+        self.fov_color = COLORS.get('light_impenetrable')
+        self.out_of_fov_color = COLORS.get('dark_impenetrable')
         self.name = "Impenetrable"
 
 class RoomFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(RoomFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.light_grey
-        self.out_of_fov_color = libtcod.grey
+        self.fov_color = COLORS.get('light_room_floor')
+        self.out_of_fov_color = COLORS.get('dark_room_floor')
         self.name = "Room floor"
 
 class CorridorFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(CorridorFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.sepia
-        self.out_of_fov_color = libtcod.darker_sepia
+        self.fov_color = COLORS.get('light_corridor_floor')
+        self.out_of_fov_color = COLORS.get('dark_corridor_floor')
         self.name = "Corridor floor"
 
 class PotentialCorridorFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(PotentialCorridorFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.lightest_green
-        self.out_of_fov_color = libtcod.lightest_green
+        self.fov_color = COLORS.get('light_potential_corridor_floor')
+        self.out_of_fov_color = COLORS.get('dark_potential_corridor_floor')
         self.name = "Potential Corridor floor"
 
 class RoomWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
         super(RoomWall, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.dark_grey
-        self.out_of_fov_color = libtcod.darkest_grey
+        self.fov_color = COLORS.get('light_room_wall')
+        self.out_of_fov_color = COLORS.get('dark_corridor_floor')
         self.name = "Wall"
         self.char = '#'
 
@@ -110,16 +112,16 @@ class StairsFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(StairsFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.light_yellow
-        self.out_of_fov_color = libtcod.yellow
+        self.fov_color = COLORS.get('light_stair_floor')
+        self.out_of_fov_color = COLORS.get('dark_stair_floor')
         self.name = "Stairs floor"
 
 class ShallowWater(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(ShallowWater, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.lighter_blue
-        self.out_of_fov_color = libtcod.light_blue
+        self.fov_color = COLORS.get('light_shallow_water')
+        self.out_of_fov_color = COLORS.get('dark_shallow_water')
         self.name = "Shallow water"
         self.char = '~'
 
@@ -127,8 +129,8 @@ class DeepWater(Tile):
     def __init__(self, blocked=True, block_sight=False):
         super(DeepWater, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.dark_blue
-        self.out_of_fov_color = libtcod.darkest_blue
+        self.fov_color = COLORS.get('light_deep_water')
+        self.out_of_fov_color = COLORS.get('dark_deep_water')
         self.name = "Deep water"
         self.char = '~'
 
@@ -136,6 +138,6 @@ class EmptyTile(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(EmptyTile, self).__init__(blocked, block_sight)
 
-        self.fov_color = libtcod.black
-        self.out_of_fov_color = libtcod.black
+        self.fov_color = COLORS.get('light_empty_tile')
+        self.out_of_fov_color = COLORS.get('dark_empty_tile')
         self.name = "An empty void that fills you with dispair as you stare into it."
