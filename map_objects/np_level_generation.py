@@ -32,7 +32,7 @@ def levelOneGenerator(map_width, map_height):
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
     #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
-    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     x2, y2 = placeExitRoom(dm, x1, y1)
 
@@ -41,7 +41,7 @@ def levelOneGenerator(map_width, map_height):
         return levelOneGenerator(map_width, map_height)
 
     #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
-    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     prefab = Prefab(treasure_room)
 
@@ -56,7 +56,7 @@ def levelOneGenerator(map_width, map_height):
                 (Tiles.CAVERN_FLOOR, 1),
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
-    dm.route_between(x3, y3, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(x3, y3, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     dm.cleanUpMap()
 
@@ -99,7 +99,7 @@ def cavernLevel(dm, x, y):
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
     #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
-    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     x2, y2 = placeExitRoom(dm, x1, y1)
 
@@ -108,7 +108,7 @@ def cavernLevel(dm, x, y):
         return cavernLevel(dm, x, y)
 
     #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
-    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     dm.cleanUpMap()
 
@@ -166,9 +166,9 @@ def bossLevelGenerator(map_width, map_height, x, y):
                 (Tiles.CAVERN_FLOOR, 1),
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
-    dm.route_between(x, y, cavern[0][0], cavern[1][0], avoid=[], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(x, y, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
-    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[Tiles.ROOM_WALL, Tiles.ROOM_FLOOR], weights = weights, overwrite = True, tile=Tiles.CAVERN_FLOOR)
+    dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[Tiles.ROOM_WALL, Tiles.ROOM_FLOOR], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     dm.cleanUpMap()
 

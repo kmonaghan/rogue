@@ -22,6 +22,12 @@ floor_to_wall = {
     Tiles.DOOR: Tiles.ROOM_WALL,
 }
 
+wall_to_floor = {
+    Tiles.CAVERN_WALL: Tiles.CAVERN_FLOOR,
+    Tiles.CORRIDOR_WALL: Tiles.CORRIDOR_FLOOR,
+    Tiles.ROOM_WALL: Tiles.DOOR,
+}
+
 from utils.utils import matprint
 
 class dungeonRoom:
@@ -520,11 +526,15 @@ class dungeonGenerator:
 
         for i in range(tcod.dijkstra_size(dijk)):
             x, y = tcod.dijkstra_get(dijk, i)
-            #if overwrite or self.grid[x,y] == Tiles.EMPTY:
-                #if self.grid[x,y] == Tiles.DOOR:
-                #    continue
-            self.grid[x,y] = tile
+            if overwrite:
+                self.grid[x,y] = tile
+            else:
+                replacement_tile = self.grid[x,y]
+                if self.grid[x,y] in BLOCKING_TILES:
+                    replacement_tile = self.grid[x,y] = wall_to_floor.get(self.grid[x,y], tile)
 
+                self.grid[x,y] = replacement_tile
+                
         return dijk_dist
 
     def create_dijkstra_map(self, x1, y1, default_weight = 1, avoid = [], weights = []):
