@@ -1,3 +1,6 @@
+import sys
+import os.path
+
 import tcod as libtcod
 
 from random import randint
@@ -471,7 +474,13 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
         npc = troll(point)
 
     if not names:
-        libtcod.namegen_parse('data/names.txt')
+        BASE_DIR = getattr(sys, "_MEIPASS", ".")
+
+        NAMES_PATH = os.path.join(BASE_DIR, "data/names.txt")
+
+        print(NAMES_PATH)
+
+        libtcod.namegen_parse(NAMES_PATH)
         names = True
 
     npc.base_name = libtcod.namegen_generate(npc.base_name)
