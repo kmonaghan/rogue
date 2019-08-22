@@ -1,6 +1,3 @@
-import sys
-import os.path
-
 import tcod
 import tcod.event
 
@@ -32,7 +29,8 @@ from render_functions import get_names_under_mouse, render_info_console, render_
 from utils.utils import (
     flatten_list_of_dictionaries,
     unpack_single_key_dict,
-    get_key_from_single_key_dict)
+    get_key_from_single_key_dict,
+    resource_path)
 
 class MainMenu(tcod.event.EventDispatch):
     def __init__(self):
@@ -535,24 +533,13 @@ class Rogue(tcod.event.EventDispatch):
 current_game = Rogue()
 main_menu = MainMenu()
 
-# The base directory, this is sys._MEIPASS when in one-file mode.
-BASE_DIR = getattr(sys, "_MEIPASS", ".")
-
-FONT_PATH = os.path.join(BASE_DIR, "arial10x10.png")
-
 def main():
     global current_game, root_console
 
     tcod.console_set_custom_font(
-        FONT_PATH,
+        resource_path("arial10x10.png"),
         tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
     )
-    '''
-    tcod.console_set_custom_font(
-        "arial10x10.png",
-        tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
-    )
-    '''
 
     root_console = tcod.console_init_root(CONFIG.get('full_screen_width'),
                                             CONFIG.get('full_screen_height'),

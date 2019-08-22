@@ -1,3 +1,5 @@
+from random import randint
+
 import tcod as libtcod
 
 import numpy as np
@@ -119,7 +121,7 @@ def cast_confuse(*args, **kwargs):
     return results
 
 def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
-    dice = libtcod.random_get_int(0, 1, number_of_npc)
+    dice = randint(1, number_of_npc)
 
     start_x = point.x - 1
     start_y = point.y - 1

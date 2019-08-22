@@ -47,12 +47,6 @@ COLORS = {
 
     'stairs': tcod.silver,
 
-    'goblin': (46, 139, 87),
-    'orc': (46, 139, 87),
-    'troll': (128, 128, 0),
-    'zombie': (145, 145, 0),
-    'necromancer': (50, 50, 50),
-
     'cursor': (255, 215, 0),
     'cursor_tail': (220, 180, 0),
 
@@ -60,6 +54,31 @@ COLORS = {
 
     'dijkstra_far': (0, 0, 255),
     'dijkstra_near': (255, 0, 0),
+
+    'elite': tcod.silver,
+
+    'bat': tcod.darker_red,
+    'bounty_hunter': tcod.gold,
+    'chest': tcod.blue,
+    'goblin': tcod.desaturated_green,
+    'mimic': tcod.darker_blue,
+    'orc': tcod.light_green,
+    'player': tcod.darker_green,
+    'rat': tcod.green,
+    'rats_nest': tcod.green,
+    'snake': tcod.darker_green,
+    'snake_egg': tcod.darker_gray,
+    'skeleton': tcod.light_blue,
+    'troll': tcod.darker_green,
+    'necromancer': (50, 50, 50),
+    'warlord': tcod.black,
+    'zombie': (145, 145, 0),
+
+    'equipment_common': tcod.gray,
+    'equipment_uncommon': tcod.chartreuse,
+    'equipment_rare': tcod.blue,
+    'equipment_epic': tcod.purple,
+    'equipment_legendary': tcod.crimson,
 }
 
 STATUS_BAR_COLORS = {

@@ -1,15 +1,10 @@
-import sys
-import os.path
-
-import tcod as libtcod
+import tcod
 
 from random import randint
 
 import equipment
 
 from game_messages import Message
-
-from etc.configuration import CONFIG
 
 import quest
 
@@ -29,11 +24,15 @@ from components.subspecies import Subspecies
 
 from entities.character import Character
 
+from etc.colors import COLORS
+from etc.configuration import CONFIG
+
 from map_objects.point import Point
 
 from components.death import PlayerDeath, WarlordDeath
 
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
+from utils.utils import resource_path
 
 from etc.enum import Species, Tiles
 
@@ -48,7 +47,7 @@ Create npc/creatures/player
 def bat(point = None):
     health_component = Health(4)
 
-    creature = Character(point, 'B', 'bat', libtcod.darker_red,
+    creature = Character(point, 'B', 'bat', COLORS.get('bat'),
                     ai=PatrollingNPC(),
                     species=Species.BAT, health=health_component, act_energy=2)
 
@@ -67,7 +66,7 @@ def bountyhunter(point):
     #create a questgiver
 
     ai_component = TetheredNPC(4, point)
-    npc = Character(point, '?', 'Bounty Hunter', libtcod.gold, ai=ai_component,
+    npc = Character(point, '?', 'Bounty Hunter', COLORS.get('bounty_hunter'), ai=ai_component,
                     species=Species.NONDESCRIPT, act_energy=2)
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')
@@ -76,13 +75,13 @@ def bountyhunter(point):
     return npc
 
 def create_chest(point = None, dungeon_level = 1):
-    npc = Character(point, 'C', 'Chest', libtcod.blue, species=Species.NONDESCRIPT)
+    npc = Character(point, 'C', 'Chest', COLORS.get('chest'), species=Species.NONDESCRIPT)
 
     mimic_chance = randint(1, 100)
 
     if (mimic_chance >= 95):
         npc.species = Species.CREATURE
-        npc.color = libtcod.darker_blue
+        npc.color = COLORS.get('mimic')
         npc.add_component(Health(30), 'health')
         npc.add_component(Offence(base_power = 3), 'offence')
         npc.add_component(Defence(defence = 3), 'defence')
@@ -124,7 +123,7 @@ def create_player():
     #create object representing the player
     health_component = Health(30)
 
-    player = Character(None, '@', 'player', libtcod.dark_green,
+    player = Character(None, '@', 'player', COLORS.get('player'),
                        death=PlayerDeath(), health=health_component,
                        species=Species.PLAYER)
 
@@ -166,7 +165,7 @@ def create_player():
 def egg(point = None):
     health_component = Health(4)
 
-    creature = Character(point, 'E', 'Snake Egg', libtcod.darker_gray,
+    creature = Character(point, 'E', 'Snake Egg', COLORS.get('snake_egg'),
                     ai=HatchingNPC(snake),
                     species=Species.EGG, health=health_component)
 
@@ -186,7 +185,7 @@ def goblin(point = None):
     health_component = Health(20)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'G', 'goblin', libtcod.desaturated_green,
+    npc = Character(point, 'G', 'goblin', COLORS.get('goblin'),
                     ai=ai_component, species=Species.GOBLIN,
                     health=health_component, act_energy=2)
 
@@ -209,7 +208,7 @@ def necromancer(point = None):
     health_component = Health(30)
     ai_component = NecromancerNPC()
 
-    npc = Character(point, 'N', 'necromancer', libtcod.darker_green,
+    npc = Character(point, 'N', 'necromancer', COLORS.get('necromancer'),
                     ai=ai_component, species=Species.NONDESCRIPT,
                     health=health_component, act_energy=1)
 
@@ -230,7 +229,7 @@ def orc(point = None):
     health_component = Health(20)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'O', 'orc', libtcod.light_green,
+    npc = Character(point, 'O', 'orc', COLORS.get('orc'),
                     ai=ai_component, species=Species.ORC,
                     health=health_component, act_energy=2)
 
@@ -249,7 +248,7 @@ def orc(point = None):
 def rat(point = None):
     health_component = Health(4)
 
-    creature = Character(point, 'R', 'rat', libtcod.darker_green,
+    creature = Character(point, 'R', 'rat', COLORS.get('rat'),
                     ai=PredatorNPC(species=Species.EGG),
                     species=Species.RAT, health=health_component, act_energy=2)
 
@@ -277,7 +276,7 @@ def rat(point = None):
 def ratsnest(point = None):
     health_component = Health(4)
 
-    creature = Character(point, 'N', 'rat\'s nest', libtcod.darker_green,
+    creature = Character(point, 'N', 'rat\'s nest', COLORS.get('rats_nest'),
                     ai=SpawningNPC(rat),
                     species=Species.RATNEST, health=health_component, act_energy=1)
 
@@ -313,7 +312,7 @@ def skeleton(point = None, old_npc = None):
 
         return old_npc
     else:
-        npc = Character(point, 'S', 'skeleton', libtcod.darker_green,
+        npc = Character(point, 'S', 'skeleton', COLORS.get('skeleton'),
                         ai=ai_component, species=Species.NONDESCRIPT,
                         health=health_component, act_energy=2)
 
@@ -331,7 +330,7 @@ def skeleton(point = None, old_npc = None):
 def snake(point = None):
     health_component = Health(8)
 
-    creature = Character(point, 'S', 'snake', libtcod.darker_green,
+    creature = Character(point, 'S', 'snake', COLORS.get('snake'),
                     ai=PredatorNPC(species=Species.RAT),
                     species=Species.SNAKE, health=health_component, act_energy=2)
 
@@ -362,7 +361,7 @@ def troll(point = None):
     health_component = Health(30)
     ai_component = BasicNPC()
 
-    npc = Character(point, 'T', 'troll', libtcod.darker_green,
+    npc = Character(point, 'T', 'troll', COLORS.get('troll'),
                     ai=ai_component, species=Species.TROLL,
                     health=health_component, act_energy=3)
 
@@ -383,7 +382,7 @@ def warlord(point = None):
     ai_component = WarlordNPC()
     health_component = Health(50)
 
-    npc = Character(point, 'W', 'Warlord', libtcod.black,
+    npc = Character(point, 'W', 'Warlord', COLORS.get('warlord'),
                     ai=ai_component, species=Species.ORC, death=WarlordDeath(),
                     health=health_component)
 
@@ -393,21 +392,21 @@ def warlord(point = None):
 
     item = equipment.longsword()
     item.base_name = item.base_name + " of I'll FUCKING Have You"
-    item.color = libtcod.purple
+    item.color = COLORS.get('equipment_epic')
     item.equippable.power_bonus = item.equippable.power_bonus * 2
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
 
     shield = equipment.shield()
     shield.base_name = shield.base_name + " of Hide and Seek"
-    shield.color = libtcod.purple
+    shield.color = COLORS.get('equipment_epic')
     shield.equippable.power_bonus = item.equippable.defence_bonus * 2
     npc.inventory.add_item(shield)
     npc.equipment.toggle_equip(shield)
 
     breastplate = equipment.breastplate()
     breastplate.base_name = breastplate.base_name + " of Rebounding"
-    breastplate.color = libtcod.purple
+    breastplate.color = COLORS.get('equipment_epic')
     breastplate.equippable.power_bonus = item.equippable.defence_bonus * 2
     npc.inventory.add_item(breastplate)
     npc.equipment.toggle_equip(breastplate)
@@ -428,7 +427,7 @@ def zombie(point = None, old_npc = None):
 
         return old_npc
     else:
-        npc = Character(point, 'Z', 'zombie', libtcod.darker_green,
+        npc = Character(point, 'Z', 'zombie', COLORS.get('zombie'),
                         ai=ai_component, species=Species.ZOMBIE,
                         health=health_component)
 
@@ -474,23 +473,17 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
         npc = troll(point)
 
     if not names:
-        BASE_DIR = getattr(sys, "_MEIPASS", ".")
-
-        NAMES_PATH = os.path.join(BASE_DIR, "data/names.txt")
-
-        print(NAMES_PATH)
-
-        libtcod.namegen_parse(NAMES_PATH)
+        tcod.namegen_parse(resource_path("data/names.txt"))
         names = True
 
-    npc.base_name = libtcod.namegen_generate(npc.base_name)
+    npc.base_name = tcod.namegen_generate(npc.base_name)
 
-    npc_level = (dungeon_level - 1) + libtcod.random_get_int(0, -1, 1)
+    npc_level = (dungeon_level - 1) + randint(-1, 1)
 
     if npc_level > 1:
         npc.level.random_level_up(npc_level - 1)
 
-    dice = libtcod.random_get_int(0, 1, 100)
+    dice = randint(1, 100)
 
     if (dice >= upgrade_chance):
         upgrade_npc(npc)
@@ -523,7 +516,7 @@ def place_chest(point, level_map, player):
         level_map.add_entity(npc)
 
 def tweak_npc(npc):
-    dice = libtcod.random_get_int(0, 1, 100)
+    dice = randint(1, 100)
     if (dice < 50):
         return
     else:
@@ -532,7 +525,7 @@ def tweak_npc(npc):
         npc.add_component(subspecies, 'subspecies')
 
 def upgrade_npc(npc):
-    npc.color = libtcod.silver
+    npc.color = COLORS.get('elite')
     npc.offence.multiplier = 1.5
     npc.level.xp_value = npc.level.xp_value * 1.5
     item = equipment.random_magic_weapon()

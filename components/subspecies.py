@@ -1,3 +1,5 @@
+from random import randint
+
 import tcod as libtcod
 
 class Subspecies:
@@ -8,7 +10,7 @@ class Subspecies:
         self.bonus_defence = 0
 
     def random_subspecies(self):
-        dice = libtcod.random_get_int(0, 1, 100)
+        dice = randint(1, 100)
         if (dice <= 10):
             self.name = "Fiery"
             self.subcolor = libtcod.red

@@ -1,4 +1,6 @@
 from math import sqrt
+from random import randint
+
 class Point:
     #a rectangle on the map. used to characterize a room.
     def __init__(self, x, y):
@@ -25,8 +27,8 @@ class Point:
         return sqrt(dx ** 2 + dy ** 2)
 
     def random_meightbouring_point(self):
-        dx = libtcod.random_get_int(0, -1, 1)
-        dy = libtcod.random_get_int(0, -1, 1)
+        dx = randint(-1, 1)
+        dy = randint(-1, 1)
 
         point = Point(self.x + dx, self.y + dy)
         if (point.x < 0) or (point.y < 0):

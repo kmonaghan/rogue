@@ -1,3 +1,5 @@
+from random import randint
+
 import tcod as libtcod
 
 from equipment_slots import EquipmentSlots
@@ -31,7 +33,7 @@ class Offence:
         results = []
 
         #a simple formula for attack damage
-        total = libtcod.random_get_int(0, 1, 20)
+        total = randint(1, 20)
         multiplier = 1;
         if (total == 20):
             multiplier = 2
