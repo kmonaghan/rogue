@@ -16,9 +16,9 @@ floor_to_wall = {
     Tiles.CORRIDOR_FLOOR: Tiles.CORRIDOR_WALL,
     Tiles.ROOM_FLOOR: Tiles.ROOM_WALL,
     Tiles.ROOM_WALL: Tiles.ROOM_WALL,
-    Tiles.STAIRSFLOOR: Tiles.ROOM_WALL,
-    Tiles.DEEPWATER: Tiles.CAVERN_WALL,
-    Tiles.SHALLOWWATER: Tiles.CAVERN_WALL,
+    Tiles.STAIRS_FLOOR: Tiles.ROOM_WALL,
+    Tiles.DEEP_WATER: Tiles.CAVERN_WALL,
+    Tiles.SHALLOW_WATER: Tiles.CAVERN_WALL,
     Tiles.DOOR: Tiles.ROOM_WALL,
 }
 
@@ -70,6 +70,19 @@ class dungeonRoom:
     def center(self):
         return (self.x + (self.width // 2) - 1, self.y + (self.height // 2) - 1)
 
+class prefabRoom(dungeonRoom):
+    def __init__(self, x, y, slice, name="", exits=[], spawnpoints=[]):
+        super(prefabRoom, self).__init__(x, y, slice, name)
+        self.mask = np.full(self.slice.shape, 1, dtype=np.int8)
+
+        empty_tiles = np.isin(self.slice, [Tiles.EMPTY])
+
+        self.mask[empty_tiles] = 0
+        self.exits = exits
+        for x,y in self.exits:
+            self.mask[x,y] = 0
+        self.spawnpoints = spawnpoints
+
 class dungeonGenerator:
     def __init__(self, width, height):
         self.grid = np.zeros((width, height), dtype=np.int8)
@@ -90,19 +103,11 @@ class dungeonGenerator:
         return self.grid.shape[1]
 
     def quadFits(self, sx, sy, rx, ry, margin):
-        top_x = sx-margin
-        if top_x < 0:
-            top_x = 0
-        top_y = sy-margin
-        if top_y < 0:
-            top_y = 0
+        top_x = max(0, sx-margin)
+        top_y = max(0, sy-margin)
 
-        bottom_x = sx+rx+margin
-        if bottom_x > (self.grid.shape[0] - 1):
-            bottom_x = self.grid.shape[0] - 1
-        bottom_y = sy+ry+margin
-        if bottom_y > (self.grid.shape[1] - 1):
-            bottom_y = self.grid.shape[1] - 1
+        bottom_x = min(self.grid.shape[0] - 1, sx+rx+margin)
+        bottom_y = min(self.grid.shape[1] - 1, sy+ry+margin)
 
         room_bounds = self.grid[top_x:bottom_x, top_y:bottom_y]
 
@@ -297,7 +302,7 @@ class dungeonGenerator:
 
             currentAreaCount -= 1
 
-    def turnAreasSmallerThanIntoWater(self, min_size = 20, tile = Tiles.SHALLOWWATER):
+    def turnAreasSmallerThanIntoWater(self, min_size = 20, tile = Tiles.SHALLOW_WATER):
         unconnected = self.findUnconnectedAreas(tilesToFill = [Tiles.EMPTY])
 
         max = np.amax(unconnected)
@@ -421,7 +426,7 @@ class dungeonGenerator:
 
             y1,x1 = np.ogrid[-radius:radius+1, -radius:radius+1]
             mask3 = x1**2 + y1**2 < (donut_radius)**2
-            room_slice[mask3] = choice([Tiles.SHALLOWWATER, Tiles.EMPTY])
+            room_slice[mask3] = choice([Tiles.SHALLOW_WATER, Tiles.EMPTY])
 
         if add_door:
             max_doors = 4
@@ -447,6 +452,10 @@ class dungeonGenerator:
         for attempt in range(attempts):
             start_x, start_y = self.randomPoint(tile=Tiles.EMPTY, x_inset = prefab.layout.shape[0] + (margin * 2), y_inset = prefab.layout.shape[1] + (margin * 2))
 
+            if not start_x:
+                print("Failed to place room as ran out of empty tiles")
+                return None
+
             if overwrite or self.quadFits(start_x, start_y, prefab.layout.shape[0], prefab.layout.shape[1], margin):
                 try:
                     self.grid[start_x:start_x+prefab.layout.shape[0], start_y:start_y+prefab.layout.shape[1]] = prefab.layout
@@ -454,7 +463,7 @@ class dungeonGenerator:
                     print(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
                     return None
 
-                room = dungeonRoom(start_x, start_y, prefab.layout, prefab.name)
+                room = prefabRoom(start_x, start_y, prefab.layout, prefab.name, prefab.exits, prefab.spawnpoints)
 
                 self.rooms.append(room)
 
@@ -502,7 +511,7 @@ class dungeonGenerator:
 
         self.grid[np.where(self.grid == Tiles.IMPENETRABLE)] = Tiles.EMPTY
 
-        self.deepWater()
+        self.DeepWater()
 
         self.placeWalls()
 
@@ -515,9 +524,9 @@ class dungeonGenerator:
                 surrounding = self.surrounding_tiles(x,y)
                 surrounding[np.where(surrounding == Tiles.EMPTY)] = floor_to_wall[self.grid[x,y]]
 
-    def route_between(self, x1, y1, x2, y2, tile=Tiles.CORRIDOR_FLOOR, avoid = [], weights = [], overwrite = False):
+    def route_between(self, x1, y1, x2, y2, tile=Tiles.CORRIDOR_FLOOR, avoid = [], weights = [], overwrite = False, avoid_rooms = False):
 
-        dijk, dijk_dist = self.create_dijkstra_map(x1, y1, default_weight = 1, avoid = avoid, weights = weights)
+        dijk, dijk_dist = self.create_dijkstra_map(x1, y1, default_weight = 1, avoid = avoid, weights = weights, avoid_rooms = avoid_rooms)
 
         tcod.dijkstra_path_set(dijk, x2, y2)
 
@@ -535,7 +544,7 @@ class dungeonGenerator:
 
         return dijk_dist
 
-    def create_dijkstra_map(self, x1, y1, default_weight = 1, avoid = [], weights = []):
+    def create_dijkstra_map(self, x1, y1, default_weight = 1, avoid = [], weights = [], avoid_rooms = False):
         walkable = np.zeros(self.grid.shape, dtype=np.int8)
         walkable[np.where(self.grid != Tiles.EMPTY)] = default_weight
 
@@ -546,6 +555,12 @@ class dungeonGenerator:
 
         for tile, weight in weights:
             walkable[np.where(self.grid == tile)] = weight
+
+        if avoid_rooms:
+            for room in self.rooms:
+                if isinstance(room, prefabRoom):
+                    room_slice = walkable[room.x:room.x+room.width, room.y:room.y+room.height]
+                    room_slice[np.where(room.mask == 1)] = 0
 
         dijk = tcod.dijkstra_new(walkable, 0)
         tcod.dijkstra_compute(dijk, x1, y1)
@@ -619,7 +634,7 @@ class dungeonGenerator:
             end_y = max(source_y, target_y)
 
             walk_grid = self.grid[start_x:end_x+1, start_y:end_y+1]
-            walk_grid[:] = Tiles.DEEPWATER
+            walk_grid[:] = Tiles.DEEP_WATER
 
             source_x -= start_x
             source_y -= start_y
@@ -748,32 +763,32 @@ class dungeonGenerator:
         x1, y1 = self.randomPoint(tile=Tiles.EMPTY)
         x2, y2 = self.randomPoint(tile=Tiles.EMPTY)
 
-        self.drunkenWalk(x1,y1,x2,y2,tile=Tiles.SHALLOWWATER, overwrite = True)
+        self.drunkenWalk(x1,y1,x2,y2,tile=Tiles.SHALLOW_WATER, overwrite = True)
 
-    def deepWater(self):
-        tiles = np.where(self.grid == Tiles.SHALLOWWATER)
+    def DeepWater(self):
+        tiles = np.where(self.grid == Tiles.SHALLOW_WATER)
 
         water_grid = self.grid.copy()
         for idx, x in enumerate(tiles[0]):
             y = tiles[1][idx]
 
             surronding = self.surrounding_tiles(x,y)
-            surrounding_water = np.where(surronding == Tiles.SHALLOWWATER)
+            surrounding_water = np.where(surronding == Tiles.SHALLOW_WATER)
 
             if len(surrounding_water[0]) == 9:
-                water_grid[x,y] = Tiles.DEEPWATER
+                water_grid[x,y] = Tiles.DEEP_WATER
 
         self.grid[:] = water_grid[:]
 
     def validateMap(self):
-        stairs = np.where(self.grid == Tiles.STAIRSFLOOR)
+        stairs = np.where(self.grid == Tiles.STAIRS_FLOOR)
 
         if len(stairs[0]) < 2:
             print("Not enough exits")
             return False
 
         walkable = self.grid.copy()
-        mask = np.isin(self.grid, [Tiles.OBSTACLE, Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.DEEPWATER, Tiles.IMPENETRABLE])
+        mask = np.isin(self.grid, [Tiles.OBSTACLE, Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.DEEP_WATER, Tiles.IMPENETRABLE])
         walkable[mask] = 0
 
         astar = tcod.path.AStar(walkable, 0)

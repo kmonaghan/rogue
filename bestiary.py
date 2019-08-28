@@ -259,9 +259,9 @@ def rat(point = None):
     creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
     creature.movement.routing_avoid.append(Tiles.DOOR)
     creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.STAIRSFLOOR)
-    creature.movement.routing_avoid.append(Tiles.DEEPWATER)
-    creature.movement.routing_avoid.append(Tiles.SHALLOWWATER)
+    creature.movement.routing_avoid.append(Tiles.STAIRS_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.DEEP_WATER)
+    creature.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -287,9 +287,9 @@ def ratsnest(point = None):
     creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
     creature.movement.routing_avoid.append(Tiles.DOOR)
     creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.STAIRSFLOOR)
-    creature.movement.routing_avoid.append(Tiles.DEEPWATER)
-    creature.movement.routing_avoid.append(Tiles.SHALLOWWATER)
+    creature.movement.routing_avoid.append(Tiles.STAIRS_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.DEEP_WATER)
+    creature.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
 
     return creature
 
@@ -342,9 +342,9 @@ def snake(point = None):
     creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
     creature.movement.routing_avoid.append(Tiles.DOOR)
     creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.STAIRSFLOOR)
-    creature.movement.routing_avoid.append(Tiles.DEEPWATER)
-    creature.movement.routing_avoid.append(Tiles.SHALLOWWATER)
+    creature.movement.routing_avoid.append(Tiles.STAIRS_FLOOR)
+    creature.movement.routing_avoid.append(Tiles.DEEP_WATER)
+    creature.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
 
     teeth = equipment.teeth()
     teeth.lootable = False

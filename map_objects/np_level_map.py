@@ -115,11 +115,11 @@ class LevelMap(Map):
                 current_tile = CorridorFloor()
             elif grid[x,y] == Tiles.ROOM_FLOOR:
                 current_tile = RoomFloor()
-            elif grid[x,y] == Tiles.SHALLOWWATER:
+            elif grid[x,y] == Tiles.SHALLOW_WATER:
                 current_tile = ShallowWater()
-            elif grid[x,y] == Tiles.DEEPWATER:
+            elif grid[x,y] == Tiles.DEEP_WATER:
                 current_tile = DeepWater()
-            elif grid[x,y] == Tiles.STAIRSFLOOR:
+            elif grid[x,y] == Tiles.STAIRS_FLOOR:
                 self.allowed_stairs_tiles[x,y] = True
                 current_tile = StairsFloor()
             elif grid[x,y] == Tiles.POTENTIAL_CORRIDOR_FLOOR:
@@ -321,9 +321,9 @@ class LevelMap(Map):
 
         walkable[mask] = 0
 
-        if Tiles.STAIRSFLOOR in routing_avoid:
+        if Tiles.STAIRS_FLOOR in routing_avoid:
             pass
-            
+
         return walkable
 
     def walkable_for_entity_under_mouse(self, x, y):

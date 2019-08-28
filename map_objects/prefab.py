@@ -3,7 +3,7 @@ from utils.utils import matprint
 import numpy as np
 
 
-def boss_room():
+def boss_room(top = 1, middle = 1, bottom = 1):
     room_map = ["vvvvv###vvvvv",
                 "vvvv##S##vvvv",
                 "vvv##...##vvv",
@@ -38,25 +38,25 @@ def necromancer_lair():
                 "#####.#####"]
 '''
 
-def stair_room():
+def stair_room(top = 1, middle = 1, bottom = 1):
     room_map = ["VDV",
                 "...",
-                ".S.",
+                ".X.",
                 "..."]
 
     return room_map
 
-def treasure_room():
-    room_map = ["##D##",
+def treasure_room(top = 1, middle = 1, bottom = 1):
+    room_map = ["##E##",
                 "#...#",
                 "#...#",
                 "#...#",
-                "##.##",
+                "##S##",
                 "V###V"]
 
     return room_map
 
-def necromancer_lair():
+def necromancer_lair(top = 1, middle = 1, bottom = 1):
     room_map = ["...........",
                 "...........",
                 ".....W.....",
@@ -67,57 +67,40 @@ def necromancer_lair():
 
     return room_map
 
-def barracks():
-    room_map = [".........",
-                ".........",
-                ".........",
-                ".........",
-                ".........",
-                "####.####",
-                "...#.#...",
-                ".........",
-                "...#.#...",
-                "####.####",
-                "...#.#...",
-                ".........",
-                "...#.#...",
-                "####.####",
-                "...#.#...",
-                ".........",
-                "...#.#...",
-                "####.####",
-                "...#.#...",
-                ".........",
-                "...#.#...",
-                "VVVVDVVVV"]
+def prison_block(top = 1, middle = 1, bottom = 1):
+    room_map = []
+
+    for x in range(top):
+        room_map.append("VV#######VV")
+        room_map.append("VV#..S..#VV")
+        room_map.append("VV#.....#VV")
+        room_map.append("#####D#####")
+    for x in range(middle):
+        room_map.append("#S..D.D..S#")
+        room_map.append("#####.#####")
+    for x in range(bottom):
+        room_map.append("V#.......#V")
+        room_map.append("V#.......#V")
+        room_map.append("V#.......#V")
+        room_map.append("V####E####V")
 
     return room_map
 
-def make_room_slice(room_map):
-    grid = np.zeros((len(room_map), len(room_map[0])), dtype=np.int8)
+def barracks(top = 1, middle = 1, bottom = 1):
+    room_map = []
 
-    for x in range(0, len(room_map)):
-        for y in range(0, len(room_map[0])):
-            try:
-                if (room_map[x][y] == "#"):
-                    grid[x,y] = Tiles.ROOM_WALL
-                elif (room_map[x][y] == "I"):
-                    grid[x,y] = Tiles.IMPENETRABLE
-                elif (room_map[x][y] == "E"):
-                    grid[x,y] = Tiles.EMPTY
-                elif (room_map[x][y] == "W"):
-                    grid[x,y] = Tiles.SHALLOWWATER
-                elif (room_map[x][y] == "S"):
-                    grid[x,y] = Tiles.STAIRSFLOOR
-                elif (room_map[x][y] == "D"):
-                    grid[x,y] = Tiles.DOOR
-                elif (room_map[x][y] == "V"):
-                    grid[x,y] = Tiles.EMPTY
-                else:
-                    grid[x,y] = Tiles.ROOM_FLOOR
-            except IndexError:
-                print(str(x) + " " + str(y))
+    for x in range(top):
+        room_map.append("V#########V")
+        room_map.append("V#.......#V")
+        room_map.append("V#.......#V")
+        room_map.append("V#.......#V")
 
-    matprint(grid)
+    for x in range(middle):
+        room_map.append("#####.#####")
+        room_map.append("#...#.#...#")
+        room_map.append("#.........#")
+        room_map.append("#...#.#...#")
 
-    return grid
+    room_map.append("#####D#####")
+
+    return room_map

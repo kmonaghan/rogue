@@ -7,7 +7,7 @@ from etc.enum import Tiles
 from map_objects.np_dungeonGeneration import dungeonGenerator
 from map_objects.np_level_map import LevelMap
 from map_objects.np_prefab import Prefab
-from map_objects.prefab import boss_room, treasure_room
+from map_objects.prefab import boss_room, treasure_room, barracks, prison_block
 
 from utils.utils import matprint
 
@@ -22,7 +22,7 @@ def levelOneGenerator(map_width, map_height):
 
     x1, y1 = placeStairAlongEdge(dm)
 
-    stairs = np.where(dm.grid == Tiles.STAIRSFLOOR)
+    stairs = np.where(dm.grid == Tiles.STAIRS_FLOOR)
     cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
 
     tile_index = randint(0, len(cavern)-1)
@@ -95,7 +95,7 @@ def cavernLevel(dm, x, y):
 
     x1, y1 = placeStairRoom(dm, x, y, name="entrance")
 
-    stairs = np.where(dm.grid == Tiles.STAIRSFLOOR)
+    stairs = np.where(dm.grid == Tiles.STAIRS_FLOOR)
     cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
 
     weights = [(Tiles.CORRIDOR_FLOOR, 1),
@@ -180,7 +180,24 @@ def arena(map_width, map_height):
 
     room = dm.addCircleShapedRoom(10, 10, 10, add_door = False)
 
-    room = dm.addRoom(10,35,3,3)
+    cells = randint(1,5)
+    prefab = Prefab(prison_block, middle=cells)
+
+    room = dm.placeRoomRandomly(prefab)
+    x1,y1 = room.exits[0]
+    x1 = x1 + room.x
+    y1 = y1 + room.y
+
+    weights = [(Tiles.EMPTY, 1)]
+
+    dm.route_between(12, 16, x1, y1, avoid = [], weights = weights, tile=Tiles.DEEP_WATER, avoid_rooms=True)
+
+    '''
+    cells = randint(1,5)
+    prefab = Prefab(barracks, middle=cells)
+
+    room = dm.placeRoomRandomly(prefab)
+    '''
 
     dm.cleanUpMap()
 
@@ -213,7 +230,7 @@ def placeStairAlongEdge(dm):
     return placeStairRoom(dm, x, y, name="entrance")
 
 def placeExitRoom(dm, x, y):
-    _, dijkstra = dm.create_dijkstra_map(x+1,y+1, avoid = [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.DEEPWATER])
+    _, dijkstra = dm.create_dijkstra_map(x+1,y+1, avoid = [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.DEEP_WATER])
 
     max = np.amax(dijkstra)
 
@@ -260,6 +277,6 @@ def placeStairRoom(dm, x, y, overlap = True, name=""):
     if not placed:
         return False, False
 
-    dm.grid[x+1,y+1] = Tiles.STAIRSFLOOR
+    dm.grid[x+1,y+1] = Tiles.STAIRS_FLOOR
 
     return x, y
