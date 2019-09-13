@@ -22,8 +22,11 @@ class EntityList:
         self.coordinate_map[(entity.x, entity.y)].append(entity)
 
     def remove(self, entity):
-        self.lst.remove(entity)
-        self.coordinate_map[(entity.x, entity.y)].remove(entity)
+        try:
+            self.lst.remove(entity)
+            self.coordinate_map[(entity.x, entity.y)].remove(entity)
+        except ValueError:
+            print(f"{entity} not found in list")
 
     def update_position(self, entity, old_position, new_position):
         try:
@@ -41,22 +44,11 @@ class EntityList:
     def find_closest(self, point, species, max_distance=2):
         npc = None
 
-        start_x = point.x - max_distance
-        start_y = point.y - max_distance
+        start_x = max(0, point.x - max_distance)
+        start_y = max(0, point.y - max_distance)
 
-        if (start_x < 0):
-            start_x = 0
-
-        if (start_y < 0):
-            start_y = 0
-
-        end_x = start_x + (max_distance * 2) + 1
-        if (end_x > self.width):
-            end_x = self.width
-
-        end_y = start_y + (max_distance * 2) + 1
-        if (end_y > self.height):
-            end_y = self.height
+        end_x = min(self.width, start_x + (max_distance * 2) + 1)
+        end_y = min(self.height, start_y + (max_distance * 2) + 1)
 
         dist = max_distance + 1
 
