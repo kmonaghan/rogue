@@ -1,7 +1,7 @@
 from math import sqrt
 import numpy as np
 import operator
-from random import choice, randint, randrange
+from random import choice, randint, randrange, shuffle
 
 import tcod
 
@@ -49,22 +49,22 @@ class dungeonRoom:
     def __init__(self, x, y, slice, name=""):
         self.x = x
         self.y = y
-        self.slice = slice.copy()
+        self.layout = slice.copy()
         self.name = name
 
     def __str__(self):
-        return f"{self.name} {self.x},{self.y} {self.slice.shape}"
+        return f"{self.name} {self.x},{self.y} {self.layout.shape}"
 
     def __repr__(self):
-        return f"{self.name} {self.x},{self.y} {self.slice.shape}"
+        return f"{self.name} {self.x},{self.y} {self.layout.shape}"
 
     @property
     def width(self):
-        return self.slice.shape[0]
+        return self.layout.shape[0]
 
     @property
     def height(self):
-        return self.slice.shape[1]
+        return self.layout.shape[1]
 
     @property
     def center(self):
@@ -73,9 +73,9 @@ class dungeonRoom:
 class prefabRoom(dungeonRoom):
     def __init__(self, x, y, slice, name="", exits=[], spawnpoints=[]):
         super(prefabRoom, self).__init__(x, y, slice, name)
-        self.mask = np.full(self.slice.shape, 1, dtype=np.int8)
+        self.mask = np.full(self.layout.shape, 1, dtype=np.int8)
 
-        empty_tiles = np.isin(self.slice, [Tiles.EMPTY])
+        empty_tiles = np.isin(self.layout, [Tiles.EMPTY])
 
         self.mask[empty_tiles] = 0
         self.exits = exits
@@ -347,10 +347,11 @@ class dungeonGenerator:
         final_room_slice = room_slice
 
         if room_slice.shape[0] != width or room_slice.shape[1] != height:
-            print("Out of bounds")
+            print("Room position out of bounds")
             return None
 
         if not overlap and not self.quadFits(x, y, width, height, margin):
+            print("Failed due to overlap/quadfits")
             return None
 
         if add_walls:
@@ -370,6 +371,21 @@ class dungeonGenerator:
             a,b = np.ogrid[x-1:x+width+1, y-1:y+height+1]
             #This gets the outline of the room EXCLUDING the corners
             door_mask = ((a >= x) & (a < x+width)) | ((b >= y) & (b < y+height))
+            #There needs to 2 spaces between the wall and the edge of the map.
+            #If there isn't, mask it out.
+            #print(f"{x} <= 2")
+            if (x <= 2):
+                door_mask[0] = False
+            #print(f"{x+width} >= {self.grid.shape[0] - 2}")
+            if (x+width >= (self.grid.shape[0] - 2)):
+                door_mask[-1] = False
+            #print(f"{y} <= 2")
+            if (y <= 2):
+                door_mask[:, 0] = False
+            #print(f"{y+height} >= {self.grid.shape[1] - 2}")
+            if (y+height >= (self.grid.shape[1] - 2)):
+                door_mask[:, -1] = False
+
             #This gets ths floor of the room
             door_mask2 = (a >= x) & (a < x+width) & (b >= y) & (b < y+height)
             #Exclude impenetrable tiles (e.g. the edges)
@@ -381,7 +397,7 @@ class dungeonGenerator:
 
             possible_door_place = np.where(final_door_mask == True)
 
-            max_doors = 2
+            max_doors = 4
             num_doors = randint(1, max_doors)
             for door in range(num_doors):
                 if len(possible_door_place[0]) > 1:
@@ -403,7 +419,7 @@ class dungeonGenerator:
         final_room_slice = room_slice
 
         if room_slice.shape[0] != width or room_slice.shape[1] != width:
-            print("Out of bounds")
+            print("Circle room out of bounds")
             return None
 
         if not overlap and not self.quadFits(x, y, room_slice.shape[0], room_slice.shape[1], margin):
@@ -437,8 +453,8 @@ class dungeonGenerator:
             for door in range(num_doors):
                 if len(possible_door_place):
                     idx = randint(0, len(possible_door_place)-1)
-                    x, y = possible_door_place[idx]
-                    outline_slice[x, y] = Tiles.DOOR
+                    door_x, door_y = possible_door_place[idx]
+                    outline_slice[door_x, door_y] = Tiles.DOOR
                     del possible_door_place[idx]
             final_room_slice = outline_slice
 
@@ -471,24 +487,74 @@ class dungeonGenerator:
 
         return None
 
-    def placeRandomRooms(self, minRoomSize, maxRoomSize, roomStep = 1, margin = 3, attempts = 500, add_door = False, add_walls = False):
+    def placeRandomRooms(self, minRoomSize, maxRoomSize, roomStep = 1, margin = 3, attempts = 500, add_door = False, add_walls = False, overlap = False):
         for attempt in range(attempts):
             roomWidth = randrange(minRoomSize, maxRoomSize, roomStep)
             roomHeight = randrange(minRoomSize, maxRoomSize, roomStep)
 
             voids = np.where(self.grid == Tiles.EMPTY)
 
-            pick = randint(0,len(voids[0]))
+            if len(voids[0]) < 1:
+                print("Out of space to place room")
+                return
+
+            pick = randint(0,len(voids[0]) - 1)
             startX = voids[0][pick]
             startY = voids[1][pick]
 
-            if roomWidth == roomHeight:
-                room = self.addCircleShapedRoom(startX, startY, roomWidth, overlap = True, margin = margin, add_door = add_door, add_walls = add_walls)
+            if (roomWidth == roomHeight) and (roomWidth > 5):
+                room = self.addCircleShapedRoom(startX, startY, roomWidth, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
             else:
-                room = self.addRoom(startX, startY, roomWidth, roomHeight, overlap = True, margin = margin, add_door = add_door, add_walls = add_walls)
+                room = self.addRoom(startX, startY, roomWidth, roomHeight, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
 
             if room:
                 self.rooms.append(room)
+
+    def connectRooms(self):
+        room_list = self.rooms.copy()
+
+        shuffle(room_list)
+
+        while len(room_list) >= 2:
+            current_room = room_list.pop(0)
+
+            self.connectDoorsToRooms(current_room, room_list)
+
+        final_room_list = self.rooms.copy()
+        final_room_list.remove(room_list[0])
+
+        self.connectDoorsToRooms(room_list[0], final_room_list)
+
+    def connectDoorsToRooms(self, room, room_list):
+        weights = [(Tiles.CORRIDOR_FLOOR, 2),
+                    (Tiles.EMPTY, 8),
+                    (Tiles.CAVERN_FLOOR, 2),
+                    (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1),
+                    (Tiles.DOOR, 9)]
+
+        doors = np.where(room.layout == Tiles.DOOR)
+
+        current_door_tuples = tuple(zip(doors[0],doors[1]))
+
+        if len(current_door_tuples) < 0:
+            print(f"No doors in {room}")
+            return
+
+        idx = 0
+        for x1, y1 in current_door_tuples:
+            x1 = x1 + room.x - 1
+            y1 = y1 + room.y - 1
+
+            target_room = room_list[idx]
+
+            target_doors = np.where(target_room.layout == Tiles.DOOR)
+            target_door_tuples = tuple(zip(target_doors[0],target_doors[1]))
+
+            target_idx = randint(0, len(target_doors[0]) - 1)
+
+            self.route_between(x1, y1, target_doors[0][target_idx] + target_room.x - 1, target_doors[1][target_idx] + target_room.y - 1, avoid = [Tiles.ROOM_FLOOR, Tiles.ROOM_WALL], weights = weights)
+
+            idx = randint(0, len(room_list) - 1)
 
     def connectDoors(self):
         doors = np.where(self.grid == Tiles.DOOR)
@@ -504,7 +570,7 @@ class dungeonGenerator:
             num_connections = randint(1, len(doors[0]))
             for i in range(num_connections):
                 idx = randint(0, len(doors[0]) - 1)
-                self.route_between(x1, y1, doors[0][idx], doors[1][idx], avoid = [Tiles.ROOM_FLOOR, Tiles.ROOM_WALL], weights = weights, overwrite = True)
+                self.route_between(x1, y1, doors[0][idx], doors[1][idx], avoid = [Tiles.ROOM_FLOOR, Tiles.ROOM_WALL], weights = weights)
 
     def cleanUpMap(self):
         self.grid[np.where(self.grid == Tiles.POTENTIAL_CORRIDOR_FLOOR)] = Tiles.EMPTY
@@ -540,6 +606,8 @@ class dungeonGenerator:
                     replacement_tile = self.grid[x,y] = wall_to_floor.get(self.grid[x,y], tile)
                 elif self.grid[x,y] == Tiles.EMPTY:
                     replacement_tile = tile
+                elif self.grid[x,y] == Tiles.POTENTIAL_CORRIDOR_FLOOR:
+                    replacement_tile = Tiles.CORRIDOR_FLOOR
                 self.grid[x,y] = replacement_tile
 
         return dijk_dist
