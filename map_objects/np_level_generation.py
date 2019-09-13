@@ -1,13 +1,13 @@
 import tcod
 import numpy as np
-from random import randint
+from random import choice, randint
 
 from etc.enum import Tiles
 
 from map_objects.np_dungeonGeneration import dungeonGenerator
 from map_objects.np_level_map import LevelMap
 from map_objects.np_prefab import Prefab
-from map_objects.prefab import boss_room, treasure_room, barracks, prison_block
+from map_objects.prefab import boss_room, treasure_room, barracks, stair_room, prison_block, list_of_prefabs
 
 from utils.utils import matprint
 
@@ -118,7 +118,7 @@ def cavernLevel(dm, x, y):
 
     dm.cleanUpMap()
 
-    return dm
+    return True
 
 def level_cavern_rooms(map_width, map_height):
     dm = dungeonGenerator(width=map_width, height=map_height)
@@ -126,27 +126,90 @@ def level_cavern_rooms(map_width, map_height):
     return dm
 
 def roomsLevel(dm, x, y):
-    pass
+    x1, y1 = placeStairRoom(dm, x, y, name="entrance", add_door = True)
+
+    #placePrefabs(dm)
+
+    dm.placeRandomRooms(3, 15, 2, 2, add_door = True, add_walls = True)
+    #room = dm.addRoom(2, 2, 3, 3, add_door = True, add_walls = True)
+    #room = dm.addRoom(66, 2, 3, 3, add_door = True, add_walls = True)
+
+    #room = dm.addRoom(2, 35, 3, 3, add_door = True, add_walls = True)
+    #room = dm.addRoom(66, 35, 3, 3, add_door = True, add_walls = True)
+
+    for i in range (5):
+        x, y = dm.findEmptySpace()
+
+        if not x and not y:
+            continue
+        else:
+            dm.generateCorridors(x = x, y = y)
+
+    prefab = Prefab(stair_room)
+    room = dm.placeRoomRandomly(prefab)
+
+    '''
+    x2, y2 = placeExitRoom(dm, x1, y1, add_door = True)
+
+    if not x2:
+        print("No exit, just start again")
+        return False
+    '''
+
+    dm.connectRooms()
+
+    stairs = np.where(dm.grid == Tiles.STAIRS_FLOOR)
+    corridors = np.where(dm.grid == Tiles.CORRIDOR_FLOOR)
+
+    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+                (Tiles.ROOM_FLOOR, 1),
+                (Tiles.EMPTY, 9),
+                (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.CAVERN_WALL, 3),
+                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
+
+    #dm.route_between(x1, y1, corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
+    #dm.route_between(x2, y2, corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
+
+    dm.cleanUpMap()
+
+    return True
+
+def placePrefabs(dm):
+    number_of_prefabs = randint(0, 2)
+
+    for x in range(number_of_prefabs):
+        prefab = Prefab(choice(list_of_prefabs))
+
+        room = dm.placeRoomRandomly(prefab)
+
+    return dm
 
 def levelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    caveOrRooms = 0 #randint(0,1)
-    if caveOrRooms == 0:
-        cavernLevel(dm, x, y)
-    else:
-        roomsLevel(dm, x, y)
+    caveOrRooms = 1 #randint(0,1)
+    result = False
 
-    if not dm.validateMap():
-        print("Bad map===========D")
+    if caveOrRooms == 0:
+        result = cavernLevel(dm, x, y)
+    else:
+        result = roomsLevel(dm, x, y)
+
+    if not result:
+        print("Failed map generation")
         return levelGenerator(map_width, map_height, x, y)
+
+    #if not dm.validateMap():
+    #    print("Bad map===========D")
+    #    return levelGenerator(map_width, map_height, x, y)
 
     return dm
 
 def bossLevelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    x1, y1 = placeStairRoom(dm, x, y)
+    x1, y1 = placeStairRoom(dm, x, y, name="entrance")
 
     addCaves(dm)
 
@@ -229,8 +292,8 @@ def placeStairAlongEdge(dm):
 
     return placeStairRoom(dm, x, y, name="entrance")
 
-def placeExitRoom(dm, x, y):
-    _, dijkstra = dm.create_dijkstra_map(x+1,y+1, avoid = [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.DEEP_WATER])
+def placeExitRoom(dm, x, y, add_door = False):
+    _, dijkstra = dm.create_dijkstra_map(x+1,y+1, avoid = [Tiles.CAVERN_WALL, Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL, Tiles.DEEP_WATER], avoid_rooms=True)
 
     max = np.amax(dijkstra)
 
@@ -256,7 +319,7 @@ def placeExitRoom(dm, x, y):
         x, y = possible_tuples[idx]
 
         print(f"Attempting to place at: {x},{y}")
-        placed = placeStairRoom(dm, x, y, name="exit")
+        placed = placeStairRoom(dm, x, y, name="exit", add_door=add_door)
 
         if placed:
             possible_tuples = []
@@ -271,8 +334,8 @@ def placeExitRoom(dm, x, y):
 
     return x, y
 
-def placeStairRoom(dm, x, y, overlap = True, name=""):
-    placed = dm.addRoom(x,y,3,3, overlap = overlap, add_walls = True, name = name)
+def placeStairRoom(dm, x, y, overlap = True, name="", add_door = False):
+    placed = dm.addRoom(x,y,3,3, overlap = overlap, add_walls = True, add_door = add_door, name = name)
 
     if not placed:
         return False, False
