@@ -2,7 +2,6 @@ from etc.enum import Tiles
 from utils.utils import matprint
 import numpy as np
 
-
 def boss_room(top = 1, middle = 1, bottom = 1):
     room_map = ["vvvvv###vvvvv",
                 "vvvv##S##vvvv",
@@ -23,26 +22,13 @@ def boss_room(top = 1, middle = 1, bottom = 1):
                 "######D######"]
 
     return room_map
-'''
-def necromancer_lair():
-    room_map = ["#####.#####",
-                "####...####",
-                "###.....###",
-                "##.......##",
-                "#....W....#",
-                "....WWW....",
-                "#....W....#",
-                "##.......##",
-                "###.....###",
-                "####...####",
-                "#####.#####"]
-'''
 
 def stair_room(top = 1, middle = 1, bottom = 1):
-    room_map = ["VDV",
-                "...",
-                ".X.",
-                "..."]
+    room_map = ["##D##",
+                "#...#",
+                "#.X.#",
+                "#...#",
+                "#####"]
 
     return room_map
 
@@ -57,13 +43,13 @@ def treasure_room(top = 1, middle = 1, bottom = 1):
     return room_map
 
 def necromancer_lair(top = 1, middle = 1, bottom = 1):
-    room_map = ["...........",
-                "...........",
-                ".....W.....",
-                "....WWW....",
-                ".....W.....",
-                "...........",
-                "..........."]
+    room_map = ["v#########v",
+                "##.......##",
+                "#....W....#",
+                "#...WWW...#",
+                "#....W....#",
+                "##.......##",
+                "v####E####v"]
 
     return room_map
 
@@ -98,9 +84,14 @@ def barracks(top = 1, middle = 1, bottom = 1):
     for x in range(middle):
         room_map.append("#####.#####")
         room_map.append("#...#.#...#")
-        room_map.append("#.........#")
+        room_map.append("#...D.D...#")
         room_map.append("#...#.#...#")
 
-    room_map.append("#####D#####")
+    room_map.append("#####E#####")
 
     return room_map
+
+list_of_prefabs = [treasure_room,
+                    necromancer_lair,
+                    prison_block,
+                    barracks]
