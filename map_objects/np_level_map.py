@@ -160,7 +160,7 @@ class LevelMap(Map):
         if room:
             search_grid = np.zeros(self.walkable.shape, dtype=np.int8)
 
-            search_grid[room.x:room.x+room.width, room.y:room.y+room.height] = room.slice
+            search_grid[room.x:room.x+room.width, room.y:room.y+room.height] = room.layout
 
             possible_positions[search_grid == 0] = 0
 

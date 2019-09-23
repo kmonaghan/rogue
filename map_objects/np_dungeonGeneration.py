@@ -10,7 +10,7 @@ from etc.enum import Tiles, WALKABLE_TILES, BLOCKING_TILES
 
 floor_to_wall = {
     Tiles.OBSTACLE: Tiles.CAVERN_WALL,
-    Tiles.IMPENETRABLE: Tiles.CAVERN_WALL,
+    Tiles.IMPENETRABLE: Tiles.IMPENETRABLE,
     Tiles.CAVERN_FLOOR: Tiles.CAVERN_WALL,
     Tiles.DEADEND: Tiles.CORRIDOR_WALL,
     Tiles.CORRIDOR_FLOOR: Tiles.CORRIDOR_WALL,
@@ -112,7 +112,7 @@ class dungeonGenerator:
         room_bounds = self.grid[top_x:bottom_x, top_y:bottom_y]
 
         if np.count_nonzero(room_bounds) > 0:
-            print("Another feature is too close.")
+            #print("Another feature is too close.")
             return False
 
         return True
@@ -341,124 +341,138 @@ class dungeonGenerator:
 
         self.grid[np.where(cells == 1)] = Tiles.CAVERN_FLOOR
 
-    def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR, name = ""):
-        room_slice = self.grid[x:x+width, y:y+height]
-
-        final_room_slice = room_slice
-
-        if room_slice.shape[0] != width or room_slice.shape[1] != height:
-            print("Room position out of bounds")
-            return None
-
-        if not overlap and not self.quadFits(x, y, width, height, margin):
-            print("Failed due to overlap/quadfits")
-            return None
-
+        def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR, name = ""):
+        offset = 0
         if add_walls:
-            outline_slice = self.grid[x-1:x+width+1, y-1:y+height+1]
-            if outline_slice.shape[0] != (width + 2) or outline_slice.shape[1] != (height + 2):
-                print("Bad shape: " + str(outline_slice.shape))
-                return None
-            outline_slice[np.where(outline_slice != Tiles.IMPENETRABLE)] = floor_to_wall[tile]
+            offset = 2
 
-            final_room_slice = outline_slice
+        room_slice = self.grid[x:x+width+offset, y:y+height+offset]
+
+        if room_slice.shape[0] != (width + offset) or room_slice.shape[1] != (height + offset):
+            #print("Room position out of bounds")
+            return None
+
+        if not overlap and not self.quadFits(x, y, room_slice.shape[0], room_slice.shape[1], margin):
+            #print("Failed due to overlap/quadfits")
+            return None
 
         room_slice[:] = tile
 
-        if add_door:
-            outline_slice = self.grid[x-1:x+width+1, y-1:y+height+1]
+        if add_walls:
+            room_slice[0] = floor_to_wall[tile]
+            room_slice[-1] = floor_to_wall[tile]
+            room_slice[:, 0] = floor_to_wall[tile]
+            room_slice[:, -1] = floor_to_wall[tile]
 
-            a,b = np.ogrid[x-1:x+width+1, y-1:y+height+1]
-            #This gets the outline of the room EXCLUDING the corners
-            door_mask = ((a >= x) & (a < x+width)) | ((b >= y) & (b < y+height))
-            #There needs to 2 spaces between the wall and the edge of the map.
-            #If there isn't, mask it out.
-            #print(f"{x} <= 2")
-            if (x <= 2):
-                door_mask[0] = False
-            #print(f"{x+width} >= {self.grid.shape[0] - 2}")
-            if (x+width >= (self.grid.shape[0] - 2)):
-                door_mask[-1] = False
-            #print(f"{y} <= 2")
-            if (y <= 2):
-                door_mask[:, 0] = False
-            #print(f"{y+height} >= {self.grid.shape[1] - 2}")
-            if (y+height >= (self.grid.shape[1] - 2)):
-                door_mask[:, -1] = False
+            if add_door:
+                self.addDoorsToRoom(x, y, width, height, room_slice, tile)
 
-            #This gets ths floor of the room
-            door_mask2 = (a >= x) & (a < x+width) & (b >= y) & (b < y+height)
-            #Exclude impenetrable tiles (e.g. the edges)
-            impenetrable_mask = outline_slice != Tiles.IMPENETRABLE
-
-            #We combine the above so we get a mask of possible door positions on
-            #the outside of the room
-            final_door_mask = (door_mask == True) & (door_mask2 == False) & (impenetrable_mask == True)
-
-            possible_door_place = np.where(final_door_mask == True)
-
-            max_doors = 4
-            num_doors = randint(1, max_doors)
-            for door in range(num_doors):
-                if len(possible_door_place[0]) > 1:
-                    idx = randint(1, len(possible_door_place[0]) - 1)
-                    outline_slice[possible_door_place[0][idx], possible_door_place[1][idx]] = Tiles.DOOR
-
-            final_room_slice = outline_slice
-
-        room = dungeonRoom(x, y, final_room_slice, name)
+        room = dungeonRoom(x, y, room_slice, name)
 
         self.rooms.append(room)
 
         return room
 
+    def addDoorsToRoom(self, x, y, width, height, room_slice, tile):
+        a,b = np.ogrid[x:x+width+2, y:y+height+2]
+        #This gets the outline of the room EXCLUDING the corners
+        door_mask = ((a > x) & (a < x+width+1)) | ((b > y) & (b < y+height+1))
+        #There needs to 2 spaces between the wall and the edge of the map.
+        #If there isn't, mask it out.
+        #print(f"{x} <= 1")
+        if (x <= 1):
+            door_mask[0] = False
+        #print(f"{x+width+3} >= {self.grid.shape[0]}")
+        if (x+width+3 >= self.grid.shape[0]):
+            door_mask[-1] = False
+        #print(f"{y} <= 1")
+        if (y <= 1):
+            door_mask[:, 0] = False
+        #print(f"{y+height+3} >= {self.grid.shape[1]}")
+        if (y+height+3 >= self.grid.shape[1]):
+            door_mask[:, -1] = False
+
+        #This gets ths floor of the room
+        floor_mask = room_slice == tile
+
+        #This gets ths floor of the room
+        empty_mask = room_slice == Tiles.EMPTY
+
+        #Exclude impenetrable tiles (e.g. the edges)
+        impenetrable_mask = room_slice != Tiles.IMPENETRABLE
+
+        #We combine the above so we get a mask of possible door positions on
+        #the outside of the room
+        final_door_mask = (door_mask == True) & (floor_mask == False) & (empty_mask == False) & (impenetrable_mask == True)
+
+        possible_door_place = np.where(final_door_mask == True)
+
+        max_doors = 4
+        num_doors = randint(1, max_doors)
+        for door in range(num_doors):
+            if len(possible_door_place[0]) > 1:
+                idx = randint(1, len(possible_door_place[0]) - 1)
+                room_slice[possible_door_place[0][idx], possible_door_place[1][idx]] = Tiles.DOOR
+
     def addCircleShapedRoom(self, x, y, radius = 5, margin = 1, overlap = False, add_door = True, add_walls = False, tile = Tiles.ROOM_FLOOR):
+
+        if add_walls:
+            radius = radius + 1
+        full_radius = radius
+
         width = (2*radius)+1
         room_slice = self.grid[x:x+width, y:y+width]
 
-        final_room_slice = room_slice
-
-        if room_slice.shape[0] != width or room_slice.shape[1] != width:
-            print("Circle room out of bounds")
+        if room_slice.shape[0] < width or room_slice.shape[1] < width:
+            #print("Circle room out of bounds")
             return None
 
         if not overlap and not self.quadFits(x, y, room_slice.shape[0], room_slice.shape[1], margin):
+            #print("Circle room failed quad fit")
             return None
 
         if add_walls:
-            y1,x1 = np.ogrid[-radius-1:radius+1, -radius-1:radius+1]
-            mask = x1**2 + y1**2 < (radius+1)**2
-            wall_slice = self.grid[x-1:x+width, y-1:y+width]
-            wall_slice[mask] = floor_to_wall[tile]
+            y1,x1 = np.ogrid[-full_radius:full_radius+1, -full_radius:full_radius+1]
+            mask2 = x1**2 + y1**2 <= (radius+1)**2
+            room_slice[mask2] = floor_to_wall[tile]
 
-        y1,x1 = np.ogrid[-radius:radius+1, -radius:radius+1]
-        mask2 = x1**2 + y1**2 < (radius)**2
+            if add_door:
+                max_doors = 4
+                num_doors = 4 #randint(1, max_doors)
+                possible_door_place = [(0, radius), (radius, width-1), (radius, 0), (width-1, radius)]
+
+                for door in range(num_doors):
+                    if len(possible_door_place):
+                        idx = randint(0, len(possible_door_place)-1)
+                        door_x, door_y = possible_door_place[idx]
+                        room_slice[door_x, door_y] = Tiles.DOOR
+                        del possible_door_place[idx]
+            radius = radius - 1
+
+        y1,x1 = np.ogrid[-full_radius:full_radius+1, -full_radius:full_radius+1]
+        mask2 = x1**2 + y1**2 < (radius+1)**2
         room_slice[mask2] = tile
 
         donut = choice([True, False])
-
         if donut and (radius > 4):
-            donut_radius = randint((radius // 2) + 1, radius - 2)
+            donut_radius = randint((full_radius // 2) + 1, full_radius - 2)
 
-            y1,x1 = np.ogrid[-radius:radius+1, -radius:radius+1]
+            y1,x1 = np.ogrid[-full_radius:full_radius+1, -full_radius:full_radius+1]
             mask3 = x1**2 + y1**2 < (donut_radius)**2
-            room_slice[mask3] = choice([Tiles.SHALLOW_WATER, Tiles.EMPTY])
+            interior_tile = choice([Tiles.SHALLOW_WATER, Tiles.EMPTY])
+            room_slice[mask3] = interior_tile
 
-        if add_door:
-            max_doors = 4
-            num_doors = randint(1, max_doors)
-            possible_door_place = [(1, radius+1), (radius+1, width), (radius+1, 1), (width, radius+1)]
-            outline_slice = self.grid[x-1:x+width, y-1:y+width]
+            if (interior_tile == Tiles.EMPTY):
+                y1,x1 = np.ogrid[-full_radius:full_radius+1, -full_radius:full_radius+1]
+                mask3 = x1**2 + y1**2 < (donut_radius)**2
+                room_slice[mask3] = floor_to_wall[tile]
 
-            for door in range(num_doors):
-                if len(possible_door_place):
-                    idx = randint(0, len(possible_door_place)-1)
-                    door_x, door_y = possible_door_place[idx]
-                    outline_slice[door_x, door_y] = Tiles.DOOR
-                    del possible_door_place[idx]
-            final_room_slice = outline_slice
+                if (donut_radius > 5):
+                    y1,x1 = np.ogrid[-full_radius:full_radius+1, -full_radius:full_radius+1]
+                    mask4 = x1**2 + y1**2 < (donut_radius-1)**2
+                    room_slice[mask4] = Tiles.EMPTY
 
-        room = dungeonRoom(x, y, final_room_slice)
+        room = dungeonRoom(x, y, room_slice)
 
         self.rooms.append(room)
 
@@ -469,14 +483,14 @@ class dungeonGenerator:
             start_x, start_y = self.randomPoint(tile=Tiles.EMPTY, x_inset = prefab.layout.shape[0] + (margin * 2), y_inset = prefab.layout.shape[1] + (margin * 2))
 
             if not start_x:
-                print("Failed to place room as ran out of empty tiles")
+                #print("Failed to place room as ran out of empty tiles")
                 return None
 
             if overwrite or self.quadFits(start_x, start_y, prefab.layout.shape[0], prefab.layout.shape[1], margin):
                 try:
                     self.grid[start_x:start_x+prefab.layout.shape[0], start_y:start_y+prefab.layout.shape[1]] = prefab.layout
                 except ValueError:
-                    print(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
+                    #print(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
                     return None
 
                 room = prefabRoom(start_x, start_y, prefab.layout, prefab.name, prefab.exits, prefab.spawnpoints)
@@ -495,7 +509,7 @@ class dungeonGenerator:
             voids = np.where(self.grid == Tiles.EMPTY)
 
             if len(voids[0]) < 1:
-                print("Out of space to place room")
+                #print("Out of space to place room")
                 return
 
             pick = randint(0,len(voids[0]) - 1)
@@ -503,7 +517,7 @@ class dungeonGenerator:
             startY = voids[1][pick]
 
             if (roomWidth == roomHeight) and (roomWidth > 5):
-                room = self.addCircleShapedRoom(startX, startY, roomWidth, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
+                room = self.addCircleShapedRoom(startX, startY, roomWidth // 2, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
             else:
                 room = self.addRoom(startX, startY, roomWidth, roomHeight, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
 
@@ -537,13 +551,13 @@ class dungeonGenerator:
         current_door_tuples = tuple(zip(doors[0],doors[1]))
 
         if len(current_door_tuples) < 0:
-            print(f"No doors in {room}")
+            #print(f"No doors in {room}")
             return
 
         idx = 0
         for x1, y1 in current_door_tuples:
-            x1 = x1 + room.x - 1
-            y1 = y1 + room.y - 1
+            x1 = x1 + room.x
+            y1 = y1 + room.y
 
             target_room = room_list[idx]
 
@@ -552,7 +566,7 @@ class dungeonGenerator:
 
             target_idx = randint(0, len(target_doors[0]) - 1)
 
-            self.route_between(x1, y1, target_doors[0][target_idx] + target_room.x - 1, target_doors[1][target_idx] + target_room.y - 1, avoid = [Tiles.ROOM_FLOOR, Tiles.ROOM_WALL], weights = weights)
+            self.route_between(x1, y1, target_doors[0][target_idx] + target_room.x, target_doors[1][target_idx] + target_room.y, avoid = [Tiles.ROOM_FLOOR, Tiles.ROOM_WALL], weights = weights)
 
             idx = randint(0, len(room_list) - 1)
 

@@ -22,6 +22,10 @@ def levelOneGenerator(map_width, map_height):
 
     x1, y1 = placeStairAlongEdge(dm)
 
+    if not x1:
+        print("No entrance, just start again")
+        return levelOneGenerator(map_width, map_height)
+
     stairs = np.where(dm.grid == Tiles.STAIRS_FLOOR)
     cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
 
@@ -50,7 +54,7 @@ def levelOneGenerator(map_width, map_height):
 
     room = dm.placeRoomRandomly(prefab)
 
-    doors = np.where(room.slice == Tiles.DOOR)
+    doors = np.where(room.layout == Tiles.DOOR)
 
     x3 = doors[0][0] + room.x
     y3 = doors[1][0] + room.y
@@ -128,14 +132,15 @@ def level_cavern_rooms(map_width, map_height):
 def roomsLevel(dm, x, y):
     x1, y1 = placeStairRoom(dm, x, y, name="entrance", add_door = True)
 
-    #placePrefabs(dm)
-
+    placePrefabs(dm)
+    #dm.addCircleShapedRoom(15, 15, radius = 6, add_door = True, add_walls = True, tile = Tiles.ROOM_FLOOR)
+    #return True
     dm.placeRandomRooms(3, 15, 2, 2, add_door = True, add_walls = True)
-    #room = dm.addRoom(2, 2, 3, 3, add_door = True, add_walls = True)
-    #room = dm.addRoom(66, 2, 3, 3, add_door = True, add_walls = True)
+    #room = dm.addRoom(1, 1, 3, 3, margin=0, add_door = True, add_walls = True)
+    #room = dm.addRoom(65, 1, 3, 3, margin=0,add_door = True, add_walls = True)
 
-    #room = dm.addRoom(2, 35, 3, 3, add_door = True, add_walls = True)
-    #room = dm.addRoom(66, 35, 3, 3, add_door = True, add_walls = True)
+    #room = dm.addRoom(1, 35, 3, 3, margin=0,add_door = True, add_walls = True)
+    #room = dm.addRoom(66, 35, 3, 3, margin=0,add_door = True, add_walls = True)
 
     for i in range (5):
         x, y = dm.findEmptySpace()
@@ -147,7 +152,7 @@ def roomsLevel(dm, x, y):
 
     prefab = Prefab(stair_room)
     room = dm.placeRoomRandomly(prefab)
-
+    room.name = "exit"
     '''
     x2, y2 = placeExitRoom(dm, x1, y1, add_door = True)
 
@@ -168,8 +173,8 @@ def roomsLevel(dm, x, y):
                 (Tiles.CAVERN_WALL, 3),
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
-    #dm.route_between(x1, y1, corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
-    #dm.route_between(x2, y2, corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
+    dm.route_between(stairs[0][0], stairs[0][1], corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
+    dm.route_between(stairs[1][0], stairs[1][1], corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
 
     dm.cleanUpMap()
 
@@ -200,9 +205,9 @@ def levelGenerator(map_width, map_height, x, y):
         print("Failed map generation")
         return levelGenerator(map_width, map_height, x, y)
 
-    #if not dm.validateMap():
-    #    print("Bad map===========D")
-    #    return levelGenerator(map_width, map_height, x, y)
+    if not dm.validateMap():
+        print("Bad map===========D")
+        return levelGenerator(map_width, map_height, x, y)
 
     return dm
 
@@ -217,7 +222,7 @@ def bossLevelGenerator(map_width, map_height, x, y):
 
     room = dm.placeRoomRandomly(prefab)
 
-    door = np.where(room.slice == Tiles.DOOR)
+    door = np.where(room.layout == Tiles.DOOR)
 
     x2 = room.x + door[0][0]
     y2 = room.y + door[1][0]
@@ -238,7 +243,7 @@ def bossLevelGenerator(map_width, map_height, x, y):
 
     return dm
 
-def arena(map_width, map_height):
+def arena(map_width, map_height, x = 5, y = 5):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
     room = dm.addCircleShapedRoom(10, 10, 10, add_door = False)
