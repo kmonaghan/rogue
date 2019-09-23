@@ -42,6 +42,36 @@ class HealingPotionUsable(Usable):
 
         return results
 
+class PowerPotionUsable(Usable):
+    def __init__(self, number_of_die=1, type_of_die=8):
+        super().__init__(name="Power Potion")
+        self.number_of_die = number_of_die
+        self.type_of_die = type_of_die
+
+    def use(self, game_map, user = None, target = None):
+        results = []
+
+        user.offence.base_power = user.offence.base_power + die_roll(self.number_of_die, self.type_of_die)
+        results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', libtcod.green)})
+        results.append({ResultTypes.DISCARD_ITEM: self.owner})
+
+        return results
+
+class DefencePotionUsable(Usable):
+    def __init__(self, number_of_die=1, type_of_die=8):
+        super().__init__(name="Defence Potion")
+        self.number_of_die = number_of_die
+        self.type_of_die = type_of_die
+
+    def use(self, game_map, user = None, target = None):
+        results = []
+
+        user.defence.base_defence = user.defence.base_defence + die_roll(self.number_of_die, self.type_of_die)
+        results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', libtcod.green)})
+        results.append({ResultTypes.DISCARD_ITEM: self.owner})
+
+        return results
+
 class ScrollUsable(Usable):
     def __init__(self, scroll_name="", scroll_spell=None, number_of_die=0, type_of_die=0):
         super().__init__(name=scroll_name)

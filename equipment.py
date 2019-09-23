@@ -8,7 +8,7 @@ import tome
 
 from components.equippable import Equippable
 from components.item import Item
-from components.usable import HealingPotionUsable, ScrollUsable
+from components.usable import DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
 
 from entities.entity import Entity
 
@@ -56,10 +56,16 @@ def random_armour(point = None, dungeon_level = 1):
 def random_potion(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['heal'] = 40
+    item_chances['offence'] = 40
+    item_chances['defence'] = 40
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'heal':
         item = healing_potion(point)
+    elif choice == 'offence':
+            item = power_potion(point)
+    elif choice == 'defence':
+        item = defence_potion(point)
 
     return item
 
@@ -166,6 +172,18 @@ def ring_of_defence(point = None):
 def healing_potion(point = None):
     item = Entity(point, '!', 'Healing Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=HealingPotionUsable())
+
+    return item
+
+def power_potion(point = None):
+    item = Entity(point, '!', 'Power Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=PowerPotionUsable())
+
+    return item
+
+def defence_potion(point = None):
+    item = Entity(point, '!', 'Defence Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=DefencePotionUsable())
 
     return item
 
