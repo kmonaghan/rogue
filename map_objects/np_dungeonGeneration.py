@@ -341,7 +341,7 @@ class dungeonGenerator:
 
         self.grid[np.where(cells == 1)] = Tiles.CAVERN_FLOOR
 
-        def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR, name = ""):
+    def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR, name = ""):
         offset = 0
         if add_walls:
             offset = 2
