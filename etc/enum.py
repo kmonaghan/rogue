@@ -38,6 +38,7 @@ class GameStates(Enum):
     GAME_OVER = auto()
     INVENTORY_DROP = auto()
     INVENTORY_EXAMINE = auto()
+    INVENTORY_SELECT = auto()
     INVENTORY_THROW = auto()
     INVENTORY_USE = auto()
     LEVEL_UP = auto()
@@ -58,14 +59,16 @@ CANCEL_STATES = {
 
 # Game states where an inventory is displayed.
 INVENTORY_STATES = {
-    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
-    GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE}
+        GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
+        GameStates.INVENTORY_THROW, GameStates.INVENTORY_SELECT,
+        GameStates.INVENTORY_USE,}
 
 # Game states accepting of user input.
 INPUT_STATES = {
     GameStates.CHARACTER_SCREEN,
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
-    GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
+    GameStates.INVENTORY_THROW, GameStates.INVENTORY_SELECT,
+    GameStates.INVENTORY_USE,
     GameStates.LEVEL_UP,
     GameStates.QUEST_LIST, GameStates.GAME_PAUSED,
     GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
@@ -203,6 +206,8 @@ class ResultTypes(Enum):
     REMOVE_ENTITY = auto()
     REMOVE_WEAPON = auto()
     RESTORE_PLAYER_INPUT = auto()
+    TARGET_ITEM_IN_INVENTORY = auto()
+    CANCEL_TARGET_ITEM_IN_INVENTORY = auto()
     QUEST_ONBOARDING = auto()
     QUEST_CANCELLED = auto()
     SET_POSITION = auto()

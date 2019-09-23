@@ -76,7 +76,7 @@ class Entity:
             return object.__getattribute__(self, attr)
         except AttributeError:
             return None
-            
+
     @property
     def point(self):
         return Point(self.x,self.y)
@@ -87,6 +87,9 @@ class Entity:
 
     @property
     def name(self):
+        if self.identifiable and not self.identifiable.identified:
+            return self.identifiable.name
+
         real_name = self.base_name
         if self.health and self.health.dead:
             if self.death.skeletal:

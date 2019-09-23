@@ -10,6 +10,8 @@ class Usable:
     def __init__(self, name=""):
         self.name = name
         self.owner = None
+        self.needs_target = False
+        self.type_of_target = False
 
     def __str__(self):
         return f"{self.__class__} {self.name}"
@@ -80,7 +82,12 @@ class ScrollUsable(Usable):
         self.type_of_die = type_of_die
 
     def use(self, game_map, user = None, target = None):
-        results = self.scroll_spell(game_map, user, target)
-        results.append({ResultTypes.DISCARD_ITEM: self.owner})
+        results = []
+
+        if not target and self.needs_target:
+            results.append({ResultTypes.TARGET_ITEM_IN_INVENTORY: self.owner})
+        else:
+            results = self.scroll_spell(game_map, user, target)
+            results.append({ResultTypes.DISCARD_ITEM: self.owner})
 
         return results

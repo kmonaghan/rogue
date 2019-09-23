@@ -39,7 +39,7 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     panel.print(x + (total_width // 2), y, '{0}: {1}/{2}'.format(name, value, maximum),
                 fg=tcod.white, alignment=tcod.CENTER)
 
-def render_menu_console(game_state, screen_width, screen_height, player, quest_request = None):
+def render_menu_console(game_state, screen_width, screen_height, player, quest_request = None, exclude = []):
     if game_state == GameStates.GAME_PAUSED:
         return game_paused(60, screen_width, screen_height)
     elif game_state == GameStates.GAME_OVER:
@@ -55,10 +55,12 @@ def render_menu_console(game_state, screen_width, screen_height, player, quest_r
             inventory_title = 'Press the key next to an item to examine it, or Esc to cancel.\n'
         elif game_state == GameStates.INVENTORY_DROP:
             inventory_title = 'Press the key next to an item to drop it, or Esc to cancel.\n'
+        elif game_state == GameStates.INVENTORY_SELECT:
+            inventory_title = 'Press the key next to an item to identify it, or Esc to cancel.\n'
         else:
             inventory_title = 'Esc to cancel.\n'
 
-        return inventory_menu(inventory_title, player, 50, screen_width, screen_height)
+        return inventory_menu(inventory_title, player, 50, screen_width, screen_height, exclude)
     elif game_state == GameStates.QUEST_ONBOARDING:
         return quest_menu('Questing', quest_request, 50, screen_width, screen_height)
     elif game_state == GameStates.QUEST_LIST:

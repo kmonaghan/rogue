@@ -7,6 +7,7 @@ from utils.random_utils import from_dungeon_level, random_choice_from_dict
 import tome
 
 from components.equippable import Equippable
+from components.identifiable import Identifiable
 from components.item import Item
 from components.usable import DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
 
@@ -14,7 +15,7 @@ from entities.entity import Entity
 
 from game_messages import Message
 
-from tome import cast_confuse, cast_fireball, cast_lightning, heal, cast_mapping
+from tome import cast_confuse, cast_fireball, cast_identify, cast_lightning, heal, cast_mapping
 
 from equipment_slots import EquipmentSlots
 from etc.enum import RenderOrder
@@ -89,6 +90,7 @@ def random_scroll(point = None, dungeon_level = 1):
     item_chances['fireball'] = 30
     item_chances['confuse'] = 30
     item_chances['map_scroll'] = 20
+    item_chances['identify_scroll'] = 20
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'lightning':
@@ -102,6 +104,9 @@ def random_scroll(point = None, dungeon_level = 1):
 
     elif choice == 'map_scroll':
         item = map_scroll(point)
+
+    elif choice == 'identify_scroll':
+        item = identify_scroll(point)
 
     return item
 
@@ -154,6 +159,8 @@ def random_magic_weapon(dungeon_level = 1):
         item.equippable.power_bonus = item.equippable.power_bonus * 4
 
     item.equippable.number_of_dice = 2
+
+    item.add_component(Identifiable(),"identifiable")
 
     return item
 
@@ -211,6 +218,14 @@ def confusion_scroll(point = None):
                         'Left-click an enemy to confuse it, or right-click to cancel.', tcod.light_cyan))
     item = Entity(point, '#', 'Confusion Scroll', tcod.light_yellow, render_order=RenderOrder.ITEM,
                     item=item_component)
+
+    return item
+
+def identify_scroll(point = None):
+    usable = ScrollUsable(scroll_name="Identify Scroll", scroll_spell=cast_identify)
+    usable.needs_target = True
+    item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
 
     return item
 

@@ -75,6 +75,7 @@ class Rogue(tcod.event.EventDispatch):
         self.motion = tcod.event.MouseMotion()
         self.lbut = self.mbut = self.rbut = 0
         self.quest_request = None
+        self.using_item = None
 
     def start_fresh_game(self):
         pubsub.pubsub = pubsub.PubSub()
@@ -147,7 +148,11 @@ class Rogue(tcod.event.EventDispatch):
             #---------------------------------------------------------------------
             # Render any menus.
             #---------------------------------------------------------------------
-            self.menu_console = render_menu_console(self.game_state, CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'), self.player, self.quest_request)
+            exclude = []
+            if self.using_item:
+                exclude.append(self.using_item)
+
+            self.menu_console = render_menu_console(self.game_state, CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'), self.player, self.quest_request, exclude)
 
             self.menu_console.blit(root_console,
                                 (root_console.width - self.menu_console.width) // 2,
@@ -269,7 +274,11 @@ class Rogue(tcod.event.EventDispatch):
 
             if self.game_state == GameStates.INVENTORY_USE:
                 if item.usable:
+                    self.using_item = item
                     player_turn_results.extend(item.usable.use(self.game_map, self.player))
+            elif self.game_state == GameStates.INVENTORY_SELECT:
+                player_turn_results.extend(self.using_item.usable.use(self.game_map, self.player, item))
+                self.using_item = None
             elif self.game_state == GameStates.INVENTORY_DROP:
                 player_turn_results.extend(self.player.inventory.drop_item(item))
             elif self.game_state == GameStates.INVENTORY_EXAMINE:
@@ -314,6 +323,8 @@ class Rogue(tcod.event.EventDispatch):
                 self.game_state = self.previous_game_state
             elif self.game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
+            elif self.game_state == GameStates.INVENTORY_SELECT:
+                player_turn_results.append({ResultTypes.CANCEL_TARGET_ITEM_IN_INVENTORY: True})
             elif self.game_state == GameStates.QUEST_ONBOARDING:
                 player_turn_results.append({'quest_cancelled': True})
             else:
@@ -384,7 +395,6 @@ class Rogue(tcod.event.EventDispatch):
                     message = Message('There are no stairs here.', tcod.yellow)
                     pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
-
         self.process_results_stack(self.player, player_turn_results)
 
         pubsub.pubsub.process_queue(self.game_map)
@@ -448,6 +458,14 @@ class Rogue(tcod.event.EventDispatch):
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
                 self.game_state = result_data.death.npc_death(self.game_map)
+
+            # Handle death.
+            if result_type == ResultTypes.TARGET_ITEM_IN_INVENTORY:
+                self.game_state = GameStates.INVENTORY_SELECT
+
+            if result_type == ResultTypes.CANCEL_TARGET_ITEM_IN_INVENTORY:
+                self.using_item = None
+                self.game_state = GameStates.PLAYER_TURN
 
             # Add an item to the inventory, and remove it from the game map.
             if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:

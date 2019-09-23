@@ -80,14 +80,18 @@ def menu2(title, header, options, width, screen_width, screen_height):
 
     return con
 
-def inventory_menu(header, player, width, screen_width, screen_height):
+def inventory_menu(header, player, width, screen_width, screen_height, exclude = []):
     # show a menu with each item of the inventory as an option
     if len(player.inventory.items) == 0:
         options = [['Inventory is empty.', tcod.white]]
     else:
         options = []
 
-        for item in player.inventory.items:
+        current_items = player.inventory.items.copy()
+        for item in exclude:
+            current_items.remove(item)
+            
+        for item in current_items:
             if player.equipment.main_hand == item:
                 options.append(['{0} (in main hand)'.format(item.name), item.color])
             elif player.equipment.off_hand == item:

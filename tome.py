@@ -160,3 +160,13 @@ def cast_mapping(game_map, caster, target):
     results.append({ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', libtcod.gold)})
 
     return results
+
+def cast_identify(game_map, caster, target):
+    results = []
+
+    if target.identifiable and not target.identified:
+        target.identifiable.identified = True
+
+    results.append({ResultTypes.MESSAGE: Message(f"The item is a {target.name}", libtcod.gold)})
+
+    return results
