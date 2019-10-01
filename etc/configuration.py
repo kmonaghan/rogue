@@ -31,4 +31,6 @@ CONFIG = {
     'debug': True,
     'show_dijkstra_player': False,
     'show_dijkstra_flee': False,
+
+    'map_generation_attempts': 10,
 }

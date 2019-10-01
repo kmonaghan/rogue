@@ -3,6 +3,7 @@ import numpy as np
 from random import choice, randint
 
 from etc.enum import Tiles
+from etc.exceptions import FailedToPlaceEntranceError, FailedToPlaceExitError, BadMapError, FailedToPlaceRoomError
 
 from map_objects.np_dungeonGeneration import dungeonGenerator
 from map_objects.np_level_map import LevelMap
@@ -23,8 +24,7 @@ def levelOneGenerator(map_width, map_height):
     x1, y1 = placeStairAlongEdge(dm)
 
     if not x1:
-        print("No entrance, just start again")
-        return levelOneGenerator(map_width, map_height)
+        raise FailedToPlaceEntranceError
 
     stairs = np.where(dm.grid == Tiles.STAIRS_FLOOR)
     cavern = np.where(dm.grid == Tiles.CAVERN_FLOOR)
@@ -44,8 +44,7 @@ def levelOneGenerator(map_width, map_height):
     x2, y2 = placeExitRoom(dm, x1, y1)
 
     if not x2:
-        print("No exit, just start again")
-        return levelOneGenerator(map_width, map_height)
+        raise FailedToPlaceExitError
 
     #print(f"Route from {x2},{y2} to {cavern[0][tile_index]},{cavern[1][tile_index]}")
     dm.route_between(x2, y2, cavern[0][tile_index], cavern[1][tile_index], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
@@ -75,9 +74,8 @@ def levelOneGenerator(map_width, map_height):
 
     dm.cleanUpMap()
 
-    if not dm.validateMap():
-        print("Bad map===========D")
-        return levelOneGenerator(map_width, map_height)
+    #if not dm.validateMap():
+    #    raise BadMapError
 
     return dm
 
@@ -114,15 +112,12 @@ def cavernLevel(dm, x, y):
     x2, y2 = placeExitRoom(dm, x1, y1)
 
     if not x2:
-        print("No exit, just start again")
-        return cavernLevel(dm, x, y)
+        raise FailedToPlaceExitError
 
     #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
     dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     dm.cleanUpMap()
-
-    return True
 
 def level_cavern_rooms(map_width, map_height):
     dm = dungeonGenerator(width=map_width, height=map_height)
@@ -153,13 +148,6 @@ def roomsLevel(dm, x, y):
     prefab = Prefab(stair_room)
     room = dm.placeRoomRandomly(prefab)
     room.name = "exit"
-    '''
-    x2, y2 = placeExitRoom(dm, x1, y1, add_door = True)
-
-    if not x2:
-        print("No exit, just start again")
-        return False
-    '''
 
     dm.connectRooms()
 
@@ -177,8 +165,6 @@ def roomsLevel(dm, x, y):
     dm.route_between(stairs[1][0], stairs[1][1], corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
 
     dm.cleanUpMap()
-
-    return True
 
 def placePrefabs(dm):
     number_of_prefabs = randint(0, 2)
@@ -201,13 +187,8 @@ def levelGenerator(map_width, map_height, x, y):
     else:
         result = roomsLevel(dm, x, y)
 
-    if not result:
-        print("Failed map generation")
-        return levelGenerator(map_width, map_height, x, y)
-
     if not dm.validateMap():
-        print("Bad map===========D")
-        return levelGenerator(map_width, map_height, x, y)
+        raise BadMapError
 
     return dm
 
@@ -281,17 +262,17 @@ def placeStairAlongEdge(dm):
     side = randint(0, 3)
 
     if side == 0:
-        x = randint(1, dm.width - 4)
+        x = randint(1, dm.width - 5)
         y = 1
     elif side == 1:
-        x = dm.width - 4
-        y = randint(0, dm.height - 4)
+        x = dm.width - 5
+        y = randint(0, dm.height - 5)
     elif side == 2:
-        x = randint(1, dm.width - 4)
-        y = dm.height - 4
+        x = randint(1, dm.width - 5)
+        y = dm.height - 5
     elif side == 3:
         x = 1
-        y = randint(1, dm.height - 4)
+        y = randint(1, dm.height - 5)
 
     print(f"{dm.width},{dm.height} placing on side: {side} at {x},{y}")
 
@@ -309,8 +290,7 @@ def placeExitRoom(dm, x, y, add_door = False):
     possible_positions = np.where(dijkstra[1:dm.width - 5,1:dm.height - 5] >= min_distance)
 
     if (len(possible_positions) < 1):
-        print('Nowhere to place exit')
-        return False
+        raise FailedToPlaceExitError
 
     attempts = 0
 
@@ -334,17 +314,14 @@ def placeExitRoom(dm, x, y, add_door = False):
             del possible_tuples[idx]
 
     if not placed:
-        print('Failed to place exit')
-        return False, False
+        raise FailedToPlaceExitError
 
     return x, y
 
 def placeStairRoom(dm, x, y, overlap = True, name="", add_door = False):
     placed = dm.addRoom(x,y,3,3, overlap = overlap, add_walls = True, add_door = add_door, name = name)
 
-    if not placed:
-        return False, False
-
-    dm.grid[x+1,y+1] = Tiles.STAIRS_FLOOR
+    x1, y1 = placed.center
+    dm.grid[x1,y1] = Tiles.STAIRS_FLOOR
 
     return x, y

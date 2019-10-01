@@ -11,6 +11,7 @@ from entities.character import Character
 
 from etc.colors import COLORS
 from etc.configuration import CONFIG
+from etc.exceptions import MapError, MapGenerationFailedError
 
 from map_objects.np_level_generation import arena, levelOneGenerator, levelGenerator, bossLevelGenerator
 from map_objects.point import Point
@@ -32,8 +33,21 @@ class GameMap:
         self.levels = []
 
     def make_map(self, map_width, map_height, player):
-        '''
-        dm = arena(map_width, map_height)
+        dm = None
+
+        attempts = 0
+
+        while attempts < CONFIG.get('map_generation_attempts'):
+            try:
+                dm = levelOneGenerator(map_width, map_height)
+                break
+            except MapError as e:
+                print(f"===Map generation failed=== {e}")
+                attempts = attempts + 1
+                dm = None
+
+        if not dm:
+            raise MapGenerationFailedError
 
         self.current_level = LevelMap(dm.grid, dm.rooms)
         self.current_level.dungeon_level = self.dungeon_level
@@ -45,17 +59,27 @@ class GameMap:
         self.test_popluate_map(player)
 
         return
-        '''
+
 
         boss_chance = randint(0,3) + self.dungeon_level
 
-        if (self.dungeon_level == 1):
-            dm = levelOneGenerator(map_width, map_height)
-        else:
-            if (boss_chance >= 6):
-                dm = bossLevelGenerator(map_width, map_height, player.x, player.y)
-            else:
-                dm = levelGenerator(map_width, map_height, player.x, player.y)
+        while attempts < CONFIG.get('map_generation_attempts'):
+            try:
+                if (self.dungeon_level == 1):
+                    dm = levelOneGenerator(map_width, map_height)
+                else:
+                    if (boss_chance >= 6):
+                        dm = bossLevelGenerator(map_width, map_height, player.x, player.y)
+                    else:
+                        dm = levelGenerator(map_width, map_height, player.x, player.y)
+                break
+            except MapError as e:
+                print(f"===Map generation failed=== {e}")
+                attempts = attempts + 1
+                dm = None
+
+        if not dm:
+            raise MapGenerationFailedError
 
         self.current_level = LevelMap(dm.grid, dm.rooms)
         self.current_level.dungeon_level = self.dungeon_level
@@ -81,11 +105,12 @@ class GameMap:
 
         prison_block = find(lambda room: room.name == 'prison_block', self.current_level.rooms)
 
-        for x,y in prison_block.spawnpoints:
-            npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
-            npc.set_point(Point(prison_block.x + x, prison_block.y + y))
-            npc.ai.set_target(player)
-            self.current_level.add_entity(npc)
+        if prison_block:
+            for x,y in prison_block.spawnpoints:
+                npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
+                npc.set_point(Point(prison_block.x + x, prison_block.y + y))
+                npc.ai.set_target(player)
+                self.current_level.add_entity(npc)
 
         '''
         for i in range(5):
@@ -113,6 +138,18 @@ class GameMap:
         ring2 = equipment.ring_of_defence(player.point)
         self.current_level.add_entity(ring2)
         '''
+
+        point = self.current_level.find_random_open_position()
+        potion2 = equipment.power_potion(point)
+        self.current_level.add_entity(potion2)
+
+        point = self.current_level.find_random_open_position()
+        potion3 = equipment.defence_potion(point)
+        self.current_level.add_entity(potion3)
+
+        point = self.current_level.find_random_open_position()
+        scroll5 = equipment.identify_scroll(player.point)
+        self.current_level.add_entity(scroll5)
 
     def place_stairs(self, player):
         exit = find(lambda room: room.name == 'exit', self.current_level.rooms)

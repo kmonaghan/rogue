@@ -7,6 +7,7 @@ import tcod
 
 #tile constants
 from etc.enum import Tiles, WALKABLE_TILES, BLOCKING_TILES
+from etc.exceptions import RoomOutOfBoundsError, RoomOverlapsError
 
 floor_to_wall = {
     Tiles.OBSTACLE: Tiles.CAVERN_WALL,
@@ -68,7 +69,7 @@ class dungeonRoom:
 
     @property
     def center(self):
-        return (self.x + (self.width // 2) - 1, self.y + (self.height // 2) - 1)
+        return (self.x + (self.width // 2), self.y + (self.height // 2))
 
 class prefabRoom(dungeonRoom):
     def __init__(self, x, y, slice, name="", exits=[], spawnpoints=[]):
@@ -350,11 +351,11 @@ class dungeonGenerator:
 
         if room_slice.shape[0] != (width + offset) or room_slice.shape[1] != (height + offset):
             #print("Room position out of bounds")
-            return None
+            raise RoomOutOfBoundsError
 
         if not overlap and not self.quadFits(x, y, room_slice.shape[0], room_slice.shape[1], margin):
             #print("Failed due to overlap/quadfits")
-            return None
+            raise RoomOverlapsError
 
         room_slice[:] = tile
 
