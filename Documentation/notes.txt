@@ -29,9 +29,18 @@ https://gitlab.com/Procedural-Generation/DungeonGenerator
 https://www.boristhebrave.com/2019/07/14/dungeon-generation-in-diablo-1/
 https://www.boristhebrave.com/2019/07/28/dungeon-generation-in-enter-the-gungeon/#more-388
 
+http://ctrl500.com/tech/handcrafted-feel-dungeon-generation-unexplored-explores-cyclic-dungeon-generation/
+https://www.youtube.com/watch?v=mA6PacEZX9M
+
+
+https://www.reddit.com/search/?q=Procedural%20Challenge%20%234
+
+https://bytten-studio.com/devlog//2012/11/30/lock-and-key-puzzle-generation/
+
+
 Other Roguelikes:
 https://github.com/Maugrift/GeneriCrawl See for nice FOV
-https://bitbucket.org/Lewatw/ticronem
+https://bitbucket.org/Lewatw/ticronem See for Esper intergration
 
 https://www.reddit.com/r/roguelikedev/wiki/faq_friday
 
