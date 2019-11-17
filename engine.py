@@ -420,6 +420,8 @@ class Rogue(tcod.event.EventDispatch):
 
         self.process_results_stack(self.player, enemy_turn_results)
 
+        pubsub.pubsub.process_queue(self.game_map)
+
         #---------------------------------------------------------------------
         # And done...so broadcast a tick
         #---------------------------------------------------------------------
@@ -476,6 +478,7 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.DISCARD_ITEM:
                 entity.inventory.remove_item(result_data)
                 self.game_state = GameStates.ENEMY_TURN
+                self.using_item = None
 
             # Remove dropped items from inventory and place on the map
             if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:

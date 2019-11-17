@@ -26,6 +26,21 @@ class Usable:
 
         return results
 
+class AntidoteUsable(Usable):
+    def __init__(self):
+        super().__init__(name="Antidote")
+
+    def use(self, game_map, user = None, target = None):
+        results = []
+
+        if user.poisoned:
+            user.poisoned.duration = -1
+
+        results.append({ResultTypes.DISCARD_ITEM: self.owner})
+        results.append({ResultTypes.MESSAGE: Message('You feel clensed.', libtcod.yellow)})
+
+        return results
+
 class HealingPotionUsable(Usable):
     def __init__(self, number_of_die=1, type_of_die=8):
         super().__init__(name="Healing Potion")

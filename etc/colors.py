@@ -33,8 +33,8 @@ COLORS = {
     'light_room_wall': tcod.dark_grey,
     'dark_room_wall': tcod.darkest_grey,
 
-    'light_stair_floor': tcod.light_yellow,
-    'dark_stair_floor':  tcod.yellow,
+    'light_stair_floor': tcod.light_grey,
+    'dark_stair_floor':  tcod.grey,
 
     'light_shallow_water': tcod.lighter_blue,
     'dark_shallow_water': tcod.light_blue,
@@ -79,6 +79,9 @@ COLORS = {
     'equipment_rare': tcod.blue,
     'equipment_epic': tcod.purple,
     'equipment_legendary': tcod.crimson,
+
+    'show_path_track': tcod.silver,
+    'show_walkable_path': tcod.lightest_blue,
 }
 
 STATUS_BAR_COLORS = {

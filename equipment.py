@@ -9,7 +9,8 @@ import tome
 from components.equippable import Equippable
 from components.identifiable import Identifiable
 from components.item import Item
-from components.usable import DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
+from components.usable import AntidoteUsable, DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
+from components.poisoner import Poisoner
 
 from entities.entity import Entity
 
@@ -59,6 +60,7 @@ def random_potion(point = None, dungeon_level = 1):
     item_chances['heal'] = 40
     item_chances['offence'] = 40
     item_chances['defence'] = 40
+    item_chances['antidote'] = 40
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'heal':
@@ -67,6 +69,8 @@ def random_potion(point = None, dungeon_level = 1):
             item = power_potion(point)
     elif choice == 'defence':
         item = defence_potion(point)
+    elif choice == 'antidote':
+        item = antidote_potion(point)
 
     return item
 
@@ -164,6 +168,9 @@ def random_magic_weapon(dungeon_level = 1):
 
     return item
 
+def add_random_ablity(item):
+    item.add_component(Poisoner(0, 1, 10), 'poisoner')
+
 def ring_of_power(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)
     item = Entity(point, 'o', 'Ring of Power', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
@@ -174,6 +181,12 @@ def ring_of_defence(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, defence_bonus=1)
     item = Entity(point, 'o', 'Ring of Health', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
+    return item
+
+def antidote_potion(point = None):
+    item = Entity(point, '!', 'Antidote', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=AntidoteUsable())
+
     return item
 
 def healing_potion(point = None):

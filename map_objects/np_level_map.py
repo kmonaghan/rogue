@@ -34,8 +34,6 @@ class LevelMap(Map):
         self.illuminated = np.zeros(self.walkable.shape, dtype=np.int8)
         self.blocked = np.zeros(self.walkable.shape, dtype=np.int8)
 
-        self.allowed_stairs_tiles = np.zeros(self.walkable.shape, dtype=np.int8)
-
         self.dark_map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('dark_wall'), dtype=np.uint8
         )
@@ -120,7 +118,6 @@ class LevelMap(Map):
             elif grid[x,y] == Tiles.DEEP_WATER:
                 current_tile = DeepWater()
             elif grid[x,y] == Tiles.STAIRS_FLOOR:
-                self.allowed_stairs_tiles[x,y] = True
                 current_tile = StairsFloor()
             elif grid[x,y] == Tiles.POTENTIAL_CORRIDOR_FLOOR:
                 current_tile = PotentialCorridorFloor()
@@ -222,18 +219,16 @@ class LevelMap(Map):
             map_console.bg[explored] = self.dark_map_bg[explored]
             map_console.bg[where_fov] = self.light_map_bg[where_fov]
 
-        map_console.ch[:] = self.map_char[:]
+        map_console.ch[explored] = self.map_char[explored]
         if CONFIG.get('debug'):
             for current_path in self.paths:
                 for x,y in current_path:
-                    map_console.bg[x,y] = tcod.lighter_green
-
-            #self.paths.clear()
+                    map_console.bg[x,y] = COLORS.get('show_path_track')
 
             for current_walkable in self.walkables:
                 for (x,y), value in np.ndenumerate(self.grid):
                     if (current_walkable[x, y]):
-                        map_console.bg[x,y] = tcod.lighter_yellow
+                        map_console.bg[x,y] = COLORS.get('show_walkable_path')
 
             self.walkables.clear()
 

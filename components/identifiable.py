@@ -1,3 +1,5 @@
+import codecs
+
 class Identifiable:
     #an item that can be picked up and used.
     def __init__(self):
@@ -5,4 +7,4 @@ class Identifiable:
 
     @property
     def name(self):
-        return 'asd ihnc adad lkmlkm'
+        return codecs.encode(self.owner.base_name, 'rot_13')
