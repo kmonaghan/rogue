@@ -57,11 +57,10 @@ class Entity:
 
         self.render_order = render_order
 
-        self.death = death
-        if self.death == None:
-            self.death = BasicDeath()
+        if death == None:
+            death = BasicDeath()
 
-        self.death.owner = self
+        self.add_component(death, "death")
 
         self.uuid = str(uuid.uuid4())
 

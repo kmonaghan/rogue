@@ -19,6 +19,7 @@ from components.level import Level
 from components.offence import Offence
 from components.defence import Defence
 from components.questgiver import Questgiver
+from components.poisoner import Poisoner
 from components.spawn import Spawn
 from components.subspecies import Subspecies
 
@@ -157,6 +158,12 @@ def create_player():
     scroll4 = equipment.map_scroll()
     player.inventory.add_item(scroll4)
 
+    scroll5 = equipment.identify_scroll()
+    player.inventory.add_item(scroll5)
+
+    potion2 = equipment.antidote_potion()
+    player.inventory.add_item(potion2)
+
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
@@ -171,12 +178,6 @@ def egg(point = None):
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
-
-    teeth = equipment.teeth()
-    teeth.lootable = False
-
-    creature.inventory.add_item(teeth)
-    creature.equipment.toggle_equip(teeth)
 
     return creature
 
@@ -347,6 +348,14 @@ def snake(point = None):
     creature.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
 
     teeth = equipment.teeth()
+
+    dice = randint(1, 100)
+
+    if (dice >= 50):
+        teeth.add_component(Poisoner(0, 1, 5), 'poisoner')
+        creature.base_name = 'Poisonous Snake'
+        creature.color = COLORS.get('poisonous_snake')
+
     teeth.lootable = False
 
     creature.inventory.add_item(teeth)
@@ -515,10 +524,24 @@ def place_chest(point, level_map, player):
 
         level_map.add_entity(npc)
 
+def poison_npc(npc, dungeon_level = 1):
+    weapon = equipment.random_weapon(dungeon_level = dungeon_level)
+    damage = randint(dungeon_level, dungeon_level * 5)
+    duration = randint(dungeon_level, dungeon_level * 10)
+    equipment.add_poison(weapon, damage, duration)
+
+    npc.inventory.add_item(weapon)
+    npc.equipment.toggle_equip(weapon)
+
+    print(weapon)
+    return npc
+
 def tweak_npc(npc):
     dice = randint(1, 100)
     if (dice < 50):
         return
+    elif (dice < 55):
+        poison_npc(npc)
     else:
         subspecies = Subspecies()
         subspecies.random_subspecies()
@@ -537,6 +560,14 @@ def upgrade_npc(npc):
 Subscription methods
 '''
 def eat_rat(sub, message, level_map):
+    if message.target is None:
+        print("eat_rat: the target is none?")
+        return
+
+    if sub.entity is None:
+        print("eat_rat: the subscriber is none?")
+        return
+
     if (message.entity.species == Species.RAT) and (message.target.uuid == sub.entity.uuid):
         sub.entity.spawn.increase_energy()
         message.entity.death.skeletonize()

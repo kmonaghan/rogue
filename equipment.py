@@ -169,7 +169,11 @@ def random_magic_weapon(dungeon_level = 1):
     return item
 
 def add_random_ablity(item):
-    item.add_component(Poisoner(0, 1, 10), 'poisoner')
+    add_poison(item, 1, 10)
+
+def add_poison(item, damage = 1, duration = 10):
+    item.add_component(Poisoner(0, damage, duration), 'poisoner')
+    item.base_name = item.base_name + " of poisoning"
 
 def ring_of_power(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)

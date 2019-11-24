@@ -67,6 +67,7 @@ COLORS = {
     'rat': tcod.green,
     'rats_nest': tcod.green,
     'snake': tcod.darker_green,
+    'poisonous_snake': tcod.darker_red,
     'snake_egg': tcod.darker_gray,
     'skeleton': tcod.light_blue,
     'troll': tcod.darker_green,

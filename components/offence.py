@@ -54,6 +54,9 @@ class Offence:
             msg = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(damage)), libtcod.white)
             results.extend(target.health.take_damage(damage, self.owner))
 
+            if weapon.poisoner:
+                weapon.poisoner.attacked_target(target)
+
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
 

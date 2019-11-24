@@ -13,7 +13,7 @@ class Poisoned:
     def countdown(self, sub, message, game_map):
         self.duration -= 1
 
-        if (self.duration < 0):
+        if self.owner.health.dead or (self.duration < 0):
             self.end(sub)
             return
 
@@ -30,6 +30,13 @@ class Poisoned:
         pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.TICK, self.countdown))
 
     def end(self, sub):
-        self.owner.del_component("poisoned")
+        if self.owner:
+            try:
+                self.owner.del_component("poisoned")
+            except AttributeError:
+                print(f"tried to remove posion from {self.owner.name} - {self.owner.uuid}")
+        else:
+            print('****No owner to poisoned - already deleted?')
         pubsub.pubsub.mark_subscription_for_removal(sub)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison has run its course in {0}.'.format(self.owner.name.title()), libtcod.red)))
+        if not self.owner.health.dead:
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison has run its course in {0}.'.format(self.owner.name.title()), libtcod.red)))
