@@ -7,6 +7,7 @@ import math
 
 from components.energy import Energy
 from components.item import Item
+from components.interaction import Interaction
 from components.death import BasicDeath
 from components.movement import Movement
 
@@ -14,7 +15,7 @@ from game_messages import Message
 
 from map_objects.point import Point
 
-from etc.enum import ResultTypes, RenderOrder
+from etc.enum import ResultTypes, RenderOrder, Interactions
 
 import uuid
 
@@ -23,7 +24,7 @@ class Entity:
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
                  ai=None, item=None, equippable=None, render_order=RenderOrder.CORPSE,
-                 death=None, health=None, usable=None, act_energy=2):
+                 death=None, health=None, usable=None, act_energy=2, interaction=Interactions.FOE):
 
         self.x = None
         self.y = None
@@ -53,14 +54,14 @@ class Entity:
 
         self.lootable = True
 
-        self.questgiver = None
-
         self.render_order = render_order
 
-        if death == None:
+        if not death:
             death = BasicDeath()
 
         self.add_component(death, "death")
+
+        self.add_component(Interaction(interaction), "interaction")
 
         self.uuid = str(uuid.uuid4())
 
@@ -120,11 +121,20 @@ class Entity:
         """Add a component as an attribute of the current object, and set the
         owner of the component to the current object.
         """
+        if not component:
+            return
+
         if component:
             component.owner = self
+
+        print(f"Adding component: {type(component).__name__}")
+
         setattr(self, component_name, component)
 
     def del_component(self, component_name):
         """Remove a component as an attribute of the current object.
         """
+
+        print(f"Removing component_name: {component_name}")
+
         delattr(self, component_name)

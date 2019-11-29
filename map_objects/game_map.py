@@ -1,7 +1,9 @@
 import tcod
+import numpy as np
 from random import choice, sample, randint, getrandbits, shuffle
 
 import bestiary
+import buildings
 import quest
 
 from components.stairs import Stairs
@@ -36,10 +38,10 @@ class GameMap:
         dm = None
 
         attempts = 0
-
+        '''
         while attempts < CONFIG.get('map_generation_attempts'):
             try:
-                dm = levelOneGenerator(map_width, map_height)
+                dm = arena(map_width, map_height)
                 break
             except MapError as e:
                 print(f"===Map generation failed=== {e}")
@@ -59,8 +61,7 @@ class GameMap:
         self.test_popluate_map(player)
 
         return
-
-
+        '''
         boss_chance = randint(0,3) + self.dungeon_level
 
         while attempts < CONFIG.get('map_generation_attempts'):
@@ -84,7 +85,11 @@ class GameMap:
         self.current_level = LevelMap(dm.grid, dm.rooms)
         self.current_level.dungeon_level = self.dungeon_level
 
-        self.place_stairs(player)
+        self.place_stairs()
+        self.place_doors()
+
+        player.set_point(self.up_stairs.point)
+
         self.current_level.add_entity(player)
 
         if (self.dungeon_level == 1):
@@ -105,12 +110,26 @@ class GameMap:
 
         prison_block = find(lambda room: room.name == 'prison_block', self.current_level.rooms)
 
-        if prison_block:
-            for x,y in prison_block.spawnpoints:
-                npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
-                npc.set_point(Point(prison_block.x + x, prison_block.y + y))
-                npc.ai.set_target(player)
-                self.current_level.add_entity(npc)
+        npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
+        point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
+        npc.set_point(point)
+        bestiary.poison_npc(npc)
+        self.current_level.add_entity(npc)
+
+        # if prison_block:
+        #     for x,y in prison_block.spawnpoints:
+        #         npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
+        #         npc.set_point(Point(prison_block.x + x, prison_block.y + y))
+        #         npc.ai.set_target(player)
+        #         self.current_level.add_entity(npc)
+
+        #Snakes and Rats
+        # for i in range(1):
+        #     npc = bestiary.generate_creature(Species.SNAKE, self.dungeon_level, player.level.current_level)
+        #     point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
+        #     npc.set_point(point)
+        #     npc.ai.set_target(player)
+        #     self.current_level.add_entity(npc)
 
         '''
         for i in range(5):
@@ -151,14 +170,31 @@ class GameMap:
         scroll5 = equipment.identify_scroll(player.point)
         self.current_level.add_entity(scroll5)
 
-    def place_stairs(self, player):
+        self.place_doors()
+
+    def place_doors(self):
+        doors_tiles = self.current_level.doors
+
+        current_door_tuples = tuple(zip(doors_tiles[0],doors_tiles[1]))
+
+        print(current_door_tuples)
+
+        for x,y in current_door_tuples:
+            door = buildings.door(Point(x,y))
+            self.current_level.add_entity(door)
+
+            point = self.current_level.find_random_open_position()
+            key = equipment.key(point, door)
+            self.current_level.add_entity(key)
+
+    def place_stairs(self):
         exit = find(lambda room: room.name == 'exit', self.current_level.rooms)
 
         if (exit):
             x,y = exit.center
 
             self.down_stairs = Entity(Point(x,y), '>', 'Stairs', COLORS.get('stairs'),
-                                                render_order=RenderOrder.STAIRS)
+                                                render_order=RenderOrder.STAIRS, always_visible=True)
             self.down_stairs.add_component(Stairs(self.dungeon_level + 1), "stairs")
 
             self.current_level.add_entity(self.down_stairs)
@@ -169,12 +205,10 @@ class GameMap:
             x,y = entrance.center
 
             self.up_stairs = Entity(Point(x,y), '<', 'Stairs', COLORS.get('stairs'),
-                                                render_order=RenderOrder.STAIRS)
+                                                render_order=RenderOrder.STAIRS, always_visible=True)
             self.up_stairs.add_component(Stairs(self.dungeon_level - 1), "stairs")
 
             self.current_level.add_entity(self.up_stairs)
-
-            player.set_point(self.up_stairs.point)
 
     def level_one(self, player):
         #point = self.current_level.find_random_open_position([Tiles.STAIRS_FLOOR], room = room)

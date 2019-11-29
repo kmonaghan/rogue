@@ -11,6 +11,7 @@ from components.identifiable import Identifiable
 from components.item import Item
 from components.usable import AntidoteUsable, DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
 from components.poisoner import Poisoner
+from components.unlock import Unlock
 
 from entities.entity import Entity
 
@@ -19,7 +20,7 @@ from game_messages import Message
 from tome import cast_confuse, cast_fireball, cast_identify, cast_lightning, heal, cast_mapping
 
 from equipment_slots import EquipmentSlots
-from etc.enum import RenderOrder
+from etc.enum import RenderOrder, Interactions
 
 def random_armour(point = None, dungeon_level = 1):
     item_chances = {}
@@ -358,3 +359,11 @@ def claw(point = None):
     item = Entity(point, ',', 'claw', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
+
+def key(point = None, unlocks = None):
+    key = Entity(point, 'k', 'key', COLORS.get('light_door'),
+                    blocks=False, interaction=Interactions.NONE,
+                    render_order=RenderOrder.ITEM, item=Item())
+    key.add_component(Unlock(unlocks.uuid), 'unlock')
+
+    return key

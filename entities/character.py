@@ -11,25 +11,18 @@ from components.inventory import Inventory
 from components.level import Level
 
 from etc.configuration import CONFIG
-from etc.enum import RenderOrder, Species
+from etc.enum import RenderOrder, Species, Interactions
 
 class Character(Entity):
-    def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None, act_energy=2):
-        super(Character, self).__init__(point, char, name, color, blocks, always_visible, ai, item, gear, death=death, health=health, act_energy=act_energy)
+    def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None, act_energy=2, interaction=Interactions.FOE):
+        super(Character, self).__init__(point, char, name, color, blocks, always_visible, ai, item, gear, death=death, health=health, act_energy=act_energy, interaction=interaction)
 
-        self.inventory = Inventory(26)
-        self.inventory.owner = self
-
-        self.equipment = Equipment()
-        self.equipment.owner = self
+        self.add_component(Equipment(), "equipment")
+        self.add_component(Inventory(26), "inventory")
 
         self.render_order = RenderOrder.ACTOR
 
         self.species = species
-
-        self.subspecies = None
-        self.offence = None
-        self.defence = None
 
     def __str__(self):
         desc = self.name.title()

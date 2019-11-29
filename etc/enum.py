@@ -303,3 +303,10 @@ class StairOption(Enum):
     GODOWN = auto()
     EXIT = auto()
     NOSTAIR = auto()
+
+class Interactions(Enum):
+    NONE = auto()
+    FOE = auto()
+    FRIEND = auto()
+    QUESTGIVER = auto()
+    DOOR = auto()

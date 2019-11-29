@@ -15,8 +15,8 @@ COLORS = {
     'light_cavern_wall': tcod.dark_sepia,
     'dark_cavern_wall': tcod.darkest_sepia,
 
-    'light_door': tcod.orange,
-    'dark_door': tcod.darker_orange,
+    'light_door_tile': tcod.orange,
+    'dark_door_tile': tcod.darker_orange,
 
     'light_impenetrable': tcod.red,
     'dark_impenetrable': tcod.darker_red,
@@ -74,6 +74,9 @@ COLORS = {
     'necromancer': (50, 50, 50),
     'warlord': tcod.black,
     'zombie': (145, 145, 0),
+
+    'light_door': tcod.purple,
+    'dark_door': tcod.darker_purple,
 
     'equipment_common': tcod.gray,
     'equipment_uncommon': tcod.chartreuse,

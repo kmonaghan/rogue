@@ -41,7 +41,7 @@ def levelOneGenerator(map_width, map_height):
     #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
     dm.route_between(stairs[0][0], stairs[1][0], cavern[0][tile_index], cavern[1][tile_index], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
-    x2, y2 = placeExitRoom(dm, x1, y1)
+    x2, y2 = placeExitRoom(dm, x1, y1, add_door = True)
 
     if not x2:
         raise FailedToPlaceExitError
@@ -74,8 +74,8 @@ def levelOneGenerator(map_width, map_height):
 
     dm.cleanUpMap()
 
-    #if not dm.validateMap():
-    #    raise BadMapError
+    if not dm.validateMap():
+        raise BadMapError
 
     return dm
 

@@ -9,7 +9,7 @@ from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import (
     ResultTypes, InputTypes, GameStates, LevelUp, StairOption,
-    INVENTORY_STATES, INPUT_STATES, CANCEL_STATES)
+    INVENTORY_STATES, INPUT_STATES, CANCEL_STATES, Interactions)
 
 from game_messages import MessageLog
 
@@ -348,10 +348,32 @@ class Rogue(tcod.event.EventDispatch):
                         targets_in_render_order = sorted(targets, key=lambda x: x.render_order.value)
                         print(targets_in_render_order)
                         target = targets[-1]
-                        if target.questgiver:
+
+                        if target.interaction.interaction_type == Interactions.QUESTGIVER:
                             quest_results = target.questgiver.talk(self.player)
                             player_turn_results.extend(quest_results)
-                        elif not target.health.dead:
+                        elif target.interaction.interaction_type == Interactions.DOOR:
+                            can_unlock = False
+
+                            if target.locked.requires_key:
+                                all_keys = self.player.inventory.search(name = 'key')
+                                for key_to_check in all_keys:
+                                    if key_to_check.unlock.unlocks == target.uuid:
+                                        can_unlock = True
+                                        player_turn_results.extend({ResultTypes.DISCARD_ITEM: target})
+                                        break
+                            else:
+                                can_unlock = True
+
+                            if can_unlock:
+                                self.game_map.current_level.remove_entity(target)
+                                target.locked.toggle()
+                                self.game_map.current_level.add_entity(target)
+
+                                message = Message('You have unlocked the door.', tcod.yellow)
+                                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+
+                        elif target.interaction.interaction_type == Interactions.FOE and not target.health.dead:
                             attack_results = self.player.offence.attack(target)
                             player_turn_results.extend(attack_results)
                     else:

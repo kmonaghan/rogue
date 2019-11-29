@@ -76,7 +76,7 @@ class LevelMap(Map):
 
     @property
     def doors(self):
-        return self.grid[np.where(self.grid == Tiles.DOOR)]
+        return self.tiles_of_type(Tiles.DOOR)
 
     @property
     def floors(self):

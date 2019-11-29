@@ -63,16 +63,16 @@ class Door(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(Door, self).__init__(blocked, block_sight)
 
-        self.fov_color = COLORS.get('light_door')
-        self.out_of_fov_color = COLORS.get('dark_door')
+        self.fov_color = COLORS.get('light_door_tile')
+        self.out_of_fov_color = COLORS.get('dark_door_tile')
         self.name = "Door"
 
 class InternalDoor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(InternalDoor, self).__init__(blocked, block_sight)
 
-        self.fov_color = COLORS.get('light_door')
-        self.out_of_fov_color = COLORS.get('dark_door')
+        self.fov_color = COLORS.get('light_door_tile')
+        self.out_of_fov_color = COLORS.get('dark_door_tile')
         self.name = "Internal Door"
 
 class ImpenetrableTile(Tile):

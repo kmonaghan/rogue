@@ -15,6 +15,7 @@ from components.ai import (BasicNPC, GuardNPC, PatrollingNPC, WarlordNPC,
 from components.berserk import Berserk
 from components.children import Children
 from components.health import Health
+from components.interaction import Interaction
 from components.level import Level
 from components.offence import Offence
 from components.defence import Defence
@@ -35,7 +36,7 @@ from components.death import PlayerDeath, WarlordDeath
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
-from etc.enum import Species, Tiles
+from etc.enum import Species, Tiles, Interactions
 
 import pubsub
 
@@ -67,7 +68,8 @@ def bountyhunter(point):
     #create a questgiver
 
     ai_component = TetheredNPC(4, point)
-    npc = Character(point, '?', 'Bounty Hunter', COLORS.get('bounty_hunter'), ai=ai_component,
+    npc = Character(point, '?', 'Bounty Hunter', COLORS.get('bounty_hunter'),
+                    ai=ai_component, interaction=Interactions.QUESTGIVER,
                     species=Species.NONDESCRIPT, act_energy=2)
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')

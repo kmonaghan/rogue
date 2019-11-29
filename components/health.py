@@ -12,7 +12,6 @@ class Health:
         self.base_max_hp = hp
         self.hp = hp
 
-
     @property
     def dead(self):
         return (self.hp <= 0)
@@ -40,6 +39,7 @@ class Health:
         if self.dead:
             self.hp = 0
             death_message = Message(f"{self.owner.name.title()} is dead!'", tcod.orange)
+            print(f"Death of {self.owner.name} - {self.owner.uuid}")
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = death_message))
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
             if npc and npc.ai:

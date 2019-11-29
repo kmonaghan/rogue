@@ -46,3 +46,9 @@ class Inventory:
     def examine_item(self, item):
         results = []
         return item.examine()
+
+    def search(self, name=None):
+        if name:
+            return filter(lambda x: x.name == name, self.items)
+
+        return None
