@@ -150,6 +150,13 @@ class LevelMap(Map):
             return (not self.door[x, y]
                     and not self.transparent[x, y])
 
+    def find_tile_within_room(self, room, tile = None):
+        search_grid = np.zeros(self.walkable.shape, dtype=np.int8)
+
+        search_grid[room.x:room.x+room.width, room.y:room.y+room.height] = room.layout
+
+        return np.where(search_grid == tile)
+
     def find_random_open_position(self, routing_avoid=[], room = None):
         routing_avoid.append(RoutingOptions.AVOID_BLOCKERS)
         possible_positions = self.make_walkable_array(routing_avoid)

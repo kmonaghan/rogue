@@ -353,25 +353,26 @@ class Rogue(tcod.event.EventDispatch):
                             quest_results = target.questgiver.talk(self.player)
                             player_turn_results.extend(quest_results)
                         elif target.interaction.interaction_type == Interactions.DOOR:
-                            can_unlock = False
+                            if target.locked:
+                                can_unlock = False
 
-                            if target.locked.requires_key:
-                                all_keys = self.player.inventory.search(name = 'key')
-                                for key_to_check in all_keys:
-                                    if key_to_check.unlock.unlocks == target.uuid:
-                                        can_unlock = True
-                                        player_turn_results.extend({ResultTypes.DISCARD_ITEM: target})
-                                        break
-                            else:
-                                can_unlock = True
+                                if target.locked.requires_key:
+                                    all_keys = self.player.inventory.search(name = 'key')
+                                    for key_to_check in all_keys:
+                                        if key_to_check.unlock.unlocks == target.uuid:
+                                            can_unlock = True
+                                            player_turn_results.extend([{ResultTypes.DISCARD_ITEM: key_to_check}])
+                                            break
+                                else:
+                                    can_unlock = True
 
-                            if can_unlock:
-                                self.game_map.current_level.remove_entity(target)
-                                target.locked.toggle()
-                                self.game_map.current_level.add_entity(target)
+                                if can_unlock:
+                                    self.game_map.current_level.remove_entity(target)
+                                    target.locked.toggle()
+                                    self.game_map.current_level.add_entity(target)
 
-                                message = Message('You have unlocked the door.', tcod.yellow)
-                                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+                                    message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
+                                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
                         elif target.interaction.interaction_type == Interactions.FOE and not target.health.dead:
                             attack_results = self.player.offence.attack(target)

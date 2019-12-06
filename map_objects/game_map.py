@@ -7,6 +7,7 @@ import buildings
 import quest
 
 from components.stairs import Stairs
+from components.locked import Locked
 
 from entities.entity import Entity
 from entities.character import Character
@@ -177,15 +178,9 @@ class GameMap:
 
         current_door_tuples = tuple(zip(doors_tiles[0],doors_tiles[1]))
 
-        print(current_door_tuples)
-
         for x,y in current_door_tuples:
             door = buildings.door(Point(x,y))
             self.current_level.add_entity(door)
-
-            point = self.current_level.find_random_open_position()
-            key = equipment.key(point, door)
-            self.current_level.add_entity(key)
 
     def place_stairs(self):
         exit = find(lambda room: room.name == 'exit', self.current_level.rooms)
@@ -311,9 +306,17 @@ class GameMap:
     def fill_prefab(self, player):
         for room in self.current_level.rooms:
             if room.name == "treasure_room":
-                print(room.spawnpoints)
                 point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
                 bestiary.place_chest(point, self.current_level, player)
+
+                all_doors = self.current_level.find_tile_within_room(room, Tiles.DOOR)
+
+                door_entities = self.current_level.entities.get_entities_in_position((all_doors[0][0], all_doors[1][0]))
+                door_entities[0].blocks = True
+                door_entities[0].add_component(Locked(requires_key=True), 'locked')
+                point = self.current_level.find_random_open_position()
+                key = equipment.key(point, door_entities[0])
+                self.current_level.add_entity(key)
 
     def place_object(self, room):
         return

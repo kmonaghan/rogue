@@ -7,11 +7,13 @@ from entities.entity import Entity
 from etc.colors import COLORS
 from etc.enum import Interactions
 
-def door(point = None):
+def door(point = None, locked=False):
     door = Entity(point, 'X', 'door', COLORS.get('light_door'), health=Health(4),
-                    blocks=True, interaction=Interactions.DOOR)
+                    blocks=False, interaction=Interactions.DOOR)
 
     door.add_component(Defence(defence = 1), 'defence')
-    door.add_component(Locked(requires_key=True), 'locked')
+    if locked:
+        door.blocks = True
+        door.add_component(Locked(requires_key=True), 'locked')
 
     return door
