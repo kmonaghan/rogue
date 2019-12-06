@@ -22,8 +22,11 @@ class Movement:
             #move by the given amount, if the destination is not blocked
             if current_level.walkable[self.owner.x + dx, self.owner.y + dy] and not current_level.blocked[self.owner.x + dx, self.owner.y + dy]:
                 self.place(self.owner.x + dx, self.owner.y + dy, current_level)
+                return True
             else:
                 print(f"{self.owner.name} can't move as blocked")
+
+                return False
 
         def place(self, x, y, current_level):
             current_level.move_entity(self.owner, Point(x, y))

@@ -553,6 +553,14 @@ class Rogue(tcod.event.EventDispatch):
                npc = result_data
                npc.movement.move_to_random_adjacent(self.game_map)
 
+            if result_type == ResultTypes.MOVE_FORCE:
+               target, dx, dy, damage = result_data
+               if damage > 0 and not target.movement.move(dx, dy, self.game_map.current_level):
+                    target.health.take_damage(damage)
+                    msg_text = '{0} crashes into the wall and takes {1} hit points damage.'
+                    msg = Message(msg_text.format(target.name, str(damage)), tcod.white)
+                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
+
             # Add a new entity to the game.
             if result_type == ResultTypes.ADD_ENTITY:
                 self.game_map.current_level.add_entity(result_data)

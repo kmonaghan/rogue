@@ -32,7 +32,6 @@ class Offence:
     def attack(self, target):
         results = []
 
-        #a simple formula for attack damage
         total = randint(1, 20)
         multiplier = 1;
         if (total == 20):
@@ -59,6 +58,9 @@ class Offence:
 
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
+
+            if weapon.ablity:
+                results.extend(weapon.ablity.on_attack(source=self.owner, target=target))
 
         else:
             msg = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), libtcod.white)

@@ -6,6 +6,7 @@ from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 import tome
 
+from components.ablity import PushBack, Shocking
 from components.equippable import Equippable
 from components.identifiable import Identifiable
 from components.item import Item
@@ -167,14 +168,33 @@ def random_magic_weapon(dungeon_level = 1):
 
     item.add_component(Identifiable(),"identifiable")
 
+    add_random_ablity(item)
+
     return item
 
 def add_random_ablity(item):
-    add_poison(item, 1, 10)
+    dice = randint(1, 100)
+
+    if dice <=40:
+        return
+    elif dice <= 60:
+        add_poison(item, 1, 10)
+    elif dice <= 80:
+        add_shocking(item)
+    elif dice <= 100:
+        add_smashing(item)
 
 def add_poison(item, damage = 1, duration = 10):
     item.add_component(Poisoner(0, damage, duration), 'poisoner')
     item.base_name = item.base_name + " of poisoning"
+
+def add_shocking(item):
+    item.add_component(Shocking(), 'ablity')
+    item.base_name = item.base_name + " of shocking"
+
+def add_smashing(item):
+    item.add_component(PushBack(), 'ablity')
+    item.base_name = item.base_name + " of smashing"
 
 def ring_of_power(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)
@@ -337,7 +357,7 @@ def longsword(point = None):
     return item
 
 def mace(point = None):
-    #create a sword
+    #create a mace
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
     equippable_component.type_of_dice = 10
     item = Entity(point, '-', 'mace', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)

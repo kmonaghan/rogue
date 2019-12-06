@@ -380,7 +380,14 @@ def troll(point = None):
     npc.add_component(Defence(defence = 8), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
-    item = equipment.longsword()
+    item = None
+    dice = randint(1,100)
+    if dice > 75:
+        item = equipment.mace()
+        equipment.add_smashing(item)
+    else:
+        item = equipment.longsword()
+
     item.lootable = False
 
     npc.inventory.add_item(item)

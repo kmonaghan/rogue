@@ -197,6 +197,7 @@ class ResultTypes(Enum):
     INCREASE_ATTACK_POWER = auto()
     MESSAGE = auto()
     MOVE = auto()
+    MOVE_FORCE = auto()
     MOVE_RANDOM_ADJACENT = auto()
     MOVE_TOWARDS = auto()
     MOVE_WITH_PATH = auto()
