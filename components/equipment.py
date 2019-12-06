@@ -1,5 +1,3 @@
-import tcod as libtcod
-
 from equipment_slots import EquipmentSlots
 
 class Equipment:

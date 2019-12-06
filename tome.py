@@ -1,7 +1,5 @@
 from random import randint
 
-import tcod as libtcod
-
 import numpy as np
 
 from components.ai import ConfusedNPC
@@ -13,6 +11,7 @@ from game_messages import Message
 from utils.random_utils import die_roll
 
 from etc.enum import ResultTypes
+from etc.colors import COLORS
 
 #spell values
 HEAL_AMOUNT = 40
@@ -30,10 +29,10 @@ def heal(*args, **kwargs):
     results = []
 
     if entity.health.hp == entity.health.max_hp:
-        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You are already at full health', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You are already at full health', COLORS.get('neutral_text'))})
     else:
         entity.health.heal(die_roll(number_of_dice, type_of_dice))
-        results.append({'consumed': True, ResultTypes.MESSAGE: Message('Your wounds start to feel better!', libtcod.green)})
+        results.append({'consumed': True, ResultTypes.MESSAGE: Message('Your wounds start to feel better!', COLORS.get('success_text'))})
 
     return results
 
@@ -60,10 +59,10 @@ def cast_lightning(*args, **kwargs):
 
     if target:
         damage = die_roll(number_of_dice, type_of_dice)
-        results.append({'consumed': True, 'target': target, ResultTypes.MESSAGE: Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage))})
+        results.append({'consumed': True, 'target': target, ResultTypes.MESSAGE: Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage), COLORS.get('effect_text'))})
         results.extend(target.health.take_damage(damage, caster))
     else:
-        results.append({'consumed': False, 'target': None, ResultTypes.MESSAGE: Message('No enemy is close enough to strike.', libtcod.red)})
+        results.append({'consumed': False, 'target': None, ResultTypes.MESSAGE: Message('No enemy is close enough to strike.', COLORS.get('failure_text'))})
 
     return results
 
@@ -80,15 +79,15 @@ def cast_fireball(*args, **kwargs):
     results = []
 
     if not game_map.current_level.fov[target_x, target_y]:
-        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
         return results
 
-    results.append({'consumed': True, ResultTypes.MESSAGE: Message('The fireball explodes, burning everything within {0} tiles!'.format(radius), libtcod.orange)})
+    results.append({'consumed': True, ResultTypes.MESSAGE: Message('The fireball explodes, burning everything within {0} tiles!'.format(radius), COLORS.get('effect_text'))})
 
     for entity in entities:
         if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.fighter:
             damage = die_roll(number_of_dice, type_of_dice)
-            results.append({ResultTypes.MESSAGE: Message('The {0} gets burned for {1} hit points.'.format(entity.name, damage), libtcod.orange)})
+            results.append({ResultTypes.MESSAGE: Message('The {0} gets burned for {1} hit points.'.format(entity.name, damage), COLORS.get('effect_text'))})
             results.extend(entity.fighter.take_damage(damage, caster))
 
     return results
@@ -102,7 +101,7 @@ def cast_confuse(*args, **kwargs):
     results = []
 
     if not game_map.current_level.fov[target_x, target_y]:
-        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
         return results
 
     for entity in entities:
@@ -112,11 +111,11 @@ def cast_confuse(*args, **kwargs):
             confused_ai.owner = entity
             entity.ai = confused_ai
 
-            results.append({'consumed': True, ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), libtcod.light_green)})
+            results.append({'consumed': True, ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), COLORS.get('effect_text'))})
 
             break
     else:
-        results.append({'consumed': False, ResultTypes.MESSAGE: Message('There is no targetable enemy at that location.', libtcod.yellow)})
+        results.append({'consumed': False, ResultTypes.MESSAGE: Message('There is no targetable enemy at that location.', COLORS.get('neutral_text'))})
 
     return results
 
@@ -157,7 +156,7 @@ def cast_mapping(game_map, caster, target):
 
     game_map.current_level.explored = np.full(game_map.current_level.grid.shape, 1, dtype=np.int8)
 
-    results.append({ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', libtcod.gold)})
+    results.append({ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', COLORS.get('success_text'))})
 
     return results
 
@@ -167,6 +166,6 @@ def cast_identify(game_map, caster, target):
     if target.identifiable and not target.identified:
         target.identifiable.identified = True
 
-    results.append({ResultTypes.MESSAGE: Message(f"The item is a {target.name}", libtcod.gold)})
+    results.append({ResultTypes.MESSAGE: Message(f"The item is a {target.name}", COLORS.get('effect_text'))})
 
     return results

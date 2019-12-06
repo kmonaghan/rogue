@@ -1,7 +1,6 @@
-import tcod as libtcod
-
 from game_messages import Message
 
+from etc.colors import COLORS
 from etc.enum import GameStates, RenderOrder, Species
 
 import pubsub
@@ -17,7 +16,7 @@ class BasicDeath:
         #transform it into a nasty corpse! it doesn't block, can't be
         #attacked and doesn't move
         self.owner.char = '%'
-        self.owner.color = libtcod.dark_red
+        self.owner.color = COLORS.get('corpse')
         self.owner.species = Species.CORPSE
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
@@ -49,7 +48,7 @@ class BasicDeath:
         self.rotting = False
         self.skeletal = True
         self.rotting_time = 24
-        self.owner.color = libtcod.white
+        self.owner.color = COLORS.get('skeletal')
 
 class WarlordDeath(BasicDeath):
     def npc_death(self, game_map):
@@ -63,9 +62,9 @@ class PlayerDeath(BasicDeath):
     def npc_death(self, game_map):
 
         self.owner.char = '%'
-        self.owner.color = libtcod.dark_red
+        self.owner.color = COLORS.get('corpse')
         self.owner.blocks = False
         self.owner.render_order = RenderOrder.CORPSE
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You died!', libtcod.red)))
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You died!', COLORS.get('failure_text'))))
 
         return GameStates.GAME_OVER

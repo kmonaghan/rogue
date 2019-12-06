@@ -1,6 +1,6 @@
-import tcod as libtcod
-
 import pubsub
+
+from etc.colors import COLORS
 
 from game_messages import Message
 
@@ -18,14 +18,14 @@ class Poisoned:
             return
 
         self.owner.health.take_damage(self.damage_per_turn)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison does {0} damage to {1}'.format(self.damage_per_turn ,self.owner.name.title()), libtcod.red)))
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison does {0} damage to {1}'.format(self.damage_per_turn ,self.owner.name.title()), COLORS.get('damage_text'))))
 
         if (self.duration == 0):
             self.end(sub)
             return
 
     def start(self):
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} feels something is wrong...their veins are on fire...hopefully they can outlast it'.format(self.owner.name.title()), libtcod.red)))
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} feels something is wrong...their veins are on fire...hopefully they can outlast it'.format(self.owner.name.title()), COLORS.get('effect_text'))))
 
         pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.TICK, self.countdown))
 

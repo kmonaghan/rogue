@@ -1,7 +1,5 @@
 __metaclass__ = type
 
-import tcod as libtcod
-
 import equipment
 import math
 
@@ -15,6 +13,7 @@ from game_messages import Message
 
 from map_objects.point import Point
 
+from etc.colors import COLORS
 from etc.enum import ResultTypes, RenderOrder, Interactions
 
 import uuid
@@ -107,7 +106,7 @@ class Entity:
         if self.equippable:
             detail += ' ' + self.equippable.equipment_description()
 
-        results.append({ResultTypes.MESSAGE: Message(detail, libtcod.gold)})
+        results.append({ResultTypes.MESSAGE: Message(detail, COLORS.get('success_text'))})
 
         return results
 

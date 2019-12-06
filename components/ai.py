@@ -1,7 +1,5 @@
 __metaclass__ = type
 
-import tcod as libtcod
-
 import bestiary
 import tome
 

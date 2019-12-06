@@ -1,5 +1,3 @@
-import tcod as libtcod
-
 import pubsub
 from game_messages import Message
 

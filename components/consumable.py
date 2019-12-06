@@ -1,5 +1,3 @@
-import tcod as libtcod
-
 from etc.enum import ResultTypes
 
 from game_messages import Message

@@ -1,5 +1,3 @@
-import tcod as libtcod
-
 class Item:
     #an item that can be picked up and used.
     def __init__(self, use_function=None, targeting=False, targeting_message=None, **kwargs):

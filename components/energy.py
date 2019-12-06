@@ -1,6 +1,3 @@
-import tcod as libtcod
-
-
 class Energy:
     def __init__(self, act_energy = 1):
         self.current_energy = 0

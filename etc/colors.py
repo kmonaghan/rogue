@@ -87,7 +87,25 @@ COLORS = {
     'show_path_track': tcod.silver,
     'show_walkable_path': tcod.lightest_blue,
 
-    'damage_text': tcod.white,
+    'damage_text': tcod.dark_red,
+    'effect_text': tcod.white,
+    'failure_text': tcod.light_red,
+    'success_text': tcod.gold,
+    'neutral_text': tcod.white,
+    'normal_text': tcod.white,
+
+    'quest_available': tcod.white,
+    'quest_complete': tcod.blue,
+    'quest_ongoing': tcod.silver,
+
+    'species_fiery': tcod.red,
+    'species_icy': tcod.blue,
+    'species_brass': tcod.brass,
+    'species_copper': tcod.copper,
+    'species_golden': tcod.gold,
+
+    'corpse': tcod.darkest_red,
+    'skeletal': tcod.white,
 }
 
 STATUS_BAR_COLORS = {

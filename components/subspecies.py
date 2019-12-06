@@ -1,6 +1,6 @@
 from random import randint
 
-import tcod as libtcod
+from etc.colors import COLORS
 
 class Subspecies:
     def __init__(self):
@@ -13,18 +13,18 @@ class Subspecies:
         dice = randint(1, 100)
         if (dice <= 10):
             self.name = "Fiery"
-            self.subcolor = libtcod.red
+            self.subcolor = COLORS.get('species_fiery')
             self.bonus_power = 1
         elif (dice <= 20):
             self.name = "Icy"
-            self.subcolor = libtcod.blue
+            self.subcolor = COLORS.get('species_icy')
             self.bonus_defence = 1
         elif (dice <= 30):
             self.name = "Brass"
-            self.subcolor = libtcod.brass
+            self.subcolor = COLORS.get('species_brass')
         elif (dice <= 40):
             self.name = "Copper"
-            self.subcolor = libtcod.copper
+            self.subcolor = COLORS.get('species_copper')
         else:
             self.name = "Golden"
-            self.subcolor = libtcod.gold
+            self.subcolor = COLORS.get('species_golden')

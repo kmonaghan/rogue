@@ -1,8 +1,8 @@
-import tcod as libtcod
-
 from random import choice
 
 from game_messages import Message
+
+from etc.colors import COLORS
 from etc.enum import ResultTypes, Species
 
 import pubsub
@@ -22,7 +22,7 @@ def check_quest_for_location(player):
         if (quest.map_point):
             if (player.point == quest.map_point):
                 quest.finish_quest()
-                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + quest.title + ' completed!', libtcod.gold)))
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + quest.title + ' completed!', COLORS.get('success_text'))))
                 pubsub.pubsub.add_message(pubsub.Publish(quest, pubsub.PubSubTypes.EARNEDXP, target=player))
 
     return results
@@ -125,7 +125,7 @@ class Quest:
 
         if (self.kill == self.kill_total):
             #print "quest complete"
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + self.title + ' completed!', libtcod.gold)))
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + self.title + ' completed!', COLORS.get('success_text'))))
             pubsub.pubsub.unsubscribe_entity(self)
 
             self.completed = True

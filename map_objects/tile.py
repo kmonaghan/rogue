@@ -1,7 +1,5 @@
 __metaclass__ = type
 
-import tcod as libtcod
-
 from etc.colors import COLORS
 
 class Tile:

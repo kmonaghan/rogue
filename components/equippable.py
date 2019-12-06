@@ -1,5 +1,3 @@
-import tcod as libtcod
-
 from utils.random_utils import die_roll
 
 class Equippable:

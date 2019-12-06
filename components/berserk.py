@@ -1,6 +1,7 @@
-import tcod as libtcod
-
 import pubsub
+
+from etc.colors import COLORS
+
 from game_messages import Message
 
 class Berserk:
@@ -21,10 +22,10 @@ class Berserk:
     def start_berserker(self):
         self.owner.health.base_max_hp += 10
         self.owner.health.heal(10)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has gone berserk!'.format(self.owner.name.title()), libtcod.red)))
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has gone berserk!'.format(self.owner.name.title()), COLORS.get('effect_text'))))
 
     def end_berserker(self):
         if not self.owner.health.dead:
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has regained their composure'.format(self.owner.name.title()), libtcod.green)))
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has regained their composure'.format(self.owner.name.title()), COLORS.get('effect_text'))))
             self.owner.health.base_max_hp -= 10
             self.owner.health.take_damage(10)

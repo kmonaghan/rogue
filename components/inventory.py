@@ -1,7 +1,6 @@
-import tcod as libtcod
-
 from game_messages import Message
 
+from etc.colors import COLORS
 from etc.enum import ResultTypes
 
 class Inventory:
@@ -14,12 +13,12 @@ class Inventory:
 
         if len(self.items) >= self.capacity:
             results.append({
-                ResultTypes.MESSAGE: Message('You cannot carry any more, your inventory is full.', libtcod.yellow)
+                ResultTypes.MESSAGE: Message('You cannot carry any more, your inventory is full.', COLORS.get('neutral_text'))
             })
         else:
             results.append({
                 ResultTypes.REMOVE_ENTITY: item,
-                ResultTypes.MESSAGE: Message('{0} picked up the {1}.'.format(self.owner.name, item.name), libtcod.blue)
+                ResultTypes.MESSAGE: Message('{0} picked up the {1}.'.format(self.owner.name, item.name), COLORS.get('success_text'))
             })
 
             self.items.append(item)

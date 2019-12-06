@@ -1,5 +1,4 @@
-import tcod as libtcod
-
+from etc.colors import COLORS
 from etc.enum import ResultTypes
 
 from game_messages import Message
@@ -22,7 +21,7 @@ class Usable:
     def use(self, game_map, user = None, target = None):
         results = []
 
-        results.append({ResultTypes.MESSAGE: Message('', libtcod.yellow)})
+        results.append({ResultTypes.MESSAGE: Message('', COLORS.get('success_text'))})
 
         return results
 
@@ -37,7 +36,7 @@ class AntidoteUsable(Usable):
             user.poisoned.duration = -1
 
         results.append({ResultTypes.DISCARD_ITEM: self.owner})
-        results.append({ResultTypes.MESSAGE: Message('You feel clensed.', libtcod.yellow)})
+        results.append({ResultTypes.MESSAGE: Message('You feel clensed.', COLORS.get('success_text'))})
 
         return results
 
@@ -51,10 +50,10 @@ class HealingPotionUsable(Usable):
         results = []
 
         if user.health.hp == user.health.max_hp:
-            results.append({ResultTypes.MESSAGE: Message('You are already at full health', libtcod.yellow)})
+            results.append({ResultTypes.MESSAGE: Message('You are already at full health', COLORS.get('success_text'))})
         else:
             user.health.heal(die_roll(self.number_of_die, self.type_of_die))
-            results.append({ResultTypes.MESSAGE: Message('Your wounds start to feel better!', libtcod.green)})
+            results.append({ResultTypes.MESSAGE: Message('Your wounds start to feel better!', COLORS.get('success_text'))})
             results.append({ResultTypes.DISCARD_ITEM: self.owner})
 
         return results
@@ -69,7 +68,7 @@ class PowerPotionUsable(Usable):
         results = []
 
         user.offence.base_power = user.offence.base_power + die_roll(self.number_of_die, self.type_of_die)
-        results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', libtcod.green)})
+        results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', COLORS.get('success_text'))})
         results.append({ResultTypes.DISCARD_ITEM: self.owner})
 
         return results
@@ -84,7 +83,7 @@ class DefencePotionUsable(Usable):
         results = []
 
         user.defence.base_defence = user.defence.base_defence + die_roll(self.number_of_die, self.type_of_die)
-        results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', libtcod.green)})
+        results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'))})
         results.append({ResultTypes.DISCARD_ITEM: self.owner})
 
         return results

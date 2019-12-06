@@ -1,6 +1,7 @@
-import tcod as libtcod
-
 import pubsub
+
+from etc.colors import COLORS
+
 from game_messages import Message
 
 class Spawn:
@@ -21,7 +22,7 @@ class Spawn:
     def spawn(self):
         if not self.owner.health.dead:
             spawned = self.npc(self.owner.point)
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has spawned a '.format(self.owner.name.title(), spawned.name.title()), libtcod.red)))
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has spawned a '.format(self.owner.name.title(), spawned.name.title()), COLORS.get('effect_text'))))
             self.current_energy = 0
             return spawned
 
