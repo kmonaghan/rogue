@@ -1,8 +1,9 @@
 from random import randint
 
-import tcod as libtcod
+from etc.colors import COLORS
 
 from equipment_slots import EquipmentSlots
+
 from game_messages import Message
 
 import pubsub
@@ -50,11 +51,8 @@ class Offence:
             if (multiplier > 1):
                 msg_text = '{0} smashes {1} with a massive blow from their {2} for {3} hit points.'
 
-            msg = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(damage)), libtcod.white)
+            msg = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(damage)), COLORS.get('damage_text'))
             results.extend(target.health.take_damage(damage, self.owner))
-
-            if weapon.poisoner:
-                weapon.poisoner.attacked_target(target)
 
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))

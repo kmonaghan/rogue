@@ -20,7 +20,6 @@ from components.level import Level
 from components.offence import Offence
 from components.defence import Defence
 from components.questgiver import Questgiver
-from components.poisoner import Poisoner
 from components.spawn import Spawn
 from components.subspecies import Subspecies
 
@@ -351,10 +350,8 @@ def snake(point = None):
 
     teeth = equipment.teeth()
 
-    dice = randint(1, 100)
-
-    if (dice >= 50):
-        teeth.add_component(Poisoner(0, 1, 5), 'poisoner')
+    if randint(1, 100) >= 50:
+        equipment.add_poison(teeth, 1, 5)
         creature.base_name = 'Poisonous Snake'
         creature.color = COLORS.get('poisonous_snake')
 

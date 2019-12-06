@@ -6,12 +6,11 @@ from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 import tome
 
-from components.ablity import PushBack, Shocking
+from components.ablity import Poisoning, PushBack, Shocking
 from components.equippable import Equippable
 from components.identifiable import Identifiable
 from components.item import Item
 from components.usable import AntidoteUsable, DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
-from components.poisoner import Poisoner
 from components.unlock import Unlock
 
 from entities.entity import Entity
@@ -185,7 +184,7 @@ def add_random_ablity(item):
         add_smashing(item)
 
 def add_poison(item, damage = 1, duration = 10):
-    item.add_component(Poisoner(0, damage, duration), 'poisoner')
+    item.add_component(Poisoning(0, damage, duration), 'ablity')
     item.base_name = item.base_name + " of poisoning"
 
 def add_shocking(item):

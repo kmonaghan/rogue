@@ -1,5 +1,7 @@
 from random import randint
 
+from components.poisoned import Poisoned
+
 from etc.colors import COLORS
 from etc.enum import ResultTypes
 
@@ -24,6 +26,23 @@ class Ablity:
     def on_defend(self, source, target):
         pass
 
+class Poisoning(Ablity):
+    def __init__(self, chance_to_poison=50, damage_per_turn=1, duration=1):
+        super().__init__(name="Poisoning")
+        self.chance_to_poison = chance_to_poison
+        self.damage_per_turn = damage_per_turn
+        self.duration = duration
+
+    def on_attack(self, source, target):
+        results = []
+
+        if randint(1, 100) > self.chance_to_poison:
+            poison = Poisoned(self.damage_per_turn, self.duration)
+            target.add_component(poison, 'poisoned')
+            poison.start()
+
+        return results
+
 class PushBack(Ablity):
     def __init__(self, distance=3, damage=10, chance=75):
         super().__init__(name="PushBack")
@@ -34,8 +53,7 @@ class PushBack(Ablity):
     def on_attack(self, source, target):
         results = []
 
-        dice = randint(1,100)
-        if dice < self.chance:
+        if randint(1,100) < self.chance:
             return results
 
         spaces = randint(1,self.distance)
