@@ -35,7 +35,7 @@ from components.death import PlayerDeath, WarlordDeath
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
-from etc.enum import Species, Tiles, Interactions
+from etc.enum import Interactions, RenderOrder, Species, Tiles
 
 import pubsub
 
@@ -179,6 +179,14 @@ def egg(point = None):
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
+
+    return creature
+
+def fungus(point = None):
+    health_component = Health(4)
+
+    creature = Character(point, '"', 'fungus', COLORS.get('fungus'),
+                    blocks=False,render_order=RenderOrder.FOLIAGE)
 
     return creature
 

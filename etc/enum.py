@@ -220,6 +220,7 @@ class ResultTypes(Enum):
     CURSOR_MODE = 98
 
 class RenderOrder(Enum):
+    FOLIAGE = auto()
     STAIRS = auto()
     CORPSE = auto()
     ITEM = auto()
