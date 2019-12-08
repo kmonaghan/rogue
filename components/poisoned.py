@@ -39,4 +39,4 @@ class Poisoned:
             print('****No owner to poisoned - already deleted?')
         pubsub.pubsub.mark_subscription_for_removal(sub)
         if not self.owner.health.dead:
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison has run its course in {0}.'.format(self.owner.name.title()), libtcod.red)))
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison has run its course in {0}.'.format(self.owner.name.title()), COLORS.get('effect_text'))))

@@ -61,7 +61,7 @@ class Offence:
                 results.extend(weapon.ablity.on_attack(source=self.owner, target=target))
 
         else:
-            msg = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), libtcod.white)
+            msg = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'))
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
 
         return results
