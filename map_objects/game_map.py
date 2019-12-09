@@ -16,6 +16,7 @@ from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.exceptions import MapError, MapGenerationFailedError
 
+from map_objects.np_dungeonGeneration import cellular_map
 from map_objects.np_level_generation import arena, levelOneGenerator, levelGenerator, bossLevelGenerator
 from map_objects.point import Point
 from map_objects.np_level_map import LevelMap
@@ -39,6 +40,7 @@ class GameMap:
         dm = None
 
         attempts = 0
+
         '''
         while attempts < CONFIG.get('map_generation_attempts'):
             try:
@@ -63,6 +65,7 @@ class GameMap:
 
         return
         '''
+
         boss_chance = randint(0,3) + self.dungeon_level
 
         while attempts < CONFIG.get('map_generation_attempts'):
@@ -101,6 +104,8 @@ class GameMap:
             else:
                 self.levelGeneric(player)
 
+        self.place_foliage()
+
         self.fill_prefab(player)
 
     def test_popluate_map(self, player):
@@ -109,20 +114,23 @@ class GameMap:
         #warlord.ai.set_target(player)
         #self.current_level.add_entity(warlord)
 
-        prison_block = find(lambda room: room.name == 'prison_block', self.current_level.rooms)
+        #prison_block = find(lambda room: room.name == 'prison_block', self.current_level.rooms)
 
-        npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
+        npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level)
         point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
         npc.set_point(point)
-        bestiary.poison_npc(npc)
+        npc.ai.set_target(player)
+        #bestiary.poison_npc(npc)
         self.current_level.add_entity(npc)
 
         # if prison_block:
-        #     for x,y in prison_block.spawnpoints:
-        #         npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
-        #         npc.set_point(Point(prison_block.x + x, prison_block.y + y))
-        #         npc.ai.set_target(player)
-        #         self.current_level.add_entity(npc)
+        #for x,y in prison_block.spawnpoints:
+        for i in range(10):
+            npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
+            point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
+            npc.set_point(point)
+            npc.ai.set_target(player)
+            self.current_level.add_entity(npc)
 
         #Snakes and Rats
         # for i in range(1):
@@ -278,6 +286,16 @@ class GameMap:
             point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
             npc.set_point(point)
             self.current_level.add_entity(npc)
+
+    def place_foliage(self):
+        cells = cellular_map(shape=self.current_level.grid.shape, probability=60)
+
+        fungal = np.where((self.current_level.grid == Tiles.CAVERN_FLOOR) & (cells == 1))
+
+        for idx, x in enumerate(fungal[0]):
+            y = fungal[1][idx]
+            f = bestiary.fungus(Point(x,y))
+            self.current_level.add_entity(f)
 
     def place_npc(self, room, player):
         #this is where we decide the chance of each npc or item appearing.

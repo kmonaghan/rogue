@@ -31,6 +31,34 @@ wall_to_floor = {
 
 from utils.utils import matprint
 
+def surrounding_tiles(x, y, grid):
+    tiles_slice = grid[x-1:x+2, y-1:y+2]
+
+    return tiles_slice
+
+def cellular_map(shape, probability = 45, smoothing = 4):
+    cells = np.random.choice([0, 1], size=shape, p=[probability/100, (100 - probability)/100])
+
+    for i in range(smoothing):
+        updated_cells = cells.copy()
+        for (x,y), value in np.ndenumerate(cells):
+            touchingEmptySpace = np.sum(surrounding_tiles(x, y, cells))
+
+            if touchingEmptySpace >= 6:
+                updated_cells[x, y] = 1
+            elif touchingEmptySpace <= 3:
+                updated_cells[x, y] = 0
+
+        cells = updated_cells;
+
+    #Don't touch the edge
+    cells[0] = 0
+    cells[-1] = 0
+    cells[:, 0] = 0
+    cells[:, -1] = 0
+
+    return cells
+
 class dungeonRoom:
     """
     a simple container for dungeon rooms
@@ -322,27 +350,11 @@ class dungeonGenerator:
                 self.grid[area] = tile
 
     def generateCaves(self, probability = 45, smoothing = 4):
-        cells = np.random.choice([0, 1], size=self.grid.shape, p=[probability/100, (100 - probability)/100])
-
-        for i in range(smoothing):
-            updated_cells = cells.copy()
-            for (x,y), value in np.ndenumerate(cells):
-                if self.grid[x, y] != Tiles.EMPTY:
-                    updated_cells[x, y] = 0
-                    continue
-
-                touchingEmptySpace = np.sum(self.surrounding_tiles(x, y, cells))
-
-                if touchingEmptySpace >= 6:
-                    updated_cells[x, y] = 1
-                elif touchingEmptySpace <= 3:
-                    updated_cells[x, y] = 0
-
-            cells = updated_cells;
+        cells = cellular_map(self.grid.shape, probability, smoothing)
 
         self.grid[np.where(cells == 1)] = Tiles.CAVERN_FLOOR
 
-    def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR, name = ""):
+    def addRoom(self, x, y, width, height, margin = 1, overlap = False, add_door = False, add_walls = False, tile = Tiles.ROOM_FLOOR, name = "", max_doors=4):
         offset = 0
         if add_walls:
             offset = 2
@@ -366,7 +378,7 @@ class dungeonGenerator:
             room_slice[:, -1] = floor_to_wall[tile]
 
             if add_door:
-                self.addDoorsToRoom(x, y, width, height, room_slice, tile)
+                self.addDoorsToRoom(x, y, width, height, room_slice, tile, max_doors)
 
         room = dungeonRoom(x, y, room_slice, name)
 
@@ -374,7 +386,7 @@ class dungeonGenerator:
 
         return room
 
-    def addDoorsToRoom(self, x, y, width, height, room_slice, tile):
+    def addDoorsToRoom(self, x, y, width, height, room_slice, tile, max_doors=4):
         a,b = np.ogrid[x:x+width+2, y:y+height+2]
         #This gets the outline of the room EXCLUDING the corners
         door_mask = ((a > x) & (a < x+width+1)) | ((b > y) & (b < y+height+1))
@@ -408,8 +420,8 @@ class dungeonGenerator:
 
         possible_door_place = np.where(final_door_mask == True)
 
-        max_doors = 4
         num_doors = randint(1, max_doors)
+        print(f"adding {num_doors} of a possible {max_doors}")
         for door in range(num_doors):
             if len(possible_door_place[0]) > 1:
                 idx = randint(1, len(possible_door_place[0]) - 1)
@@ -602,7 +614,7 @@ class dungeonGenerator:
 
         for x, y in tiles_tuples:
             if self.grid[x, y] in WALKABLE_TILES:
-                surrounding = self.surrounding_tiles(x,y)
+                surrounding = surrounding_tiles(x,y,self.grid)
                 surrounding[np.where(surrounding == Tiles.EMPTY)] = floor_to_wall[self.grid[x,y]]
 
     def route_between(self, x1, y1, x2, y2, tile=Tiles.CORRIDOR_FLOOR, avoid = [], weights = [], overwrite = False, avoid_rooms = False):
@@ -796,18 +808,6 @@ class dungeonGenerator:
         total += 1
         return self.drunkenWalk(source_x, source_y, target_x, target_y, previous_x, previous_y, total, tile, overwrite  )
 
-    def surrounding_tiles(self, x, y, grid = None):
-        if grid is None:
-            grid = self.grid
-
-        offset_x = -1
-
-        offset_y = -1
-
-        tiles_slice = grid[x-1:x+2, y-1:y+2]
-
-        return tiles_slice
-
     def distanceBetween(self, x1, y1, x2, y2):
         #return the distance to another point
         dx = abs(x2 - x1)
@@ -855,8 +855,8 @@ class dungeonGenerator:
         for idx, x in enumerate(tiles[0]):
             y = tiles[1][idx]
 
-            surronding = self.surrounding_tiles(x,y)
-            surrounding_water = np.where(surronding == Tiles.SHALLOW_WATER)
+            surrounding = surrounding_tiles(x,y,self.grid)
+            surrounding_water = np.where(surrounding == Tiles.SHALLOW_WATER)
 
             if len(surrounding_water[0]) == 9:
                 water_grid[x,y] = Tiles.DEEP_WATER
