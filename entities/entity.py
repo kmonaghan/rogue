@@ -64,6 +64,8 @@ class Entity:
 
         self.uuid = str(uuid.uuid4())
 
+        self.turn = {}
+
     def __str__(self):
         return f"{self.name.title()}"
 
@@ -126,7 +128,7 @@ class Entity:
         if component:
             component.owner = self
 
-        print(f"Adding component: {type(component).__name__}")
+        #print(f"Adding component: {type(component).__name__}")
 
         setattr(self, component_name, component)
 
@@ -137,3 +139,28 @@ class Entity:
         print(f"Removing component_name: {component_name}")
 
         delattr(self, component_name)
+
+    def register_turn(self, item):
+        key = str(uuid.uuid4())
+        self.turn[key] = item
+
+        return key
+
+    def deregister_turn(self, key):
+        try:
+            del self.turn[key]
+        except KeyError:
+            print(f"Key {key} not found")
+
+    def on_turn(self):
+        results = []
+
+        for key in self.turn.copy():
+            try:
+                results.extend(self.turn[key].tick())
+            except TypeError:
+                print('~'*20)
+                print('Error proccessing turn')
+                print(self.turn)
+
+        return results

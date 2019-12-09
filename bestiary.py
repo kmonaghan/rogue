@@ -601,7 +601,8 @@ def goblin_observed_death(sub, message, level_map):
         elif level_map.current_level.fov[sub.entity.x, sub.entity.y]:
             if not sub.entity.berserk:
                 sub.entity.add_component(Berserk(), 'berserk')
-                sub.entity.berserk.start_berserker()
+                sub.entity.berserk.start()
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has gone berserk!'.format(sub.entity.name.title()), COLORS.get('effect_text'))))
 
 def mimic_activate(sub, message, level_map):
     if (sub.entity.uuid == message.target.uuid):

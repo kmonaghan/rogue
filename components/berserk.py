@@ -1,6 +1,7 @@
 import pubsub
 
 from etc.colors import COLORS
+from etc.enum import ResultTypes
 
 from game_messages import Message
 
@@ -10,22 +11,44 @@ class Berserk:
         self.power_modifier = power_modifier
         self.health_modifier = health_modifier
         self.turns = turns
-        pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.TICK, self.countdown))
+        self.uuid = None
 
-    def countdown(self, sub, message, game_map):
+    def tick(self):
+        results = []
+
         self.turns -= 1
         if (self.turns < 1):
-            self.end_berserker()
-            pubsub.pubsub.mark_subscription_for_removal(sub)
-            self.owner.del_component("berserk")
+            results.extend(self.end())
 
-    def start_berserker(self):
-        self.owner.health.base_max_hp += 10
-        self.owner.health.heal(10)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has gone berserk!'.format(self.owner.name.title()), COLORS.get('effect_text'))))
+        return results
 
-    def end_berserker(self):
+    def start(self):
+        results = []
+
+        self.owner.health.base_max_hp += self.health_modifier
+        self.owner.health.heal(self.health_modifier)
+        results.append({
+            ResultTypes.MESSAGE: Message('{0} has gone berserk!'.format(self.owner.name.title()), COLORS.get('effect_text'))
+        })
+
+        self.uuid = self.owner.register_turn(self)
+
+        return results
+
+    def end(self):
+        results = []
         if not self.owner.health.dead:
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has regained their composure'.format(self.owner.name.title()), COLORS.get('effect_text'))))
-            self.owner.health.base_max_hp -= 10
-            self.owner.health.take_damage(10)
+            results.append({
+                ResultTypes.MESSAGE: Message('{0} has regained their composure'.format(self.owner.name.title()), COLORS.get('effect_text'))
+            })
+            self.owner.health.base_max_hp -= self.health_modifier
+            results.extend(self.owner.health.take_damage(self.health_modifier))
+
+            self.owner.deregister_turn(self.uuid)
+
+            try:
+                self.owner.del_component('berserk')
+            except AttributeError:
+                print(f"tried to remove berserk from {self.owner.name} - {self.owner.uuid}")
+
+        return results

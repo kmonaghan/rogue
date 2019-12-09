@@ -39,7 +39,7 @@ class Poisoning(Ablity):
         if randint(1, 100) > self.chance_to_poison:
             poison = Poisoned(self.damage_per_turn, self.duration)
             target.add_component(poison, 'poisoned')
-            poison.start()
+            results.extend(poison.start())
 
         return results
 

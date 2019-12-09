@@ -98,7 +98,7 @@ class Rogue(tcod.event.EventDispatch):
         self.game_state = GameStates.PLAYER_TURN
         self.previous_game_state = None
 
-        self.message_log.add_message(Message('Let\'s get ready to rock and/or roll!.', tcod.yellow))
+        self.message_log.add_message(Message('Let\'s get ready to rock and/or roll!', tcod.yellow))
 
     def on_enter(self):
         tcod.sys_set_fps(60)
@@ -345,7 +345,7 @@ class Rogue(tcod.event.EventDispatch):
                     if self.game_map.current_level.blocked[self.player.x + dx, self.player.y + dy]:
                         targets = self.game_map.current_level.entities.get_entities_in_position((self.player.x + dx, self.player.y + dy))
 
-                        targets_in_render_order = sorted(targets, key=lambda x: x.render_order.value)
+                        targets_in_render_order = sorted(targets, key=lambda x: x.render_order.value, reverse=True)
                         print(targets_in_render_order)
                         target = targets[-1]
 
@@ -372,11 +372,11 @@ class Rogue(tcod.event.EventDispatch):
                                     self.game_map.current_level.add_entity(target)
 
                                     message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
-                                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
-
-                        elif target.interaction.interaction_type == Interactions.FOE and not target.health.dead:
-                            attack_results = self.player.offence.attack(target)
-                            player_turn_results.extend(attack_results)
+                                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+                        elif target.interaction.interaction_type == Interactions.FOE:
+                            if target.health and not target.health.dead:
+                                attack_results = self.player.offence.attack(target)
+                                player_turn_results.extend(attack_results)
                     else:
                         self.player.movement.move(dx, dy, self.game_map.current_level)
                         player_turn_results.extend(quest.check_quest_for_location(self.player))
@@ -395,7 +395,7 @@ class Rogue(tcod.event.EventDispatch):
                         pickup = True
                 if not pickup:
                     message = Message('There is nothing here to pick up.', tcod.yellow)
-                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
 
             elif action == InputTypes.TAKE_STAIRS:
                 stair_state = self.game_map.check_for_stairs(self.player.x, self.player.y)
@@ -403,7 +403,7 @@ class Rogue(tcod.event.EventDispatch):
                         self.game_map.next_floor(self.player)
                         self.fov_recompute = True
                         message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
-                        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+                        player_turn_results.extend([{ResultTypes.MESSAGE: message}])
 
                         #continue
                         return
@@ -416,7 +416,7 @@ class Rogue(tcod.event.EventDispatch):
                     self.game_state = GameStates.GAME_PAUSED
                 else:
                     message = Message('There are no stairs here.', tcod.yellow)
-                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
 
         self.process_results_stack(self.player, player_turn_results)
 
@@ -430,6 +430,11 @@ class Rogue(tcod.event.EventDispatch):
         if self.game_state == GameStates.ENEMY_TURN:
             self.game_map.current_level.clear_paths()
             for entity in self.game_map.current_level.entities:
+                enemy_turn_results = entity.on_turn()
+                self.process_results_stack(self.player, enemy_turn_results)
+
+                enemy_turn_results = []
+
                 if entity.health and entity.health.dead:
                     entity.death.decompose(self.game_map)
                 elif entity.ai:
@@ -438,6 +443,8 @@ class Rogue(tcod.event.EventDispatch):
                     if entity.energy.take_action():
                         print("Taking turn for " + str(entity))
                         enemy_turn_results.extend(entity.ai.take_turn(self.game_map))
+
+                    self.process_results_stack(self.player, enemy_turn_results)
 
             self.game_state = GameStates.PLAYER_TURN
 
@@ -483,6 +490,7 @@ class Rogue(tcod.event.EventDispatch):
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
                 self.game_state = result_data.death.npc_death(self.game_map)
+                turn_results = []
 
             # Handle death.
             if result_type == ResultTypes.TARGET_ITEM_IN_INVENTORY:
@@ -507,8 +515,7 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
                 self.game_map.current_level.add_entity(result_data)
                 message = Message(f"{entity.name} dropped the {result_data.name}", tcod.yellow)
-                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
-
+                turn_results.extend([{ResultTypes.MESSAGE: message}])
                 self.game_state = GameStates.ENEMY_TURN
 
             if result_type == ResultTypes.EQUIP:
@@ -524,7 +531,7 @@ class Rogue(tcod.event.EventDispatch):
                     if dequipped:
                         message = Message(f"{entity.name} dequipped the {dequipped.name}")
 
-                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
+                    turn_results.extend([{ResultTypes.MESSAGE: message}])
 
                 self.game_state = GameStates.ENEMY_TURN
             if result_type == ResultTypes.QUEST_ONBOARDING:
@@ -556,11 +563,10 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.MOVE_FORCE:
                target, dx, dy, damage = result_data
                if damage > 0 and not target.movement.move(dx, dy, self.game_map.current_level):
-                    target.health.take_damage(damage)
+                    turn_results.extend(target.health.take_damage(damage))
                     msg_text = '{0} crashes into the wall and takes {1} hit points damage.'
-                    msg = Message(msg_text.format(target.name, str(damage)), tcod.white)
-                    pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
-
+                    message = Message(msg_text.format(target.name, str(damage)), tcod.white)
+                    turn_results.extend([{ResultTypes.MESSAGE: message}])
             # Add a new entity to the game.
             if result_type == ResultTypes.ADD_ENTITY:
                 self.game_map.current_level.add_entity(result_data)

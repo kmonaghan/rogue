@@ -1,6 +1,7 @@
 import pubsub
 
 from etc.colors import COLORS
+from etc.enum import ResultTypes
 
 from game_messages import Message
 
@@ -9,27 +10,40 @@ class Poisoned:
         self.owner = None
         self.damage_per_turn = damage_per_turn
         self.duration = duration
+        self.uuid = None
 
-    def countdown(self, sub, message, game_map):
+    def tick(self):
         self.duration -= 1
+        results = []
 
         if self.owner.health.dead or (self.duration < 0):
-            self.end(sub)
+            self.end()
             return
 
-        self.owner.health.take_damage(self.damage_per_turn)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison does {0} damage to {1}'.format(self.damage_per_turn ,self.owner.name.title()), COLORS.get('damage_text'))))
+        results.extend(self.owner.health.take_damage(self.damage_per_turn))
+        results.append({
+            ResultTypes.MESSAGE: Message('The poison does {0} damage to {1}'.format(self.damage_per_turn ,self.owner.name.title()), COLORS.get('damage_text'))
+        })
 
         if (self.duration == 0):
-            self.end(sub)
-            return
+            results.extend(self.end())
+
+        return results
 
     def start(self):
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} feels something is wrong...their veins are on fire...hopefully they can outlast it'.format(self.owner.name.title()), COLORS.get('effect_text'))))
+        results = []
 
-        pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.TICK, self.countdown))
+        results.append({
+            ResultTypes.MESSAGE: Message('{0} feels something is wrong...their veins are on fire...hopefully they can outlast it'.format(self.owner.name.title()), COLORS.get('effect_text'))
+        })
 
-    def end(self, sub):
+        self.uuid = self.owner.register_turn(self)
+
+        return results
+
+    def end(self):
+        results = []
+
         if self.owner:
             try:
                 self.owner.del_component("poisoned")
@@ -37,6 +51,12 @@ class Poisoned:
                 print(f"tried to remove posion from {self.owner.name} - {self.owner.uuid}")
         else:
             print('****No owner to poisoned - already deleted?')
-        pubsub.pubsub.mark_subscription_for_removal(sub)
+
+        self.owner.deregister_turn(self.uuid)
+
         if not self.owner.health.dead:
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('The poison has run its course in {0}.'.format(self.owner.name.title()), COLORS.get('effect_text'))))
+            results.append({
+                ResultTypes.MESSAGE: Message('The poison has run its course in {0}.'.format(self.owner.name.title()), COLORS.get('effect_text'))
+            })
+
+        return results
