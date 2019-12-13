@@ -23,14 +23,15 @@ class Equippable:
 
         return base
 
-    def on_equip(self):
+    def on_equip(self, entity):
         if self.attribute:
-            self.owner.add_component(self.attribute, type(self.attribute).__name__)
+            entity.add_component(self.attribute, type(self.attribute).__name__)
             self.attribute.start()
 
-    def on_dequip(self):
+    def on_dequip(self, entity):
         if self.attribute:
-            self.owner.del_component(type(self.attribute).__name__)
+            self.attribute.end()
+            entity.del_component(type(self.attribute).__name__)
 
     def equipment_description(self):
         desription = ""

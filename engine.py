@@ -269,13 +269,22 @@ class Rogue(tcod.event.EventDispatch):
 
         if (action == InputTypes.INVENTORY_INDEX
             and self.previous_game_state != GameStates.GAME_OVER
-            and action_value < len(self.player.inventory.items)):
-            item = self.player.inventory.items[action_value]
+            and action_value <= len(self.player.inventory.items)):
+
+            items = self.player.inventory.items.copy()
+
+            if self.using_item:
+                items.remove(self.using_item)
+
+            item = items[action_value]
 
             if self.game_state == GameStates.INVENTORY_USE:
                 if item.usable:
                     self.using_item = item
                     player_turn_results.extend(item.usable.use(self.game_map, self.player))
+                else:
+                    player_turn_results.extend([{ResultTypes.EQUIP: item}])
+
             elif self.game_state == GameStates.INVENTORY_SELECT:
                 player_turn_results.extend(self.using_item.usable.use(self.game_map, self.player, item))
                 self.using_item = None
@@ -335,6 +344,9 @@ class Rogue(tcod.event.EventDispatch):
             tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
         if self.game_state == GameStates.PLAYER_TURN:
+            player_on_turn_results = self.player.on_turn()
+            self.process_results_stack(self.player, player_on_turn_results)
+
             if self.player.health.dead:
                 self.game_state = GameStates.GAME_OVER
             elif action == InputTypes.MOVE:
@@ -399,7 +411,6 @@ class Rogue(tcod.event.EventDispatch):
                 if not pickup:
                     message = Message('There is nothing here to pick up.', tcod.yellow)
                     player_turn_results.extend([{ResultTypes.MESSAGE: message}])
-
             elif action == InputTypes.TAKE_STAIRS:
                 stair_state = self.game_map.check_for_stairs(self.player.x, self.player.y)
                 if stair_state == StairOption.GODOWN:
@@ -496,7 +507,6 @@ class Rogue(tcod.event.EventDispatch):
                 turn_results = []
                 result_data.deregister_turn_all()
 
-            # Handle death.
             if result_type == ResultTypes.TARGET_ITEM_IN_INVENTORY:
                 self.game_state = GameStates.INVENTORY_SELECT
 
@@ -531,9 +541,11 @@ class Rogue(tcod.event.EventDispatch):
 
                     if equipped:
                         message = Message(f"{entity.name} equipped the {equipped.name}")
+                        equipped.equippable.on_equip(entity)
 
                     if dequipped:
                         message = Message(f"{entity.name} dequipped the {dequipped.name}")
+                        dequipped.equippable.on_dequip(entity)
 
                     turn_results.extend([{ResultTypes.MESSAGE: message}])
 

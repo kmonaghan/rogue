@@ -136,9 +136,10 @@ class Entity:
         """Remove a component as an attribute of the current object.
         """
 
-        print(f"Removing component_name: {component_name}")
-
-        delattr(self, component_name)
+        try:
+            delattr(self, component_name)
+        except AttributeError:
+            print(f"No component_name {component_name} to remove.")
 
     def register_turn(self, item):
         key = str(uuid.uuid4())
