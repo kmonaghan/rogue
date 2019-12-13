@@ -20,6 +20,7 @@ from components.level import Level
 from components.offence import Offence
 from components.defence import Defence
 from components.questgiver import Questgiver
+from components.regeneration import Regeneration
 from components.spawn import Spawn
 from components.subspecies import Subspecies
 
@@ -384,7 +385,10 @@ def troll(point = None):
     npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
-
+    regen = Regeneration()
+    npc.add_component(regen, 'regeneration')
+    regen.start()
+    
     item = None
     dice = randint(1,100)
     if dice > 75:

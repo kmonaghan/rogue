@@ -347,7 +347,7 @@ class Rogue(tcod.event.EventDispatch):
 
                         targets_in_render_order = sorted(targets, key=lambda x: x.render_order.value, reverse=True)
                         print(targets_in_render_order)
-                        target = targets[-1]
+                        target = targets_in_render_order[0]
 
                         if target.interaction.interaction_type == Interactions.QUESTGIVER:
                             quest_results = target.questgiver.talk(self.player)
@@ -372,6 +372,9 @@ class Rogue(tcod.event.EventDispatch):
                                     self.game_map.current_level.add_entity(target)
 
                                     message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
+                                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+                                else:
+                                    message = Message(f"The {target.name} is locked.", tcod.yellow)
                                     player_turn_results.extend([{ResultTypes.MESSAGE: message}])
                         elif target.interaction.interaction_type == Interactions.FOE:
                             if target.health and not target.health.dead:
@@ -491,6 +494,7 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.DEAD_ENTITY:
                 self.game_state = result_data.death.npc_death(self.game_map)
                 turn_results = []
+                result_data.deregister_turn_all()
 
             # Handle death.
             if result_type == ResultTypes.TARGET_ITEM_IN_INVENTORY:

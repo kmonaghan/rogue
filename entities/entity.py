@@ -152,15 +152,17 @@ class Entity:
         except KeyError:
             print(f"Key {key} not found")
 
+    def deregister_turn_all(self):
+        self.turn.clear()
+
     def on_turn(self):
         results = []
 
-        for key in self.turn.copy():
+        turn_copy = self.turn.copy()
+        for key in turn_copy:
             try:
-                results.extend(self.turn[key].tick())
-            except TypeError:
-                print('~'*20)
-                print('Error proccessing turn')
-                print(self.turn)
+                results.extend(turn_copy[key].tick())
+            except TypeError as e:
+                print(f"Error proccessing turn: {e}")
 
         return results

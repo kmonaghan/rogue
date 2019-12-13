@@ -1,7 +1,7 @@
 from utils.random_utils import die_roll
 
 class Equippable:
-    def __init__(self, slot, power_bonus=0, defence_bonus=0, max_hp_bonus=0, bonus_damage=0):
+    def __init__(self, slot, power_bonus=0, defence_bonus=0, max_hp_bonus=0, bonus_damage=0, attribute=None):
         self.slot = slot
         self.power_bonus = power_bonus
         self.defence_bonus = defence_bonus
@@ -10,6 +10,7 @@ class Equippable:
         self.number_of_dice = 1
         self.type_of_dice = 6
         self.bonus_damage = 0
+        self.attribute=attribute
 
     def damage(self):
         return die_roll(self.number_of_dice, self.type_of_dice, self.bonus_damage)
@@ -21,6 +22,15 @@ class Equippable:
             base += ' +' + str(self.bonus_damage)
 
         return base
+
+    def on_equip(self):
+        if self.attribute:
+            self.owner.add_component(self.attribute, type(self.attribute).__name__)
+            self.attribute.start()
+
+    def on_dequip(self):
+        if self.attribute:
+            self.owner.del_component(type(self.attribute).__name__)
 
     def equipment_description(self):
         desription = ""

@@ -10,6 +10,7 @@ from components.ablity import Poisoning, PushBack, Shocking
 from components.equippable import Equippable
 from components.identifiable import Identifiable
 from components.item import Item
+from components.regeneration import Regeneration
 from components.usable import AntidoteUsable, DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
 from components.unlock import Unlock
 
@@ -79,6 +80,7 @@ def random_ring(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['power'] = 50
     item_chances['defence'] = 50
+    item_chances['regeneration'] = 5
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'power':
@@ -86,7 +88,8 @@ def random_ring(point = None, dungeon_level = 1):
 
     elif choice == 'defence':
         item = ring_of_defence(point)
-
+    elif choice == 'regeneration':
+        item = ring_of_regeneration(point)
     return item
 
 def random_scroll(point = None, dungeon_level = 1):
@@ -204,6 +207,12 @@ def ring_of_power(point = None):
 def ring_of_defence(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, defence_bonus=1)
     item = Entity(point, 'o', 'Ring of Health', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                        equippable=equippable_component)
+    return item
+
+def ring_of_regeneration(point = None):
+    equippable_component = Equippable(EquipmentSlots.RING, attribute=Regeneration())
+    item = Entity(point, 'o', 'Ring of Regeneration', COLORS.get('equipment_rare'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
 

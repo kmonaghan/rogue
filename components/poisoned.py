@@ -16,9 +16,9 @@ class Poisoned:
         self.duration -= 1
         results = []
 
-        if self.owner.health.dead or (self.duration < 0):
+        if self.owner.health.dead:
             self.end()
-            return
+            return results
 
         results.extend(self.owner.health.take_damage(self.damage_per_turn))
         results.append({

@@ -86,6 +86,7 @@ class Equipment:
         results = []
 
         slot = equippable_entity.equippable.slot
+        equiped = False
 
         if slot == EquipmentSlots.MAIN_HAND:
             if self.main_hand == equippable_entity:
@@ -97,6 +98,7 @@ class Equipment:
 
                 self.main_hand = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equiped = True
         elif slot == EquipmentSlots.OFF_HAND:
             if self.off_hand == equippable_entity:
                 self.off_hand = None
@@ -107,6 +109,7 @@ class Equipment:
 
                 self.off_hand = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equiped = True
         elif slot == EquipmentSlots.CHEST:
             if self.chest == equippable_entity:
                 self.chest = None
@@ -117,6 +120,7 @@ class Equipment:
 
                 self.chest = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equiped = True
         elif slot == EquipmentSlots.HEAD:
             if self.head == equippable_entity:
                 self.head = None
@@ -127,6 +131,7 @@ class Equipment:
 
                 self.head = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equiped = True
         elif slot == EquipmentSlots.RING:
             if not self.left_ring_finger:
                 self.left_ring_finger = equippable_entity
@@ -140,6 +145,7 @@ class Equipment:
 
                 self.left_ring_finger = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equiped = True
         elif slot == EquipmentSlots.LEFT_RING_FINGER:
             if self.left_ring_finger == equippable_entity:
                 self.left_ring_finger = None
@@ -150,6 +156,7 @@ class Equipment:
 
                 self.left_ring_finger = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equiped = True
         elif slot == EquipmentSlots.RIGHT_RING_FINGER:
             if self.right_ring_finger == equippable_entity:
                 self.right_ring_finger = None
@@ -160,6 +167,12 @@ class Equipment:
 
                 self.right_ring_finger = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equiped = True
+
+        if equiped:
+            equippable_entity.equippable.on_equip()
+        else:
+            equippable_entity.equippable.on_dequip()
 
         return results
 

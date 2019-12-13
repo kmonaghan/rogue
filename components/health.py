@@ -52,12 +52,23 @@ class Health:
         return results
 
     def heal(self, amt):
+        results = []
         if self.dead:
-            return
+            return results
 
         self.hp += amt
         if (self.hp > self.base_max_hp):
             self.hp = self.base_max_hp
+
+        suffix = ''
+        if amt > 1:
+            suffix = 's'
+
+        results.append({
+            ResultTypes.MESSAGE: Message('{1} heals for {0} point{2}.'.format(amt ,self.owner.name.title(), suffix), COLORS.get('effect_text'))
+        })
+
+        return results
 
     def display_color(self):
 
