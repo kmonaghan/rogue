@@ -1,6 +1,8 @@
+from operator import itemgetter
 from random import randint
 
 from etc.colors import COLORS
+from etc.enum import ResultTypes
 
 from equipment_slots import EquipmentSlots
 
@@ -46,22 +48,24 @@ class Offence:
         if (hit > 0) or (multiplier == 2):
             #make the target take some damage
             damage = weapon.equippable.damage() * multiplier
+            damage_results = target.health.take_damage(damage, self.owner, weapon.equippable.damage_type)
 
             msg_text = '{0} attacks {1} with {2} for {3} hit points.'
             if (multiplier > 1):
                 msg_text = '{0} smashes {1} with a massive blow from their {2} for {3} hit points.'
 
-            msg = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(damage)), COLORS.get('damage_text'))
-            results.extend(target.health.take_damage(damage, self.owner))
+            res = list(map(itemgetter(ResultTypes.DAMAGE), damage_results))
+            final_damage = res[0]
 
+            message = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(final_damage)), COLORS.get('damage_text'))
+            results.extend(damage_results)
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
+            results.append({ResultTypes.MESSAGE: message})
 
             if weapon.ablity:
                 results.extend(weapon.ablity.on_attack(source=self.owner, target=target))
-
         else:
-            msg = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'))
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = msg))
+            message = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'))
+            results.append({ResultTypes.MESSAGE: message})
 
         return results

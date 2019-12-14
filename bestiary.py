@@ -21,8 +21,10 @@ from components.offence import Offence
 from components.defence import Defence
 from components.questgiver import Questgiver
 from components.regeneration import Regeneration
+from components.resistance import Resistance
 from components.spawn import Spawn
 from components.subspecies import Subspecies
+from components.vulnerability import Vulnerability
 
 from entities.character import Character
 
@@ -142,7 +144,9 @@ def create_player():
 
     if CONFIG.get('debug'):
         player.level.random_level_up(20)
-        weapon = equipment.random_magic_weapon()
+        #weapon = equipment.random_magic_weapon()
+        weapon = equipment.longsword()
+        equipment.add_flaming(weapon)
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
 
@@ -329,6 +333,7 @@ def skeleton(point = None, old_npc = None):
 
         npc.add_component(Offence(base_power = 12), 'offence')
         npc.add_component(Defence(defence = 8), 'defence')
+        npc.add_component(Resistance(sharp=0.8), 'resistance')
 
         item = equipment.longsword()
         item.lootable = False
@@ -387,8 +392,9 @@ def troll(point = None):
     npc.add_component(Level(xp_value = 10), 'level')
     regen = Regeneration()
     npc.add_component(regen, 'regeneration')
+    npc.add_component(Vulnerability(fire=1.5), 'vulnerability')
     regen.start()
-    
+
     item = None
     dice = randint(1,100)
     if dice > 75:

@@ -3,7 +3,7 @@ from random import randint
 from components.poisoned import Poisoned
 
 from etc.colors import COLORS
-from etc.enum import ResultTypes
+from etc.enum import DamageType, ResultTypes
 
 from game_messages import Message
 
@@ -65,20 +65,22 @@ class PushBack(Ablity):
 
         return results
 
-class Shocking(Ablity):
-    def __init__(self, number_of_dice=1, type_of_dice=6):
-        super().__init__(name="Shock")
+class ExtraDamage(Ablity):
+    def __init__(self, number_of_dice=1, type_of_dice=6, name="extra", damage_type=DamageType.DEFAULT):
+        super().__init__(name="Damage")
         self.number_of_dice = number_of_dice
         self.type_of_dice = type_of_dice
+        self.name = name
+        self.damage_type = damage_type
 
     def on_attack(self, source, target):
         results = []
 
         damage = die_roll(self.number_of_dice, self.type_of_dice)
 
-        msg_text = '{0} takes {1} shock damage.'
+        msg_text = f"{{0}} takes {{1}} {self.name} damage."
         msg = Message(msg_text.format(target.name, str(damage)), COLORS.get('damage_text'))
-        results.extend(target.health.take_damage(damage, source))
+        results.extend(target.health.take_damage(damage, source, self.damage_type))
         results.extend([{ResultTypes.MESSAGE: msg}])
 
         return results

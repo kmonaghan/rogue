@@ -312,3 +312,11 @@ class Interactions(Enum):
     FRIEND = auto()
     QUESTGIVER = auto()
     DOOR = auto()
+
+class DamageType(Enum):
+    DEFAULT = auto()
+    BLUNT = auto()
+    SHARP = auto()
+    FIRE = auto()
+    ICE = auto()
+    ELECTRIC = auto()

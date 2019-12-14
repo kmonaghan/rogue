@@ -6,7 +6,7 @@ from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 import tome
 
-from components.ablity import Poisoning, PushBack, Shocking
+from components.ablity import ExtraDamage, Poisoning, PushBack
 from components.equippable import Equippable
 from components.identifiable import Identifiable
 from components.item import Item
@@ -21,7 +21,7 @@ from game_messages import Message
 from tome import cast_confuse, cast_fireball, cast_identify, cast_lightning, heal, cast_mapping
 
 from equipment_slots import EquipmentSlots
-from etc.enum import RenderOrder, Interactions
+from etc.enum import DamageType, Interactions, RenderOrder
 
 def random_armour(point = None, dungeon_level = 1):
     item_chances = {}
@@ -190,8 +190,12 @@ def add_poison(item, damage = 1, duration = 10):
     item.add_component(Poisoning(0, damage, duration), 'ablity')
     item.base_name = item.base_name + " of poisoning"
 
+def add_flaming(item):
+    item.add_component(ExtraDamage(number_of_dice=1, type_of_dice=6, name="fire", damage_type=DamageType.FIRE), 'ablity')
+    item.base_name = item.base_name + " of flaming"
+
 def add_shocking(item):
-    item.add_component(Shocking(), 'ablity')
+    item.add_component(ExtraDamage(number_of_dice=1, type_of_dice=6, name="shock", damage_type=DamageType.ELECTRIC), 'ablity')
     item.base_name = item.base_name + " of shocking"
 
 def add_smashing(item):
@@ -336,6 +340,7 @@ def axe(point = None):
     #create a sword
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
     equippable_component.type_of_dice = 8
+    equippable_component.damage_type = DamageType.SHARP
     item = Entity(point, '-', 'axe', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
@@ -344,6 +349,7 @@ def dagger(point = None):
     #create a sword
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
     equippable_component.type_of_dice = 4
+    equippable_component.damage_type = DamageType.SHARP
     item = Entity(point, '-', 'dagger', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
@@ -352,6 +358,7 @@ def shortsword(point = None):
     #create a sword
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=3)
     equippable_component.type_of_dice = 6
+    equippable_component.damage_type = DamageType.SHARP
     item = Entity(point, '/', 'short sword', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
@@ -360,6 +367,7 @@ def longsword(point = None):
     #create a sword
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=4)
     equippable_component.type_of_dice = 8
+    equippable_component.damage_type = DamageType.SHARP
     item = Entity(point, '\\', 'long sword', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
@@ -368,6 +376,7 @@ def mace(point = None):
     #create a mace
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
     equippable_component.type_of_dice = 10
+    equippable_component.damage_type = DamageType.BLUNT
     item = Entity(point, '-', 'mace', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
@@ -376,6 +385,7 @@ def teeth(point = None):
     #create teeth for animals
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
     equippable_component.type_of_dice = 2
+    equippable_component.damage_type = DamageType.SHARP
     item = Entity(point, '"', 'teeth', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
@@ -384,6 +394,7 @@ def claw(point = None):
     #create claw for animals
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
     equippable_component.type_of_dice = 4
+    equippable_component.damage_type = DamageType.SHARP
     item = Entity(point, ',', 'claw', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item

@@ -1,7 +1,9 @@
+from etc.enum import DamageType
+
 from utils.random_utils import die_roll
 
 class Equippable:
-    def __init__(self, slot, power_bonus=0, defence_bonus=0, max_hp_bonus=0, bonus_damage=0, attribute=None):
+    def __init__(self, slot, power_bonus=0, defence_bonus=0, max_hp_bonus=0, bonus_damage=0, attribute=None, damage_type=DamageType.DEFAULT):
         self.slot = slot
         self.power_bonus = power_bonus
         self.defence_bonus = defence_bonus
@@ -11,6 +13,7 @@ class Equippable:
         self.type_of_dice = 6
         self.bonus_damage = 0
         self.attribute=attribute
+        self.damage_type = damage_type
 
     def damage(self):
         return die_roll(self.number_of_dice, self.type_of_dice, self.bonus_damage)

@@ -89,6 +89,7 @@ COLORS = {
     'show_walkable_path': tcod.lightest_blue,
 
     'damage_text': tcod.dark_red,
+    'death_text': tcod.orange,
     'effect_text': tcod.white,
     'failure_text': tcod.light_red,
     'success_text': tcod.gold,
@@ -107,6 +108,10 @@ COLORS = {
 
     'corpse': tcod.darkest_red,
     'skeletal': tcod.white,
+
+    'health_near_death': tcod.red,
+    'health_injured': tcod.orange,
+    'health_barely_injured': tcod.yellow,
 }
 
 STATUS_BAR_COLORS = {

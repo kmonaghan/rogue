@@ -10,7 +10,7 @@ from game_messages import Message
 
 from utils.random_utils import die_roll
 
-from etc.enum import ResultTypes
+from etc.enum import DamageType, ResultTypes
 from etc.colors import COLORS
 
 #spell values
@@ -60,7 +60,7 @@ def cast_lightning(*args, **kwargs):
     if target:
         damage = die_roll(number_of_dice, type_of_dice)
         results.append({'consumed': True, 'target': target, ResultTypes.MESSAGE: Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage), COLORS.get('effect_text'))})
-        results.extend(target.health.take_damage(damage, caster))
+        results.extend(target.health.take_damage(damage, caster, DamageType.ELECTRIC))
     else:
         results.append({'consumed': False, 'target': None, ResultTypes.MESSAGE: Message('No enemy is close enough to strike.', COLORS.get('failure_text'))})
 
@@ -88,7 +88,7 @@ def cast_fireball(*args, **kwargs):
         if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.fighter:
             damage = die_roll(number_of_dice, type_of_dice)
             results.append({ResultTypes.MESSAGE: Message('The {0} gets burned for {1} hit points.'.format(entity.name, damage), COLORS.get('effect_text'))})
-            results.extend(entity.fighter.take_damage(damage, caster))
+            results.extend(entity.fighter.take_damage(damage, caster, DamageType.FIRE))
 
     return results
 
