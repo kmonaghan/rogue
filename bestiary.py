@@ -1,6 +1,6 @@
 import tcod
 
-from random import randint
+from random import choice, randint
 
 import equipment
 
@@ -8,7 +8,7 @@ from game_messages import Message
 
 import quest
 
-from components.ai import (BasicNPC, GuardNPC, PatrollingNPC, WarlordNPC,
+from components.ai import (BasicNPC, CaptainNPC, GuardNPC, PatrollingNPC, WarlordNPC,
                             NecromancerNPC, PredatorNPC, SpawningNPC,
                             HatchingNPC, TetheredNPC, ZombieNPC)
 
@@ -76,6 +76,23 @@ def bountyhunter(point):
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')
     npc.add_component(Questgiver(), 'questgiver')
+
+    return npc
+
+def captain(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 98, troops=5):
+    npc = random_npc(point, dungeon_level, player_level, upgrade_chance)
+
+    upgrade_npc(npc)
+
+    if npc.species == Species.TROLL:
+        underling = troll
+    elif npc.species == Species.ORC:
+        underling = ORC
+    elif npc.species == Species.GOBLIN:
+        underling = goblin
+
+    npc.add_component(CaptainNPC(underling), 'ai')
+    npc.add_component(Children(troops), 'children')
 
     return npc
 
@@ -494,6 +511,11 @@ def generate_creature(type, dungeon_level = 1, player_level = 1, point = None):
         creature = egg(point)
 
     return creature
+
+def random_npc(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 98):
+    npc_types = [Species.GOBLIN, Species.ORC, Species.TROLL]
+
+    return generate_npc(choice(npc_types), dungeon_level, player_level, point, upgrade_chance)
 
 def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrade_chance = 98):
     global names

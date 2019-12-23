@@ -33,18 +33,18 @@ def stair_room(top = 1, middle = 1, bottom = 1):
     return room_map
 
 def treasure_room(top = 1, middle = 1, bottom = 1):
-    room_map = ["##E##",
-                "#...#",
-                "#...#",
-                "#...#",
-                "##S##",
-                "V###V"]
+    room_map = ["V##E##V",
+                "##...##",
+                "#.....#",
+                "##...##",
+                "V##S##V",
+                "VV###VV"]
 
     return room_map
 
 def necromancer_lair(top = 1, middle = 1, bottom = 1):
     room_map = ["v#########v",
-                "##.......##",
+                "##...S...##",
                 "#....W....#",
                 "#...WWW...#",
                 "#....W....#",
@@ -78,7 +78,7 @@ def barracks(top = 1, middle = 1, bottom = 1):
     for x in range(top):
         room_map.append("V#########V")
         room_map.append("V#.......#V")
-        room_map.append("V#.......#V")
+        room_map.append("V#...S...#V")
         room_map.append("V#.......#V")
 
     for x in range(middle):

@@ -310,6 +310,34 @@ class HatchingNPC(BaseAI):
                     SpawnEntity(spawn, hatch=True)
                 )))
 
+class CaptainNPC(BaseAI):
+    """AI for a .
+
+    The captain will stay in the one spot unti the payer comes into view and will
+    then attack. Until then it will spawn NPCs.
+
+    This is meant for use with the brrcks prefab.
+
+    """
+    def __init__(self, spawn, min_time=5, max_time=10):
+        number_of_turns = randint(min_time, max_time)
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()
+                ),
+                Sequence(
+                    WithinPlayerFov(),
+                    MoveTowardsTargetEntity()
+                ),
+                Sequence(
+                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)
+                ),
+            )
+        )
+
 class WarlordNPC(BaseAI):
     """AI for a warlord.
 
