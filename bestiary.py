@@ -44,6 +44,9 @@ import pubsub
 
 names = False
 
+creature_avoid = [Tiles.CORRIDOR_FLOOR, Tiles.DOOR, Tiles.ROOM_FLOOR, Tiles.STAIRS_FLOOR, Tiles.DEEP_WATER, Tiles.SHALLOW_WATER]
+npc_avoid = [Tiles.DEEP_WATER]
+
 '''
 Create npc/creatures/player
 '''
@@ -77,6 +80,8 @@ def bountyhunter(point):
     npc.add_component(Defence(defence = 0), 'defence')
     npc.add_component(Questgiver(), 'questgiver')
 
+    npc.movement.routing_avoid.extend(npc_avoid)
+
     return npc
 
 def captain(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 98, troops=5):
@@ -87,12 +92,14 @@ def captain(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 
     if npc.species == Species.TROLL:
         underling = troll
     elif npc.species == Species.ORC:
-        underling = ORC
+        underling = orc
     elif npc.species == Species.GOBLIN:
         underling = goblin
 
     npc.add_component(CaptainNPC(underling), 'ai')
     npc.add_component(Children(troops), 'children')
+
+    npc.movement.routing_avoid.extend(npc_avoid)
 
     return npc
 
@@ -160,10 +167,8 @@ def create_player():
     player.equipment.toggle_equip(dagger)
 
     if CONFIG.get('debug'):
-        player.level.random_level_up(20)
-        #weapon = equipment.random_magic_weapon()
-        weapon = equipment.longsword()
-        equipment.add_flaming(weapon)
+        player.level.random_level_up(30)
+        weapon = equipment.random_magic_weapon()
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
 
@@ -225,6 +230,8 @@ def goblin(point = None):
     npc.add_component(Defence(defence = 5), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
+    npc.movement.routing_avoid.extend(npc_avoid)
+
     dagger = equipment.dagger()
     dagger.lootable = False
 
@@ -235,7 +242,7 @@ def goblin(point = None):
 
     return npc
 
-def necromancer(point = None):
+def necromancer(point = None, dungeon_level=1):
     #create a necromancer
     health_component = Health(30)
     ai_component = NecromancerNPC()
@@ -248,11 +255,27 @@ def necromancer(point = None):
     npc.add_component(Defence(defence = 8), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
 
-    item = equipment.longsword()
-    item.lootable = False
+    npc.movement.routing_avoid.extend(npc_avoid)
 
-    npc.inventory.add_item(item)
-    npc.equipment.toggle_equip(item)
+    weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
+    weapon.lootable = True
+
+    npc.inventory.add_item(weapon)
+    npc.equipment.toggle_equip(weapon)
+
+    num_of_potions = randint(0,3)
+
+    for i in range(num_of_potions):
+        potion = equipment.random_potion(dungeon_level=dungeon_level)
+        potion.lootable = True
+        npc.inventory.add_item(potion)
+
+    num_of_scrolls = randint(0,3)
+
+    for i in range(num_of_scrolls):
+        scroll = equipment.random_scroll(dungeon_level=dungeon_level)
+        scroll.lootable = True
+        npc.inventory.add_item(scroll)
 
     return npc
 
@@ -268,6 +291,8 @@ def orc(point = None):
     npc.add_component(Offence(base_power = 10), 'offence')
     npc.add_component(Defence(defence = 4), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
+
+    npc.movement.routing_avoid.extend(npc_avoid)
 
     item = equipment.shortsword()
     item.lootable = False
@@ -288,12 +313,7 @@ def rat(point = None):
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
 
-    creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.DOOR)
-    creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.STAIRS_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.DEEP_WATER)
-    creature.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
+    creature.movement.routing_avoid.extend(creature_avoid)
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -316,12 +336,7 @@ def ratsnest(point = None):
     creature.add_component(Level(xp_value = 1), 'level')
     creature.add_component(Children(5), 'children')
 
-    creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.DOOR)
-    creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.STAIRS_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.DEEP_WATER)
-    creature.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
+    creature.movement.routing_avoid.extend(creature_avoid)
 
     return creature
 
@@ -352,6 +367,9 @@ def skeleton(point = None, old_npc = None):
         npc.add_component(Defence(defence = 8), 'defence')
         npc.add_component(Resistance(sharp=0.8), 'resistance')
 
+        npc.movement.routing_avoid.extend(npc_avoid)
+        npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
+
         item = equipment.longsword()
         item.lootable = False
 
@@ -372,12 +390,7 @@ def snake(point = None):
     creature.add_component(Level(xp_value = 10), 'level')
     creature.add_component(Spawn(2, egg), 'spawn')
 
-    creature.movement.routing_avoid.append(Tiles.CORRIDOR_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.DOOR)
-    creature.movement.routing_avoid.append(Tiles.ROOM_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.STAIRS_FLOOR)
-    creature.movement.routing_avoid.append(Tiles.DEEP_WATER)
-    creature.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
+    creature.movement.routing_avoid.extend(creature_avoid)
 
     teeth = equipment.teeth()
 
@@ -412,6 +425,8 @@ def troll(point = None):
     npc.add_component(Vulnerability(fire=1.5), 'vulnerability')
     regen.start()
 
+    npc.movement.routing_avoid.extend(npc_avoid)
+
     item = None
     dice = randint(1,100)
     if dice > 75:
@@ -439,6 +454,8 @@ def warlord(point = None):
     npc.add_component(Offence(base_power = 10), 'offence')
     npc.add_component(Defence(defence = 4), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
+
+    npc.movement.routing_avoid.extend(npc_avoid)
 
     item = equipment.longsword()
     item.base_name = item.base_name + " of I'll FUCKING Have You"
@@ -483,6 +500,7 @@ def zombie(point = None, old_npc = None):
 
         npc.add_component(Offence(base_power = 10), 'offence')
         npc.add_component(Defence(defence = 4), 'defence')
+        npc.movement.routing_avoid.extend(npc_avoid)
 
         item = equipment.longsword()
         item.lootable = False
