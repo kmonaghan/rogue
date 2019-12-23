@@ -455,7 +455,7 @@ class Rogue(tcod.event.EventDispatch):
                     # Enemies move and attack if possible.
                     entity.energy.increase_energy()
                     if entity.energy.take_action():
-                        print("Taking turn for " + str(entity))
+                        print(f"Taking turn for {entity}")
                         enemy_turn_results.extend(entity.ai.take_turn(self.game_map))
 
                     self.process_results_stack(self.player, enemy_turn_results)

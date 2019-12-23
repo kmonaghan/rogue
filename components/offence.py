@@ -49,20 +49,27 @@ class Offence:
             #make the target take some damage
             damage = weapon.equippable.damage() * multiplier
             damage_results = target.health.take_damage(damage, self.owner, weapon.equippable.damage_type)
+            results.extend(damage_results)
 
             msg_text = '{0} attacks {1} with {2} for {3} hit points.'
             if (multiplier > 1):
                 msg_text = '{0} smashes {1} with a massive blow from their {2} for {3} hit points.'
 
-            res = list(map(itemgetter(ResultTypes.DAMAGE), damage_results))
-            final_damage = res[0]
+            final_damage = 0
 
-            message = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(final_damage)), COLORS.get('damage_text'))
-            results.extend(damage_results)
+            for item in damage_results:
+                for key in item:
+                    if key == ResultTypes.DAMAGE:
+                        final_damage = item[key]
+                        break
+
+            if final_damage > 0:
+                message = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(final_damage)), COLORS.get('damage_text'))
+                results.append({ResultTypes.MESSAGE: message})
+
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
-            results.append({ResultTypes.MESSAGE: message})
 
-            if weapon.ablity:
+            if weapon.ablity and not target.health.dead:
                 results.extend(weapon.ablity.on_attack(source=self.owner, target=target))
         else:
             message = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'))
