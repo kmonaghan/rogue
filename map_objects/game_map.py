@@ -109,75 +109,6 @@ class GameMap:
         self.fill_prefab(player)
 
     def test_popluate_map(self, player):
-        #point = self.current_level.find_random_open_position()
-        #warlord = bestiary.warlord(point)
-        #warlord.ai.set_target(player)
-        #self.current_level.add_entity(warlord)
-
-        #prison_block = find(lambda room: room.name == 'prison_block', self.current_level.rooms)
-
-        npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level)
-        point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
-        npc.set_point(point)
-        npc.ai.set_target(player)
-        #bestiary.poison_npc(npc)
-        self.current_level.add_entity(npc)
-
-        # if prison_block:
-        #for x,y in prison_block.spawnpoints:
-        for i in range(10):
-            npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
-            point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
-            npc.set_point(point)
-            npc.ai.set_target(player)
-            self.current_level.add_entity(npc)
-
-        #Snakes and Rats
-        # for i in range(1):
-        #     npc = bestiary.generate_creature(Species.SNAKE, self.dungeon_level, player.level.current_level)
-        #     point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
-        #     npc.set_point(point)
-        #     npc.ai.set_target(player)
-        #     self.current_level.add_entity(npc)
-
-        '''
-        for i in range(5):
-            npc = bestiary.generate_npc(Species.GOBLIN, self.dungeon_level, player.level.current_level)
-            point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
-            npc.set_point(point)
-            npc.ai.set_target(player)
-            self.current_level.add_entity(npc)
-
-        point = self.current_level.find_random_open_position()
-        #Potions, scrolls and rings
-        potion = equipment.healing_potion(point)
-        self.current_level.add_entity(potion)
-
-        scroll1 = equipment.lighting_scroll(Point(1,2))
-        self.current_level.add_entity(scroll1)
-        scroll2 = equipment.fireball_scroll(Point(1,3))
-        self.current_level.add_entity(scroll2)
-        scroll3 = equipment.confusion_scroll(Point(1,4))
-        self.current_level.add_entity(scroll3)
-        scroll4 = equipment.map_scroll(player.point)
-        self.current_level.add_entity(scroll4)
-        ring1 = equipment.ring_of_power(player.point)
-        self.current_level.add_entity(ring1)
-        ring2 = equipment.ring_of_defence(player.point)
-        self.current_level.add_entity(ring2)
-        '''
-
-        point = self.current_level.find_random_open_position()
-        potion2 = equipment.power_potion(point)
-        self.current_level.add_entity(potion2)
-
-        point = self.current_level.find_random_open_position()
-        potion3 = equipment.defence_potion(point)
-        self.current_level.add_entity(potion3)
-
-        point = self.current_level.find_random_open_position()
-        scroll5 = equipment.identify_scroll(player.point)
-        self.current_level.add_entity(scroll5)
 
         self.place_doors()
 
@@ -214,8 +145,9 @@ class GameMap:
             self.current_level.add_entity(self.up_stairs)
 
     def level_one(self, player):
-        #point = self.current_level.find_random_open_position([Tiles.STAIRS_FLOOR], room = room)
-        npc = bestiary.bountyhunter(Point(player.x-1, player.y-1))
+        entrance = find(lambda room: room.name == 'entrance', self.current_level.rooms)
+        point = self.current_level.find_random_open_position([Tiles.STAIRS_FLOOR, Tiles.DOOR], room=entrance)
+        npc = bestiary.bountyhunter(point)
 
         q = quest.kill_rats_nests()
         q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100, start_func=self.level_one_goblin)
@@ -251,6 +183,11 @@ class GameMap:
     def levelGeneric(self, player):
         if len(self.current_level.caves) > 0:
             self.place_creatures(player)
+        if len(self.current_level.rooms) > 0:
+            for room in self.current_level.rooms:
+                if not room.name:
+                    self.place_npc(room, player)
+                    self.place_object(room)
 
     def levelBoss(self, player):
         npc = bestiary.bountyhunter(Point(player.x-1,player.y-1))
@@ -259,10 +196,10 @@ class GameMap:
         npc.questgiver.add_quest(q)
         self.current_level.add_entity(npc)
 
-        point = self.current_level.find_random_open_position(room=self.current_level.rooms[1])
-        warlord = bestiary.warlord(point)
-        warlord.ai.set_target(player)
-        self.current_level.add_entity(warlord)
+        for room in self.current_level.rooms:
+            if not room.name:
+                self.place_npc(room, player)
+                self.place_object(room)
 
     def place_creatures(self, player):
         npc_chances = {}
@@ -298,10 +235,10 @@ class GameMap:
             self.current_level.add_entity(f)
 
     def place_npc(self, room, player):
-        #this is where we decide the chance of each npc or item appearing.
+        #this is where we decide the chance of each npc appearing.
 
         #maximum number of npcs per room
-        max_npcs = 4# from_dungeon_level([[1,2], [2, 2], [3, 4], [5, 5]], self.dungeon_level)
+        max_npcs = from_dungeon_level([[1,2], [2, 2], [3, 4], [5, 5]], self.dungeon_level)
 
         #chance of each npc
         npc_chances = {}
@@ -315,8 +252,9 @@ class GameMap:
         for i in range(num_npcs):
             choice = random_choice_from_dict(npc_chances)
             npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level)
-            point = self.current_level.find_random_open_position(npc.movement.routing_avoid,
-                                                                    room = room)
+            avoid = npc.movement.routing_avoid
+            avoid.append(Tiles.DOOR)
+            point = self.current_level.find_random_open_position(avoid, room = room)
             npc.set_point(point)
             npc.ai.set_target(player)
             self.current_level.add_entity(npc)
@@ -335,6 +273,21 @@ class GameMap:
                 point = self.current_level.find_random_open_position()
                 key = equipment.key(point, door_entities[0])
                 self.current_level.add_entity(key)
+            elif room.name == "barracks":
+                point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
+                npc = bestiary.captain(point)
+                npc.ai.set_target(player)
+                self.current_level.add_entity(npc)
+            elif room.name == "necromancer_lair":
+                point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
+                npc = bestiary.necromancer(point, self.dungeon_level)
+                npc.ai.set_target(player)
+                self.current_level.add_entity(npc)
+            elif room.name == "boss_room":
+                point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
+                npc = bestiary.warlord(point)
+                npc.ai.set_target(player)
+                self.current_level.add_entity(npc)
 
     def place_object(self, room):
         return
