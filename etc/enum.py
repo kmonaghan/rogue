@@ -103,6 +103,7 @@ class InputTypes(Enum):
     SHOW_DIJKSTRA_PLAYER = auto()
     SHOW_DIJKSTRA_FLEE = auto()
     TAKE_STAIRS = auto()
+    DOWN_LEVEL = auto()
     WAIT = auto()
 
 # Game states for menu

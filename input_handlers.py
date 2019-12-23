@@ -92,6 +92,9 @@ def handle_player_turn_keys(event):
     if CONFIG.get('debug') and event.sym == ord('p'):
         return {InputTypes.SHOW_DIJKSTRA_FLEE: True}
 
+    if CONFIG.get('debug') and event.sym == ord('x'):
+        return {InputTypes.DOWN_LEVEL: True}
+
     # No key was pressed
     return {}
 

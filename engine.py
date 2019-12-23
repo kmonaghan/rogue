@@ -411,16 +411,24 @@ class Rogue(tcod.event.EventDispatch):
                 if not pickup:
                     message = Message('There is nothing here to pick up.', tcod.yellow)
                     player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+            elif action == InputTypes.DOWN_LEVEL:
+                self.game_map.next_floor(self.player)
+                self.fov_recompute = True
+                message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
+                player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+
+                #continue
+                return
             elif action == InputTypes.TAKE_STAIRS:
                 stair_state = self.game_map.check_for_stairs(self.player.x, self.player.y)
                 if stair_state == StairOption.GODOWN:
-                        self.game_map.next_floor(self.player)
-                        self.fov_recompute = True
-                        message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
-                        player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+                    self.game_map.next_floor(self.player)
+                    self.fov_recompute = True
+                    message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
+                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
 
-                        #continue
-                        return
+                    #continue
+                    return
                 elif stair_state == StairOption.GOUP:
                     self.game_map.previous_floor(self.player)
                     self.fov_recompute = True
