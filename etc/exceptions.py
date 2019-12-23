@@ -50,6 +50,14 @@ class RoomOverlapsError(MapError):
         msg = "Failed to place a room as it overlaps with another feature"
     super(RoomOverlapsError, self).__init__(msg)
 
+class MapNotEnoughExitsError(MapError):
+   """Raised when there are fewer than 2 exits"""
+   def __init__(self, msg=None):
+    if msg is None:
+        # Set some default useful error message
+        msg = "Not enough exits to the map"
+    super(MapNotEnoughExitsError, self).__init__(msg)
+
 class MapGenerationFailedError(MapError):
    """Raised when no valid map is produced"""
    def __init__(self, msg=None):

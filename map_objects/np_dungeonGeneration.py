@@ -421,13 +421,13 @@ class dungeonGenerator:
         possible_door_place = np.where(final_door_mask == True)
 
         num_doors = randint(1, max_doors)
-        print(f"adding {num_doors} of a possible {max_doors}")
+        print(f"Adding {num_doors} doors of a possible {max_doors}")
         for door in range(num_doors):
             if len(possible_door_place[0]) > 1:
                 idx = randint(1, len(possible_door_place[0]) - 1)
                 room_slice[possible_door_place[0][idx], possible_door_place[1][idx]] = Tiles.DOOR
 
-    def addCircleShapedRoom(self, x, y, radius = 5, margin = 1, overlap = False, add_door = True, add_walls = False, tile = Tiles.ROOM_FLOOR):
+    def addCircleShapedRoom(self, x, y, radius = 5, margin = 1, overlap = False, add_door = True, add_walls = False, tile = Tiles.ROOM_FLOOR, max_doors = 4):
 
         if add_walls:
             radius = radius + 1
@@ -450,10 +450,19 @@ class dungeonGenerator:
             room_slice[mask2] = floor_to_wall[tile]
 
             if add_door:
-                max_doors = 4
-                num_doors = 4 #randint(1, max_doors)
-                possible_door_place = [(0, radius), (radius, width-1), (radius, 0), (width-1, radius)]
+                num_doors = randint(1, max_doors)
 
+                possible_door_place = []
+                if x >=2:
+                    possible_door_place.append((0, radius))
+                if y >=2:
+                    possible_door_place.append((radius, 0))
+                if x <= self.grid.shape[0] - width - 2:
+                    possible_door_place.append((width-1, radius))
+                if y <= self.grid.shape[1] - width - 2:
+                    possible_door_place.append((radius, width-1))
+
+                print(f"Doors: {num_doors} from: {possible_door_place}")
                 for door in range(num_doors):
                     if len(possible_door_place):
                         idx = randint(0, len(possible_door_place)-1)
@@ -514,7 +523,55 @@ class dungeonGenerator:
 
         return None
 
-    def placeRandomRooms(self, minRoomSize, maxRoomSize, roomStep = 1, margin = 3, attempts = 500, add_door = False, add_walls = False, overlap = False):
+    def placeLargeRoom(self, width=15, height=15):
+        template = np.full((5,5), Tiles.ROOM_FLOOR, dtype=np.int8)
+
+        template[0] = Tiles.ROOM_WALL
+        template[-1] = Tiles.ROOM_WALL
+        template[:, 0] = Tiles.ROOM_WALL
+        template[:, -1] = Tiles.ROOM_WALL
+
+        template[0,-1] = Tiles.DEEP_WATER
+        template[0,0] = Tiles.DEEP_WATER
+        template[-1,0] = Tiles.DEEP_WATER
+        template[-1,-1] = Tiles.DEEP_WATER
+
+        matprint(template)
+
+        room = np.zeros((width, height), dtype=np.int8)
+
+        x = randint(0,width-template.shape[0])
+        y = randint(0,height-template.shape[1])
+
+        room_slice = room[x:x+template.shape[0], y:y+template.shape[1]]
+
+        room_slice[np.where(room_slice == Tiles.EMPTY)] = template[np.where(room_slice == Tiles.EMPTY)]
+
+        for i in range(9):
+            floor = np.where(room == Tiles.ROOM_FLOOR)
+
+            if len(floor[0]) < 1:
+                print("Out of space to place room")
+                return
+
+            pick = randint(0,len(floor[0]) - 1)
+            x = floor[0][pick]
+            y = floor[1][pick]
+
+            room_slice = room[x:x+template.shape[0], y:y+template.shape[1]]
+
+            room_slice[np.where(room_slice == Tiles.EMPTY)] = template[np.where(room_slice == Tiles.EMPTY)]
+
+            room_slice[np.where((room_slice == Tiles.ROOM_WALL) & (template == Tiles.ROOM_WALL))] = Tiles.DEEP_WATER
+
+            room_slice[1:template.shape[0]-1, 1:template.shape[1]-1] = Tiles.ROOM_FLOOR
+
+            print(f"Added detail at {x} {y}")
+            matprint(room)
+
+    def placeRandomRooms(self, minRoomSize, maxRoomSize, roomStep = 1, margin = 3,
+                            attempts = 500, add_door = False, add_walls = False,
+                            overlap = False):
         for attempt in range(attempts):
             roomWidth = randrange(minRoomSize, maxRoomSize, roomStep)
             roomHeight = randrange(minRoomSize, maxRoomSize, roomStep)
@@ -522,17 +579,25 @@ class dungeonGenerator:
             voids = np.where(self.grid == Tiles.EMPTY)
 
             if len(voids[0]) < 1:
-                #print("Out of space to place room")
+                print("Out of space to place room")
                 return
 
             pick = randint(0,len(voids[0]) - 1)
             startX = voids[0][pick]
             startY = voids[1][pick]
 
-            if (roomWidth == roomHeight) and (roomWidth > 5):
-                room = self.addCircleShapedRoom(startX, startY, roomWidth // 2, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
-            else:
-                room = self.addRoom(startX, startY, roomWidth, roomHeight, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
+            room = None
+
+            try:
+                if (roomWidth == roomHeight) and (roomWidth > 5):
+                    room = self.addCircleShapedRoom(startX, startY, roomWidth // 2, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
+                else:
+                    room = self.addRoom(startX, startY, roomWidth, roomHeight, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
+            except (RoomOverlapsError, RoomOutOfBoundsError) as e:
+                #print("<"*30)
+                #print(e)
+                #print(">"*30)
+                pass
 
             if room:
                 self.rooms.append(room)

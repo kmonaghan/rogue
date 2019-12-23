@@ -3,7 +3,7 @@ import numpy as np
 from random import choice, randint
 
 from etc.enum import Tiles
-from etc.exceptions import FailedToPlaceEntranceError, FailedToPlaceExitError, BadMapError, FailedToPlaceRoomError
+from etc.exceptions import FailedToPlaceEntranceError, FailedToPlaceExitError, BadMapError, FailedToPlaceRoomError, MapNotEnoughExitsError
 
 from map_objects.np_dungeonGeneration import dungeonGenerator
 from map_objects.np_level_map import LevelMap
@@ -132,7 +132,11 @@ def roomsLevel(dm, x, y):
 
     placePrefabs(dm)
 
-    dm.placeRandomRooms(3, 15, 2, 2, add_door = True, add_walls = True)
+    dm.placeRandomRooms(5, 15, 2, 2, add_door = True, add_walls = True, attempts=5000)
+
+    prefab = Prefab(stair_room)
+    room = dm.placeRoomRandomly(prefab, overwrite=False)
+    room.name = "exit"
 
     for i in range (5):
         x, y = dm.findEmptySpace()
@@ -142,21 +146,22 @@ def roomsLevel(dm, x, y):
         else:
             dm.generateCorridors(x = x, y = y)
 
-    prefab = Prefab(stair_room)
-    room = dm.placeRoomRandomly(prefab)
-    room.name = "exit"
-
     dm.connectRooms()
 
     stairs = np.where(dm.grid == Tiles.STAIRS_FLOOR)
+    if len(stairs[0]) < 2:
+        raise MapNotEnoughExitsError
+
     corridors = np.where(dm.grid == Tiles.CORRIDOR_FLOOR)
 
-    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+    weights = [(Tiles.POTENTIAL_CORRIDOR_FLOOR, 1),
+                (Tiles.CORRIDOR_FLOOR, 1),
                 (Tiles.ROOM_FLOOR, 1),
-                (Tiles.EMPTY, 9),
                 (Tiles.CAVERN_FLOOR, 1),
                 (Tiles.CAVERN_WALL, 3),
-                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
+                (Tiles.EMPTY, 7),
+                (Tiles.ROOM_WALL, 9),
+            ]
 
     dm.route_between(stairs[0][0], stairs[0][1], corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
     dm.route_between(stairs[1][0], stairs[1][1], corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
@@ -224,7 +229,11 @@ def bossLevelGenerator(map_width, map_height, x, y):
 def arena(map_width, map_height, x = 5, y = 5):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    room = dm.addCircleShapedRoom(10, 10, 5, add_door = False)
+    #room = dm.addCircleShapedRoom(10, 10, 5, add_walls=True, add_door=True, max_doors = 1)
+
+    cave = dm.addRoom(15, 25, 10, 10, add_door=False, add_walls = True, tile = Tiles.CAVERN_FLOOR, max_doors = 1)
+
+    #dm.connectRooms()
 
     '''
     cells = randint(1,5)
