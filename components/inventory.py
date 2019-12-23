@@ -18,7 +18,7 @@ class Inventory:
         else:
             results.append({
                 ResultTypes.REMOVE_ENTITY: item,
-                ResultTypes.MESSAGE: Message('{0} picked up the {1}.'.format(self.owner.name, item.name), COLORS.get('success_text'))
+                ResultTypes.MESSAGE: Message('{0} picked up {1}.'.format(self.owner.name, item.name), COLORS.get('success_text'))
             })
 
             self.items.append(item)
