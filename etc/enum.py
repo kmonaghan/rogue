@@ -54,8 +54,8 @@ CANCEL_STATES = {
     GameStates.CHARACTER_SCREEN, GameStates.GAME_PAUSED,
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
-    GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING}
-    #GameStates.CURSOR_INPUT,}
+    GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
+    GameStates.TARGETING,}
 
 # Game states where an inventory is displayed.
 INVENTORY_STATES = {
@@ -103,6 +103,7 @@ class InputTypes(Enum):
     SHOW_DIJKSTRA_PLAYER = auto()
     SHOW_DIJKSTRA_FLEE = auto()
     TAKE_STAIRS = auto()
+    TARGETING = auto()
     DOWN_LEVEL = auto()
     WAIT = auto()
 
@@ -194,6 +195,7 @@ class ResultTypes(Enum):
     EQUIP_ARMOR = auto()
     EQUIP_WEAPON = auto()
     FREEZE = auto()
+    FOV_RECOMPUTE = auto()
     HARM = auto()
     INCREASE_ATTACK_POWER = auto()
     MESSAGE = auto()
@@ -210,6 +212,7 @@ class ResultTypes(Enum):
     RESTORE_PLAYER_INPUT = auto()
     TARGET_ITEM_IN_INVENTORY = auto()
     CANCEL_TARGET_ITEM_IN_INVENTORY = auto()
+    TARGETING = auto()
     QUEST_ONBOARDING = auto()
     QUEST_CANCELLED = auto()
     SET_POSITION = auto()

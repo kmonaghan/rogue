@@ -179,12 +179,17 @@ class Rogue(tcod.event.EventDispatch):
         self.motion = event
 
     def ev_mousebuttondown(self, event: tcod.event.MouseButtonDown):
+        input_type = None
         if event.button == tcod.event.BUTTON_LEFT:
             self.lbut = True
+            input_type = InputTypes.TARGETING
         elif event.button == tcod.event.BUTTON_MIDDLE:
             self.mbut = True
         elif event.button == tcod.event.BUTTON_RIGHT:
             self.rbut = True
+            input_type = InputTypes.EXIT
+
+        self.process_turn(input_type, (event.tile.x, event.tile.y))
 
     def ev_mousebuttonup(self, event: tcod.event.MouseButtonUp):
         if event.button == tcod.event.BUTTON_LEFT:
@@ -315,23 +320,19 @@ class Rogue(tcod.event.EventDispatch):
             self.message_log.add_message(selected_quest.status())
             self.game_state = self.previous_game_state
 
-        if self.game_state == GameStates.TARGETING:
-            '''
-            if left_click:
-                target_x, target_y = left_click
+        if (action == InputTypes.TARGETING
+            and self.game_state == GameStates.TARGETING):
+            target_x, target_y = action_value
 
-                item_use_results = item.usable.use(self.game_map, self.player)
-                player_turn_results.extend(item_use_results)
-            elif right_click:
-                player_turn_results.append({'targeting_cancelled': True})
-            '''
-            pass
+            player_turn_results.extend(self.using_item.usable.use(game_map=self.game_map,
+                                                            user=self.player,
+                                                            target_x=target_x,
+                                                            target_y=target_y))
 
         if action == InputTypes.EXIT:
             if self.game_state in CANCEL_STATES:
                 self.game_state = self.previous_game_state
-            elif self.game_state == GameStates.TARGETING:
-                player_turn_results.append({'targeting_cancelled': True})
+                self.using_item = None
             elif self.game_state == GameStates.INVENTORY_SELECT:
                 player_turn_results.append({ResultTypes.CANCEL_TARGET_ITEM_IN_INVENTORY: True})
             elif self.game_state == GameStates.QUEST_ONBOARDING:
@@ -343,9 +344,12 @@ class Rogue(tcod.event.EventDispatch):
         if action == InputTypes.FULLSCREEN:
             tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
+        self.process_results_stack(self.player, player_turn_results, self.player)
+        player_turn_results = []
+
         if self.game_state == GameStates.PLAYER_TURN:
             player_on_turn_results = self.player.on_turn()
-            self.process_results_stack(self.player, player_on_turn_results)
+            self.process_results_stack(self.player, player_on_turn_results, self.player)
 
             if self.player.health.dead:
                 self.game_state = GameStates.GAME_OVER
@@ -453,7 +457,7 @@ class Rogue(tcod.event.EventDispatch):
             self.game_map.current_level.clear_paths()
             for entity in self.game_map.current_level.entities:
                 enemy_turn_results = entity.on_turn()
-                self.process_results_stack(self.player, enemy_turn_results)
+                self.process_results_stack(self.player, enemy_turn_results, entity)
 
                 enemy_turn_results = []
 
@@ -466,7 +470,7 @@ class Rogue(tcod.event.EventDispatch):
                         print(f"Taking turn for {entity}")
                         enemy_turn_results.extend(entity.ai.take_turn(self.game_map))
 
-                    self.process_results_stack(self.player, enemy_turn_results)
+                    self.process_results_stack(self.player, enemy_turn_results, entity)
 
             self.game_state = GameStates.PLAYER_TURN
 
@@ -481,13 +485,13 @@ class Rogue(tcod.event.EventDispatch):
 
         pubsub.pubsub.process_queue(self.game_map)
 
-    def process_results_stack(self, entity, turn_results):
+    def process_results_stack(self, entity, turn_results, current_entity=None):
         #----------------------------------------------------------------------
         # Process the results stack
         #......................................................................
-        # We are done processing player inputs, and may have some results on
-        # the player turn stack.  Process the stack by popping off the top
-        # result from the queue.  There are many different possible results,
+        # We are done processing inputs, and may have some results on
+        # the player turn stack. Process the stack by popping off the top
+        # result from the queue. There are many different possible results,
         # so each is handled with a dedicated handler.
         #
         # Note: Handling a result may result in other results being added to
@@ -509,10 +513,17 @@ class Rogue(tcod.event.EventDispatch):
                 message = result_data
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
+            if result_type == ResultTypes.FOV_RECOMPUTE:
+                self.fov_recompute = True
+
+            if result_type == ResultTypes.END_TURN:
+                self.game_state = GameStates.ENEMY_TURN
+
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
                 self.game_state = result_data.death.npc_death(self.game_map)
-                turn_results = []
+                if current_entity == result_data:
+                    turn_results = []
                 result_data.deregister_turn_all()
 
             if result_type == ResultTypes.TARGET_ITEM_IN_INVENTORY:
@@ -598,19 +609,9 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.REMOVE_ENTITY:
                 self.game_map.current_level.remove_entity(result_data)
 
-            '''
-            if targeting:
+            if result_type == ResultTypes.TARGETING:
+                self.previous_game_state = self.game_state
                 self.game_state = GameStates.TARGETING
-
-                targeting_item = targeting
-
-                self.message_log.add_message(targeting_item.item.targeting_message)
-
-            if targeting_cancelled:
-                self.game_state = self.previous_game_state
-
-                self.message_log.add_message(Message('Targeting cancelled'))
-            '''
 
 current_game = Rogue()
 main_menu = MainMenu()

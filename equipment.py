@@ -18,7 +18,7 @@ from entities.entity import Entity
 
 from game_messages import Message
 
-from tome import cast_confuse, cast_fireball, cast_identify, cast_lightning, heal, cast_mapping
+from tome import cast_confuse, cast_fireball, cast_identify, cast_lightning, heal, cast_mapping, cast_teleport
 
 from equipment_slots import EquipmentSlots
 from etc.enum import DamageType, Interactions, RenderOrder
@@ -99,6 +99,7 @@ def random_scroll(point = None, dungeon_level = 1):
     item_chances['confuse'] = 30
     item_chances['map_scroll'] = 20
     item_chances['identify_scroll'] = 20
+    item_chances['teleport'] = 20
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'lightning':
@@ -115,6 +116,9 @@ def random_scroll(point = None, dungeon_level = 1):
 
     elif choice == 'identify_scroll':
         item = identify_scroll(point)
+
+    elif choice == 'teleport':
+        item = teleport_scroll(point)
 
     return item
 
@@ -254,11 +258,17 @@ def lighting_scroll(point = None):
 
 def fireball_scroll(point = None):
     #create a fireball scroll
-    item_component = Item(use_function=cast_fireball, targeting=True, targeting_message=Message(
-                        'Left-click a target tile for the fireball, or right-click to cancel.', tcod.light_cyan),
-                                          number_of_dice=3, type_of_dice=6, radius=3)
+    usable = ScrollUsable(scroll_name="Fireball Scroll",
+                            scroll_spell=cast_fireball,
+                            number_of_die=3,
+                            type_of_die=6,
+                            radius=3,
+                            targets_inventory=False)
+    usable.needs_target = True
+    usable.targeting_message = Message('Left-click a target tile for the fireball, or right-click to cancel.', tcod.light_cyan)
+
     item = Entity(point, '#', 'Fireball Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                                  item=item_component)
+                                  item=Item(), usable=usable)
 
     return item
 
@@ -272,8 +282,16 @@ def confusion_scroll(point = None):
     return item
 
 def identify_scroll(point = None):
-    usable = ScrollUsable(scroll_name="Identify Scroll", scroll_spell=cast_identify)
-    usable.needs_target = True
+    usable = ScrollUsable(scroll_name="Identify Scroll", scroll_spell=cast_identify, targets_inventory=True)
+
+    item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
+
+    return item
+
+def teleport_scroll(point = None):
+    usable = ScrollUsable(scroll_name="Teleport Scroll", scroll_spell=cast_teleport, targets_inventory=False)
+
     item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)
 
