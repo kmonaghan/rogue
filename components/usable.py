@@ -5,6 +5,8 @@ from game_messages import Message
 
 from utils.random_utils import die_roll
 
+from tome import cast_heal
+
 class Usable:
     def __init__(self, name=""):
         self.name = name
@@ -49,12 +51,8 @@ class HealingPotionUsable(Usable):
     def use(self, game_map, user = None, target = None):
         results = []
 
-        if user.health.hp == user.health.max_hp:
-            results.append({ResultTypes.MESSAGE: Message('You are already at full health', COLORS.get('success_text'))})
-        else:
-            user.health.heal(die_roll(self.number_of_die, self.type_of_die))
-            results.append({ResultTypes.MESSAGE: Message('Your wounds start to feel better!', COLORS.get('success_text'))})
-            results.append({ResultTypes.DISCARD_ITEM: self.owner})
+        results.extend(cast_heal(caster=user, target=target, number_of_die=self.number_of_die, type_of_die=self.type_of_die))
+        results.append({ResultTypes.DISCARD_ITEM: self.owner})
 
         return results
 

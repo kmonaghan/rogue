@@ -22,22 +22,21 @@ CONFUSE_RANGE = 8
 CONFUSE_NUM_TURNS = 10
 FIREBALL_RADIUS = 3
 
-def heal(*args, **kwargs):
-    entity = args[0]
+def cast_heal(*args, **kwargs):
     number_of_die = kwargs.get('number_of_die')
     type_of_die = kwargs.get('type_of_die')
+    caster = kwargs.get('caster')
     target = kwargs.get('target')
 
     results = []
 
-    if entity.health.hp == entity.health.max_hp:
-        results.append({ResultTypes.MESSAGE: Message('You are already at full health', COLORS.get('neutral_text'))})
+    if target.health.hp == target.health.max_hp:
+        results.append({ResultTypes.MESSAGE: Message(f"{target.name} is already at full health.", COLORS.get('neutral_text'))})
     else:
-        entity.health.heal(die_roll(number_of_die, type_of_die))
-        results.append({ResultTypes.MESSAGE: Message('Your wounds start to feel better!', COLORS.get('success_text'))})
+        target.health.heal(die_roll(number_of_die, type_of_die))
+        results.append({ResultTypes.MESSAGE: Message(f"{target.name} wounds start to close up.", COLORS.get('success_text'))})
 
     return results
-
 
 def cast_lightning(*args, **kwargs):
     caster = args[0]

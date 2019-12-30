@@ -286,7 +286,7 @@ class Rogue(tcod.event.EventDispatch):
             if self.game_state == GameStates.INVENTORY_USE:
                 if item.usable:
                     self.using_item = item
-                    player_turn_results.extend(item.usable.use(self.game_map, self.player))
+                    player_turn_results.extend(item.usable.use(self.game_map, self.player, self.player))
                 else:
                     player_turn_results.extend([{ResultTypes.EQUIP: item}])
 
