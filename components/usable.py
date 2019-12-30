@@ -51,7 +51,7 @@ class HealingPotionUsable(Usable):
     def use(self, game_map, user = None, target = None):
         results = []
 
-        results.extend(cast_heal(caster=user, target=target, number_of_die=self.number_of_die, type_of_die=self.type_of_die))
+        results.extend(cast_heal(caster=user, target=user, number_of_die=self.number_of_die, type_of_die=self.type_of_die))
         results.append({ResultTypes.DISCARD_ITEM: self.owner})
 
         return results
