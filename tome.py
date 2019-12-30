@@ -205,5 +205,7 @@ def cast_identify(*args, **kwargs):
         target.identifiable.identified = True
 
     results.append({ResultTypes.MESSAGE: Message(f"The item is a {target.name}", COLORS.get('effect_text'))})
+    if target.identifiable.common_ident:
+        results.append({ResultTypes.COMMON_IDENT: target.base_name})
 
     return results

@@ -9,7 +9,7 @@ from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
 from components.ablity import ExtraDamage, Poisoning, PushBack
 from components.equippable import Equippable
-from components.identifiable import Identifiable
+from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
 from components.item import Item
 from components.regeneration import Regeneration
 from components.usable import AntidoteUsable, DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
@@ -21,6 +21,11 @@ from game_messages import Message
 
 from equipment_slots import EquipmentSlots
 from etc.enum import DamageType, Interactions, RenderOrder
+from utils.utils import resource_path
+
+identified_items = {}
+potion_descriptions = {}
+potion_random_details = False
 
 def random_armour(point = None, dungeon_level = 1):
     item_chances = {}
@@ -152,6 +157,8 @@ def random_magic_weapon(dungeon_level = 1):
 
     dice = randint(1, 1000)
 
+    item.add_component(IdentifiableWeapon(item.base_name),"identifiable")
+
     if (dice <= 500):
         item.base_name = item.base_name + " of Stabby Stabby"
         item.color = COLORS.get('equipment_uncommon')
@@ -171,8 +178,6 @@ def random_magic_weapon(dungeon_level = 1):
 
     item.equippable.number_of_dice = 2
 
-    item.add_component(Identifiable(),"identifiable")
-
     add_random_ablity(item)
 
     return item
@@ -182,7 +187,11 @@ def add_random_ablity(item):
 
     if dice <=40:
         return
-    elif dice <= 60:
+
+    if not item.identifiable:
+        item.add_component(IdentifiableWeapon(item.base_name),"identifiable")
+
+    if dice <= 60:
         add_poison(item, 1, 10)
     elif dice <= 80:
         add_shocking(item)
@@ -223,35 +232,58 @@ def ring_of_regeneration(point = None):
                         equippable=equippable_component)
     return item
 
+def potion_description(item):
+    global potion_random_details
+
+    description = potion_descriptions.get(item.base_name)
+    if not description:
+        if not potion_random_details:
+            tcod.namegen_parse(resource_path("data/liquids.txt"))
+            potion_random_details = True
+        description = {}
+        description['container'] = tcod.namegen_generate('potion_container')
+        description['liquid_color'] = tcod.namegen_generate('potion_colours')
+        description['liquid_type'] = tcod.namegen_generate('potion_texture')
+        potion_descriptions[item.base_name] = description
+
+    item.add_component(IdentifiablePotion(container=description['container'],
+                                            liquid_color=description['liquid_color'],
+                                            liquid_type=description['liquid_type']),
+                                            "identifiable")
+
+    return item
+
 def antidote_potion(point = None):
     item = Entity(point, '!', 'Antidote', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=AntidoteUsable())
 
-    return item
+    return potion_description(item)
 
 def healing_potion(point = None):
     item = Entity(point, '!', 'Healing Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=HealingPotionUsable())
 
-    return item
+    return potion_description(item)
 
 def power_potion(point = None):
     item = Entity(point, '!', 'Power Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=PowerPotionUsable())
 
-    return item
+    return potion_description(item)
 
 def defence_potion(point = None):
     item = Entity(point, '!', 'Defence Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=DefencePotionUsable())
 
-    return item
+    return potion_description(item)
 
 def lighting_scroll(point = None):
     #create a lightning bolt scroll
     item_component = Item(use_function=tome.cast_lightning, number_of_dice=2, type_of_dice=10, maximum_range=5)
     item = Entity(point, '#', 'Lightning Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=item_component)
+
+    item.add_component(IdentifiableScroll(), "identifiable")
 
     return item
 
@@ -269,6 +301,8 @@ def fireball_scroll(point = None):
     item = Entity(point, '#', 'Fireball Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                                   item=Item(), usable=usable)
 
+    item.add_component(IdentifiableScroll(), "identifiable")
+
     return item
 
 def confusion_scroll(point = None):
@@ -278,6 +312,8 @@ def confusion_scroll(point = None):
     item = Entity(point, '#', 'Confusion Scroll', tcod.light_yellow, render_order=RenderOrder.ITEM,
                     item=item_component)
 
+    item.add_component(IdentifiableScroll(), "identifiable")
+
     return item
 
 def identify_scroll(point = None):
@@ -285,6 +321,8 @@ def identify_scroll(point = None):
 
     item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)
+
+    item.add_component(IdentifiableScroll(), "identifiable")
 
     return item
 
@@ -294,6 +332,8 @@ def teleport_scroll(point = None):
     item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)
 
+    item.add_component(IdentifiableScroll(), "identifiable")
+
     return item
 
 def map_scroll(point = None):
@@ -301,6 +341,8 @@ def map_scroll(point = None):
 
     item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)
+
+    item.add_component(IdentifiableScroll(), "identifiable")
 
     return item
 

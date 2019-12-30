@@ -10,6 +10,7 @@ from etc.configuration import CONFIG
 from etc.enum import (
     ResultTypes, InputTypes, GameStates, LevelUp, StairOption,
     INVENTORY_STATES, INPUT_STATES, CANCEL_STATES, Interactions)
+from equipment import identified_items, potion_descriptions
 
 from game_messages import MessageLog
 
@@ -94,6 +95,8 @@ class Rogue(tcod.event.EventDispatch):
         self.fov_recompute = True
 
         quest.active_quests = []
+        identified_items = {}
+        potion_descriptions = {}
 
         self.game_state = GameStates.PLAYER_TURN
         self.previous_game_state = None
@@ -408,6 +411,8 @@ class Rogue(tcod.event.EventDispatch):
                 pickup = False
                 for entity in entities:
                     if entity.item:
+                        if entity.identifiable and identified_items.get(entity.base_name):
+                            entity.identifiable.identified = True
                         player_turn_results.extend([{
                             ResultTypes.ADD_ITEM_TO_INVENTORY: entity
                         }])
@@ -612,6 +617,10 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.TARGETING:
                 self.previous_game_state = self.game_state
                 self.game_state = GameStates.TARGETING
+
+            if result_type == ResultTypes.COMMON_IDENT:
+                print('result_data')
+                identified_items[result_data] = True
 
 current_game = Rogue()
 main_menu = MainMenu()

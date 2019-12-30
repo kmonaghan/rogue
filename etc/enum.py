@@ -184,6 +184,7 @@ class ResultTypes(Enum):
     ADD_ITEM_TO_INVENTORY = auto()
     CHANGE_SWIM_STAMINA = auto()
     CONFUSE = auto()
+    COMMON_IDENT = auto()
     DAMAGE = auto()
     DEAD_ENTITY = auto()
     DEATH_MESSAGE = auto()

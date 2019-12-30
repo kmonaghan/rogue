@@ -1,0 +1,17 @@
+name "potion_container" {
+  syllablesStart = "glass, clay, crystal,"
+  syllablesEnd = "jar, vial, bottle, gourd,"
+  rules = "%25$s_$e, $e"
+}
+
+name "potion_colours" {
+  syllablesStart = "brash, light, deep, hazy, delicate, gelatinous,"
+  syllablesEnd = "red, blue, green, azure, copper, purple,"
+  rules = "%25$s_$e, $e"
+}
+
+name "potion_texture" {
+  syllablesEnd = "viscous, thick, sludgy, thin, watery, airy, bubbly,"
+  "slimy, oily, chunky, milky,"
+  rules = "$e"
+}
