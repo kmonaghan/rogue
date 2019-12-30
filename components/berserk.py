@@ -42,7 +42,8 @@ class Berserk:
                 ResultTypes.MESSAGE: Message('{0} has regained their composure'.format(self.owner.name.title()), COLORS.get('effect_text'))
             })
             self.owner.health.base_max_hp -= self.health_modifier
-            results.extend(self.owner.health.take_damage(self.health_modifier))
+            damage_results, total_damage = self.owner.health.take_damage(self.health_modifier)
+            results.extend(damage_results)
 
             self.owner.deregister_turn(self.uuid)
 

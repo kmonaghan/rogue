@@ -77,10 +77,11 @@ class ExtraDamage(Ablity):
         results = []
 
         damage = die_roll(self.number_of_dice, self.type_of_dice)
-
-        msg_text = f"{{0}} takes {{1}} {self.name} damage."
+        damage_results, total_damage = target.health.take_damage(damage, source, self.damage_type)
+        msg_text = f"{{0}} takes {{1}} {self.name} total_damage."
         msg = Message(msg_text.format(target.name, str(damage)), COLORS.get('damage_text'))
-        results.extend(target.health.take_damage(damage, source, self.damage_type))
+
+        results.extend(damage_results)
         results.extend([{ResultTypes.MESSAGE: msg}])
 
         return results

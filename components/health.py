@@ -32,8 +32,10 @@ class Health:
     def take_damage(self, amount, npc = None, type=DamageType.DEFAULT):
         results = []
 
+        total_damage = 0
+
         if self.dead:
-            return results
+            return results, total_damage
 
         if self.owner.resistance:
             amount = floor(amount * self.owner.resistance.modifier(type))
@@ -41,7 +43,9 @@ class Health:
         if self.owner.vulnerability:
             amount = floor(amount * self.owner.vulnerability.modifier(type))
 
-        results.append({ResultTypes.DAMAGE: min(self.hp, amount)})
+        total_damage = min(self.hp, amount)
+        
+        results.append({ResultTypes.DAMAGE: total_damage})
         self.hp -= amount
 
         if self.dead:
@@ -56,7 +60,7 @@ class Health:
         elif npc and self.owner.ai:
             self.owner.ai.set_target(npc)
 
-        return results
+        return results, total_damage
 
     def heal(self, amt):
         results = []

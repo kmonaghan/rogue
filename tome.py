@@ -2,7 +2,9 @@ from random import randint
 
 import numpy as np
 
-from components.ai import ConfusedNPC
+import bestiary
+
+from components.ai import (BasicNPC, ConfusedNPC)
 
 from map_objects.point import Point
 
@@ -87,7 +89,8 @@ def cast_fireball(*args, **kwargs):
     for entity in game_map.current_level.entities:
         if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.health:
             damage = die_roll(number_of_die, type_of_die)
-            results.extend(entity.health.take_damage(damage, caster, DamageType.FIRE))
+            damage_results, total_damage = entity.health.take_damage(damage, caster, DamageType.FIRE)
+            results.extend(damage_results)
 
     return results
 
@@ -156,10 +159,29 @@ def cast_teleport(*args, **kwargs):
     results = []
 
     point = game_map.current_level.find_random_open_position()
+    orginal_point = caster.point
     caster.movement.place(point.x, point.y, game_map.current_level)
 
     results.append({ResultTypes.MESSAGE: Message('You feel like you are torn apart and put back together again.', COLORS.get('success_text'))})
     results.append({ResultTypes.FOV_RECOMPUTE: True})
+
+    chance_of_teleport_going_wrong = randint(1, 100)
+
+    if (chance_of_teleport_going_wrong >= 99):
+        clone = bestiary.create_player()
+        clone_point = game_map.current_level.find_random_open_position()
+        clone.set_point(clone_point)
+        clone.char = 'C'
+        clone.base_name = 'Clone of ' + clone.base_name
+        clone.add_component(BasicNPC(), 'ai')
+        clone.ai.set_target(caster)
+        clone.ai.tree.namespace["target_point"] = caster.point
+        game_map.current_level.add_entity(clone)
+        results.append({ResultTypes.MESSAGE: Message(f"You feel as if you are split in two.", COLORS.get('damage_text'))})
+
+    elif (chance_of_teleport_going_wrong >= 90):
+        damage_results, total_damage = caster.health.take_damage(die_roll(1, 6, int(orginal_point.distance_to(point))))
+        results.append({ResultTypes.MESSAGE: Message(f"You take {str(total_damage)} damage.", COLORS.get('damage_text'))})
 
     return results
 

@@ -20,9 +20,10 @@ class Poisoned:
             self.end()
             return results
 
-        results.extend(self.owner.health.take_damage(self.damage_per_turn))
+        damage_results, total_damage = self.owner.health.take_damage(self.damage_per_turn)
+        results.extend(damage_results)
         results.append({
-            ResultTypes.MESSAGE: Message('The poison does {0} damage to {1}'.format(self.damage_per_turn ,self.owner.name.title()), COLORS.get('damage_text'))
+            ResultTypes.MESSAGE: Message('The poison does {0} damage to {1}'.format(total_damage ,self.owner.name.title()), COLORS.get('damage_text'))
         })
 
         if (self.duration == 0):
