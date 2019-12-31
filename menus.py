@@ -56,7 +56,7 @@ def menu2(title, header, options, width, screen_width, screen_height):
 
     con.print_box(
         1,
-        1,
+        2,
         con.width - 2,
         header_height,
         header,
@@ -90,22 +90,29 @@ def inventory_menu(header, player, width, screen_width, screen_height, exclude =
         current_items = player.inventory.items.copy()
         for item in exclude:
             current_items.remove(item)
-            
+
         for item in current_items:
+            formated_name = item.name
             if player.equipment.main_hand == item:
-                options.append(['{0} (in main hand)'.format(item.name), item.color])
+                formated_name += ' (in main hand)'
             elif player.equipment.off_hand == item:
-                options.append(['{0} (in off hand)'.format(item.name), item.color])
+                formated_name += ' (in off hand)'
             elif player.equipment.chest == item:
-                options.append(['{0} (on chest)'.format(item.name), item.color])
+                formated_name += ' (on chest)'
             elif player.equipment.head == item:
-                options.append(['{0} (on head)'.format(item.name), item.color])
+                formated_name += ' (on head)'
             elif player.equipment.left_ring_finger == item:
-                options.append(['{0} (on left hand)'.format(item.name), item.color])
+                formated_name += ' (on left hand)'
             elif player.equipment.right_ring_finger == item:
-                options.append(['{0} (on right hand)'.format(item.name), item.color])
+                formated_name += ' (on right hand)'
+
+            if item.identifiable and not item.identifiable.identified:
+                item_colour = tcod.red
+                formated_name += ' (identifiable)'
             else:
-                options.append([item.name, item.color])
+                item_colour = item.color
+
+            options.append([formated_name, item_colour])
 
     return menu2('Inventory', header, options, width, screen_width, screen_height)
 
