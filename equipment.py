@@ -102,7 +102,7 @@ def random_scroll(point = None, dungeon_level = 1):
     item_chances['fireball'] = 30
     item_chances['confuse'] = 30
     item_chances['map_scroll'] = 20
-    item_chances['identify_scroll'] = 20
+    item_chances['identify'] = 20
     item_chances['teleport'] = 20
 
     choice = random_choice_from_dict(item_chances)
@@ -118,7 +118,7 @@ def random_scroll(point = None, dungeon_level = 1):
     elif choice == 'map_scroll':
         item = map_scroll(point)
 
-    elif choice == 'identify_scroll':
+    elif choice == 'identify':
         item = identify_scroll(point)
 
     elif choice == 'teleport':
