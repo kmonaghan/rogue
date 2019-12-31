@@ -128,15 +128,23 @@ def level_cavern_rooms(map_width, map_height):
     return dm
 
 def roomsLevel(dm, x, y):
+    square_height = dm.width // 3
+
     x1, y1, room = placeStairRoom(dm, x, y, name="entrance", add_door = True)
 
-    placePrefabs(dm)
+    tempgrid = dm.grid.copy()
+    tempgrid[x1-(square_height//2):x1+(square_height//2), y1-(square_height//2):y1+(square_height//2)] = Tiles.IMPENETRABLE
+    tempgrid[:, -4:dm.width] = Tiles.IMPENETRABLE
+    tempgrid[-4:dm.width] = Tiles.IMPENETRABLE
+    empties = np.where(tempgrid == 0)
 
-    dm.placeRandomRooms(5, 15, 2, 2, add_door = True, add_walls = True, attempts=5000)
+    tile_index = randint(0, len(empties[0])-1)
 
-    prefab = Prefab(stair_room)
-    room = dm.placeRoomRandomly(prefab, overwrite=False)
-    room.name = "exit"
+    placeStairRoom(dm, empties[0][tile_index], empties[1][tile_index], name="exit", add_door = True)
+
+    placePrefabs(dm, overwrite=False)
+
+    dm.placeRandomRooms((square_height//4), square_height-2, 2, 2, add_door = True, add_walls = True, attempts=5000)
 
     for i in range (5):
         x, y = dm.findEmptySpace()
@@ -148,33 +156,15 @@ def roomsLevel(dm, x, y):
 
     dm.connectRooms()
 
-    stairs = np.where(dm.grid == Tiles.STAIRS_FLOOR)
-    if len(stairs[0]) < 2:
-        raise MapNotEnoughExitsError
-
-    corridors = np.where(dm.grid == Tiles.CORRIDOR_FLOOR)
-
-    weights = [(Tiles.POTENTIAL_CORRIDOR_FLOOR, 1),
-                (Tiles.CORRIDOR_FLOOR, 1),
-                (Tiles.ROOM_FLOOR, 1),
-                (Tiles.CAVERN_FLOOR, 1),
-                (Tiles.CAVERN_WALL, 3),
-                (Tiles.EMPTY, 7),
-                (Tiles.ROOM_WALL, 9),
-            ]
-
-    dm.route_between(stairs[0][0], stairs[0][1], corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
-    dm.route_between(stairs[1][0], stairs[1][1], corridors[0][0], corridors[1][0], avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
-
     dm.cleanUpMap()
 
-def placePrefabs(dm):
-    number_of_prefabs = randint(0, 2)
+def placePrefabs(dm, overwrite=True):
+    number_of_prefabs = randint(0, len(list_of_prefabs)-1)
 
     for x in range(number_of_prefabs):
         prefab = Prefab(choice(list_of_prefabs))
 
-        room = dm.placeRoomRandomly(prefab)
+        room = dm.placeRoomRandomly(prefab, overwrite=overwrite)
 
     return dm
 
@@ -331,3 +321,41 @@ def placeStairRoom(dm, x, y, overlap = True, name="", add_door = False):
     dm.grid[x1,y1] = Tiles.STAIRS_FLOOR
 
     return x, y, placed
+
+def squares(dm, x, y):
+    square_height = dm.width // 3
+
+    #dm.grid[square_height] = Tiles.IMPENETRABLE
+    #dm.grid[square_height*2] = Tiles.IMPENETRABLE
+    #dm.grid[:, square_height] = Tiles.IMPENETRABLE
+    #dm.grid[:, square_height*2] = Tiles.IMPENETRABLE
+
+    x1, y1, room = placeStairRoom(dm, x, y, name="entrance", add_door = True)
+
+    tempgrid = dm.grid.copy()
+    tempgrid[x1-(square_height//2):x1+(square_height//2), y1-(square_height//2):y1+(square_height//2)] = Tiles.IMPENETRABLE
+    tempgrid[:, -4:dm.width] = Tiles.IMPENETRABLE
+    tempgrid[-4:dm.width] = Tiles.IMPENETRABLE
+    empties = np.where(tempgrid == 0)
+
+    tile_index = randint(0, len(empties[0])-1)
+
+    placeStairRoom(dm, empties[0][tile_index], empties[1][tile_index], name="exit", add_door = True)
+
+    placePrefabs(dm, overwrite=False)
+
+    dm.placeRandomRooms((square_height//4), square_height-2, 2, 2, add_door = True, add_walls = True, attempts=5000)
+
+    for i in range (5):
+        x, y = dm.findEmptySpace()
+
+        if not x and not y:
+            continue
+        else:
+            dm.generateCorridors(x = x, y = y)
+
+    dm.connectRooms()
+
+    dm.cleanUpMap()
+
+    return dm

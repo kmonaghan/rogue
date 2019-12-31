@@ -1,7 +1,7 @@
 import tcod
 
 screen_width = 71
-screen_height = 51
+screen_height = 56
 bar_width = 20
 panel_height = 10
 info_panel_width = bar_width + 4
@@ -21,7 +21,7 @@ CONFIG = {
     'message_panel_width': message_panel_width,
     'message_width': message_panel_width - 2,
     'message_height': panel_height - 2,
-    'map_width': screen_width,
+    'map_width': 45,
     'map_height': screen_height - panel_height - 1,
 
     'fov_algorithm': tcod.FOV_RESTRICTIVE,
