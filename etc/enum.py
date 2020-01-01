@@ -225,7 +225,7 @@ class ResultTypes(Enum):
     CURSOR_MODE = 98
 
 class RenderOrder(Enum):
-    FOLIAGE = auto()
+    TERRAIN = auto()
     STAIRS = auto()
     CORPSE = auto()
     ITEM = auto()
@@ -287,6 +287,9 @@ BLOCKING_TILES = {
     Tiles.CORRIDOR_WALL, Tiles.ROOM_WALL,
     Tiles.DEEP_WATER, Tiles.IMPENETRABLE
 }
+
+SHIMMERING_TILES = [
+    Tiles.SHALLOW_WATER]
 
 class TreeStates(Enum):
     SUCCESS = auto()

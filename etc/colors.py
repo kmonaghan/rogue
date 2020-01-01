@@ -1,4 +1,5 @@
 import tcod
+import random
 
 COLORS = {
     'light_default': tcod.dark_grey,
@@ -126,3 +127,21 @@ STATUS_BAR_COLORS = {
         'string_color': tcod.white
     }
 }
+
+def random_light_shallow_water():
+    dr = int(random.uniform(-10, 10))
+    dg = int(random.uniform(-10, 10))
+    db = int(random.uniform(-10, 10))
+    return (64 + dr, 164 + dg, 223 + db)
+
+def random_dark_shallow_water():
+    dr = int(random.uniform(-10, 10))
+    dg = int(random.uniform(-10, 10))
+    db = int(random.uniform(-10, 10))
+    return (71 + dr, 128 + dg, 161 + db)
+
+def random_light_deep_water():
+    return tcod.dark_blue
+
+def random_dark_deep_water():
+    return tcod.darkest_blue

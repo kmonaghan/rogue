@@ -9,7 +9,7 @@ from entities.entity_list import EntityList
 
 from etc.colors import COLORS
 from etc.configuration import CONFIG
-from etc.enum import RoutingOptions, Tiles, WALKABLE_TILES
+from etc.enum import RoutingOptions, Tiles, WALKABLE_TILES, SHIMMERING_TILES
 
 from map_objects.point import Point
 from map_objects.tile import (CavernFloor, CavernWall, CorridorFloor,
@@ -65,6 +65,8 @@ class LevelMap(Map):
         self.dijkstra_flee = None
 
         self.rooms = rooms
+
+        self.should_shimmer = 0
 
     @property
     def caves(self):
@@ -179,6 +181,18 @@ class LevelMap(Map):
 
     def update_and_draw_all(self, map_console, player):
         map_console.clear()
+
+        if self.should_shimmer > 5:
+            shimmering = np.isin(self.grid, [Tiles.SHALLOW_WATER])
+            shimmer_list = np.where(shimmering)
+            for idx, x in enumerate(shimmer_list[0]):
+                y = shimmer_list[1][idx]
+
+                self.dark_map_bg[x,y] = self.tiles[x][y].fov_shimmer
+                self.light_map_bg[x,y] = self.tiles[x][y].out_of_fov_shimmer
+                self.should_shimmer = 0
+        else:
+            self.should_shimmer += 1
 
         if not CONFIG.get('debug'):
             where_fov = np.where(self.fov[:])
