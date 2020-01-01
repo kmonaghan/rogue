@@ -109,6 +109,9 @@ class GameMap:
         self.fill_prefab(player)
 
     def test_popluate_map(self, player):
+        point = self.current_level.find_random_open_position()
+        item = equipment.healing_potion(point)
+        self.current_level.add_entity(item)
 
         self.place_doors()
 
@@ -161,7 +164,6 @@ class GameMap:
 
         npc.questgiver.add_quest(q)
         self.current_level.add_entity(npc)
-
         #Snakes and Rats
         for i in range(10):
             snake = bestiary.generate_creature(Species.SNAKE, self.dungeon_level, player.level.current_level)
@@ -179,7 +181,7 @@ class GameMap:
             point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
             nest.set_point(point)
             self.current_level.add_entity(nest)
-
+        
     def levelGeneric(self, player):
         if len(self.current_level.caves) > 0:
             self.place_creatures(player)
@@ -268,10 +270,9 @@ class GameMap:
                 all_doors = self.current_level.find_tile_within_room(room, Tiles.DOOR)
 
                 door_entities = self.current_level.entities.get_entities_in_position((all_doors[0][0], all_doors[1][0]))
-                door_entities[0].blocks = True
-                door_entities[0].add_component(Locked(requires_key=True), 'locked')
+                key = buildings.make_lockable(door_entities[0])
                 point = self.current_level.find_random_open_position()
-                key = equipment.key(point, door_entities[0])
+                key.set_point(point)
                 self.current_level.add_entity(key)
             elif room.name == "barracks":
                 point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
