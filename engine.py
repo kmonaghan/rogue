@@ -68,8 +68,8 @@ class Rogue(tcod.event.EventDispatch):
         self.game_map = None
         self.fov_recompute = True
         self.map_console = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('map_height'), 'F')
-        self.info_console = tcod.console.Console(CONFIG.get('info_panel_width'), CONFIG.get('panel_height'), 'F')
-        self.message_console = tcod.console.Console(CONFIG.get('message_panel_width'), CONFIG.get('panel_height'), 'F')
+        self.info_console = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('info_panel_height'), 'F')
+        self.message_console = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('message_panel_height'), 'F')
         self.menu_console = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('map_height'), 'F')
         self.game_state = GameStates.PLAYER_TURN
         self.previous_game_state = None
@@ -141,12 +141,12 @@ class Rogue(tcod.event.EventDispatch):
         self.map_console.blit(root_console, 0, 0, 0, 0,
                           self.map_console.width, self.map_console.height)
 
-        root_console.print(1, CONFIG.get('panel_y') - 1, get_names_under_mouse(self.motion.tile.x, self.motion.tile.y, self.game_map.current_level), tcod.white)
+        root_console.print(1, CONFIG.get('info_panel_y') - 1, get_names_under_mouse(self.motion.tile.x, self.motion.tile.y, self.game_map.current_level), tcod.white)
 
-        self.info_console.blit(root_console, 0, CONFIG.get('panel_y'), 0, 0,
-                          CONFIG.get('info_panel_width'), CONFIG.get('panel_height'))
-        self.message_console.blit(root_console, CONFIG.get('info_panel_width'), CONFIG.get('panel_y'), 0, 0,
-                          CONFIG.get('message_panel_width'), CONFIG.get('panel_height'))
+        self.info_console.blit(root_console, 0, CONFIG.get('info_panel_y'), 0, 0,
+                          CONFIG.get('full_screen_width'), CONFIG.get('info_panel_height'))
+        self.message_console.blit(root_console, 0, CONFIG.get('message_panel_y'), 0, 0,
+                          CONFIG.get('full_screen_width'), CONFIG.get('message_panel_height'))
 
         if self.game_state in INPUT_STATES:
             #---------------------------------------------------------------------
@@ -418,6 +418,8 @@ class Rogue(tcod.event.EventDispatch):
     def npc_actions(self):
         self.game_map.current_level.clear_paths()
         for entity in self.game_map.current_level.entities:
+            if entity == self.player:
+                continue
             entity.energy.increase_energy()
             if entity.energy.take_action():
                 enemy_turn_results = entity.on_turn()
@@ -451,8 +453,9 @@ class Rogue(tcod.event.EventDispatch):
 
         if (action == InputTypes.INVENTORY_INDEX
             and self.previous_game_state != GameStates.GAME_OVER
-            and action_value <= len(self.player.inventory.items)):
+            and action_value < len(self.player.inventory.items)):
 
+            print(f"action_value: {action_value} > {len(self.player.inventory.items)}")
             items = self.player.inventory.items.copy()
 
             if self.using_item:
@@ -511,8 +514,11 @@ class Rogue(tcod.event.EventDispatch):
 
             self.player.energy.increase_energy()
             if self.player.energy.can_act:
+                print("-"*20)
                 self.game_state = GameStates.PLAYER_TURN
+                break
             else:
+                print("="*20)
                 sleep(0.1)
                 self.on_draw()
                 tcod.console_flush()

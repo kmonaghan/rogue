@@ -26,17 +26,17 @@ def get_names_under_mouse(x, y, current_level):
     return tile_description + location + ' ' + names
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
-    bar_width = int(float(value) / maximum * total_width)
+    bar_width = int(float(value / maximum) * total_width)
 
     if (bar_width > total_width):
         bar_width = total_width
 
-    panel.bg[1:total_width, y] = back_color
+    panel.bg[x:x+total_width, y] = back_color
 
     if bar_width > 0:
-        panel.bg[1:bar_width, y] = bar_color
+        panel.bg[x:x+bar_width, y] = bar_color
 
-    panel.print(x + (total_width // 2), y, '{0}: {1}/{2}'.format(name, value, maximum),
+    panel.print(x + (total_width // 2), y, f"{name} {value}/{maximum}",
                 fg=tcod.white, alignment=tcod.CENTER)
 
 def render_menu_console(game_state, screen_width, screen_height, player, quest_request = None, exclude = []):
@@ -60,7 +60,7 @@ def render_menu_console(game_state, screen_width, screen_height, player, quest_r
         else:
             inventory_title = 'Esc to cancel.\n'
 
-        return inventory_menu(inventory_title, player, 50, screen_width, screen_height, exclude)
+        return inventory_menu(inventory_title, player, 40, screen_width, screen_height, exclude)
     elif game_state == GameStates.QUEST_ONBOARDING:
         return quest_menu('Questing', quest_request, 50, screen_width, screen_height)
     elif game_state == GameStates.QUEST_LIST:
@@ -76,18 +76,20 @@ def render_info_console(info_console, player, game_map):
                 0,
                 info_console.width,
                 info_console.height,
-                "Stats",
+                f"Dungeon level: {game_map.dungeon_level}",
                 False,
                 fg=tcod.white,
                 bg=tcod.black,
             )
-    render_bar(info_console, 1, 2, info_console.width - 2, 'HP', player.health.hp, player.health.max_hp,
-               tcod.light_red, tcod.darker_red)
+    bar_width = (info_console.width - 4) // 2
 
-    render_bar(info_console, 1, 4, info_console.width - 2, 'XP', player.level.current_xp, player.level.experience_to_next_level,
-                   tcod.light_green, tcod.darker_green)
+    render_bar(info_console, 1, 2, bar_width, 'HP',
+                player.health.hp, player.health.max_hp,
+                tcod.light_red, tcod.darker_red)
 
-    info_console.print(1, 6, 'Dungeon level: {0}'.format(game_map.dungeon_level), tcod.white)
+    render_bar(info_console, info_console.width - bar_width - 1, 2, bar_width, 'XP',
+                player.level.current_xp, player.level.experience_to_next_level,
+                tcod.light_green, tcod.darker_green)
 
     return info_console
 
