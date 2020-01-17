@@ -1,6 +1,6 @@
 class Energy:
     def __init__(self, act_energy = 1):
-        self.current_energy = 0
+        self.current_energy = act_energy
         self.act_energy = act_energy
         self.owner = None
 
@@ -10,7 +10,7 @@ class Energy:
 
     def increase_energy(self, amount = 1):
         self.current_energy += amount
-
+    
     def take_action(self):
         if self.can_act:
             self.current_energy = 0

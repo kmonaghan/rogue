@@ -1,5 +1,6 @@
 import tcod
 import tcod.event
+from time import sleep
 
 from bestiary import create_player
 
@@ -205,31 +206,76 @@ class Rogue(tcod.event.EventDispatch):
     def ev_quit(self, event: tcod.event.Quit):
         raise SystemExit()
 
-    def process_turn(self, action, action_value):
-        player_turn_results = []
-
+    def game_actions(self, action, action_value):
         if action == InputTypes.GAME_EXIT:
             self.game_state = GameStates.GAME_EXIT
-            return
+            return True
 
         if action == InputTypes.GAME_SAVE:
             save_game(self.player, self.game_map, message_log, self.game_state, pubsub.pubsub)
-            return
+            return True
 
         if action == InputTypes.GAME_RESTART:
             self.start_fresh_game()
-            return
+            return True
 
         if action == InputTypes.GAME_RESET:
             self.game_map.first_floor(self.player)
             self.start_game()
-            return
+            return True
 
         if action == InputTypes.RELOAD_LEVEL:
             self.game_map.next_floor(self.player)
             self.fov_recompute = True
-            return
+            return True
 
+        return False
+
+    def change_state_action(self, action, action_value):
+        if self.player.level.can_level_up():
+            self.game_state = GameStates.LEVEL_UP
+            return True
+
+        if action == InputTypes.CHARACTER_SCREEN:
+            self.previous_game_state = self.game_state
+            self.game_state = GameStates.CHARACTER_SCREEN
+            return True
+
+        if action == InputTypes.INVENTORY_DROP:
+            self.previous_game_state = self.game_state
+            self.game_state = GameStates.INVENTORY_DROP
+            return True
+
+        if action == InputTypes.INVENTORY_EXAMINE:
+            self.previous_game_state = self.game_state
+            self.game_state = GameStates.INVENTORY_EXAMINE
+            return True
+
+        if action == InputTypes.INVENTORY_THROW:
+            self.previous_game_state = self.game_state
+            self.game_state = GameStates.INVENTORY_THROW
+            return True
+
+        if action == InputTypes.INVENTORY_USE:
+            self.previous_game_state = self.game_state
+            self.game_state = GameStates.INVENTORY_USE
+            return True
+
+        if action == InputTypes.LEVEL_UP:
+            self.player.level.level_up_stats(action_value)
+            self.game_state = self.previous_game_state
+
+        if action == InputTypes.QUEST_LIST:
+            self.previous_game_state = self.game_state
+            self.game_state = GameStates.QUEST_LIST
+            return True
+
+        if action == InputTypes.WAIT:
+            self.game_state = GameStates.ENEMY_TURN
+
+        return False
+
+    def debug_actions(self, action, action_value):
         if action == InputTypes.DEBUG_ON:
             CONFIG.update({'debug': True})
             self.fov_recompute = True
@@ -246,34 +292,162 @@ class Rogue(tcod.event.EventDispatch):
             CONFIG.update({'show_dijkstra_flee': not CONFIG.get('show_dijkstra_flee')})
             self.fov_recompute = True
 
-        if self.player.level.can_level_up():
-            self.game_state = GameStates.LEVEL_UP
+    def menu_actions(self, action, action_value):
+        pass
 
-        if action == InputTypes.WAIT:
-            self.game_state = GameStates.ENEMY_TURN
+    def quest_actions(self, action, action_value):
+        if action == InputTypes.QUEST_RESPONSE:
+            if action_value:
+                self.quest_request.owner.start_quest(self.game_map)
+                self.message_log.add_message(Message(f"Started quest: {self.quest_request.title}", tcod.yellow))
+            self.quest_request = None
+            self.game_state = self.previous_game_state
 
-        '''
-        Menu Options
-        '''
-        if action == InputTypes.CHARACTER_SCREEN:
-            self.previous_game_state = self.game_state
-            self.game_state = GameStates.CHARACTER_SCREEN
+        if (action == InputTypes.QUEST_INDEX
+            and self.previous_game_state != GameStates.GAME_OVER
+            and action_value < len(quest.active_quests)):
+            self.message_log.add_message(quest.active_quests[action_value].status())
+            self.game_state = self.previous_game_state
 
-        if action == InputTypes.INVENTORY_DROP:
-            self.previous_game_state = self.game_state
-            self.game_state = GameStates.INVENTORY_DROP
+    def player_actions(self, action, action_value):
+        self.player.energy.take_action()
 
-        if action == InputTypes.INVENTORY_EXAMINE:
-            self.previous_game_state = self.game_state
-            self.game_state = GameStates.INVENTORY_EXAMINE
+        player_turn_results = []
 
-        if action == InputTypes.INVENTORY_THROW:
-            self.previous_game_state = self.game_state
-            self.game_state = GameStates.INVENTORY_THROW
+        player_on_turn_results = self.player.on_turn()
+        self.process_results_stack(self.player, player_on_turn_results)
 
-        if action == InputTypes.INVENTORY_USE:
-            self.previous_game_state = self.game_state
-            self.game_state = GameStates.INVENTORY_USE
+        if self.player.health.dead:
+            self.game_state = GameStates.GAME_OVER
+        elif action == InputTypes.MOVE:
+            dx, dy = action_value
+            point = Point(self.player.x + dx, self.player.y + dy)
+
+            if self.game_map.current_level.walkable[self.player.x + dx, self.player.y + dy]:
+                if self.game_map.current_level.blocked[self.player.x + dx, self.player.y + dy]:
+                    targets = self.game_map.current_level.entities.get_entities_in_position((self.player.x + dx, self.player.y + dy))
+
+                    targets_in_render_order = sorted(targets, key=lambda x: x.render_order.value, reverse=True)
+                    target = targets_in_render_order[0]
+
+                    if target.interaction.interaction_type == Interactions.QUESTGIVER:
+                        quest_results = target.questgiver.talk(self.player)
+                        player_turn_results.extend(quest_results)
+                    elif target.interaction.interaction_type == Interactions.DOOR:
+                        if target.locked:
+                            can_unlock = False
+
+                            if target.locked.requires_key:
+                                all_keys = self.player.inventory.search(name = 'key')
+                                for key_to_check in all_keys:
+                                    if key_to_check.unlock.unlocks == target.uuid:
+                                        can_unlock = True
+                                        player_turn_results.extend([{ResultTypes.DISCARD_ITEM: key_to_check}])
+                                        break
+                            else:
+                                can_unlock = True
+
+                            if can_unlock:
+                                self.game_map.current_level.remove_entity(target)
+                                target.locked.toggle()
+                                self.game_map.current_level.add_entity(target)
+
+                                message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
+                                player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+                            else:
+                                message = Message(f"The {target.name} is locked.", tcod.yellow)
+                                player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+                    elif target.interaction.interaction_type == Interactions.FOE:
+                        if target.health and not target.health.dead:
+                            attack_results = self.player.offence.attack(target)
+                            player_turn_results.extend(attack_results)
+                else:
+                    self.player.movement.move(dx, dy, self.game_map.current_level)
+                    player_turn_results.extend(quest.check_quest_for_location(self.player))
+
+                    self.fov_recompute = True
+
+                self.game_state = GameStates.ENEMY_TURN
+        elif action == InputTypes.PICKUP:
+            entities = self.game_map.current_level.entities.get_entities_in_position((self.player.x, self.player.y))
+            pickup = False
+            for entity in entities:
+                if entity.item:
+                    if entity.identifiable and identified_items.get(entity.base_name):
+                        entity.identifiable.identified = True
+                    player_turn_results.extend([{
+                        ResultTypes.ADD_ITEM_TO_INVENTORY: entity
+                    }])
+                    pickup = True
+            if not pickup:
+                message = Message('There is nothing here to pick up.', tcod.yellow)
+                player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+        elif action == InputTypes.DOWN_LEVEL:
+            self.game_map.next_floor(self.player)
+            self.fov_recompute = True
+            message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
+            player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+
+            #continue
+            return
+        elif action == InputTypes.TAKE_STAIRS:
+            stair_state = self.game_map.check_for_stairs(self.player.x, self.player.y)
+            if stair_state == StairOption.GODOWN:
+                self.game_map.next_floor(self.player)
+                self.fov_recompute = True
+                message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
+                player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+
+                #continue
+                return
+            elif stair_state == StairOption.GOUP:
+                self.game_map.previous_floor(self.player)
+                self.fov_recompute = True
+
+                return
+            elif stair_state == StairOption.EXIT:
+                self.game_state = GameStates.GAME_PAUSED
+            else:
+                message = Message('There are no stairs here.', tcod.yellow)
+                player_turn_results.extend([{ResultTypes.MESSAGE: message}])
+
+        self.process_results_stack(self.player, player_turn_results)
+
+        pubsub.pubsub.process_queue(self.game_map)
+
+    def npc_actions(self):
+        self.game_map.current_level.clear_paths()
+        for entity in self.game_map.current_level.entities:
+            entity.energy.increase_energy()
+            if entity.energy.take_action():
+                enemy_turn_results = entity.on_turn()
+                self.process_results_stack(entity, enemy_turn_results)
+                enemy_turn_results.clear()
+
+                if entity.health and entity.health.dead:
+                    entity.death.decompose(self.game_map)
+                elif entity.ai:
+                    # Enemies move and attack if possible.
+                    print(f"Taking turn for {entity}")
+                    enemy_turn_results.extend(entity.ai.take_turn(self.game_map))
+
+                    self.process_results_stack(entity, enemy_turn_results)
+                    enemy_turn_results.clear()
+
+                pubsub.pubsub.process_queue(self.game_map)
+
+    def process_turn(self, action, action_value):
+        player_turn_results = []
+
+        if self.game_actions(action, action_value):
+            return
+
+        if self.change_state_action(action, action_value):
+            return
+
+        self.debug_actions(action, action_value)
+
+        self.quest_actions(action, action_value)
 
         if (action == InputTypes.INVENTORY_INDEX
             and self.previous_game_state != GameStates.GAME_OVER
@@ -301,27 +475,6 @@ class Rogue(tcod.event.EventDispatch):
             elif self.game_state == GameStates.INVENTORY_EXAMINE:
                 player_turn_results.extend(self.player.inventory.examine_item(item))
 
-        if action == InputTypes.LEVEL_UP:
-            self.player.level.level_up_stats(action_value)
-            self.game_state = self.previous_game_state
-
-        if action == InputTypes.QUEST_LIST:
-            self.previous_game_state = self.game_state
-            self.game_state = GameStates.QUEST_LIST
-
-        if action == InputTypes.QUEST_RESPONSE:
-            if action_value:
-                self.quest_request.owner.start_quest(self.game_map)
-                self.message_log.add_message(Message(f"Started quest: {self.quest_request.title}", tcod.yellow))
-            self.quest_request = None
-            self.game_state = self.previous_game_state
-
-        if (action == InputTypes.QUEST_INDEX
-            and self.previous_game_state != GameStates.GAME_OVER
-            and action_value < len(quest.active_quests)):
-            selected_quest = quest.active_quests[action_value]
-            self.message_log.add_message(selected_quest.status())
-            self.game_state = self.previous_game_state
 
         if (action == InputTypes.TARGETING
             and self.game_state == GameStates.TARGETING):
@@ -336,152 +489,33 @@ class Rogue(tcod.event.EventDispatch):
             if self.game_state in CANCEL_STATES:
                 self.game_state = self.previous_game_state
                 self.using_item = None
-            elif self.game_state == GameStates.INVENTORY_SELECT:
-                player_turn_results.append({ResultTypes.CANCEL_TARGET_ITEM_IN_INVENTORY: True})
             elif self.game_state == GameStates.QUEST_ONBOARDING:
                 player_turn_results.append({'quest_cancelled': True})
             else:
                 self.game_state = GameStates.GAME_PAUSED
                 return
 
-        if action == InputTypes.FULLSCREEN:
-            tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
-
-        self.process_results_stack(self.player, player_turn_results, self.player)
-        player_turn_results = []
-
-        if self.game_state == GameStates.PLAYER_TURN:
-            player_on_turn_results = self.player.on_turn()
-            self.process_results_stack(self.player, player_on_turn_results, self.player)
-
-            if self.player.health.dead:
-                self.game_state = GameStates.GAME_OVER
-            elif action == InputTypes.MOVE:
-                dx, dy = action_value
-                point = Point(self.player.x + dx, self.player.y + dy)
-
-                if self.game_map.current_level.walkable[self.player.x + dx, self.player.y + dy]:
-                    if self.game_map.current_level.blocked[self.player.x + dx, self.player.y + dy]:
-                        targets = self.game_map.current_level.entities.get_entities_in_position((self.player.x + dx, self.player.y + dy))
-
-                        targets_in_render_order = sorted(targets, key=lambda x: x.render_order.value, reverse=True)
-                        print(targets_in_render_order)
-                        target = targets_in_render_order[0]
-
-                        if target.interaction.interaction_type == Interactions.QUESTGIVER:
-                            quest_results = target.questgiver.talk(self.player)
-                            player_turn_results.extend(quest_results)
-                        elif target.interaction.interaction_type == Interactions.DOOR:
-                            if target.locked:
-                                can_unlock = False
-
-                                if target.locked.requires_key:
-                                    all_keys = self.player.inventory.search(name = 'key')
-                                    for key_to_check in all_keys:
-                                        if key_to_check.unlock.unlocks == target.uuid:
-                                            can_unlock = True
-                                            player_turn_results.extend([{ResultTypes.DISCARD_ITEM: key_to_check}])
-                                            break
-                                else:
-                                    can_unlock = True
-
-                                if can_unlock:
-                                    self.game_map.current_level.remove_entity(target)
-                                    target.locked.toggle()
-                                    self.game_map.current_level.add_entity(target)
-
-                                    message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
-                                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
-                                else:
-                                    message = Message(f"The {target.name} is locked.", tcod.yellow)
-                                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
-                        elif target.interaction.interaction_type == Interactions.FOE:
-                            if target.health and not target.health.dead:
-                                attack_results = self.player.offence.attack(target)
-                                player_turn_results.extend(attack_results)
-                    else:
-                        self.player.movement.move(dx, dy, self.game_map.current_level)
-                        player_turn_results.extend(quest.check_quest_for_location(self.player))
-
-                        self.fov_recompute = True
-
-                    self.game_state = GameStates.ENEMY_TURN
-            elif action == InputTypes.PICKUP:
-                entities = self.game_map.current_level.entities.get_entities_in_position((self.player.x, self.player.y))
-                pickup = False
-                for entity in entities:
-                    if entity.item:
-                        if entity.identifiable and identified_items.get(entity.base_name):
-                            entity.identifiable.identified = True
-                        player_turn_results.extend([{
-                            ResultTypes.ADD_ITEM_TO_INVENTORY: entity
-                        }])
-                        pickup = True
-                if not pickup:
-                    message = Message('There is nothing here to pick up.', tcod.yellow)
-                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
-            elif action == InputTypes.DOWN_LEVEL:
-                self.game_map.next_floor(self.player)
-                self.fov_recompute = True
-                message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
-                player_turn_results.extend([{ResultTypes.MESSAGE: message}])
-
-                #continue
-                return
-            elif action == InputTypes.TAKE_STAIRS:
-                stair_state = self.game_map.check_for_stairs(self.player.x, self.player.y)
-                if stair_state == StairOption.GODOWN:
-                    self.game_map.next_floor(self.player)
-                    self.fov_recompute = True
-                    message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
-                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
-
-                    #continue
-                    return
-                elif stair_state == StairOption.GOUP:
-                    self.game_map.previous_floor(self.player)
-                    self.fov_recompute = True
-
-                    return
-                elif stair_state == StairOption.EXIT:
-                    self.game_state = GameStates.GAME_PAUSED
-                else:
-                    message = Message('There are no stairs here.', tcod.yellow)
-                    player_turn_results.extend([{ResultTypes.MESSAGE: message}])
-
         self.process_results_stack(self.player, player_turn_results)
 
-        pubsub.pubsub.process_queue(self.game_map)
+        #-------------------------------------------------------------------
+        # Player takes their turn.
+        #-------------------------------------------------------------------
+        if self.game_state == GameStates.PLAYER_TURN:
+            self.player_actions(action, action_value)
 
         #-------------------------------------------------------------------
-        # All enemies and terrain take their turns.
+        # NPCs take their turns.
         #-------------------------------------------------------------------
-        enemy_turn_results = []
+        while self.game_state == GameStates.ENEMY_TURN:
+            self.npc_actions()
 
-        if self.game_state == GameStates.ENEMY_TURN:
-            self.game_map.current_level.clear_paths()
-            for entity in self.game_map.current_level.entities:
-                enemy_turn_results = entity.on_turn()
-                self.process_results_stack(self.player, enemy_turn_results, entity)
-
-                enemy_turn_results = []
-
-                if entity.health and entity.health.dead:
-                    entity.death.decompose(self.game_map)
-                elif entity.ai:
-                    # Enemies move and attack if possible.
-                    entity.energy.increase_energy()
-                    if entity.energy.take_action():
-                        print(f"Taking turn for {entity}")
-                        enemy_turn_results.extend(entity.ai.take_turn(self.game_map))
-
-                    self.process_results_stack(self.player, enemy_turn_results, entity)
-
-            self.game_state = GameStates.PLAYER_TURN
-
-        self.process_results_stack(self.player, enemy_turn_results)
-
-        pubsub.pubsub.process_queue(self.game_map)
+            self.player.energy.increase_energy()
+            if self.player.energy.can_act:
+                self.game_state = GameStates.PLAYER_TURN
+            else:
+                sleep(0.1)
+                self.on_draw()
+                tcod.console_flush()
 
         #---------------------------------------------------------------------
         # And done...so broadcast a tick
@@ -490,12 +524,12 @@ class Rogue(tcod.event.EventDispatch):
 
         pubsub.pubsub.process_queue(self.game_map)
 
-    def process_results_stack(self, entity, turn_results, current_entity=None):
+    def process_results_stack(self, entity, turn_results):
         #----------------------------------------------------------------------
         # Process the results stack
         #......................................................................
         # We are done processing inputs, and may have some results on
-        # the player turn stack. Process the stack by popping off the top
+        # the entity turn stack. Process the stack by popping off the top
         # result from the queue. There are many different possible results,
         # so each is handled with a dedicated handler.
         #
@@ -505,7 +539,6 @@ class Rogue(tcod.event.EventDispatch):
         #----------------------------------------------------------------------
         while turn_results != []:
             # Sort the turn results stack by the priority order.
-            #print(turn_results)
             turn_results = sorted(
                 flatten_list_of_dictionaries(turn_results),
                 key = lambda d: get_key_from_single_key_dict(d))
@@ -527,7 +560,7 @@ class Rogue(tcod.event.EventDispatch):
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
                 self.game_state = result_data.death.npc_death(self.game_map)
-                if current_entity == result_data:
+                if entity == result_data:
                     turn_results = []
                 result_data.deregister_turn_all()
 
@@ -552,7 +585,7 @@ class Rogue(tcod.event.EventDispatch):
             # Remove dropped items from inventory and place on the map
             if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
                 self.game_map.current_level.add_entity(result_data)
-                message = Message(f"{entity.name} dropped the {result_data.name}", tcod.yellow)
+                message = Message(f"{entity.name} dropped the {result_data.name}", COLORS.get('success_text'))
                 turn_results.extend([{ResultTypes.MESSAGE: message}])
                 self.game_state = GameStates.ENEMY_TURN
 
@@ -605,7 +638,7 @@ class Rogue(tcod.event.EventDispatch):
                if damage > 0 and not target.movement.move(dx, dy, self.game_map.current_level):
                     damage_results, total_damage = turn_results.extend(target.health.take_damage(damage))
                     msg_text = '{0} crashes into the wall and takes {1} hit points damage.'
-                    message = Message(msg_text.format(target.name, str(total_damage)), tcod.white)
+                    message = Message(msg_text.format(target.name, str(total_damage)), COLORS.get('damage_text'))
                     turn_results.extend([{ResultTypes.MESSAGE: message}])
             # Add a new entity to the game.
             if result_type == ResultTypes.ADD_ENTITY:
@@ -619,7 +652,6 @@ class Rogue(tcod.event.EventDispatch):
                 self.game_state = GameStates.TARGETING
 
             if result_type == ResultTypes.COMMON_IDENT:
-                print('result_data')
                 identified_items[result_data] = True
 
 current_game = Rogue()

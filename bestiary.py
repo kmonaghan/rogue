@@ -56,7 +56,7 @@ def bat(point = None):
 
     creature = Character(point, 'B', 'bat', COLORS.get('bat'),
                     ai=PatrollingNPC(),
-                    species=Species.BAT, health=health_component, act_energy=2)
+                    species=Species.BAT, health=health_component)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -75,7 +75,7 @@ def bountyhunter(point):
     ai_component = TetheredNPC(4, point)
     npc = Character(point, '?', 'Bounty Hunter', COLORS.get('bounty_hunter'),
                     ai=ai_component, interaction=Interactions.QUESTGIVER,
-                    species=Species.NONDESCRIPT, act_energy=2)
+                    species=Species.NONDESCRIPT)
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')
     npc.add_component(Questgiver(), 'questgiver')
@@ -192,6 +192,15 @@ def create_player():
     potion2 = equipment.antidote_potion()
     player.inventory.add_item(potion2)
 
+    scroll5 = equipment.fireball_scroll()
+    player.inventory.add_item(scroll5)
+
+    scroll7 = equipment.map_scroll()
+    player.inventory.add_item(scroll7)
+
+    scroll6 = equipment.teleport_scroll()
+    player.inventory.add_item(scroll6)
+
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
@@ -213,7 +222,7 @@ def fungus(point = None):
     health_component = Health(4)
 
     creature = Character(point, '"', 'fungus', COLORS.get('fungus'),
-                    blocks=False,render_order=RenderOrder.FOLIAGE)
+                    blocks=False,render_order=RenderOrder.TERRAIN)
 
     return creature
 
@@ -224,7 +233,7 @@ def goblin(point = None):
 
     npc = Character(point, 'G', 'goblin', COLORS.get('goblin'),
                     ai=ai_component, species=Species.GOBLIN,
-                    health=health_component, act_energy=2)
+                    health=health_component)
 
     npc.add_component(Offence(base_power = 5), 'offence')
     npc.add_component(Defence(defence = 5), 'defence')
@@ -249,7 +258,7 @@ def necromancer(point = None, dungeon_level=1):
 
     npc = Character(point, 'N', 'necromancer', COLORS.get('necromancer'),
                     ai=ai_component, species=Species.NONDESCRIPT,
-                    health=health_component, act_energy=1)
+                    health=health_component)
 
     npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), 'defence')
@@ -286,7 +295,7 @@ def orc(point = None):
 
     npc = Character(point, 'O', 'orc', COLORS.get('orc'),
                     ai=ai_component, species=Species.ORC,
-                    health=health_component, act_energy=2)
+                    health=health_component)
 
     npc.add_component(Offence(base_power = 10), 'offence')
     npc.add_component(Defence(defence = 4), 'defence')
@@ -307,7 +316,7 @@ def rat(point = None):
 
     creature = Character(point, 'R', 'rat', COLORS.get('rat'),
                     ai=PredatorNPC(species=Species.EGG),
-                    species=Species.RAT, health=health_component, act_energy=2)
+                    species=Species.RAT, health=health_component)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -361,7 +370,7 @@ def skeleton(point = None, old_npc = None):
     else:
         npc = Character(point, 'S', 'skeleton', COLORS.get('skeleton'),
                         ai=ai_component, species=Species.NONDESCRIPT,
-                        health=health_component, act_energy=2)
+                        health=health_component)
 
         npc.add_component(Offence(base_power = 12), 'offence')
         npc.add_component(Defence(defence = 8), 'defence')
@@ -383,7 +392,7 @@ def snake(point = None):
 
     creature = Character(point, 'S', 'snake', COLORS.get('snake'),
                     ai=PredatorNPC(species=Species.RAT),
-                    species=Species.SNAKE, health=health_component, act_energy=2)
+                    species=Species.SNAKE, health=health_component)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')

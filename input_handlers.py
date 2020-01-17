@@ -76,9 +76,6 @@ def handle_player_turn_keys(event):
     elif event.sym == ord('c'):
         return {InputTypes.CHARACTER_SCREEN: True}
 
-    if event.sym == tcod.event.K_RETURN and key.lalt:
-        # Alt+K_RETURN: toggle full screen
-        return {InputTypes.FULLSCREEN: True}
     elif event.sym == tcod.event.K_ESCAPE:
         # Exit the game
         return {InputTypes.EXIT: True}
@@ -144,10 +141,7 @@ def handle_show_quests(event):
     if index >= 0:
         return {InputTypes.QUEST_INDEX: index}
 
-    if event.sym == tcod.event.K_RETURN and key.lalt:
-        # Alt+K_RETURN: toggle full screen
-        return {InputTypes.FULLSCREEN: True}
-    elif event.sym == tcod.event.K_ESCAPE:
+    if event.sym == tcod.event.K_ESCAPE:
         # Exit the menu
         return {InputTypes.EXIT: True}
 

@@ -53,9 +53,9 @@ class GameStates(Enum):
 CANCEL_STATES = {
     GameStates.CHARACTER_SCREEN, GameStates.GAME_PAUSED,
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
-    GameStates.INVENTORY_THROW, GameStates.INVENTORY_USE,
-    GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
-    GameStates.TARGETING,}
+    GameStates.INVENTORY_THROW, GameStates.INVENTORY_SELECT,
+    GameStates.INVENTORY_USE, GameStates.QUEST_LIST,
+    GameStates.QUEST_ONBOARDING, GameStates.TARGETING,}
 
 # Game states where an inventory is displayed.
 INVENTORY_STATES = {
@@ -81,7 +81,6 @@ class InputTypes(Enum):
     DEBUG_OFF = auto()
     DEBUG_ON = auto()
     EXIT = auto()
-    FULLSCREEN = auto()
     GAME_EXIT = auto()
     GAME_LOAD = auto()
     GAME_NEW = auto()
