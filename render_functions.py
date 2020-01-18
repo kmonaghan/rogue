@@ -39,15 +39,15 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     panel.print(x + (total_width // 2), y, f"{name} {value}/{maximum}",
                 fg=tcod.white, alignment=tcod.CENTER)
 
-def render_menu_console(game_state, screen_width, screen_height, player, quest_request = None, exclude = []):
+def render_menu_console(game_state, player, quest_request = None, exclude = []):
     if game_state == GameStates.GAME_PAUSED:
-        return game_paused(60, screen_width, screen_height)
+        return game_paused()
     elif game_state == GameStates.GAME_OVER:
-        return game_over(60, screen_width, screen_height)
+        return game_over()
     elif game_state == GameStates.GAME_COMPLETE:
-        return game_completed(60, screen_width, screen_height)
+        return game_completed()
     elif game_state == GameStates.CHARACTER_SCREEN:
-        return character_screen(player, 30, 10, screen_width, screen_height)
+        return character_screen(player)
     elif game_state in INVENTORY_STATES:
         if game_state == GameStates.INVENTORY_USE:
             inventory_title = 'Press the key next to an item to use it, or Esc to cancel.\n'
@@ -60,13 +60,13 @@ def render_menu_console(game_state, screen_width, screen_height, player, quest_r
         else:
             inventory_title = 'Esc to cancel.\n'
 
-        return inventory_menu(inventory_title, player, 40, screen_width, screen_height, exclude)
+        return inventory_menu(inventory_title, player, exclude)
     elif game_state == GameStates.QUEST_ONBOARDING:
-        return quest_menu('Questing', quest_request, 50, screen_width, screen_height)
+        return quest_menu('Questing', quest_request)
     elif game_state == GameStates.QUEST_LIST:
-        return quest_list_menu('Press the key next to an quest to get details, or Esc to cancel.\n', player, 50, screen_width, screen_height)
+        return quest_list_menu('Press the key next to an quest to get details, or Esc to cancel.\n', player)
     elif game_state == GameStates.LEVEL_UP:
-        return level_up_menu('Level up! Choose a stat to raise:', player, 40, screen_width, screen_height)
+        return level_up_menu('Level up! Choose a stat to raise:', player)
 
 def render_info_console(info_console, player, game_map):
     info_console.clear()

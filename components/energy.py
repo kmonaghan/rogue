@@ -10,7 +10,6 @@ class Energy:
 
     def increase_energy(self, amount = 1):
         self.current_energy += amount
-        print(f"{self.owner.name} energy: {self.current_energy} of {self.act_energy}")
 
     def take_action(self):
         if self.can_act:

@@ -156,12 +156,9 @@ class Rogue(tcod.event.EventDispatch):
             if self.using_item:
                 exclude.append(self.using_item)
 
-            self.menu_console = render_menu_console(self.game_state, CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'), self.player, self.quest_request, exclude)
+            self.menu_console = render_menu_console(self.game_state, self.player, self.quest_request, exclude)
 
-            self.menu_console.blit(root_console,
-                                (root_console.width - self.menu_console.width) // 2,
-                                (root_console.height - self.menu_console.height) // 2,
-                                0, 0,
+            self.menu_console.blit(root_console, 0, 0, 0, 0,
                                 CONFIG.get('full_screen_width'), CONFIG.get('full_screen_height'))
 
     def ev_keydown(self, event: tcod.event.KeyDown):
@@ -455,7 +452,7 @@ class Rogue(tcod.event.EventDispatch):
             and self.previous_game_state != GameStates.GAME_OVER
             and action_value < len(self.player.inventory.items)):
 
-            print(f"action_value: {action_value} > {len(self.player.inventory.items)}")
+            print(f"action_value: {action_value} < {len(self.player.inventory.items)}")
             items = self.player.inventory.items.copy()
 
             if self.using_item:
@@ -514,11 +511,9 @@ class Rogue(tcod.event.EventDispatch):
 
             self.player.energy.increase_energy()
             if self.player.energy.can_act:
-                print("-"*20)
                 self.game_state = GameStates.PLAYER_TURN
                 break
             else:
-                print("="*20)
                 sleep(0.1)
                 self.on_draw()
                 tcod.console_flush()

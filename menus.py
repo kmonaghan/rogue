@@ -2,7 +2,10 @@ import tcod
 
 import quest
 
-def menu(con, header, options, width, screen_width, screen_height):
+from etc.colors import COLORS
+from etc.configuration import CONFIG
+
+def menu(con, header, options, width):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
 
     # calculate total height for the header (after auto-wrap) and one line per option
@@ -31,17 +34,10 @@ def menu(con, header, options, width, screen_width, screen_height):
     y = int(screen_height / 2 - height / 2)
     tcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
-def menu2(title, header, options, width, screen_width, screen_height):
-    header_height = 2 #tcod.console_get_height_rect(con, 0, 0, width - 2, screen_height, header)
-    height = len(options) + header_height + 1
+def ingame_menu(title, header, options):
+    con = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('map_height'), 'F')
 
-    text = ''
-    letter_index = ord('a')
-    for option_text, color in options:
-        text += '(' + chr(letter_index) + ') ' + option_text + "\n"
-        letter_index += 1
-
-    con = tcod.console.Console(width, height + 5, 'F')
+    header_height = con.get_height_rect(1, 1, con.width - 2, 10, header)
 
     con.draw_frame(
         0,
@@ -67,20 +63,29 @@ def menu2(title, header, options, width, screen_width, screen_height):
 
     con.draw_rect(1, header_height+1, con.width - 2, 1, ord('_'), tcod.white)
 
-    con.print_box(
-        1,
-        header_height + 3,
-        con.width - 2,
-        len(options),
-        text,
-        fg=tcod.white,
-        bg=None,
-        alignment=tcod.LEFT,
-    )
+    current_y = header_height + 3
+    letter_index = ord('a')
+    for option_text, color in options:
+        text = '(' + chr(letter_index) + ') ' + option_text
+        letter_index += 1
+        text_height = con.get_height_rect(1, current_y, con.width - 2, 10, text)
+
+        con.print_box(
+            1,
+            current_y,
+            con.width - 2,
+            text_height,
+            text,
+            fg=color,
+            bg=None,
+            alignment=tcod.LEFT,
+        )
+
+        current_y = current_y + text_height
 
     return con
 
-def inventory_menu(header, player, width, screen_width, screen_height, exclude = []):
+def inventory_menu(header, player, exclude = []):
     # show a menu with each item of the inventory as an option
     if len(player.inventory.items) == 0:
         options = [['Inventory is empty.', tcod.white]]
@@ -114,17 +119,17 @@ def inventory_menu(header, player, width, screen_width, screen_height, exclude =
 
             options.append([formated_name, item_colour])
 
-    return menu2('Inventory', header, options, width, screen_width, screen_height)
+    return ingame_menu('Inventory', header, options)
 
-def quest_menu(header, quest, inventory_width, screen_width, screen_height):
+def quest_menu(header, quest):
     # show a menu with each item of the inventory as an option
     header = quest.title + "\n" + quest.description
     options = [['Let\'s go do it!', tcod.white],
                 ['Not right now', tcod.white]]
 
-    return menu2('Quest', header, options, inventory_width, screen_width, screen_height)
+    return ingame_menu('Quest', header, options)
 
-def quest_list_menu(header, player, inventory_width, screen_width, screen_height):
+def quest_list_menu(header, player):
     # show a menu with each item of the inventory as an option
     if len(quest.active_quests) == 0:
         options = [['No active quests.', tcod.white]]
@@ -134,9 +139,9 @@ def quest_list_menu(header, player, inventory_width, screen_width, screen_height
         for q in quest.active_quests:
             options.append([q.title, tcod.white])
 
-    return menu2('Quest', header, options, inventory_width, screen_width, screen_height)
+    return ingame_menu('Quest', header, options)
 
-def main_menu(con, background_image, screen_width, screen_height):
+def main_menu(con, background_image):
     #tcod.image_blit_2x(background_image, 0, 0, 0)
 
     tcod.console_set_default_foreground(0, tcod.light_yellow)
@@ -147,16 +152,14 @@ def main_menu(con, background_image, screen_width, screen_height):
 
     menu(con, '', [['Play a new game', tcod.white], ['Continue last game', tcod.white], ['Quit', tcod.white]], 24, screen_width, screen_height)
 
-
-def level_up_menu(header, player, menu_width, screen_width, screen_height):
+def level_up_menu(header, player):
     options = [['Constitution (+20 HP, from {0})'.format(player.health.max_hp), tcod.white],
                ['Strength (+1 attack, from {0})'.format(player.offence.power), tcod.white],
                ['Agility (+1 defence, from {0})'.format(player.defence.defence), tcod.white]]
 
-    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
+    return ingame_menu('Quest', header, options)
 
-
-def character_screen(player, character_screen_width, character_screen_height, screen_width, screen_height):
+def character_screen(player):
     options =['Level: {0}'.format(player.level.current_level),
                 'Experience: {0}'.format(player.level.current_xp),
                 'Experience to Level: {0}'.format(player.level.experience_to_next_level),
@@ -167,7 +170,7 @@ def character_screen(player, character_screen_width, character_screen_height, sc
 
     height = len(options) + 2
 
-    con = tcod.console.Console(character_screen_width, height, 'F')
+    con = tcod.console.Console(CONFIG.get('map_width'), height, 'F')
 
     con.draw_frame(
         0,
@@ -193,7 +196,7 @@ def character_screen(player, character_screen_width, character_screen_height, sc
 
     return con
 
-def game_over(menu_width, screen_width, screen_height):
+def game_over():
     header = "You have failed. Death's cold embrace envelops you. Loser."
     options = [['Start from scratch', tcod.white],
                 ['View Stats', tcod.white],
@@ -201,23 +204,23 @@ def game_over(menu_width, screen_width, screen_height):
                 ['View Quests', tcod.white],
                 ['Quit', tcod.white]]
 
-    return menu2('Quest', header, options, menu_width, screen_width, screen_height)
+    return ingame_menu('Quest', header, options)
 
-def game_paused(menu_width, screen_width, screen_height):
+def game_paused():
     header = ""
     options = [['Restart', tcod.white],
                 ['Save Game', tcod.white],
                 ['Quit', tcod.white]]
 
-    return menu2('Paused', header, options, menu_width, screen_width, screen_height)
+    return ingame_menu('Paused', header, options)
 
-def game_completed(menu_width, screen_width, screen_height):
+def game_completed():
     header = 'Congratulations - You have defeated the King Under the Hill'
     options = [['Restart with higher level encounters', tcod.white],
                 ['Start from scratch', tcod.white],
                 ['Quit while the going is good', tcod.white]]
 
-    return menu2('Game Complete', header, options, menu_width, screen_width, screen_height)
+    return ingame_menu('Victory!', header, options)
 
-def message_box(con, header, width, screen_width, screen_height):
-    menu(con, header, [], width, screen_width, screen_height)
+def message_box(con, header):
+    menu(con, header, [], width)
