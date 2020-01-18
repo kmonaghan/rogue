@@ -2,9 +2,7 @@ from operator import itemgetter
 from random import randint
 
 from etc.colors import COLORS
-from etc.enum import ResultTypes
-
-from equipment_slots import EquipmentSlots
+from etc.enum import EquipmentSlots, ResultTypes
 
 from game_messages import Message
 

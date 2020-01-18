@@ -19,8 +19,7 @@ from entities.entity import Entity
 
 from game_messages import Message
 
-from equipment_slots import EquipmentSlots
-from etc.enum import DamageType, Interactions, RenderOrder
+from etc.enum import DamageType, EquipmentSlots, Interactions, RenderOrder
 from utils.utils import resource_path
 
 identified_items = {}

@@ -1,4 +1,5 @@
-from equipment_slots import EquipmentSlots
+from etc.enum import EquipmentSlots
+
 
 class Equipment:
     #an object that can be equipped, yielding bonuses. automatically adds the Item component.
