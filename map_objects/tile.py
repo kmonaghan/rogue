@@ -1,6 +1,6 @@
 __metaclass__ = type
 
-from etc.colors import COLORS, random_light_shallow_water, random_dark_shallow_water, random_light_deep_water, random_dark_deep_water
+from etc.colors import COLORS, random_color_shimmer
 
 class Tile:
     """
@@ -26,6 +26,14 @@ class Tile:
 
     def __repr__(self):
         return f"{self.name}"
+
+    @property
+    def fov_shimmer(self):
+        return random_color_shimmer(self.fov_color)
+
+    @property
+    def out_of_fov_shimmer(self):
+        return random_color_shimmer(self.out_of_fov_color)
 
     def isFloor(self):
         return not (self.blocked and self.block_sight)
@@ -131,14 +139,6 @@ class ShallowWater(Tile):
         self.name = "Shallow water"
         self.char = '~'
 
-    @property
-    def fov_shimmer(self):
-        return random_light_shallow_water()
-
-    @property
-    def out_of_fov_shimmer(self):
-        return random_dark_shallow_water()
-
 class DeepWater(Tile):
     def __init__(self, blocked=True, block_sight=False):
         super(DeepWater, self).__init__(blocked, block_sight)
@@ -147,14 +147,6 @@ class DeepWater(Tile):
         self.out_of_fov_color = COLORS.get('dark_deep_water')
         self.name = "Deep water"
         self.char = '~'
-
-    @property
-    def fov_shimmer(self):
-        return random_light_deep_water()
-
-    @property
-    def out_of_fov_shimmer(self):
-        return random_dark_deep_water()
 
 class EmptyTile(Tile):
     def __init__(self, blocked=False, block_sight=False):

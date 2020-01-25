@@ -1,6 +1,8 @@
 import tcod
 import random
 
+from tcod.color import Color
+
 COLORS = {
     'light_default': tcod.dark_grey,
     'dark_default': tcod.darkest_grey,
@@ -37,8 +39,8 @@ COLORS = {
     'light_stair_floor': tcod.light_grey,
     'dark_stair_floor':  tcod.grey,
 
-    'light_shallow_water': (64, 164, 223),
-    'dark_shallow_water': (71, 128, 161),
+    'light_shallow_water': Color(64, 164, 223),
+    'dark_shallow_water': Color(71, 128, 161),
 
     'light_deep_water': tcod.dark_blue,
     'dark_deep_water': tcod.darkest_blue,
@@ -48,34 +50,34 @@ COLORS = {
 
     'stairs': tcod.silver,
 
-    'cursor': (255, 215, 0),
-    'cursor_tail': (220, 180, 0),
+    'cursor': Color(255, 215, 0),
+    'cursor_tail': Color(220, 180, 0),
 
-    'console_background': (0, 0, 0),
+    'console_background': Color(0, 0, 0),
 
-    'dijkstra_far': (0, 0, 255),
-    'dijkstra_near': (255, 0, 0),
+    'dijkstra_far': Color(0, 0, 255),
+    'dijkstra_near': Color(255, 0, 0),
 
     'elite': tcod.silver,
 
     'bat': tcod.darker_red,
     'bounty_hunter': tcod.gold,
     'chest': tcod.blue,
-    'fungus': (117, 225, 117),
+    'fungus': Color(117, 225, 117),
     'goblin': tcod.desaturated_green,
     'mimic': tcod.darker_blue,
     'orc': tcod.light_green,
     'player': tcod.darker_green,
-    'rat': (139, 84, 29),
-    'rats_nest': (123, 133, 142),
-    'snake': (89, 152, 47),
-    'poisonous_snake': (25, 82, 89),
+    'rat': Color(139, 84, 29),
+    'rats_nest': Color(123, 133, 142),
+    'snake': Color(89, 152, 47),
+    'poisonous_snake': Color(25, 82, 89),
     'snake_egg': tcod.darker_gray,
     'skeleton': tcod.light_blue,
     'troll': tcod.darker_green,
-    'necromancer': (50, 50, 50),
+    'necromancer': Color(50, 50, 50),
     'warlord': tcod.black,
-    'zombie': (145, 145, 0),
+    'zombie': Color(145, 145, 0),
 
     'light_door': tcod.purple,
     'dark_door': tcod.darker_purple,
@@ -128,20 +130,8 @@ STATUS_BAR_COLORS = {
     }
 }
 
-def random_light_shallow_water():
+def random_color_shimmer(color):
     dr = int(random.uniform(-10, 10))
     dg = int(random.uniform(-10, 10))
     db = int(random.uniform(-10, 10))
-    return (64 + dr, 164 + dg, 223 + db)
-
-def random_dark_shallow_water():
-    dr = int(random.uniform(-10, 10))
-    dg = int(random.uniform(-10, 10))
-    db = int(random.uniform(-10, 10))
-    return (71 + dr, 128 + dg, 161 + db)
-
-def random_light_deep_water():
-    return tcod.dark_blue
-
-def random_dark_deep_water():
-    return tcod.darkest_blue
+    return (color.r + dr, color.g + dg, color.b + db)
