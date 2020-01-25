@@ -166,7 +166,8 @@ class LevelMap(Map):
 
         return np.where(search_grid == tile)
 
-    def find_random_open_position(self, routing_avoid=[], room = None):
+    def find_random_open_position(self, base_routing_avoid=[], room = None):
+        routing_avoid = base_routing_avoid.copy()
         routing_avoid.append(RoutingOptions.AVOID_BLOCKERS)
         possible_positions = self.make_walkable_array(routing_avoid)
 
