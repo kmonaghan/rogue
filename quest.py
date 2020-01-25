@@ -163,4 +163,4 @@ class Quest:
         if (self.kill_type):
             message += ' ' + str(self.kill_total) + ' of ' + str(self.kill) + ' killed'
 
-        return Message(message, libtcod.gold)
+        return Message(message, COLORS.get('success_text'))
