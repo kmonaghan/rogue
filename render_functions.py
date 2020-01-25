@@ -62,11 +62,11 @@ def render_menu_console(game_state, player, quest_request = None, exclude = []):
 
         return inventory_menu(inventory_title, player, exclude)
     elif game_state == GameStates.QUEST_ONBOARDING:
-        return quest_menu('Questing', quest_request)
+        return quest_menu(quest_request)
     elif game_state == GameStates.QUEST_LIST:
-        return quest_list_menu('Press the key next to an quest to get details, or Esc to cancel.\n', player)
+        return quest_list_menu(player)
     elif game_state == GameStates.LEVEL_UP:
-        return level_up_menu('Level up! Choose a stat to raise:', player)
+        return level_up_menu(player)
 
 def render_info_console(info_console, player, game_map):
     info_console.clear()

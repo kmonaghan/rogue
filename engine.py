@@ -229,10 +229,6 @@ class Rogue(tcod.event.EventDispatch):
         return False
 
     def change_state_action(self, action, action_value):
-        if self.player.level.can_level_up():
-            self.game_state = GameStates.LEVEL_UP
-            return True
-
         if action == InputTypes.CHARACTER_SCREEN:
             self.previous_game_state = self.game_state
             self.game_state = GameStates.CHARACTER_SCREEN
@@ -261,6 +257,12 @@ class Rogue(tcod.event.EventDispatch):
         if action == InputTypes.LEVEL_UP:
             self.player.level.level_up_stats(action_value)
             self.game_state = self.previous_game_state
+
+        #This needs to come after leveling up or we get stuck in a loop
+        if self.player.level.can_level_up():
+            self.previous_game_state = self.game_state
+            self.game_state = GameStates.LEVEL_UP
+            return True
 
         if action == InputTypes.QUEST_LIST:
             self.previous_game_state = self.game_state

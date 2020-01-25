@@ -37,8 +37,7 @@ def menu(con, header, options, width):
 def ingame_menu(title, header, options):
     con = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('map_height'), 'F')
 
-    header_height = con.get_height_rect(1, 1, con.width - 2, 10, header)
-
+    header_height = con.get_height_rect(1, 1, con.width - 2, 10, header) + 1
     con.draw_frame(
         0,
         0,
@@ -121,15 +120,17 @@ def inventory_menu(header, player, exclude = []):
 
     return ingame_menu('Inventory', header, options)
 
-def quest_menu(header, quest):
-    # show a menu with each item of the inventory as an option
+def quest_menu(quest):
+    title = 'Quest'
     header = quest.title + "\n" + quest.description
     options = [['Let\'s go do it!', tcod.white],
                 ['Not right now', tcod.white]]
 
-    return ingame_menu('Quest', header, options)
+    return ingame_menu(title, header, options)
 
-def quest_list_menu(header, player):
+def quest_list_menu(player):
+    title = 'Current Quests'
+    header = 'Press the key next to an quest to get details, or Esc to cancel.'
     # show a menu with each item of the inventory as an option
     if len(quest.active_quests) == 0:
         options = [['No active quests.', tcod.white]]
@@ -139,7 +140,7 @@ def quest_list_menu(header, player):
         for q in quest.active_quests:
             options.append([q.title, tcod.white])
 
-    return ingame_menu('Quest', header, options)
+    return ingame_menu(title, header, options)
 
 def main_menu(con, background_image):
     #tcod.image_blit_2x(background_image, 0, 0, 0)
@@ -152,12 +153,14 @@ def main_menu(con, background_image):
 
     menu(con, '', [['Play a new game', tcod.white], ['Continue last game', tcod.white], ['Quit', tcod.white]], 24, screen_width, screen_height)
 
-def level_up_menu(header, player):
-    options = [['Constitution (+20 HP, from {0})'.format(player.health.max_hp), tcod.white],
-               ['Strength (+1 attack, from {0})'.format(player.offence.power), tcod.white],
-               ['Agility (+1 defence, from {0})'.format(player.defence.defence), tcod.white]]
+def level_up_menu(player):
+    title = 'Level up!'
+    header = 'You\'ve earned enough XP to level up. Pick a stat to increase.'
+    options = [[f"Constitution +20 HP (from {player.health.max_hp} to {player.health.max_hp + 20})", tcod.white],
+               [f"Strength +1 attack (from {player.offence.power} to {player.offence.power + 1})", tcod.white],
+               [f"Agility +1 defence (from {player.defence.defence} to {player.defence.defence + 1})", tcod.white]]
 
-    return ingame_menu('Quest', header, options)
+    return ingame_menu(title, header, options)
 
 def character_screen(player):
     options =['Level: {0}'.format(player.level.current_level),
@@ -215,7 +218,7 @@ def game_paused():
     return ingame_menu('Paused', header, options)
 
 def game_completed():
-    header = 'Congratulations - You have defeated the King Under the Hill'
+    header = 'Congratulations - You\'ve defeated the warlord'
     options = [['Restart with higher level encounters', tcod.white],
                 ['Start from scratch', tcod.white],
                 ['Quit while the going is good', tcod.white]]
