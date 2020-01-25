@@ -63,28 +63,10 @@ class Movement:
 
             return False
 
-        def move_astar(self, target, game_map):
-            walkable = game_map.current_level.make_walkable_array(self.routing_avoid)
-            walkable[target.x, target.y] = True
-            walkable[self.owner.x, self.owner.y] = True
-            astar = tcod.path.AStar(walkable)
-
-            path = astar.get_path(self.owner.x, self.owner.y, target.x, target.y)
-            print(path)
-
-            if len(path):
-                self.place(path[0][0], path[0][1], game_map.current_level)
-                game_map.current_level.paths.append(path)
-            else:
-                # Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
-                # it will still try to move towards the player (closer to the corridor opening)
-                self.move_towards(target, game_map)
-                game_map.current_level.path = None
-
         def move_to_random_adjacent(self, game_map):
             """Move the owner to a random adjacent tile."""
             dx, dy = choice([
                 (-1, 1), (0, 1), (1, 1),
                 (-1, 0),         (1, 0),
                 (-1, -1), (0, -1), (1, -1)])
-            self.move(dx, dy, game_map.current_level)
+            self.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
