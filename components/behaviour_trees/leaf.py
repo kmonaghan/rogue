@@ -39,23 +39,30 @@ class MoveTowardsPointInNamespace(Node):
 
     def __init__(self, name):
         self.name = name
+        self.target_path = None
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         if not self.namespace.get(self.name):
             raise ValueError(f"{self.name} is not in tree namespace!")
         point = self.namespace.get(self.name)
-        if ((owner.x, owner.y) == self.namespace.get(self.name + '_previous')
-            or (owner.x, owner.y) == point):
-            self.namespace[self.name + '_previous'] = None
-            print("MoveTowardsPointInNamespace Setting to none: " + self.name)
-            self.namespace[self.name] = None
-            return TreeStates.SUCCESS, []
-        results = [{ResultTypes.MOVE_TOWARDS: (owner, point.x, point.y)}]
-        self.namespace[self.name + '_previous'] = (owner.x, owner.y)
-        print("MoveTowardsPointInNamespace Move towards:" + str(point))
-        return TreeStates.SUCCESS, results
 
+        if self.target_path and len(self.target_path) > 1 and (Point(self.target_path[0][0], self.target_path[0][1]) == owner.point):
+            self.target_path.pop(0)
+
+            if not game_map.current_level.blocked[self.target_path[0][0], self.target_path[0][1]]:
+                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
+
+        self.target_path = get_shortest_path(
+            game_map,
+            owner.point,
+            point,
+            routing_avoid=owner.movement.routing_avoid)
+        if len(self.target_path) < 1:
+            self.target_position = None
+            return TreeStates.SUCCESS, []
+
+        return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
 
 class SeekTowardsLInfinityRadius(Node):
     """Seek to stay a fixed radius from a target."""
@@ -132,7 +139,8 @@ class Attack(Node):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
         if target.health.dead:
-            print("Attack: FAILURE - target dead")
+            print("Attack: FAILURE - target dead, removing")
+            del self.namespace["target"]
             return TreeStates.FAILURE, []
 
         print("Attack: SUCCESS " + str(target))
@@ -219,7 +227,7 @@ class SpawnEntity(Node):
 
                 if owner.children:
                     owner.children.addChild(entity)
-                    
+
                 self.current_time = 0
                 return TreeStates.SUCCESS, results
             #else:
