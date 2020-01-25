@@ -305,6 +305,16 @@ class LevelMap(Map):
 
             self.blocked[point.x, point.y] = True
 
+    def update_entity_position(self, entity):
+        self.blocked[entity.x, entity.y] = False
+
+        current_entities = self.entities.get_entities_in_position((entity.x, entity.y))
+
+        for other_entity in current_entities:
+            if other_entity.blocks:
+                self.blocked[entity.x, entity.y] = True
+
+
     def make_walkable_array(self, routing_avoid=None):
         """Return a boolean array indicating which squares are accable to be routed
         through for some entity.

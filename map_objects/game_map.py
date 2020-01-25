@@ -271,6 +271,7 @@ class GameMap:
 
                 door_entities = self.current_level.entities.get_entities_in_position((all_doors[0][0], all_doors[1][0]))
                 key = buildings.make_lockable(door_entities[0])
+                self.current_level.update_entity_position(door_entities[0])
                 point = self.current_level.find_random_open_position()
                 key.set_point(point)
                 self.current_level.add_entity(key)
