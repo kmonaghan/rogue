@@ -639,10 +639,10 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.MOVE_FORCE:
                target, dx, dy, damage = result_data
                if damage > 0 and not target.movement.move(dx, dy, self.game_map.current_level):
-                    damage_results, total_damage = turn_results.extend(target.health.take_damage(damage))
-                    msg_text = '{0} crashes into the wall and takes {1} hit points damage.'
-                    message = Message(msg_text.format(target.name, str(total_damage)), COLORS.get('damage_text'))
-                    turn_results.extend([{ResultTypes.MESSAGE: message}])
+                   damage_results, total_damage = target.health.take_damage(damage)
+                   msg_text = '{0} crashes into the wall and takes {1} hit points damage.'
+                   message = Message(msg_text.format(target.name, str(total_damage)), COLORS.get('damage_text'))
+                   turn_results.extend([{ResultTypes.MESSAGE: message}])
             # Add a new entity to the game.
             if result_type == ResultTypes.ADD_ENTITY:
                 self.game_map.current_level.add_entity(result_data)
