@@ -21,6 +21,7 @@ def door(point = None, locked=False):
 
 def make_lockable(item, locked_character='X', unlocked_character='+'):
     item.blocks = True
+    item.transparent = False
     item.add_component(Locked(requires_key=True,locked_character=locked_character, unlocked_character=unlocked_character), 'locked')
     item.char = locked_character
 

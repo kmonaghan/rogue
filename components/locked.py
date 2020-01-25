@@ -19,5 +19,7 @@ class Locked:
                 self.owner.char = self.locked_character
         else:
             self.owner.blocks = False
+            self.owner.transparent = True
+
             if self.unlocked_character:
                 self.owner.char = self.unlocked_character

@@ -191,7 +191,7 @@ class LevelMap(Map):
         map_console.clear()
 
         if self.should_shimmer > 5:
-            shimmering = np.isin(self.grid, [Tiles.SHALLOW_WATER])
+            shimmering = np.isin(self.grid, SHIMMERING_TILES)
             shimmer_list = np.where(shimmering)
             for idx, x in enumerate(shimmer_list[0]):
                 y = shimmer_list[1][idx]
@@ -315,12 +315,15 @@ class LevelMap(Map):
 
     def update_entity_position(self, entity):
         self.blocked[entity.x, entity.y] = False
+        self.transparent[entity.x, entity.y] = self.grid[entity.x, entity.y] in WALKABLE_TILES
 
         current_entities = self.entities.get_entities_in_position((entity.x, entity.y))
 
         for other_entity in current_entities:
             if other_entity.blocks:
                 self.blocked[entity.x, entity.y] = True
+            if not other_entity.transparent:
+                self.transparent[entity.x, entity.y] = False
 
 
     def make_walkable_array(self, routing_avoid=None):

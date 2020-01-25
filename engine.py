@@ -347,10 +347,10 @@ class Rogue(tcod.event.EventDispatch):
                                 can_unlock = True
 
                             if can_unlock:
-                                self.game_map.current_level.remove_entity(target)
                                 target.locked.toggle()
-                                self.game_map.current_level.add_entity(target)
-
+                                self.game_map.current_level.update_entity_position(target)
+                                self.fov_recompute = True
+                                
                                 message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
                                 player_turn_results.extend([{ResultTypes.MESSAGE: message}])
                             else:

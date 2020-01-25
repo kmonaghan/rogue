@@ -42,8 +42,8 @@ COLORS = {
     'light_shallow_water': Color(64, 164, 223),
     'dark_shallow_water': Color(71, 128, 161),
 
-    'light_deep_water': tcod.dark_blue,
-    'dark_deep_water': tcod.darkest_blue,
+    'light_deep_water': tcod.dark_sea,
+    'dark_deep_water': tcod.darkest_sea,
 
     'light_empty_tile': tcod.black,
     'dark_empty_tile': tcod.black,
@@ -134,4 +134,7 @@ def random_color_shimmer(color):
     dr = int(random.uniform(-10, 10))
     dg = int(random.uniform(-10, 10))
     db = int(random.uniform(-10, 10))
-    return (color.r + dr, color.g + dg, color.b + db)
+    red = min(max(0, color.r + dr), 255)
+    green = min(max(0, color.g + dg), 255)
+    blue = min(max(0, color.b + db), 255)
+    return (red, green, blue)

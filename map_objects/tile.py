@@ -1,5 +1,6 @@
 __metaclass__ = type
 
+from random import choice
 from etc.colors import COLORS, random_color_shimmer
 
 class Tile:
@@ -48,6 +49,7 @@ class CavernFloor(Tile):
         self.fov_color = COLORS.get('light_cavern_floor')
         self.out_of_fov_color = COLORS.get('light_cavern_floor')
         self.name = "Cavern floor"
+        self.char = choice([',','`',';',"'"])
 
 class CavernWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
@@ -80,6 +82,7 @@ class InternalDoor(Tile):
         self.fov_color = COLORS.get('light_door_tile')
         self.out_of_fov_color = COLORS.get('dark_door_tile')
         self.name = "Room Floor"
+        self.char = '.'
 
 class ImpenetrableTile(Tile):
     def __init__(self, blocked=False, block_sight=False):
@@ -96,14 +99,16 @@ class RoomFloor(Tile):
         self.fov_color = COLORS.get('light_room_floor')
         self.out_of_fov_color = COLORS.get('dark_room_floor')
         self.name = "Room floor"
+        self.char = '.'
 
 class CorridorFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(CorridorFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = COLORS.get('light_corridor_floor')
-        self.out_of_fov_color = COLORS.get('dark_corridor_floor')
+        self.fov_color = COLORS.get('light_room_floor')
+        self.out_of_fov_color = COLORS.get('dark_room_floor')
         self.name = "Corridor floor"
+        self.char = '.'
 
 class PotentialCorridorFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
