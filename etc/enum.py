@@ -288,7 +288,7 @@ BLOCKING_TILES = {
 }
 
 SHIMMERING_TILES = [
-    Tiles.SHALLOW_WATER]
+    Tiles.SHALLOW_WATER, Tiles.DEEP_WATER]
 
 class TreeStates(Enum):
     SUCCESS = auto()
