@@ -184,7 +184,7 @@ def random_magic_weapon(dungeon_level = 1):
 def add_random_ablity(item):
     dice = randint(1, 100)
 
-    if dice <=40:
+    if dice <=50:
         return
 
     if not item.identifiable:
@@ -192,6 +192,8 @@ def add_random_ablity(item):
 
     if dice <= 60:
         add_poison(item, 1, 10)
+    elif dice <= 70:
+        add_flaming(item)
     elif dice <= 80:
         add_shocking(item)
     elif dice <= 100:
