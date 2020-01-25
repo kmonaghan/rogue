@@ -140,6 +140,13 @@ class LevelMap(Map):
         self.walkable[x, y] = True
         self.transparent[x, y] = True
 
+    def accessible_tile(self, x, y):
+        if not self.within_bounds(x,y):
+            return False
+        if not self.walkable[x, y]:
+            return False
+        return True
+
     def within_bounds(self, x, y, buffer=0):
         return (
             (0 + buffer <= x < self.width - buffer) and

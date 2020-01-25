@@ -320,7 +320,7 @@ class Rogue(tcod.event.EventDispatch):
             dx, dy = action_value
             point = Point(self.player.x + dx, self.player.y + dy)
 
-            if self.game_map.current_level.walkable[self.player.x + dx, self.player.y + dy]:
+            if self.game_map.current_level.accessible_tile(self.player.x + dx, self.player.y + dy):
                 if self.game_map.current_level.blocked[self.player.x + dx, self.player.y + dy]:
                     targets = self.game_map.current_level.entities.get_entities_in_position((self.player.x + dx, self.player.y + dy))
 
