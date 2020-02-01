@@ -5,6 +5,7 @@ class Identifiable:
     def __init__(self):
         self.identified = False
         self.common_ident = False
+        self.chance_to_identify = 90
 
     @property
     def name(self):

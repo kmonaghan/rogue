@@ -60,6 +60,15 @@ class Offence:
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
 
             if weapon.ablity and not target.health.dead:
+                if weapon.identifiable and not weapon.identified:
+                    if randint(1,100) < weapon.identifiable.chance_to_identify:
+                        return results
+                    else:
+                        weapon.identifiable.identified = True
+                        message = Message(f"{weapon.name} sparks in your hands.", COLORS.get('success_text'))
+
+                        results.append({ResultTypes.MESSAGE: message})
+
                 results.extend(weapon.ablity.on_attack(source=self.owner, target=target))
         else:
             message = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'))

@@ -11,6 +11,7 @@ from components.ablity import ExtraDamage, Poisoning, PushBack
 from components.equippable import Equippable
 from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
 from components.item import Item
+from components.naming import Naming
 from components.regeneration import Regeneration
 from components.usable import AntidoteUsable, DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
 from components.unlock import Unlock
@@ -158,23 +159,24 @@ def random_magic_weapon(dungeon_level = 1):
 
     item.add_component(IdentifiableWeapon(item.base_name),"identifiable")
 
+    naming = Naming(item.base_name)
     if (dice <= 500):
-        item.base_name = item.base_name + " of Stabby Stabby"
+        naming.suffix = "of Stabby Stabby"
         item.color = COLORS.get('equipment_uncommon')
         item.equippable.power_bonus = item.equippable.power_bonus * 1.25
     elif (dice <= 750):
-        item.base_name = item.base_name + " of YORE MA"
+        naming.suffix = "of YORE MA"
         item.color = COLORS.get('equipment_rare')
         item.equippable.power_bonus = item.equippable.power_bonus * 1.5
     elif (dice <= 990):
-        item.base_name = item.base_name + " of I'll FUCKING Have You"
+        naming.suffix = " of I'll FUCKING Have You"
         item.color = COLORS.get('equipment_epic')
         item.equippable.power_bonus = item.equippable.power_bonus * 2
     else:
-        item.base_name = item.base_name + " of Des and Troy"
+        naming.suffix = "of Des and Troy"
         item.color = COLORS.get('equipment_legendary')
         item.equippable.power_bonus = item.equippable.power_bonus * 4
-
+    item.add_component(naming, 'naming')
     item.equippable.number_of_dice = 2
 
     add_random_ablity(item)
@@ -201,19 +203,23 @@ def add_random_ablity(item):
 
 def add_poison(item, damage = 1, duration = 10):
     item.add_component(Poisoning(0, damage, duration), 'ablity')
-    item.base_name = item.base_name + " of poisoning"
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of poisoning'), 'naming')
 
 def add_flaming(item):
     item.add_component(ExtraDamage(number_of_dice=1, type_of_dice=6, name="fire", damage_type=DamageType.FIRE), 'ablity')
-    item.base_name = item.base_name + " of flaming"
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of flaming'), 'naming')
 
 def add_shocking(item):
     item.add_component(ExtraDamage(number_of_dice=1, type_of_dice=6, name="shock", damage_type=DamageType.ELECTRIC), 'ablity')
-    item.base_name = item.base_name + " of shocking"
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of shocking'), 'naming')
 
 def add_smashing(item):
     item.add_component(PushBack(), 'ablity')
-    item.base_name = item.base_name + " of smashing"
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of smashing'), 'naming')
 
 def ring_of_power(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)

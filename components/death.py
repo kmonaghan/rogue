@@ -1,5 +1,7 @@
 from game_messages import Message
 
+from components.naming import Naming
+
 from etc.colors import COLORS
 from etc.enum import GameStates, RenderOrder, Species
 
@@ -17,7 +19,7 @@ class BasicDeath:
         #attacked and doesn't move
         self.owner.char = '%'
         self.owner.color = COLORS.get('corpse')
-        self.owner.species = Species.CORPSE
+        #self.owner.species = Species.CORPSE
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
 
@@ -34,6 +36,8 @@ class BasicDeath:
 
         self.rotting = True
 
+        self.owner.add_component(Naming(self.owner.base_name, prefix='Skeletal remains of'), 'naming')
+
         return GameStates.PLAYER_TURN
 
     def decompose(self, game_map):
@@ -49,6 +53,7 @@ class BasicDeath:
         self.skeletal = True
         self.rotting_time = 24
         self.owner.color = COLORS.get('skeletal')
+        self.owner.naming.prefix = 'Rotting corpse of'
 
 class WarlordDeath(BasicDeath):
     def npc_death(self, game_map):

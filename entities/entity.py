@@ -92,14 +92,10 @@ class Entity:
         if self.identifiable and not self.identifiable.identified:
             return self.identifiable.name
 
-        real_name = self.base_name
-        if self.health and self.health.dead:
-            if self.death.skeletal:
-                real_name = "Skeletal remains of " + real_name
-            elif self.death.rotting:
-                real_name = "Rotting corpse of " + real_name
+        if self.naming:
+            return self.naming.fullname
 
-        return real_name
+        return self.base_name
 
     def examine(self):
         results = []
