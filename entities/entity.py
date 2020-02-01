@@ -13,7 +13,7 @@ from game_messages import Message
 
 from map_objects.point import Point
 
-from etc.colors import COLORS
+from etc.colors import COLORS, random_color_shimmer
 from etc.enum import ResultTypes, RenderOrder, Interactions
 
 import uuid
@@ -34,6 +34,7 @@ class Entity:
         self.color = color
         self.blocks = blocks
         self.always_visible = always_visible
+        self.transparent = True
 
         self.add_component(health, "health")
         self.add_component(ai, "ai")
@@ -112,8 +113,19 @@ class Entity:
 
         return results
 
+    @property
+    def display_char(self):
+        if self.shimmer:
+            return self.shimmer.display_char
+
+        return self.char
+
+    @property
     def display_color(self):
-        if (self.health):
+        if self.shimmer:
+            return random_color_shimmer(self.color)
+
+        if self.health:
             return self.health.display_color()
 
         return self.color
@@ -167,3 +179,7 @@ class Entity:
                 print(f"Error proccessing turn: {e}")
 
         return results
+
+    def clone(self):
+        for att in dir(self):
+            print (att, getattr(self, att))

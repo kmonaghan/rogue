@@ -22,6 +22,7 @@ from components.defence import Defence
 from components.questgiver import Questgiver
 from components.regeneration import Regeneration
 from components.resistance import Resistance
+from components.shimmer import Shimmer
 from components.spawn import Spawn
 from components.subspecies import Subspecies
 from components.vulnerability import Vulnerability
@@ -103,48 +104,51 @@ def captain(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 
 
     return npc
 
+def mimic(point = None, dungeon_level = 1):
+    npc = Character(point, 'C', 'Chest', COLORS.get('mimic'), species=Species.CREATURE)
+
+    npc.add_component(Health(30), 'health')
+    npc.add_component(Offence(base_power = 3), 'offence')
+    npc.add_component(Defence(defence = 3), 'defence')
+    npc.add_component(Level(), 'level')
+    npc.add_component(Shimmer(alt_char = 'M', alt_chance = 95), 'shimmer')
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    npc.inventory.add_item(teeth)
+    npc.equipment.toggle_equip(teeth)
+
+    pubsub.pubsub.subscribe(pubsub.Subscription(npc, pubsub.PubSubTypes.ATTACKED, mimic_activate))
+
+    return npc
+
 def create_chest(point = None, dungeon_level = 1):
     npc = Character(point, 'C', 'Chest', COLORS.get('chest'), species=Species.NONDESCRIPT)
 
-    mimic_chance = randint(1, 100)
+    if randint(1, 100) >= 95:
+        return mimic(point = None, dungeon_level = 1)
 
-    if (mimic_chance >= 95):
-        npc.species = Species.CREATURE
-        npc.color = COLORS.get('mimic')
-        npc.add_component(Health(30), 'health')
-        npc.add_component(Offence(base_power = 3), 'offence')
-        npc.add_component(Defence(defence = 3), 'defence')
-        npc.add_component(Level(), 'level')
+    npc.add_component(Health(10), 'health')
+    npc.add_component(Defence(defence = 2), 'defence')
+    npc.add_component(Offence(base_power = 0), 'offence')
+    #TODO: Generate random level appropriate loot in chest
+    potion = equipment.random_potion(dungeon_level=dungeon_level)
+    potion.lootable = True
 
-        teeth = equipment.teeth()
-        teeth.lootable = False
+    scroll = equipment.random_scroll(dungeon_level=dungeon_level)
+    scroll.lootable = True
 
-        npc.inventory.add_item(teeth)
-        npc.equipment.toggle_equip(teeth)
+    weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
+    weapon.lootable = True
 
-        pubsub.pubsub.subscribe(pubsub.Subscription(npc, pubsub.PubSubTypes.ATTACKED, mimic_activate))
-        pubsub.pubsub.subscribe(pubsub.Subscription(npc, pubsub.PubSubTypes.TICK, mimic_shimmer))
-    else:
-        npc.add_component(Health(10), 'health')
-        npc.add_component(Defence(defence = 2), 'defence')
-        npc.add_component(Offence(base_power = 0), 'offence')
-        #TODO: Generate random level appropriate loot in chest
-        potion = equipment.random_potion(dungeon_level=dungeon_level)
-        potion.lootable = True
+    armour = equipment.random_armour(dungeon_level=dungeon_level)
+    armour.lootable = True
 
-        scroll = equipment.random_scroll(dungeon_level=dungeon_level)
-        scroll.lootable = True
-
-        weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
-        weapon.lootable = True
-
-        armour = equipment.random_armour(dungeon_level=dungeon_level)
-        armour.lootable = True
-
-        npc.inventory.add_item(potion)
-        npc.inventory.add_item(scroll)
-        npc.inventory.add_item(weapon)
-        npc.inventory.add_item(armour)
+    npc.inventory.add_item(potion)
+    npc.inventory.add_item(scroll)
+    npc.inventory.add_item(weapon)
+    npc.inventory.add_item(armour)
 
     return npc
 
@@ -668,6 +672,8 @@ def mimic_activate(sub, message, level_map):
         sub.entity.add_component(BasicNPC(), 'ai')
         sub.entity.char = 'M'
         sub.entity.base_name = 'Mimic'
+        sub.entity.del_component('shimmer')
+        sub.entity.ai.set_target(message.entity)
         pubsub.pubsub.mark_subscription_for_removal(sub)
 
 def mimic_shimmer(sub, message, level_map):

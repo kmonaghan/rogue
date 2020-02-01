@@ -205,10 +205,12 @@ class LevelMap(Map):
         if not CONFIG.get('debug'):
             where_fov = np.where(self.fov[:])
             self.explored[where_fov] = True
+            explored = np.where(self.explored[:])
         else:
             where_fov = np.where(self.light_map_bg[:])
+            self.explored[:] = True
+            explored = np.where(self.explored[:])
 
-        explored = np.where(self.explored[:])
         self.map_bg[explored] = self.dark_map_bg[explored]
 
         dx = 0.0
@@ -278,8 +280,8 @@ class LevelMap(Map):
             current_entities = self.entities.get_entities_in_position((x, y))
             entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
             for entity in entities_in_render_order:
-                map_console.ch[x, y] = ord(entity.char)
-                map_console.fg[x, y] = entity.display_color()
+                map_console.ch[x, y] = ord(entity.display_char)
+                map_console.fg[x, y] = entity.display_color
 
     def clear_paths(self):
         self.paths.clear()

@@ -73,6 +73,7 @@ class Character(Entity):
 
         return " (" + desc + ")"
 
+    @property
     def display_color(self):
         if self.health and not self.health.dead and (self.health.health_percentage < 100):
             return self.health.display_color()
@@ -80,4 +81,4 @@ class Character(Entity):
         if self.health and not self.health.dead and self.subspecies:
             return self.subspecies.subcolor
 
-        return self.color
+        return super(Character, self).display_color
