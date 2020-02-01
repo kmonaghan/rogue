@@ -350,7 +350,7 @@ class Rogue(tcod.event.EventDispatch):
                                 target.locked.toggle()
                                 self.game_map.current_level.update_entity_position(target)
                                 self.fov_recompute = True
-                                
+
                                 message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
                                 player_turn_results.extend([{ResultTypes.MESSAGE: message}])
                             else:
@@ -643,6 +643,8 @@ class Rogue(tcod.event.EventDispatch):
                    msg_text = '{0} crashes into the wall and takes {1} hit points damage.'
                    message = Message(msg_text.format(target.name, str(total_damage)), COLORS.get('damage_text'))
                    turn_results.extend([{ResultTypes.MESSAGE: message}])
+                   turn_results.extend(damage_results)
+
             # Add a new entity to the game.
             if result_type == ResultTypes.ADD_ENTITY:
                 self.game_map.current_level.add_entity(result_data)
