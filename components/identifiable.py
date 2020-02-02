@@ -6,7 +6,8 @@ class Identifiable:
         self.identified = False
         self.common_ident = False
         self.chance_to_identify = 90
-
+        self.identified_on_use_message = ''
+        self.owner = None
     @property
     def name(self):
         return codecs.encode(self.owner.base_name, 'rot_13')
@@ -15,6 +16,7 @@ class IdentifiableWeapon(Identifiable):
     def __init__(self, base_name=None):
         super().__init__()
         self.base_name = base_name
+        self.identified_on_use_message = f"Power surges through {self.base_name} and reveals true self."
 
     @property
     def name(self):

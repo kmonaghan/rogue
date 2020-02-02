@@ -65,7 +65,7 @@ class Offence:
                         return results
                     else:
                         weapon.identifiable.identified = True
-                        message = Message(f"{weapon.name} sparks in your hands.", COLORS.get('success_text'))
+                        message = Message(weapon.identifiable.identified_on_use_message, COLORS.get('success_text'))
 
                         results.append({ResultTypes.MESSAGE: message})
 
