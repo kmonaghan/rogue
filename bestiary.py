@@ -172,9 +172,10 @@ def create_player():
 
     if CONFIG.get('debug'):
         player.level.random_level_up(30)
-        weapon = equipment.random_magic_weapon()
-        player.inventory.add_item(weapon)
-        player.equipment.toggle_equip(weapon)
+        #weapon = equipment.random_magic_weapon()
+        #player.inventory.add_item(weapon)
+        #player.equipment.toggle_equip(weapon)
+        equipment.add_lifedrain(dagger)
 
         armour = equipment.random_armour()
         player.inventory.add_item(armour)
@@ -455,6 +456,27 @@ def troll(point = None):
 
     return npc
 
+def vampire(point = None):
+    creature = Character(point, 'V', 'Vampire', COLORS.get('vampire'),
+                    ai=BasicNPC(),
+                    species=Species.UNDEAD, health=Health(20))
+
+    creature.add_component(Offence(base_power = 5), 'offence')
+    creature.add_component(Defence(defence = 5), 'defence')
+    creature.add_component(Level(xp_value = 10), 'level')
+
+    creature.movement.routing_avoid.extend(npc_avoid)
+    creature.movement.routing_avoid.extend([Tiles.SHALLOW_WATER])
+
+    teeth = equipment.teeth()
+    equipment.add_lifedrain(teeth)
+    teeth.lootable = False
+
+    creature.inventory.add_item(teeth)
+    creature.equipment.toggle_equip(teeth)
+
+    return creature
+
 def warlord(point = None):
     #create a warlord
     ai_component = WarlordNPC()
@@ -501,14 +523,14 @@ def zombie(point = None, old_npc = None):
         old_npc.blocks = True
         old_npc.char = 'Z'
         old_npc.base_name = 'Zombie ' + old_npc.base_name
-        old_npc.species=Species.ZOMBIE
+        old_npc.species=Species.UNDEAD
         old_npc.add_component(ai_component, 'ai')
         old_npc.add_component(Health(old_npc.health.max_hp // 2), 'health')
 
         return old_npc
     else:
         npc = Character(point, 'Z', 'zombie', COLORS.get('zombie'),
-                        ai=ai_component, species=Species.ZOMBIE,
+                        ai=ai_component, species=Species.UNDEAD,
                         health=health_component)
 
         npc.add_component(Offence(base_power = 10), 'offence')

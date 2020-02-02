@@ -78,10 +78,31 @@ class ExtraDamage(Ablity):
 
         damage = die_roll(self.number_of_dice, self.type_of_dice)
         damage_results, total_damage = target.health.take_damage(damage, source, self.damage_type)
-        msg_text = f"{{0}} takes {{1}} {self.name} total_damage."
-        msg = Message(msg_text.format(target.name, str(damage)), COLORS.get('damage_text'))
+        if total_damage > 0:
+            msg = Message(f"{target.name} takes {str(damage)} {self.name} total_damage.", COLORS.get('damage_text'))
+            results.extend(damage_results)
+            results.extend([{ResultTypes.MESSAGE: msg}])
 
-        results.extend(damage_results)
-        results.extend([{ResultTypes.MESSAGE: msg}])
+        return results
+
+class LifeDrain(Ablity):
+    def __init__(self, number_of_dice=1, type_of_dice=6, chance=50, transfer=0.5):
+        super().__init__(name="Draining")
+        self.chance = chance
+        self.number_of_dice = number_of_dice
+        self.type_of_dice = type_of_dice
+        self.transfer = transfer
+
+    def on_attack(self, source, target):
+        results = []
+
+        damage = die_roll(self.number_of_dice, self.type_of_dice)
+        damage_results, total_damage = target.health.take_damage(damage, source, DamageType.DEFAULT)
+        if total_damage > 0:
+            drain_amount = max(1, int(total_damage * self.transfer))
+            msg = Message(f"{target.name} takes {str(damage)} {self.name} damage.", COLORS.get('damage_text'))
+            results.extend(damage_results)
+            results.extend([{ResultTypes.MESSAGE: msg}])
+            results.extend(source.health.heal(drain_amount))
 
         return results

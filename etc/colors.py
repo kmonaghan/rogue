@@ -76,6 +76,7 @@ COLORS = {
     'skeleton': tcod.light_blue,
     'troll': tcod.darker_green,
     'necromancer': Color(50, 50, 50),
+    'vampire': Color(50, 50, 50),
     'warlord': tcod.black,
     'zombie': Color(145, 145, 0),
 

@@ -146,7 +146,7 @@ class NecromancerNPC(BaseAI):
         self.tree = Root(
             Selection(
                 Sequence(
-                    Negate(NumberOfEntities(radius=2, species=Species.ZOMBIE, number_of_entities=4)),
+                    Negate(NumberOfEntities(radius=2, species=Species.UNDEAD, number_of_entities=4)),
                     CoinFlip(p=0.3),
                     SpawnEntity(bestiary.zombie, min_time=0, max_time=0),
                 ),

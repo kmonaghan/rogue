@@ -7,7 +7,7 @@ import tome
 from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
-from components.ablity import ExtraDamage, Poisoning, PushBack
+from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain
 from components.equippable import Equippable
 from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
 from components.item import Item
@@ -192,14 +192,16 @@ def add_random_ablity(item):
     if not item.identifiable:
         item.add_component(IdentifiableWeapon(item.base_name),"identifiable")
 
-    if dice <= 60:
+    if dice <= 50:
         add_poison(item, 1, 10)
-    elif dice <= 70:
+    elif dice <= 60:
         add_flaming(item)
-    elif dice <= 80:
+    elif dice <= 70:
         add_shocking(item)
-    elif dice <= 100:
+    elif dice <= 80:
         add_smashing(item)
+    elif dice <= 90:
+        add_lifedrain(item)
 
 def add_poison(item, damage = 1, duration = 10):
     item.add_component(Poisoning(0, damage, duration), 'ablity')
@@ -220,6 +222,11 @@ def add_smashing(item):
     item.add_component(PushBack(), 'ablity')
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = 'of smashing'), 'naming')
+
+def add_lifedrain(item):
+    item.add_component(LifeDrain(), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of life drain'), 'naming')
 
 def ring_of_power(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)

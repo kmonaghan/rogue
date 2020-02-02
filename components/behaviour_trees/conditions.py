@@ -210,7 +210,7 @@ class SetNamespace(Node):
         return TreeStates.SUCCESS, []
 
 class NumberOfEntities(Node):
-    def __init__(self, radius=3, species=Species.ZOMBIE, number_of_entities=0):
+    def __init__(self, radius=3, species=Species.UNDEAD, number_of_entities=0):
         self.radius = radius
         self.species = species
         self.number_of_entities = number_of_entities
