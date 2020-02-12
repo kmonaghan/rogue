@@ -164,13 +164,13 @@ class Entity:
     def deregister_turn_all(self):
         self.turn.clear()
 
-    def on_turn(self):
+    def on_turn(self, game_map):
         results = []
 
         turn_copy = self.turn.copy()
         for key in turn_copy:
             try:
-                results.extend(turn_copy[key].tick())
+                results.extend(turn_copy[key].tick(game_map))
             except TypeError as e:
                 print(f"Error proccessing turn: {e}")
 

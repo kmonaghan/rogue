@@ -269,9 +269,6 @@ class Rogue(tcod.event.EventDispatch):
             self.game_state = GameStates.QUEST_LIST
             return True
 
-        if action == InputTypes.WAIT:
-            self.game_state = GameStates.ENEMY_TURN
-
         return False
 
     def debug_actions(self, action, action_value):
@@ -313,10 +310,12 @@ class Rogue(tcod.event.EventDispatch):
 
         player_turn_results = []
 
-        player_on_turn_results = self.player.on_turn()
+        player_on_turn_results = self.player.on_turn(self.game_map)
         self.process_results_stack(self.player, player_on_turn_results)
 
-        if self.player.health.dead:
+        if action == InputTypes.WAIT:
+            self.game_state = GameStates.ENEMY_TURN
+        elif self.player.health.dead:
             self.game_state = GameStates.GAME_OVER
         elif action == InputTypes.MOVE:
             dx, dy = action_value
@@ -421,7 +420,7 @@ class Rogue(tcod.event.EventDispatch):
                 continue
             entity.energy.increase_energy()
             if entity.energy.take_action():
-                enemy_turn_results = entity.on_turn()
+                enemy_turn_results = entity.on_turn(self.game_map)
                 self.process_results_stack(entity, enemy_turn_results)
                 enemy_turn_results.clear()
 
@@ -601,11 +600,9 @@ class Rogue(tcod.event.EventDispatch):
 
                     if equipped:
                         message = Message(f"{entity.name} equipped the {equipped.name}")
-                        equipped.equippable.on_equip(entity)
 
                     if dequipped:
                         message = Message(f"{entity.name} dequipped the {dequipped.name}")
-                        dequipped.equippable.on_dequip(entity)
 
                     turn_results.extend([{ResultTypes.MESSAGE: message}])
 

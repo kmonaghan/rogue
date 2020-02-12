@@ -12,7 +12,7 @@ class Poisoned:
         self.duration = duration
         self.uuid = None
 
-    def tick(self):
+    def tick(self, game_map):
         self.duration -= 1
         results = []
 

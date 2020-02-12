@@ -88,50 +88,71 @@ class Equipment:
 
         slot = equippable_entity.equippable.slot
 
+        equipped = None
+        dequipped = None
+
         if slot == EquipmentSlots.MAIN_HAND:
             if self.main_hand == equippable_entity:
                 self.main_hand = None
                 results.append({'dequipped': equippable_entity})
+                dequipped = equippable_entity
             else:
                 if self.main_hand:
                     results.append({'dequipped': self.main_hand})
-
+                    dequipped = equippable_entity
                 if self.main_hand != equippable_entity:
                     self.main_hand = equippable_entity
                     results.append({'equipped': equippable_entity})
+                    equipped = equippable_entity
         elif slot == EquipmentSlots.OFF_HAND:
             if self.off_hand == equippable_entity:
                 self.off_hand = None
                 results.append({'dequipped': equippable_entity})
+                dequipped = equippable_entity
             else:
                 if self.off_hand:
                     results.append({'dequipped': self.off_hand})
+                    dequipped = equippable_entity
 
                 self.off_hand = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equipped = equippable_entity
         elif slot == EquipmentSlots.CHEST:
             if self.chest == equippable_entity:
                 self.chest = None
                 results.append({'dequipped': equippable_entity})
+                dequipped = equippable_entity
             else:
                 if self.chest:
                     results.append({'dequipped': self.chest})
+                    dequipped = equippable_entity
 
                 self.chest = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equipped = equippable_entity
         elif slot == EquipmentSlots.HEAD:
             if self.head == equippable_entity:
                 self.head = None
                 results.append({'dequipped': equippable_entity})
+                dequipped = equippable_entity
             else:
                 if self.head:
                     results.append({'dequipped': self.head})
+                    dequipped = equippable_entity
 
                 if self.head != equippable_entity:
                     self.head = equippable_entity
                     results.append({'equipped': equippable_entity})
+                    equipped = equippable_entity
         elif slot == EquipmentSlots.RING or EquipmentSlots.LEFT_RING_FINGER or EquipmentSlots.RIGHT_RING_FINGER:
             results.extend(self.equip_ring(equippable_entity))
+            equipped = equippable_entity
+
+        if equipped:
+            equipped.equippable.on_equip(self.owner)
+
+        if dequipped:
+            dequipped.equippable.on_dequip(self.owner)
 
         return results
 

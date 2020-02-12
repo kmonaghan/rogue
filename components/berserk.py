@@ -13,7 +13,7 @@ class Berserk:
         self.turns = turns
         self.uuid = None
 
-    def tick(self):
+    def tick(self, game_map):
         results = []
 
         self.turns -= 1

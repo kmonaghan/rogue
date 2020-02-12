@@ -14,7 +14,7 @@ class Regeneration:
         self.turns_since_last_heal = 0
         self.uuid = None
 
-    def tick(self):
+    def tick(self, game_map):
         self.duration -= 1
         results = []
 

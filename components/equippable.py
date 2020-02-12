@@ -27,14 +27,29 @@ class Equippable:
         return base
 
     def on_equip(self, entity):
+        print(f"equiping {self}")
+        print(entity)
         if self.attribute:
             entity.add_component(self.attribute, type(self.attribute).__name__)
             self.attribute.start()
+        if self.owner.aura:
+            print('adding aura')
+            self.owner.aura.owner = entity
+            self.owner.aura.uuid = entity.register_turn(self.owner.aura)
+            print(f"aura uuid: {self.owner.aura.uuid}")
+            entity.aura = True
 
     def on_dequip(self, entity):
+        print('dequip')
+        print(entity)
         if self.attribute:
             self.attribute.end()
             entity.del_component(type(self.attribute).__name__)
+        if self.owner.aura:
+            print('removing aura')
+            self.owner.aura.owner = None
+            entity.deregister_turn(self.owner.aura.uuid)
+            entity.aura = False
 
     def equipment_description(self):
         desription = ""

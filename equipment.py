@@ -8,6 +8,7 @@ from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
 from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain
+from components.aura import DamageAura
 from components.equippable import Equippable
 from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
 from components.item import Item
@@ -179,11 +180,11 @@ def random_magic_weapon(dungeon_level = 1):
     item.add_component(naming, 'naming')
     item.equippable.number_of_dice = 2
 
-    add_random_ablity(item)
+    add_random_weapon_ablity(item)
 
     return item
 
-def add_random_ablity(item):
+def add_random_weapon_ablity(item):
     dice = randint(1, 100)
 
     if dice <=50:
@@ -479,3 +480,6 @@ def key(point = None, unlocks = None):
     key.add_component(Unlock(unlocks.uuid), 'unlock')
 
     return key
+
+def add_damage_aura(item):
+    item.add_component(DamageAura(), 'aura')
