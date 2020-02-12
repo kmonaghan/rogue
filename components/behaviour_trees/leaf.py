@@ -100,21 +100,27 @@ class TravelToRandomPosition(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         if not self.target_position or (self.target_position == owner.point):
+            print("Getting new target position")
             self.target_position = random_walkable_position(game_map, owner)
+        print(f"Current target: {self.target_position}")
 
-        if self.target_path and len(self.target_path) > 1 and (Point(self.target_path[0][0], self.target_path[0][1]) == owner.point):
+        if self.target_path and len(self.target_path) > 1:
+            print("Have a path already")
             self.target_path.pop(0)
 
-            if not game_map.current_level.blocked[self.target_path[0][0], self.target_path[0][1]]:
+            if game_map.current_level.accessible_tile(self.target_path[0][0], self.target_path[0][1]):
                 return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
-
+        print("Recalculating path")
+        print(f"avoiding: {owner.movement.routing_avoid}")
         self.target_path = get_shortest_path(
             game_map,
             owner.point,
             self.target_position,
             routing_avoid=owner.movement.routing_avoid)
+        print(f"result: {self.target_path}")
         if len(self.target_path) < 1:
             self.target_position = None
+            self.target_path = None
             return TreeStates.SUCCESS, []
 
         return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
