@@ -7,7 +7,7 @@ from tcod.map import Map
 
 from entities.entity_list import EntityList
 
-from etc.colors import COLORS
+from etc.colors import COLORS, random_color_shimmer
 from etc.configuration import CONFIG
 from etc.enum import RoutingOptions, Tiles, WALKABLE_TILES, SHIMMERING_TILES
 
@@ -279,14 +279,11 @@ class LevelMap(Map):
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
             current_entities = self.entities.get_entities_in_position((x, y))
-            print(f"current_entities: {current_entities}")
             entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
-            print(f"render order_entities: {entities_in_render_order}")
             for entity in entities_in_render_order:
                 map_console.ch[x, y] = ord(entity.display_char)
                 map_console.fg[x, y] = entity.display_color
                 if entity.aura:
-                    print(f"adding {entity} from {entities_in_render_order}")
                     auras.append(entity)
             entities_in_render_order.clear()
             entity = None
@@ -296,7 +293,7 @@ class LevelMap(Map):
 
             for x in range(0, slice.shape[0]):
                 for y in range(0, slice.shape[1]):
-                    slice[x,y] = tcod.color_lerp(tcod.Color(slice[x,y][0],slice[x,y][1],slice[x,y][2]), tcod.red, 0.05)
+                    slice[x,y] = tcod.color_lerp(tcod.Color(slice[x,y][0],slice[x,y][1],slice[x,y][2]), random_color_shimmer(tcod.red), 0.05)
 
     def clear_paths(self):
         self.paths.clear()
