@@ -1,7 +1,7 @@
 import pubsub
 
 from etc.colors import COLORS
-from etc.enum import ResultTypes
+from etc.enum import DamageType, ResultTypes
 
 from game_messages import Message
 
@@ -20,7 +20,7 @@ class Poisoned:
             self.end()
             return results
 
-        damage_results, total_damage = self.owner.health.take_damage(self.damage_per_turn)
+        damage_results, total_damage = self.owner.health.take_damage(self.damage_per_turn, type=DamageType.POISON)
         results.extend(damage_results)
         results.append({
             ResultTypes.MESSAGE: Message('The poison does {0} damage to {1}'.format(total_damage ,self.owner.name.title()), COLORS.get('damage_text'))
@@ -49,7 +49,7 @@ class Poisoned:
             try:
                 self.owner.del_component("poisoned")
             except AttributeError:
-                print(f"tried to remove posion from {self.owner.name} - {self.owner.uuid}")
+                print(f"tried to remove poison from {self.owner.name} - {self.owner.uuid}")
         else:
             print('****No owner to poisoned - already deleted?')
 

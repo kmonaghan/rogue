@@ -327,6 +327,7 @@ class DamageType(Enum):
     FIRE = auto()
     ICE = auto()
     ELECTRIC = auto()
+    POISON = auto()
 
 class EquipmentSlots(Enum):
     MAIN_HAND = auto()
