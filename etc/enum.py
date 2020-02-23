@@ -194,6 +194,7 @@ class ResultTypes(Enum):
     EQUIP = auto()
     EQUIP_ARMOR = auto()
     EQUIP_WEAPON = auto()
+    EARN_XP = auto()
     FREEZE = auto()
     FOV_RECOMPUTE = auto()
     HARM = auto()

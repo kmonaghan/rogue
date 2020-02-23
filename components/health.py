@@ -13,6 +13,12 @@ class Health:
         self.hp = hp
         self.on_death = None
 
+    def __str__(self):
+        return f"{self.hp}/{self.base_max_hp}"
+
+    def __repr__(self):
+        return f"{self.hp}/{self.base_max_hp}"
+
     @property
     def dead(self):
         return (self.hp <= 0)
@@ -51,13 +57,18 @@ class Health:
 
         if self.dead:
             self.hp = 0
-            message = Message(f"{self.owner.name.title()} is dead!", COLORS.get('death_text'))
-            print(f"Death of {self.owner.name} - {self.owner.uuid} by {npc.name} - {npc.uuid}")
-            pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
+
             if npc and npc.ai:
                 npc.ai.remove_target(self.owner)
+                
+            message = Message(f"{self.owner.name.title()} is dead!", COLORS.get('death_text'))
             results.append({ResultTypes.MESSAGE: message})
             results.append({ResultTypes.DEAD_ENTITY: self.owner})
+            if self.owner.level:
+                xp = self.owner.level.xp_worth(npc)
+                results.extend([{ResultTypes.EARN_XP: {'xp': xp, 'earner': npc}}])
+
+            pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
 
         elif npc and self.owner.ai:
             self.owner.ai.set_target(npc)

@@ -207,7 +207,6 @@ def create_player():
     scroll6 = equipment.teleport_scroll()
     player.inventory.add_item(scroll6)
 
-    pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.DEATH, earn_death_xp))
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
     return player
@@ -706,20 +705,6 @@ def rat_swarm(sub, message, level_map):
         if level_map.current_level.fov[sub.entity.x, sub.entity.y]:
             if sub.entity.ai:
                 sub.entity.ai.set_target(message.entity)
-
-def earn_death_xp(sub, message, level_map):
-    if message.target is None:
-        print("earn_death_xp: the target is none?")
-        return
-
-    if sub.entity is None:
-        print("earn_death_xp: the subscriber is none?")
-        return
-
-    if (message.target.uuid == sub.entity.uuid) and message.entity.level:
-        xp = message.entity.level.xp_worth(message.target)
-        sub.entity.level.add_xp(xp)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))
 
 def earn_quest_xp(sub, message, level_map):
     if (message.target.uuid == sub.entity.uuid):

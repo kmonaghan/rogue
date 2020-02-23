@@ -48,7 +48,7 @@ class DamageAura(Aura):
                         damage = die_roll(self.number_of_dice, self.type_of_dice)
                         damage_results, total_damage = entity.health.take_damage(damage, self.owner, self.damage_type)
                         if total_damage > 0:
-                            msg = Message(f"{entity.name} takes {str(damage)} from {self.owner.name}'s {self.name} damage.", COLORS.get('damage_text'))
+                            msg = Message(f"{entity.name} takes {str(damage)} damage from {self.owner.name}'s {self.name}.", COLORS.get('damage_text'))
                             results.extend(damage_results)
                             results.extend([{ResultTypes.MESSAGE: msg}])
 

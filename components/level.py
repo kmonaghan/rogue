@@ -19,6 +19,12 @@ class Level:
 
         self.xp_value = xp_value
 
+    def __str__(self):
+        return f"{self.current_level} ({self.current_xp}/{self.experience_to_next_level})"
+
+    def __repr__(self):
+        return f"{self.current_level} ({self.current_xp}/{self.experience_to_next_level})"
+
     @property
     def experience_to_next_level(self):
         return self.current_level_xp + self.next_level_xp
@@ -67,5 +73,5 @@ class Level:
             return
 
         for x in range(total_levels):
+            print(f"leveling up {x} for {self.owner}")
             self.level_up_stats(choice(list(LevelUp)))
-            self.current_level += 1

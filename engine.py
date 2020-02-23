@@ -420,6 +420,8 @@ class Rogue(tcod.event.EventDispatch):
                 continue
             entity.energy.increase_energy()
             if entity.energy.take_action():
+                if entity.level and entity.level.can_level_up():
+                    entity.level.random_level_up(1)
                 enemy_turn_results = entity.on_turn(self.game_map)
                 self.process_results_stack(entity, enemy_turn_results)
                 enemy_turn_results.clear()
@@ -557,6 +559,12 @@ class Rogue(tcod.event.EventDispatch):
 
             if result_type == ResultTypes.END_TURN:
                 self.game_state = GameStates.ENEMY_TURN
+
+            if result_type == ResultTypes.EARN_XP:
+                if result_data['xp'] > 0:
+                    result_data['earner'].level.add_xp(result_data['xp'])
+                    message = Message(f"{result_data['earner'].name} gained {result_data['xp']} xp", COLORS.get('success_text'))
+                    turn_results.extend([{ResultTypes.MESSAGE: message}])
 
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
