@@ -70,3 +70,33 @@ class EntityList:
                 #    #print "no entites at " + str(x) + ", " + str(y)
 
         return npc
+
+    def find_all_closest(self, point, species, max_distance=2):
+        npcs = []
+
+        start_x = max(0, point.x - max_distance)
+        start_y = max(0, point.y - max_distance)
+
+        end_x = min(self.width, start_x + (max_distance * 2) + 1)
+        end_y = min(self.height, start_y + (max_distance * 2) + 1)
+
+        dist = max_distance + 1
+
+        #print("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
+        for x in range(start_x, end_x):
+            for y in range(start_y, end_y):
+                #print ("checking " + str(x) + ", " + str(y))
+
+                if (len(self.coordinate_map[(x, y)])):
+                    for entity in self.coordinate_map[(x, y)]:
+                        if (point.x == x) and (point.y == y):
+                            continue
+                        if isinstance(entity, Character) and (entity.species == species) and not entity.health.dead:
+                            entity_distance = abs(x - point.x)
+                            if (entity_distance < dist):
+                                #print("FOUND!")
+                                npcs.append(entity)
+                #else:
+                #    #print "no entites at " + str(x) + ", " + str(y)
+
+        return npcs

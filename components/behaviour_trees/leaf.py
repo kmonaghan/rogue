@@ -1,7 +1,7 @@
 '''via https://github.com/madrury/roguelike
 '''
 
-from random import uniform
+from random import choice, randint, uniform
 
 from components.behaviour_trees.root import Node
 
@@ -18,10 +18,8 @@ class MoveTowardsTargetEntity(Node):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
         if not target:
-            print("No target set")
             return TreeStates.FAILURE, []
 
-        print("MoveTowardsTargetEntity Targeting: " + str(target))
         self.path = get_shortest_path(
             game_map,
             owner.point,
@@ -33,7 +31,6 @@ class MoveTowardsTargetEntity(Node):
         results = [{
             ResultTypes.MOVE_WITH_PATH: (owner, self.path)}]
         return TreeStates.SUCCESS, results
-
 
 class MoveTowardsPointInNamespace(Node):
 
@@ -100,24 +97,18 @@ class TravelToRandomPosition(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         if not self.target_position or (self.target_position == owner.point):
-            print("Getting new target position")
             self.target_position = random_walkable_position(game_map, owner)
-        print(f"Current target: {self.target_position}")
 
         if self.target_path and len(self.target_path) > 1:
-            print("Have a path already")
             self.target_path.pop(0)
 
             if game_map.current_level.accessible_tile(self.target_path[0][0], self.target_path[0][1]):
                 return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
-        print("Recalculating path")
-        print(f"avoiding: {owner.movement.routing_avoid}")
         self.target_path = get_shortest_path(
             game_map,
             owner.point,
             self.target_position,
             routing_avoid=owner.movement.routing_avoid)
-        print(f"result: {self.target_path}")
         if len(self.target_path) < 1:
             self.target_position = None
             self.target_path = None
@@ -132,12 +123,44 @@ class Skitter(Node):
         results = [{ResultTypes.MOVE_RANDOM_ADJACENT: owner}]
         return TreeStates.SUCCESS, results
 
+class Swarm(Node):
+
+    def __init__(self, species, radius = 3, follow_chance = 75):
+        self.species = species
+        self.radius = radius
+        self.chance = follow_chance
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        results = []
+        if randint(1,100) < self.chance:
+            npcs = game_map.current_level.entities.find_all_closest(owner.point, self.species, max_distance=self.radius)
+            moved = []
+            for npc in npcs:
+                if npc.movement and npc.movement.has_moved:
+                    moved.append(npc)
+
+            if len(moved) > 0:
+                follow_npc = choice(moved)
+
+                target_path = get_shortest_path(
+                    game_map,
+                    owner.point,
+                    follow_npc.point,
+                    routing_avoid=owner.movement.routing_avoid)
+
+                if len(target_path) < 1:
+                    return TreeStates.FAILURE, []
+
+                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, target_path)}]
+
+        return TreeStates.FAILURE, []
+
 class DoNothing(Node):
     """Take no action and pass the turn."""
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         return TreeStates.SUCCESS, []
-
 
 class Attack(Node):
     """The owner attackes the target."""
@@ -149,7 +172,6 @@ class Attack(Node):
             del self.namespace["target"]
             return TreeStates.FAILURE, []
 
-        print("Attack: SUCCESS " + str(target))
         return (TreeStates.SUCCESS,
                     owner.offence.attack(target))
 
@@ -161,7 +183,6 @@ class PointToTarget(Node):
     """The owner attackes the target."""
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        print("Setting namespace for " + self.target_point_name)
         self.namespace[self.target_point_name] = self.target_point
 
         return TreeStates.SUCCESS, []
@@ -212,7 +233,6 @@ class SpawnEntity(Node):
 
         if owner.children:
             if not owner.children.can_have_children:
-                print("TOO MANY CHILDREN.")
                 return TreeStates.FAILURE, []
 
         if self.current_time > self.max_time or (uniform(0, 1) , (self.current_time/self.max_time)):
@@ -226,7 +246,6 @@ class SpawnEntity(Node):
                 if target:
                     entity.ai.set_target(target)
 
-                #print(f"Spawning: {entity}")
                 results = [{ResultTypes.ADD_ENTITY: entity}]
                 if self.hatch:
                     results.append({ResultTypes.REMOVE_ENTITY: owner})

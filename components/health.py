@@ -11,6 +11,7 @@ class Health:
     def __init__(self, hp):
         self.base_max_hp = hp
         self.hp = hp
+        self.on_death = None
 
     @property
     def dead(self):
@@ -44,19 +45,20 @@ class Health:
             amount = floor(amount * self.owner.vulnerability.modifier(type))
 
         total_damage = min(self.hp, amount)
-        
+
         results.append({ResultTypes.DAMAGE: total_damage})
         self.hp -= amount
 
         if self.dead:
             self.hp = 0
             message = Message(f"{self.owner.name.title()} is dead!", COLORS.get('death_text'))
-            print(f"Death of {self.owner.name} - {self.owner.uuid}")
+            print(f"Death of {self.owner.name} - {self.owner.uuid} by {npc.name} - {npc.uuid}")
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
             if npc and npc.ai:
-                npc.ai.remove_target()
+                npc.ai.remove_target(self.owner)
             results.append({ResultTypes.MESSAGE: message})
             results.append({ResultTypes.DEAD_ENTITY: self.owner})
+
         elif npc and self.owner.ai:
             self.owner.ai.set_target(npc)
 

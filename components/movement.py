@@ -10,6 +10,7 @@ class Movement:
         def __init__(self, can_move=True):
             self.can_move = can_move
             self.routing_avoid = [RoutingOptions.AVOID_BLOCKERS]
+            self.has_moved = False
 
         def move(self, dx, dy, current_level):
             if not self.can_move:
@@ -22,6 +23,7 @@ class Movement:
             #move by the given amount, if the destination is not blocked
             if current_level.walkable[self.owner.x + dx, self.owner.y + dy] and not current_level.blocked[self.owner.x + dx, self.owner.y + dy]:
                 self.place(self.owner.x + dx, self.owner.y + dy, current_level)
+                self.has_moved = True
                 return True
             else:
                 print(f"{self.owner.name} can't move as blocked")
@@ -53,13 +55,11 @@ class Movement:
             self.attempt_move(Point(self.owner.x + dx, self.owner.y + dy), game_map)
 
         def attempt_move(self, target_point, game_map):
-            print(f"attempt_move: {self.owner.name} from {self.owner.point} to {target_point}")
             if game_map.current_level.walkable[target_point.x, target_point.y] and not game_map.current_level.blocked[target_point.x, target_point.y]:
                 self.place(target_point.x, target_point.y, game_map.current_level)
+                self.has_moved = True
 
                 return True
-
-            print(f"attempt_move: Can't move {self.owner.name}")
 
             return False
 

@@ -85,4 +85,8 @@ def entity_spawn(sub, message, game_map):
         game_map.current_level.add_entity(npc)
 
 def on_entity_death(sub, message, game_map):
+    if sub.entity and sub.entity.ai:
+        sub.entity.ai.remove_target(message.entity)
+        pubsub.remove_subscription(sub)
+
     pubsub.unsubscribe_entity(message.entity)

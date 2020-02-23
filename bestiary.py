@@ -11,7 +11,6 @@ import quest
 from components.ai import (BasicNPC, CaptainNPC, GuardNPC, PatrollingNPC, WarlordNPC,
                             NecromancerNPC, PredatorNPC, SpawningNPC,
                             HatchingNPC, TetheredNPC, ZombieNPC)
-
 from components.berserk import Berserk
 from components.children import Children
 from components.health import Health
@@ -19,6 +18,7 @@ from components.interaction import Interaction
 from components.level import Level
 from components.offence import Offence
 from components.defence import Defence
+from components.naming import Naming
 from components.questgiver import Questgiver
 from components.regeneration import Regeneration
 from components.resistance import Resistance
@@ -178,6 +178,7 @@ def create_player():
         equipment.add_lifedrain(dagger)
 
         armour = equipment.random_armour()
+        equipment.add_damage_aura(armour)
         player.inventory.add_item(armour)
         player.equipment.toggle_equip(armour)
 
@@ -515,36 +516,6 @@ def warlord(point = None):
 
     return npc
 
-def zombie(point = None, old_npc = None):
-    ai_component = ZombieNPC()
-    health_component = Health(30)
-
-    if old_npc:
-        old_npc.blocks = True
-        old_npc.char = 'Z'
-        old_npc.base_name = 'Zombie ' + old_npc.base_name
-        old_npc.species=Species.UNDEAD
-        old_npc.add_component(ai_component, 'ai')
-        old_npc.add_component(Health(old_npc.health.max_hp // 2), 'health')
-
-        return old_npc
-    else:
-        npc = Character(point, 'Z', 'zombie', COLORS.get('zombie'),
-                        ai=ai_component, species=Species.UNDEAD,
-                        health=health_component)
-
-        npc.add_component(Offence(base_power = 10), 'offence')
-        npc.add_component(Defence(defence = 4), 'defence')
-        npc.movement.routing_avoid.extend(npc_avoid)
-
-        item = equipment.longsword()
-        item.lootable = False
-
-        npc.inventory.add_item(item)
-        npc.equipment.toggle_equip(item)
-
-    return npc
-
 '''
 Helper methods to create npcs/creatures/objects
 '''
@@ -597,9 +568,28 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
         upgrade_npc(npc)
         npc.level.random_level_up(1)
 
-    #print("final npc level: " + str(npc.level.current_level))
-
     tweak_npc(npc)
+
+    return npc
+
+def generate_zombie(type, dungeon_level = 1, player_level = 1, point = None, upgrade_chance = 98):
+    npc = generate_npc(type, dungeon_level, player_level, point, upgrade_chance)
+
+    return convert_npc_to_zombie(npc)
+
+def convert_npc_to_zombie(npc):
+    npc.char = 'Z'
+    npc.add_component(Naming(npc.base_name, prefix='Zombie'), 'naming')
+    npc.add_component(ZombieNPC(species=npc.species), 'ai')
+    npc.add_component(Health(max(1, npc.health.max_hp // 2)), 'health')
+    npc.species=Species.UNDEAD
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+    equipment.add_infection(teeth, name="Zombification", chance=101, on_turn=None, on_death=convert_npc_to_zombie)
+
+    npc.inventory.add_item(teeth)
+    npc.equipment.toggle_equip(teeth)
 
     return npc
 
@@ -632,7 +622,6 @@ def poison_npc(npc, dungeon_level = 1):
     npc.inventory.add_item(weapon)
     npc.equipment.toggle_equip(weapon)
 
-    print(weapon)
     return npc
 
 def tweak_npc(npc):

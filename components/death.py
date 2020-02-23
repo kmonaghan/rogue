@@ -15,6 +15,11 @@ class BasicDeath:
         self.skeletal = False
 
     def npc_death(self, game_map):
+        if self.owner.health and self.owner.health.on_death:
+            print(">>>>>>>On death trigger")
+            self.owner.health.on_death(self.owner)
+            return GameStates.PLAYER_TURN
+
         #transform it into a nasty corpse! it doesn't block, can't be
         #attacked and doesn't move
         self.owner.char = '%'
@@ -36,7 +41,7 @@ class BasicDeath:
 
         self.rotting = True
 
-        self.owner.add_component(Naming(self.owner.base_name, prefix='Skeletal remains of'), 'naming')
+        self.owner.add_component(Naming(self.owner.base_name, prefix='Rotting corpse of'), 'naming')
 
         return GameStates.PLAYER_TURN
 
@@ -53,7 +58,7 @@ class BasicDeath:
         self.skeletal = True
         self.rotting_time = 24
         self.owner.color = COLORS.get('skeletal')
-        self.owner.naming.prefix = 'Rotting corpse of'
+        self.owner.naming.prefix = 'Skeletal remains of'
 
 class WarlordDeath(BasicDeath):
     def npc_death(self, game_map):

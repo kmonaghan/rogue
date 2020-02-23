@@ -106,3 +106,20 @@ class LifeDrain(Ablity):
             results.extend(source.health.heal(drain_amount))
 
         return results
+
+class Infection(Ablity):
+    def __init__(self, name="Infection", chance=50, on_turn=None, on_death=None):
+        super().__init__(name=name)
+        self.chance = chance
+        self.on_turn = on_turn
+        self.on_death = on_death
+
+    def on_attack(self, source, target):
+        results = []
+
+        if randint(1,100) < self.chance:
+            return results
+        if self.on_death:
+            target.health.on_death = self.on_death
+
+        return results

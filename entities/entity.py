@@ -167,6 +167,9 @@ class Entity:
     def on_turn(self, game_map):
         results = []
 
+        if self.movement:
+            self.movement.has_moved = False
+            
         turn_copy = self.turn.copy()
         for key in turn_copy:
             try:

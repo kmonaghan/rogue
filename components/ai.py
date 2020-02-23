@@ -2,6 +2,7 @@ __metaclass__ = type
 
 import bestiary
 import tome
+import pubsub
 
 from random import randint
 
@@ -16,7 +17,7 @@ from components.behaviour_trees.composite import (
     Selection, Sequence, Negate)
 from components.behaviour_trees.leaf import (
      Attack, MoveTowardsTargetEntity, TravelToRandomPosition, SeekTowardsLInfinityRadius,
-     MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, PointToTarget)
+     MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, Swarm, PointToTarget)
 from components.behaviour_trees.conditions import (
     IsAdjacent, IsFinished, WithinPlayerFov, InNamespace, CoinFlip, FindNearestTargetEntity,
     WithinL2Radius, OutsideL2Radius, CheckHealthStatus, SetNamespace, NumberOfEntities)
@@ -35,11 +36,18 @@ class BaseAI:
         return results
 
     def set_target(self, target):
-        print("setting the target: " + str(target))
-        self.tree.namespace["target"] = target
+        current_target = self.tree.namespace.get("target")
 
-    def remove_target(self):
-        del self.tree.namespace["target"]
+        if current_target == target:
+            return
+
+        self.tree.namespace["target"] = target
+        pubsub.pubsub.subscribe(pubsub.Subscription(self.owner, pubsub.PubSubTypes.DEATH, pubsub.on_entity_death))
+
+    def remove_target(self, target=None):
+        current_target = self.tree.namespace.get("target")
+        if current_target and current_target.uuid == target.uuid:
+            del self.tree.namespace["target"]
 
 class PatrollingNPC(BaseAI):
     """Simple NPC ai.
@@ -133,7 +141,6 @@ class FrozenNPC(BaseAI):
     def __init__(self):
         self.tree = Root(DoNothing())
 
-
 class NecromancerNPC(BaseAI):
     """AI for a necromancer.
 
@@ -191,20 +198,6 @@ class HuntingNPC(BaseAI):
                     WithinL2Radius(radius=sensing_range),
                     MoveTowardsTargetEntity()),
                 TravelToRandomPosition()))
-
-
-class ZombieNPC(BaseAI):
-    """Similar to a HuntingNPC, but will not wander."""
-    def __init__(self, move_towards_radius=6):
-        self.tree = Root(
-            Selection(
-                Sequence(
-                    IsAdjacent(),
-                    Attack()),
-                Sequence(
-                    WithinL2Radius(radius=move_towards_radius),
-                    MoveTowardsTargetEntity())))
-
 
 class SkitteringNPC(BaseAI):
     """An impatient NPC.
@@ -386,3 +379,21 @@ class WarlordNPC(BaseAI):
                 )
             )
         )
+
+class ZombieNPC(BaseAI):
+    """Rwarrr...."""
+    def __init__(self, move_towards_radius=6, species=Species.NONDESCRIPT):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinL2Radius(radius=move_towards_radius),
+                    MoveTowardsTargetEntity()),
+                Sequence(
+                    FindNearestTargetEntity(range=move_towards_radius,species_type=species),
+                    MoveTowardsTargetEntity(),
+                ),
+                Swarm(species=species),
+                Skitter()))

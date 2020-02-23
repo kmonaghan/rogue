@@ -7,7 +7,7 @@ import tome
 from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
-from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain
+from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain, Infection
 from components.aura import DamageAura
 from components.equippable import Equippable
 from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
@@ -228,6 +228,11 @@ def add_lifedrain(item):
     item.add_component(LifeDrain(), 'ablity')
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = 'of life drain'), 'naming')
+
+def add_infection(item, name="Infection", chance=50, on_turn=None, on_death=None):
+    item.add_component(Infection(name=name, chance=chance, on_turn=on_turn, on_death=on_death), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = f"of {name}"), 'naming')
 
 def ring_of_power(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)
