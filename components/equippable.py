@@ -36,13 +36,10 @@ class Equippable:
             entity.aura = True
 
     def on_dequip(self, entity):
-        print('dequip')
-        print(entity)
         if self.attribute:
             self.attribute.end()
             entity.del_component(type(self.attribute).__name__)
         if self.owner.aura:
-            print('removing aura')
             self.owner.aura.owner = None
             entity.deregister_turn(self.owner.aura.uuid)
             entity.aura = False

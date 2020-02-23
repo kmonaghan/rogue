@@ -428,7 +428,6 @@ class Rogue(tcod.event.EventDispatch):
                     entity.death.decompose(self.game_map)
                 elif entity.ai:
                     # Enemies move and attack if possible.
-                    print(f"Taking turn for {entity}")
                     enemy_turn_results.extend(entity.ai.take_turn(self.game_map))
 
                     self.process_results_stack(entity, enemy_turn_results)
