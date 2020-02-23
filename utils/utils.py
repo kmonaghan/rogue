@@ -20,13 +20,6 @@ def unpack_single_key_dict(d):
     k = list(d)[0]
     return k, d[k]
 
-def choose_from_list_of_tuples(list_of_tuples):
-    """Randomly sample from a catagorical distribution defined by a list
-    of (probability, catagory) tuples.
-    """
-    probs, choices = zip(*list_of_tuples)
-    return np.random.choice(choices, size=1, p=probs)[0]
-
 #-----------------------------------------------------------------------------
 # Geometric operations.
 #-----------------------------------------------------------------------------

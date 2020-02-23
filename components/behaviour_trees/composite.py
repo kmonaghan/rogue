@@ -26,7 +26,7 @@ class Sequence(Node):
 
 class Selection(Node):
     """Tick chideren in sequence until success and propogate the results of
-    that success.  If no success is encuntered, propogate failure.
+    that success.  If no success is encountered, propogate failure.
     """
     def __init__(self, *children):
         for child in children:
