@@ -6,11 +6,12 @@ from etc.enum import DamageType, ResultTypes
 from game_messages import Message
 
 class Poisoned:
-    def __init__(self, damage_per_turn=1, duration=1):
+    def __init__(self, damage_per_turn=1, duration=1, poisoner=None):
         self.owner = None
         self.damage_per_turn = damage_per_turn
         self.duration = duration
         self.uuid = None
+        self.poisoner = poisoner
 
     def tick(self, game_map):
         self.duration -= 1
@@ -20,7 +21,7 @@ class Poisoned:
             self.end()
             return results
 
-        damage_results, total_damage = self.owner.health.take_damage(self.damage_per_turn, type=DamageType.POISON)
+        damage_results, total_damage = self.owner.health.take_damage(self.damage_per_turn, type=DamageType.POISON, npc=self.poisoner)
         results.extend(damage_results)
         results.append({
             ResultTypes.MESSAGE: Message('The poison does {0} damage to {1}'.format(total_damage ,self.owner.name.title()), COLORS.get('damage_text'))
