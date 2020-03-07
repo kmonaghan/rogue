@@ -21,7 +21,6 @@ class InNamespace(Node):
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        print("Checking for: " + str(self.name))
         if self.namespace.get(self.name):
             return TreeStates.SUCCESS, []
         else:
@@ -62,6 +61,9 @@ class WithinL2Radius(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
+        if not target:
+            print(f"No target for WithinL2Radius")
+            return TreeStates.FAILURE, []
         distance = owner.point.distance_to(target.point)
         if distance <= self.radius:
             return TreeStates.SUCCESS, []
@@ -155,7 +157,6 @@ class FindNearestTargetEntity(Node):
             target = game_map.current_level.find_closest_entity(owner, self.range, self.species)
 
             if target:
-                print("FindNearestTargetEntity: " + str(target))
                 self.namespace["target"] = target
 
                 return TreeStates.SUCCESS, []

@@ -25,4 +25,5 @@ class Node:
         return self.parent.namespace
 
     def tick(self, owner, game_map):
-        print(self.__class__.__name__)
+        #print(self.__class__.__name__)
+        pass

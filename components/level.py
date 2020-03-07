@@ -73,5 +73,4 @@ class Level:
             return
 
         for x in range(total_levels):
-            print(f"leveling up {x} for {self.owner}")
             self.level_up_stats(choice(list(LevelUp)))
