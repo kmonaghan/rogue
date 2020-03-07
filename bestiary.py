@@ -127,7 +127,7 @@ def create_chest(point = None, dungeon_level = 1):
     npc = Character(point, 'C', 'Chest', COLORS.get('chest'), species=Species.NONDESCRIPT)
 
     if randint(1, 100) >= 95:
-        return mimic(point = None, dungeon_level = 1)
+        return mimic(point, dungeon_level = 1)
 
     npc.add_component(Health(10), 'health')
     npc.add_component(Defence(defence = 2), 'defence')
@@ -172,10 +172,10 @@ def create_player():
 
     if CONFIG.get('debug'):
         player.level.random_level_up(30)
-        #weapon = equipment.random_magic_weapon()
-        #player.inventory.add_item(weapon)
-        #player.equipment.toggle_equip(weapon)
-        equipment.add_lifedrain(dagger)
+        weapon = equipment.random_magic_weapon()
+        player.inventory.add_item(weapon)
+        player.equipment.toggle_equip(weapon)
+        #equipment.add_lifedrain(dagger)
 
         armour = equipment.random_armour()
         equipment.add_damage_aura(armour)
@@ -220,14 +220,6 @@ def egg(point = None):
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
-
-    return creature
-
-def fungus(point = None):
-    health_component = Health(4)
-
-    creature = Character(point, '"', 'fungus', COLORS.get('fungus'),
-                    blocks=False,render_order=RenderOrder.TERRAIN)
 
     return creature
 
@@ -607,8 +599,8 @@ def place_chest(point, level_map, player):
     for i in range(guards):
         npc = generate_npc(npc_choice, dungeon_level=level_map.dungeon_level, point=point)
         ai_component = GuardNPC(guard_point = chest.point)
-        ai_component.set_target(player)
         npc.add_component(ai_component, 'ai')
+        ai_component.set_target(player)
 
         level_map.add_entity(npc)
 
