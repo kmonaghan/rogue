@@ -267,6 +267,7 @@ class Tiles(IntEnum):
     EXIT_DOOR = auto()
     DEADEND = auto()
     CAVERN_FLOOR = auto()
+    FUNGAL_CAVERN_FLOOR = auto()
     POTENTIAL_CORRIDOR_FLOOR = auto()
     CORRIDOR_FLOOR = auto()
     ROOM_FLOOR = auto()
@@ -278,6 +279,7 @@ class Tiles(IntEnum):
 WALKABLE_TILES = {
     Tiles.INTERNAL_DOOR, Tiles.EXIT_DOOR,
     Tiles.DOOR, Tiles.CAVERN_FLOOR,
+    Tiles.FUNGAL_CAVERN_FLOOR,
     Tiles.CORRIDOR_FLOOR, Tiles.ROOM_FLOOR,
     Tiles.SHALLOW_WATER, Tiles.DEEP_WATER,
     Tiles.STAIRS_FLOOR, Tiles.SPAWN_POINT}

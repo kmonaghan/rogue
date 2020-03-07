@@ -10,6 +10,10 @@ COLORS = {
     'light_cavern_floor': tcod.lighter_sepia,
     'dark_cavern_floor': tcod.light_sepia,
 
+    'light_fungal_cavern_floor': Color(203, 230, 82),
+    'dark_fungal_cavern_floor': Color(91, 103, 31),
+
+
     'dark_wall': tcod.darkest_sepia,
     'dark_ground': tcod.darker_sepia,
     'light_wall': tcod.dark_sepia,
@@ -63,7 +67,6 @@ COLORS = {
     'bat': tcod.darker_red,
     'bounty_hunter': tcod.gold,
     'chest': tcod.blue,
-    'fungus': Color(117, 225, 117),
     'goblin': tcod.desaturated_green,
     'mimic': tcod.darker_blue,
     'orc': tcod.light_green,

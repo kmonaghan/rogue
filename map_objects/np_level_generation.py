@@ -5,10 +5,10 @@ from random import choice, randint
 from etc.enum import Tiles
 from etc.exceptions import FailedToPlaceEntranceError, FailedToPlaceExitError, BadMapError, FailedToPlaceRoomError, MapNotEnoughExitsError
 
-from map_objects.np_dungeonGeneration import dungeonGenerator
+from map_objects.np_dungeonGeneration import dungeonGenerator, cellular_map
 from map_objects.np_level_map import LevelMap
 from map_objects.np_prefab import Prefab
-from map_objects.prefab import boss_room, treasure_room, barracks, stair_room, prison_block, list_of_prefabs
+from map_objects.prefab import boss_room, treasure_room, barracks, stair_room, prison_block, necromancer_lair, list_of_prefabs
 
 from utils.utils import matprint
 
@@ -31,8 +31,6 @@ def levelOneGenerator(map_width, map_height):
 
     tile_index = randint(0, len(cavern[0])-1)
 
-    print(f"picking tile {tile_index}: {cavern[0][tile_index]}, {cavern[1][tile_index]}")
-
     weights = [(Tiles.CORRIDOR_FLOOR, 1),
                 (Tiles.CAVERN_FLOOR, 1),
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1),
@@ -44,7 +42,6 @@ def levelOneGenerator(map_width, map_height):
         door_y = entrance_doors[1][idx]
         door_x = door_x + entrance.x
         door_y = door_y + entrance.y
-        print(f"Route from {door_x},{door_y} to {cavern[0][tile_index]},{cavern[1][tile_index]}")
         dm.route_between(door_x, door_y, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     x2, y2, exit_room = placeExitRoom(dm, x1, y1, add_door = True)
@@ -58,7 +55,6 @@ def levelOneGenerator(map_width, map_height):
         door_y = exit_doors[1][idx]
         door_x = door_x + exit_room.x
         door_y = door_y + exit_room.y
-        print(f"Route from {door_x},{door_y} to {cavern[0][tile_index]},{cavern[1][tile_index]}")
         dm.route_between(door_x, door_y, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     prefab = Prefab(treasure_room)
@@ -75,6 +71,8 @@ def levelOneGenerator(map_width, map_height):
 
         dm.route_between(x3, y3, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
+    place_foliage(dm)
+
     dm.cleanUpMap()
 
     if not dm.validateMap():
@@ -90,6 +88,8 @@ def addCaves(dm):
     unconnected = dm.findUnconnectedAreas()
 
     dm.joinUnconnectedAreas(unconnected, connecting_tile = Tiles.CAVERN_FLOOR)
+
+    place_foliage(dm)
 
 def cavernLevel(dm, x, y):
     addCaves(dm)
@@ -109,7 +109,6 @@ def cavernLevel(dm, x, y):
                 (Tiles.CAVERN_FLOOR, 1),
                 (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
 
-    #print(f"Route from {stairs[0][0]},{stairs[1][0]} to {cavern[0][0]},{cavern[1][0]}")
     dm.route_between(stairs[0][0], stairs[1][0], cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     x2, y2, exit_room = placeExitRoom(dm, x1, y1)
@@ -117,13 +116,68 @@ def cavernLevel(dm, x, y):
     if not x2:
         raise FailedToPlaceExitError
 
-    #print(f"Route from {x2},{y2} to {cavern[0][0]},{cavern[1][0]}")
     dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
     dm.cleanUpMap()
 
-def level_cavern_rooms(map_width, map_height):
-    dm = dungeonGenerator(width=map_width, height=map_height)
+def level_cavern_rooms(dm, x, y):
+    square_height = dm.width // 3
+
+    overwrite = randint(0,1)
+
+    cavern_width = randint(square_height, (dm.width * 3) // 4)
+    cavern_height = randint(square_height, (dm.height * 3) // 4)
+
+    width_offset = randint(0, dm.width - cavern_width - 1)
+    height_offset = randint(0, dm.height - cavern_height - 1)
+
+    x1, y1, room = placeStairRoom(dm, x, y, name="entrance", add_door = True)
+
+    if overwrite == 1:
+        dm.grid[width_offset:width_offset+cavern_width, height_offset:height_offset+cavern_height] = Tiles.IMPENETRABLE
+
+    dm.placeRandomRooms((square_height//4), square_height-2, 2, 2, add_door = True, add_walls = True, attempts=5000)
+
+    cells = cellular_map(shape=(cavern_width,cavern_height), probability=43)
+
+    slice = dm.grid[width_offset:width_offset+cavern_width, height_offset:height_offset+cavern_height]
+
+    if overwrite == 1:
+        slice[:] = cells[:]
+        slice[np.where(cells == 1)] = Tiles.CAVERN_FLOOR
+    else:
+        slice[np.where((cells == 1) & (slice == Tiles.EMPTY))] = Tiles.CAVERN_FLOOR
+
+    for i in range (5):
+        x, y = dm.findEmptySpace()
+
+        if not x and not y:
+            continue
+        else:
+            dm.generateCorridors(x = x, y = y)
+
+    dm.connectRooms()
+
+    unconnected = dm.findUnconnectedAreas()
+
+    dm.joinUnconnectedAreas(unconnected, connecting_tile = Tiles.CAVERN_FLOOR)
+
+    x2, y2, exit_room = placeExitRoom(dm, x1, y1)
+
+    if not x2:
+        raise FailedToPlaceExitError
+
+    weights = [(Tiles.CORRIDOR_FLOOR, 1),
+                (Tiles.ROOM_WALL, 9),
+                (Tiles.EMPTY, 9),
+                (Tiles.CAVERN_FLOOR, 1),
+                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
+
+    dm.route_between(x2, y2, x1, y1, avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
+
+    place_foliage(dm)
+
+    dm.cleanUpMap()
 
     return dm
 
@@ -171,13 +225,15 @@ def placePrefabs(dm, overwrite=True):
 def levelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
-    caveOrRooms = 1 #randint(0,1)
+    levelType = randint(0,3)
     result = False
 
-    if caveOrRooms == 0:
-        result = cavernLevel(dm, x, y)
-    else:
+    if levelType == 0:
         result = roomsLevel(dm, x, y)
+    elif levelType == 1:
+        result = cavernLevel(dm, x, y)
+    elif levelType == 2:
+        result = level_cavern_rooms(dm, x, y)
 
     if not dm.validateMap():
         raise BadMapError
@@ -219,15 +275,14 @@ def bossLevelGenerator(map_width, map_height, x, y):
 def arena(map_width, map_height, x = 5, y = 5):
     dm = dungeonGenerator(width=map_width, height=map_height)
 
+    room = dm.addRoom(10, 10, 10, 10, add_walls=True, add_door=True, max_doors = 1)
+
     #room = dm.addCircleShapedRoom(10, 10, 5, add_walls=True, add_door=True, max_doors = 1)
 
-    cave = dm.addRoom(15, 25, 10, 10, add_door=False, add_walls = True, tile = Tiles.CAVERN_FLOOR, max_doors = 1)
-
-    #dm.connectRooms()
+    cave = dm.addRoom(14, 24, 4, 4, add_door=False, add_walls = True, tile = Tiles.CAVERN_FLOOR, max_doors = 1)
 
     '''
-    cells = randint(1,5)
-    prefab = Prefab(prison_block, middle=cells)
+    prefab = Prefab(barracks)
 
     room = dm.placeRoomRandomly(prefab)
     x1,y1 = room.exits[0]
@@ -236,14 +291,8 @@ def arena(map_width, map_height, x = 5, y = 5):
 
     weights = [(Tiles.EMPTY, 1)]
 
-    dm.route_between(12, 16, x1, y1, avoid = [], weights = weights, tile=Tiles.DEEP_WATER, avoid_rooms=True)
-
-    cells = randint(1,5)
-    prefab = Prefab(barracks, middle=cells)
-
-    room = dm.placeRoomRandomly(prefab)
+    dm.route_between(18, 29, x1, y1, avoid = [], weights = weights, avoid_rooms=True)
     '''
-
     dm.cleanUpMap()
 
     return dm
@@ -269,8 +318,6 @@ def placeStairAlongEdge(dm):
     elif side == 3:
         x = 0
         y = randint(0, dm.height - 5)
-
-    print(f"{dm.width},{dm.height} placing on side: {side} at {x},{y}")
 
     return placeStairRoom(dm, x, y, name="entrance")
 
@@ -299,14 +346,12 @@ def placeExitRoom(dm, x, y, add_door = False):
 
         x, y = possible_tuples[idx]
 
-        print(f"Attempting to place at: {x},{y}")
         x1, y1, placed = placeStairRoom(dm, x, y, name="exit", add_door=add_door)
 
         if placed:
             possible_tuples = []
         else:
             attempts += 1
-            print(f"Room place attempt: {attempts}")
             del possible_tuples[idx]
 
     if not placed:
@@ -359,3 +404,8 @@ def squares(dm, x, y):
     dm.cleanUpMap()
 
     return dm
+
+def place_foliage(dm):
+    cells = cellular_map(shape=dm.grid.shape, probability=60)
+
+    dm.grid[np.where((dm.grid == Tiles.CAVERN_FLOOR) & (cells == 1))] = Tiles.FUNGAL_CAVERN_FLOOR

@@ -13,6 +13,7 @@ floor_to_wall = {
     Tiles.OBSTACLE: Tiles.CAVERN_WALL,
     Tiles.IMPENETRABLE: Tiles.IMPENETRABLE,
     Tiles.CAVERN_FLOOR: Tiles.CAVERN_WALL,
+    Tiles.FUNGAL_CAVERN_FLOOR: Tiles.CAVERN_WALL,
     Tiles.DEADEND: Tiles.CORRIDOR_WALL,
     Tiles.CORRIDOR_FLOOR: Tiles.CORRIDOR_WALL,
     Tiles.ROOM_FLOOR: Tiles.ROOM_WALL,
@@ -421,7 +422,6 @@ class dungeonGenerator:
         possible_door_place = np.where(final_door_mask == True)
 
         num_doors = randint(1, max_doors)
-        print(f"Adding {num_doors} doors of a possible {max_doors}")
         for door in range(num_doors):
             if len(possible_door_place[0]) > 1:
                 idx = randint(1, len(possible_door_place[0]) - 1)
@@ -594,9 +594,6 @@ class dungeonGenerator:
                 else:
                     room = self.addRoom(startX, startY, roomWidth, roomHeight, overlap = overlap, margin = margin, add_door = add_door, add_walls = add_walls)
             except (RoomOverlapsError, RoomOutOfBoundsError) as e:
-                #print("<"*30)
-                #print(e)
-                #print(">"*30)
                 pass
 
             if room:
@@ -945,8 +942,8 @@ class dungeonGenerator:
         if len(path) < 1:
             print("Can't route between stairs")
             return False
-        elif len(path) < 60:
-            print("Path between stairs too short")
-            return False
+        #elif len(path) < 30:
+        #    print("Path between stairs too short")
+        #    return False
 
         return True

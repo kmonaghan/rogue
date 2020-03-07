@@ -13,9 +13,10 @@ from etc.enum import RoutingOptions, Tiles, WALKABLE_TILES, SHIMMERING_TILES
 
 from map_objects.point import Point
 from map_objects.tile import (CavernFloor, CavernWall, CorridorFloor,
-                                CorridorWall, DeepWater, Door, ImpenetrableTile,
-                                RoomFloor, RoomWall, ShallowWater, StairsFloor,
-                                EmptyTile, PotentialCorridorFloor)
+                                CorridorWall, DeepWater, Door, FungalCavernFloor,
+                                ImpenetrableTile, RoomFloor, RoomWall,
+                                ShallowWater, StairsFloor, EmptyTile,
+                                PotentialCorridorFloor)
 
 from utils.utils import matprint
 
@@ -111,6 +112,8 @@ class LevelMap(Map):
                 current_tile = CorridorWall()
             elif grid[x,y] == Tiles.CAVERN_FLOOR:
                 current_tile = CavernFloor()
+            elif grid[x,y] == Tiles.FUNGAL_CAVERN_FLOOR:
+                current_tile = FungalCavernFloor()
             elif grid[x,y] == Tiles.CORRIDOR_FLOOR:
                 current_tile = CorridorFloor()
             elif grid[x,y] == Tiles.ROOM_FLOOR:

@@ -104,8 +104,6 @@ class GameMap:
             else:
                 self.levelGeneric(player)
 
-        self.place_foliage()
-
         self.fill_prefab(player)
 
     def test_popluate_map(self, player):
@@ -181,7 +179,7 @@ class GameMap:
             point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
             nest.set_point(point)
             self.current_level.add_entity(nest)
-        
+
     def levelGeneric(self, player):
         if len(self.current_level.caves) > 0:
             self.place_creatures(player)
@@ -226,16 +224,6 @@ class GameMap:
             npc.set_point(point)
             self.current_level.add_entity(npc)
 
-    def place_foliage(self):
-        cells = cellular_map(shape=self.current_level.grid.shape, probability=60)
-
-        fungal = np.where((self.current_level.grid == Tiles.CAVERN_FLOOR) & (cells == 1))
-
-        for idx, x in enumerate(fungal[0]):
-            y = fungal[1][idx]
-            f = bestiary.fungus(Point(x,y))
-            self.current_level.add_entity(f)
-
     def place_npc(self, room, player):
         #this is where we decide the chance of each npc appearing.
 
@@ -254,7 +242,7 @@ class GameMap:
         for i in range(num_npcs):
             choice = random_choice_from_dict(npc_chances)
             npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level)
-            avoid = npc.movement.routing_avoid
+            avoid = npc.movement.routing_avoid.copy()
             avoid.append(Tiles.DOOR)
             point = self.current_level.find_random_open_position(avoid, room = room)
             npc.set_point(point)

@@ -51,6 +51,15 @@ class CavernFloor(Tile):
         self.name = "Cavern floor"
         self.char = choice([',','`',';',"'"])
 
+class FungalCavernFloor(Tile):
+    def __init__(self, blocked=False, block_sight=False):
+        super(FungalCavernFloor, self).__init__(blocked, block_sight)
+
+        self.fov_color = COLORS.get('light_fungal_cavern_floor')
+        self.out_of_fov_color = COLORS.get('dark_fungal_cavern_floor')
+        self.name = "Fungus covered cavern floor"
+        self.char = '"'
+
 class CavernWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
         super(CavernWall, self).__init__(blocked, block_sight)
