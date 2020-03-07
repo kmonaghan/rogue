@@ -28,12 +28,13 @@ class BasicDeath:
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
 
-        for item in self.owner.inventory.items:
-            if (item.lootable):
-                item.x = self.owner.x
-                item.y = self.owner.y
-                #npc.inventory.drop_item(item)
-                game_map.current_level.add_entity(item)
+        if self.owner.inventory:
+            for item in self.owner.inventory.items:
+                if (item.lootable):
+                    item.x = self.owner.x
+                    item.y = self.owner.y
+                    #npc.inventory.drop_item(item)
+                    game_map.current_level.add_entity(item)
 
         game_map.current_level.remove_entity(self.owner)
         self.owner.blocks = False
