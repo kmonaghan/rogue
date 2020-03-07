@@ -12,7 +12,7 @@ CONFIG = {
 
     'info_panel_y': screen_height - info_panel_height - message_panel_height + 1,
     'info_panel_height': info_panel_height,
-    'message_panel_y': screen_height - message_panel_height + 1,
+    'message_panel_y': screen_height - message_panel_height,
     'message_panel_height': message_panel_height,
     'message_width': screen_width - 2,
     'message_height': message_panel_height - 2,
