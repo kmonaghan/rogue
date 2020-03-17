@@ -123,3 +123,21 @@ class Infection(Ablity):
             target.health.on_death = self.on_death
 
         return results
+
+class Paralysis(Ablity):
+    def __init__(self, name="Paralysis", chance=50, turns_paralysed = 2):
+        super().__init__(name=name)
+        self.chance = chance
+        self.turns_paralysed = turns_paralysed
+
+    def on_attack(self, source, target):
+        results = []
+
+        #if randint(1,100) < self.chance:
+        #    return results
+
+        target.energy.current_energy = -(target.energy.act_energy * self.turns_paralysed)
+        msg = Message(f"{target.name} is paralysed for {self.turns_paralysed} turns.", COLORS.get('damage_text'))
+        results.extend([{ResultTypes.MESSAGE: msg}])
+
+        return results

@@ -230,6 +230,7 @@ class RenderOrder(Enum):
     CORPSE = auto()
     ITEM = auto()
     ACTOR = auto()
+    OVERLAY = auto()
 
 class RoutingOptions(Enum):
     AVOID_BLOCKERS = auto()
@@ -254,6 +255,7 @@ class Species(Enum):
     PLAYER = auto()
     CORPSE = auto()
     UNDEAD = auto()
+    OOZE = auto()
 
 class Tiles(IntEnum):
     EMPTY = 0

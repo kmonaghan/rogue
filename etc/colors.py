@@ -67,6 +67,7 @@ COLORS = {
     'bat': tcod.darker_red,
     'bounty_hunter': tcod.gold,
     'chest': tcod.blue,
+    'gelatinous_cube': tcod.white,
     'goblin': tcod.desaturated_green,
     'mimic': tcod.darker_blue,
     'orc': tcod.light_green,

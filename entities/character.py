@@ -12,8 +12,8 @@ from etc.configuration import CONFIG
 from etc.enum import RenderOrder, Species, Interactions
 
 class Character(Entity):
-    def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None, act_energy=2, interaction=Interactions.FOE, render_order=RenderOrder.ACTOR):
-        super(Character, self).__init__(point, char, name, color, blocks, always_visible, ai, item, gear, death=death, health=health, act_energy=act_energy, interaction=interaction, render_order=render_order)
+    def __init__(self, point, char, name, color, always_visible=False, blocks=True, ai=None, item=None, gear=None, species=Species.NONDESCRIPT, death=None, health=None, act_energy=2, interaction=Interactions.FOE, render_order=RenderOrder.ACTOR, animate=True):
+        super(Character, self).__init__(point, char, name, color, blocks, always_visible, ai, item, gear, death=death, health=health, act_energy=act_energy, interaction=interaction, render_order=render_order, animate=animate)
 
         self.add_component(Equipment(), "equipment")
         self.add_component(Inventory(26), "inventory")

@@ -6,7 +6,7 @@ from components.behaviour_trees.root import Node
 
 
 class Sequence(Node):
-    """Tick childeren in sequence we encounter a failure.  If no failure is
+    """Tick childeren in sequence until we encounter a failure.  If no failure is
     encountered, propogate the results of the final child.
     """
     def __init__(self, *children):

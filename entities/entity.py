@@ -23,7 +23,8 @@ class Entity:
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
                  ai=None, item=None, equippable=None, render_order=RenderOrder.CORPSE,
-                 death=None, health=None, usable=None, act_energy=2, interaction=Interactions.FOE):
+                 death=None, health=None, usable=None, act_energy=2,
+                 interaction=Interactions.FOE, animate=True):
 
         self.x = None
         self.y = None
@@ -35,6 +36,7 @@ class Entity:
         self.blocks = blocks
         self.always_visible = always_visible
         self.transparent = True
+        self.animate = animate
 
         self.add_component(health, "health")
         self.add_component(ai, "ai")
@@ -169,7 +171,7 @@ class Entity:
 
         if self.movement:
             self.movement.has_moved = False
-            
+
         turn_copy = self.turn.copy()
         for key in turn_copy:
             try:

@@ -8,9 +8,10 @@ from game_messages import Message
 
 import quest
 
-from components.ai import (BasicNPC, CaptainNPC, GuardNPC, PatrollingNPC, WarlordNPC,
-                            NecromancerNPC, PredatorNPC, SpawningNPC,
-                            HatchingNPC, TetheredNPC, ZombieNPC)
+from components.ai import (BasicNPC, CaptainNPC, CleanerNPC, GuardNPC,
+                            PatrollingNPC, WarlordNPC, NecromancerNPC,
+                            PredatorNPC, SpawningNPC, HatchingNPC,
+                            TetheredNPC, ZombieNPC)
 from components.berserk import Berserk
 from components.children import Children
 from components.health import Health
@@ -222,6 +223,33 @@ def egg(point = None):
     creature.add_component(Defence(defence = 1), 'defence')
 
     return creature
+
+def gelatinous_cube(point = None):
+    npc = Character(point, 'C', 'gelatinous cube', COLORS.get('gelatinous_cube'),
+                    ai=CleanerNPC(), species=Species.OOZE,
+                    render_order=RenderOrder.OVERLAY, health=Health(20))
+
+    npc.add_component(Offence(base_power = 1), 'offence')
+    npc.add_component(Defence(defence = 1), 'defence')
+    npc.add_component(Level(xp_value = 10), 'level')
+
+    cube_avoid = [Tiles.INTERNAL_DOOR, Tiles.EXIT_DOOR,
+                    Tiles.DOOR, Tiles.CAVERN_FLOOR,
+                    Tiles.FUNGAL_CAVERN_FLOOR,
+                    #Tiles.ROOM_FLOOR,
+                    Tiles.SHALLOW_WATER, Tiles.DEEP_WATER,
+                    Tiles.STAIRS_FLOOR, Tiles.SPAWN_POINT]
+
+    npc.movement.routing_avoid.extend(cube_avoid)
+
+    pseudopod = equipment.pseudopod()
+    pseudopod.lootable = False
+    equipment.add_paralysis(pseudopod)
+
+    npc.inventory.add_item(pseudopod)
+    npc.equipment.toggle_equip(pseudopod)
+
+    return npc
 
 def goblin(point = None):
     #create a goblin

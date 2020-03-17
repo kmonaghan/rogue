@@ -7,7 +7,7 @@ import tome
 from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 
-from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain, Infection
+from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain, Infection, Paralysis
 from components.aura import DamageAura
 from components.equippable import Equippable
 from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
@@ -228,6 +228,11 @@ def add_lifedrain(item):
     item.add_component(LifeDrain(), 'ablity')
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = 'of life drain'), 'naming')
+
+def add_paralysis(item):
+    item.add_component(Paralysis(), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of paralysis'), 'naming')
 
 def add_infection(item, name="Infection", chance=50, on_turn=None, on_death=None):
     item.add_component(Infection(name=name, chance=chance, on_turn=on_turn, on_death=on_death), 'ablity')
@@ -475,6 +480,14 @@ def claw(point = None):
     equippable_component.type_of_dice = 4
     equippable_component.damage_type = DamageType.SHARP
     item = Entity(point, ',', 'claw', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
+
+    return item
+
+def pseudopod(point = None):
+    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+    equippable_component.type_of_dice = 6
+    equippable_component.damage_type = DamageType.BLUNT
+    item = Entity(point, ',', 'pseudopod', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 

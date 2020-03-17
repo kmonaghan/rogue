@@ -11,7 +11,7 @@ from etc.enum import Interactions
 
 def door(point = None, locked=False):
     door = Entity(point, '+', 'door', COLORS.get('light_door'), health=Health(4),
-                    blocks=False, interaction=Interactions.DOOR)
+                    blocks=False, interaction=Interactions.DOOR, animate=False)
 
     door.add_component(Defence(defence = 1), 'defence')
     if locked:

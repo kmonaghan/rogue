@@ -71,7 +71,7 @@ class EntityList:
 
         return npc
 
-    def find_all_closest(self, point, species, max_distance=2):
+    def find_all_closest(self, point, species=None, max_distance=2):
         npcs = []
 
         start_x = max(0, point.x - max_distance)
@@ -91,7 +91,10 @@ class EntityList:
                     for entity in self.coordinate_map[(x, y)]:
                         if (point.x == x) and (point.y == y):
                             continue
-                        if isinstance(entity, Character) and (entity.species == species) and not entity.health.dead:
+                        if isinstance(entity, Character) and not entity.health.dead:
+                            if species and (entity.species != species):
+                                continue
+                                
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
                                 #print("FOUND!")

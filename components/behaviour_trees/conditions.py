@@ -26,7 +26,6 @@ class InNamespace(Node):
         else:
             return TreeStates.FAILURE, []
 
-
 class IsAdjacent(Node):
     """Return sucess is owner is adjacent to target."""
     def tick(self, owner, game_map):
@@ -41,7 +40,6 @@ class IsAdjacent(Node):
         else:
             return TreeStates.FAILURE, []
 
-
 class WithinPlayerFov(Node):
     """Return success if owner is in the player's fov."""
     def tick(self, owner, game_map):
@@ -49,7 +47,6 @@ class WithinPlayerFov(Node):
         if game_map.current_level.fov[owner.x, owner.y]:
             return TreeStates.SUCCESS, []
         return TreeStates.FAILURE, []
-
 
 class WithinL2Radius(Node):
     """Return success if the distance between owner and target is less than or
@@ -70,7 +67,6 @@ class WithinL2Radius(Node):
         else:
             return TreeStates.FAILURE, []
 
-
 class AtLInfinityRadius(Node):
     """Return success if the owner is at exactly a given Linfinity norm
     radius.
@@ -87,7 +83,6 @@ class AtLInfinityRadius(Node):
         else:
             return TreeStates.FAILURE, []
 
-
 class CoinFlip(Node):
 
     def __init__(self, p=0.5):
@@ -99,7 +94,6 @@ class CoinFlip(Node):
             return TreeStates.SUCCESS, []
         else:
             return TreeStates.FAILURE, []
-
 
 class OutsideL2Radius(Node):
     """Return success if the distance between owner and target is less than or
@@ -233,3 +227,109 @@ class NumberOfEntities(Node):
             return TreeStates.SUCCESS, []
         else:
             return TreeStates.FAILURE, []
+
+class OtherEntityInSameSpot(Node):
+    def __init__(self):
+        pass
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        entities = game_map.current_level.entities.get_entities_in_position((owner.x,owner.y)).copy()
+
+        if owner in entities: entities.remove(owner)
+
+        if len(entities):
+            return TreeStates.SUCCESS, []
+        else:
+            return TreeStates.FAILURE, []
+
+class IsItemInSpot(Node):
+    def __init__(self):
+        pass
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        entities = game_map.current_level.entities.get_entities_in_position((owner.x,owner.y))
+
+        for entity in entities:
+            if entity.item:
+                self.namespace['item'] = entity
+
+                return TreeStates.SUCCESS, []
+
+        return TreeStates.FAILURE, []
+
+class IsNPCInSpot(Node):
+    def __init__(self):
+        pass
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        entities = game_map.current_level.entities.get_entities_in_position((owner.x,owner.y)).copy()
+
+        if owner in entities: entities.remove(owner)
+
+        for entity in entities:
+            if entity.animate and entity.health:
+
+                self.namespace['item'] = entity
+
+                return TreeStates.SUCCESS, []
+
+        return TreeStates.FAILURE, []
+
+class IsNPCAdjacent(Node):
+    def __init__(self):
+        pass
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        npcs = game_map.current_level.entities.find_all_closest(owner.point, max_distance=1)
+
+        if len(npcs) > 0:
+            self.namespace['adjacent'] = npcs
+
+            return TreeStates.SUCCESS, []
+
+        return TreeStates.FAILURE, []
+
+class IsNPCAParalyzed(Node):
+    def __init__(self):
+        pass
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        adjacent = self.namespace.pop("adjacent", None)
+
+        if adjacent:
+            for entity in adjacent:
+                if entity.energy and entity.energy.current_energy < 0:
+
+                    self.namespace["paralyzed"] = entity
+                    return TreeStates.SUCCESS, []
+
+            self.namespace["target"] = random.choice(adjacent)
+
+        return TreeStates.FAILURE, []
+
+class IsCorpseInSpot(Node):
+    def __init__(self):
+        pass
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        entities = game_map.current_level.entities.get_entities_in_position((owner.x,owner.y))
+
+        for entity in entities:
+            if entity.health and entity.health.dead:
+                self.namespace['corpse'] = entity
+
+                return TreeStates.SUCCESS, []
+
+        return TreeStates.FAILURE, []

@@ -167,6 +167,10 @@ class Attack(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
+        if not target:
+            print(f"No target - how did we get here?")
+            return TreeStates.FAILURE, []
+            
         if target.health.dead:
             print("Attack: FAILURE - target dead, removing")
             del self.namespace["target"]
@@ -257,4 +261,45 @@ class SpawnEntity(Node):
                 return TreeStates.SUCCESS, results
             #else:
             #    print("Can't spawn as no room.")
+        return TreeStates.FAILURE, []
+
+class PickUp(Node):
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        item = self.namespace.get("item")
+
+        if item:
+            del self.namespace["item"]
+
+            return TreeStates.SUCCESS, [{ResultTypes.ADD_ITEM_TO_INVENTORY: item}]
+
+        return TreeStates.FAILURE, []
+
+class Envelop(Node):
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        target = self.namespace["paralyzed"]
+
+        if target:
+            del self.namespace["paralyzed"]
+            return TreeStates.SUCCESS, [{ResultTypes.SET_POSITION: (owner, target.point)}]
+
+        return TreeStates.FAILURE, []
+
+class Disolve(Node):
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        target = self.namespace["corpse"]
+
+        if target:
+            del self.namespace["corpse"]
+            if target.death.rotting_time > 1:
+                target.death.rotting_time = min(1, target.death.rotting_time - 5)
+                target.death.decompose(game_map)
+
+            return TreeStates.SUCCESS, []
+
         return TreeStates.FAILURE, []

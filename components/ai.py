@@ -17,10 +17,13 @@ from components.behaviour_trees.composite import (
     Selection, Sequence, Negate)
 from components.behaviour_trees.leaf import (
      Attack, MoveTowardsTargetEntity, TravelToRandomPosition, SeekTowardsLInfinityRadius,
-     MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, Swarm, PointToTarget)
+     MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, Swarm, PointToTarget,
+     PickUp, Disolve, Envelop)
 from components.behaviour_trees.conditions import (
-    IsAdjacent, IsFinished, WithinPlayerFov, InNamespace, CoinFlip, FindNearestTargetEntity,
-    WithinL2Radius, OutsideL2Radius, CheckHealthStatus, SetNamespace, NumberOfEntities)
+    IsAdjacent, IsFinished, IsItemInSpot, WithinPlayerFov, InNamespace, CoinFlip,
+    FindNearestTargetEntity, WithinL2Radius, OtherEntityInSameSpot,
+    OutsideL2Radius, CheckHealthStatus, SetNamespace, NumberOfEntities,
+    IsNPCInSpot, IsCorpseInSpot, IsNPCAdjacent, IsNPCAParalyzed)
 
 class BaseAI:
     """Base class for NPC AI.
@@ -397,3 +400,43 @@ class ZombieNPC(BaseAI):
                 ),
                 Swarm(species=species),
                 Skitter()))
+
+class CleanerNPC(BaseAI):
+    def __init__(self):
+        self.tree = Root(
+            Selection(
+                Sequence( #Do something to entity in spot
+                    OtherEntityInSameSpot(),
+                    Selection(
+                        Sequence(
+                            IsItemInSpot(),
+                            PickUp()
+                        ),
+                        Sequence(
+                            IsCorpseInSpot(),
+                            Disolve()
+                        ),
+                        Sequence(
+                            IsNPCInSpot(),
+                            Attack()
+                        ),
+                    ),
+                ),
+                Sequence( #Do something to entity adject
+                    IsNPCAdjacent(),
+                    Selection(
+                        Sequence(
+                            IsNPCAParalyzed(),
+                            Envelop()
+                        ),
+                        Sequence(
+                            InNamespace(name="target"),
+                            IsAdjacent(),
+                            Attack()
+                        ),
+                    )
+                ),
+                Sequence( #Shuffle along
+                    Skitter()
+                )
+            ))
