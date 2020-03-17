@@ -580,10 +580,12 @@ class Rogue(tcod.event.EventDispatch):
 
             # Handle death.
             if result_type == ResultTypes.DEAD_ENTITY:
-                self.game_state = result_data.death.npc_death(self.game_map)
-                if entity == result_data:
+                self.game_state = result_data['dead'].death.npc_death(self.game_map)
+                if entity == result_data['dead']:
                     turn_results = []
-                result_data.deregister_turn_all()
+                if result_data['attacker']:
+                    result_data['attacker'].ai.remove_target(target=result_data['dead'])
+                result_data['dead'].deregister_turn_all()
 
             if result_type == ResultTypes.TARGET_ITEM_IN_INVENTORY:
                 self.game_state = GameStates.INVENTORY_SELECT
@@ -596,7 +598,6 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.ADD_ITEM_TO_INVENTORY:
                 turn_results.extend(entity.inventory.add_item(result_data))
                 self.game_state = GameStates.ENEMY_TURN
-
             # Remove consumed items from inventory
             if result_type == ResultTypes.DISCARD_ITEM:
                 entity.inventory.remove_item(result_data)
@@ -636,7 +637,7 @@ class Rogue(tcod.event.EventDispatch):
 
             if result_type == ResultTypes.SET_POSITION:
                 npc, point = result_data
-                npc.movement.attempt_move(point, self.game_map)
+                npc.movement.place(point.x, point.y, self.game_map.current_level)
             # Handle a move towards action.  Move towards a target.
             if result_type == ResultTypes.MOVE_TOWARDS:
                npc, target_x, target_y = result_data
@@ -667,7 +668,6 @@ class Rogue(tcod.event.EventDispatch):
             # Remove an entity from the game.
             if result_type == ResultTypes.REMOVE_ENTITY:
                 self.game_map.current_level.remove_entity(result_data)
-
             if result_type == ResultTypes.TARGETING:
                 self.previous_game_state = self.game_state
                 self.game_state = GameStates.TARGETING

@@ -60,10 +60,11 @@ class Health:
 
             if npc and npc.ai:
                 npc.ai.remove_target(self.owner)
-                
+
             message = Message(f"{self.owner.name.title()} is dead!", COLORS.get('death_text'))
             results.append({ResultTypes.MESSAGE: message})
-            results.append({ResultTypes.DEAD_ENTITY: self.owner})
+            results.append({ResultTypes.DEAD_ENTITY: {'dead': self.owner, 'attacker': npc}})
+
             if self.owner.level:
                 xp = self.owner.level.xp_worth(npc)
                 results.extend([{ResultTypes.EARN_XP: {'xp': xp, 'earner': npc}}])
