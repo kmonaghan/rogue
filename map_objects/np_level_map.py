@@ -71,11 +71,11 @@ class LevelMap(Map):
 
     @property
     def caves(self):
-        return self.grid[np.where(self.grid == Tiles.CAVERN_FLOOR)]
+        return self.tiles_of_type(Tiles.CAVERN_FLOOR)
 
     @property
     def corridors(self):
-        return self.grid[np.where(self.grid == Tiles.CORRIDOR_FLOOR)]
+        return self.tiles_of_type(Tiles.CORRIDOR_FLOOR)
 
     @property
     def doors(self):
@@ -83,7 +83,7 @@ class LevelMap(Map):
 
     @property
     def floors(self):
-        return self.grid[np.where(self.grid == Tiles.ROOM_FLOOR)]
+        return self.tiles_of_type(Tiles.ROOM_FLOOR)
 
     def tiles_of_type(self, tile):
         return np.where(self.grid == tile)
