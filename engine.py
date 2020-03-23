@@ -506,6 +506,7 @@ class Rogue(tcod.event.EventDispatch):
             elif self.game_state == GameStates.QUEST_ONBOARDING:
                 player_turn_results.append({'quest_cancelled': True})
             else:
+                self.previous_game_state = self.game_state
                 self.game_state = GameStates.GAME_PAUSED
                 return
 
