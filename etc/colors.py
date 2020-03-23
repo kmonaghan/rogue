@@ -10,9 +10,8 @@ COLORS = {
     'light_cavern_floor': tcod.lighter_sepia,
     'dark_cavern_floor': tcod.light_sepia,
 
-    'light_fungal_cavern_floor': Color(203, 230, 82),
-    'dark_fungal_cavern_floor': Color(91, 103, 31),
-
+    'light_fungal_cavern_floor': Color(94, 145, 79),
+    'dark_fungal_cavern_floor': Color(64, 96, 52),
 
     'dark_wall': tcod.darkest_sepia,
     'dark_ground': tcod.darker_sepia,

@@ -133,6 +133,16 @@ def level_cavern_rooms(dm, x, y):
 
     x1, y1, room = placeStairRoom(dm, x, y, name="entrance", add_door = True)
 
+    tempgrid = dm.grid.copy()
+    tempgrid[x1-(square_height//2):x1+(square_height//2), y1-(square_height//2):y1+(square_height//2)] = Tiles.IMPENETRABLE
+    tempgrid[:, -4:dm.width] = Tiles.IMPENETRABLE
+    tempgrid[-4:dm.width] = Tiles.IMPENETRABLE
+    empties = np.where(tempgrid == 0)
+
+    tile_index = randint(0, len(empties[0])-1)
+
+    placeStairRoom(dm, empties[0][tile_index], empties[1][tile_index], name="exit", add_door = True)
+
     if overwrite == 1:
         dm.grid[width_offset:width_offset+cavern_width, height_offset:height_offset+cavern_height] = Tiles.IMPENETRABLE
 
@@ -161,19 +171,6 @@ def level_cavern_rooms(dm, x, y):
     unconnected = dm.findUnconnectedAreas()
 
     dm.joinUnconnectedAreas(unconnected, connecting_tile = Tiles.CAVERN_FLOOR)
-
-    x2, y2, exit_room = placeExitRoom(dm, x1, y1)
-
-    if not x2:
-        raise FailedToPlaceExitError
-
-    weights = [(Tiles.CORRIDOR_FLOOR, 1),
-                (Tiles.ROOM_WALL, 9),
-                (Tiles.EMPTY, 9),
-                (Tiles.CAVERN_FLOOR, 1),
-                (Tiles.POTENTIAL_CORRIDOR_FLOOR, 1)]
-
-    dm.route_between(x2, y2, x1, y1, avoid=[], weights = weights, tile=Tiles.CORRIDOR_FLOOR)
 
     place_foliage(dm)
 
@@ -224,7 +221,8 @@ def placePrefabs(dm, overwrite=True):
 
 def levelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
-
+    x = x - 2
+    y = y - 2
     levelType = randint(0,3)
     result = False
 
@@ -280,6 +278,8 @@ def arena(map_width, map_height, x = 5, y = 5):
     #room = dm.addCircleShapedRoom(10, 10, 5, add_walls=True, add_door=True, max_doors = 1)
 
     cave = dm.addRoom(14, 24, 4, 4, add_door=False, add_walls = True, tile = Tiles.CAVERN_FLOOR, max_doors = 1)
+
+    room2 = dm.addRoom(25, 25, 3, 3, add_walls=True, add_door=True, max_doors = 1)
 
     '''
     prefab = Prefab(barracks)

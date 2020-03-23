@@ -316,7 +316,8 @@ class dungeonGenerator:
         currentAreaCount = np.amax(unconnectedAreas)
         currentTiles = np.where(unconnectedAreas == currentAreaCount)
 
-        weights = [(Tiles.EMPTY, 9)]
+        weights = [(Tiles.EMPTY, 9),
+                    (Tiles.ROOM_WALL, 9)]
 
         while currentAreaCount > 1:
             nextAreaCount = currentAreaCount - 1
@@ -535,8 +536,6 @@ class dungeonGenerator:
         template[0,0] = Tiles.DEEP_WATER
         template[-1,0] = Tiles.DEEP_WATER
         template[-1,-1] = Tiles.DEEP_WATER
-
-        matprint(template)
 
         room = np.zeros((width, height), dtype=np.int8)
 
@@ -886,7 +885,6 @@ class dungeonGenerator:
                 max = np.amax(self.grid[x-1:x+2, y-1:y+2])
 
                 if max == 0:
-                    print('found a blank space!')
                     return x, y
             count += 1
 
