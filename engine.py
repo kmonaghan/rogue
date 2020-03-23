@@ -583,7 +583,8 @@ class Rogue(tcod.event.EventDispatch):
                 self.game_state = result_data['dead'].death.npc_death(self.game_map)
                 if entity == result_data['dead']:
                     turn_results = []
-                if result_data['attacker']:
+                if result_data['attacker'] and result_data['attacker'].ai:
+                    print(f"Removing target {result_data['dead']}")
                     result_data['attacker'].ai.remove_target(target=result_data['dead'])
                 result_data['dead'].deregister_turn_all()
 

@@ -219,6 +219,8 @@ def egg(point = None):
                     ai=HatchingNPC(snake),
                     species=Species.EGG, health=health_component)
 
+    creature.movement.routing_avoid.extend(creature_avoid)
+
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
 
@@ -236,7 +238,7 @@ def gelatinous_cube(point = None):
     cube_avoid = [Tiles.INTERNAL_DOOR, Tiles.EXIT_DOOR,
                     Tiles.DOOR, Tiles.CAVERN_FLOOR,
                     Tiles.FUNGAL_CAVERN_FLOOR,
-                    #Tiles.ROOM_FLOOR,
+                    Tiles.ROOM_FLOOR,
                     Tiles.SHALLOW_WATER, Tiles.DEEP_WATER,
                     Tiles.STAIRS_FLOOR, Tiles.SPAWN_POINT]
 
