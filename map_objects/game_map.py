@@ -37,34 +37,15 @@ class GameMap:
         self.levels = []
 
     def make_map(self, map_width, map_height, player):
-        dm = None
+        #player.set_point(Point(10,10))
+
+        self.generate_layout(map_width, map_height, player)
+        self.populate_map(player)
+
+    def generate_layout(self, map_width, map_height, player):
+        #return self.generate_test_layout(map_width, map_height, player)
 
         attempts = 0
-
-        '''
-        while attempts < CONFIG.get('map_generation_attempts'):
-            try:
-                dm = arena(map_width, map_height)
-                break
-            except MapError as e:
-                print(f"===Map generation failed=== {e}")
-                attempts = attempts + 1
-                dm = None
-
-        if not dm:
-            raise MapGenerationFailedError
-
-        self.current_level = LevelMap(dm.grid, dm.rooms)
-        self.current_level.dungeon_level = self.dungeon_level
-
-        point = self.current_level.find_random_open_position()
-        player.set_point(point)
-
-        self.current_level.add_entity(player)
-        self.test_popluate_map(player)
-
-        return
-        '''
 
         boss_chance = randint(0,3) + self.dungeon_level
 
@@ -89,27 +70,54 @@ class GameMap:
         self.current_level = LevelMap(dm.grid, dm.rooms)
         self.current_level.dungeon_level = self.dungeon_level
 
+    def generate_test_layout(self, map_width, map_height, player):
+        while attempts < CONFIG.get('map_generation_attempts'):
+            try:
+                #dm = arena(map_width, map_height)
+                dm = levelGenerator(map_width, map_height, player.x, player.y)
+
+                break
+            except MapError as e:
+                print(f"===Map generation failed=== {e}")
+                attempts = attempts + 1
+                dm = None
+
+        if not dm:
+            raise MapGenerationFailedError
+
+        self.current_level = LevelMap(dm.grid, dm.rooms)
+        self.current_level.dungeon_level = self.dungeon_level
+
+    def populate_map(self, player):
         self.place_stairs()
         self.place_doors()
 
         player.set_point(self.up_stairs.point)
-
         self.current_level.add_entity(player)
+
+        #return test_popluate_map(self, player)
+
+        level_theme = self.fill_prefab(player)
 
         if (self.dungeon_level == 1):
             self.level_one(player)
         else:
-            if (boss_chance >= 6):
-                self.levelBoss(player)
-            else:
-                self.levelGeneric(player)
-
-        self.fill_prefab(player)
+            self.level_generic(player)
 
     def test_popluate_map(self, player):
         point = self.current_level.find_random_open_position()
-        item = equipment.healing_potion(point)
+        item = equipment.healing_potion(Point(27,27))
         self.current_level.add_entity(item)
+
+        item2 = equipment.healing_potion(player.point)
+        self.current_level.add_entity(item2)
+
+        cube = bestiary.gelatinous_cube(item.point)
+        self.current_level.add_entity(cube)
+
+        npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level)
+        npc.set_point(Point(26,26))
+        self.current_level.add_entity(npc)
 
         self.place_doors()
 
@@ -180,16 +188,28 @@ class GameMap:
             nest.set_point(point)
             self.current_level.add_entity(nest)
 
-    def levelGeneric(self, player):
-        if len(self.current_level.caves) > 0:
+    def level_generic(self, player):
+        if len(self.current_level.caves[0]) > 0:
             self.place_creatures(player)
-        if len(self.current_level.rooms) > 0:
+        if len(self.current_level.floors[0]) > 0:
+            self.place_npc(player)
+
             for room in self.current_level.rooms:
                 if not room.name:
-                    self.place_npc(room, player)
                     self.place_object(room)
 
-    def levelBoss(self, player):
+        if len(self.current_level.corridors[0]) > 0:
+            max_cubes = len(self.current_level.corridors[0]) // 75
+
+            num_cubes = randint(0, max_cubes)
+
+            for i in range(0, num_cubes):
+                cube = bestiary.gelatinous_cube()
+                point = self.current_level.find_random_open_position(cube.movement.routing_avoid)
+                cube.set_point(point)
+                self.current_level.add_entity(cube)
+
+    def level_boss(self, player):
         npc = bestiary.bountyhunter(Point(player.x-1,player.y-1))
 
         q = quest.kill_warlord()
@@ -209,26 +229,25 @@ class GameMap:
         npc_chances[Species.RATNEST] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
         npc_chances[Species.BAT] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
-        max_npcs = len(self.current_level.caves) // 100
+        max_npcs = len(self.current_level.caves[0]) // 15
+        min_npcs = max(1, max_npcs // 4)
+        num_npcs = randint(min_npcs, max_npcs)
 
-        num_npcs = randint(1, max_npcs)
-
-        print (f"Max NPCs: {max_npcs}, number of NPCs: {num_npcs}")
+        print (f"Max creatures: {max_npcs}, number of creatures: {num_npcs}")
 
         for i in range(num_npcs):
             #choose random spot for this npc
             creature_choice = random_choice_from_dict(npc_chances)
 
             npc = bestiary.generate_creature(creature_choice, self.dungeon_level, player.level.current_level)
-            point = self.current_level.find_random_open_position(npc.movement.routing_avoid)
+            avoid = npc.movement.routing_avoid.copy()
+            avoid.extend([Tiles.CORRIDOR_FLOOR, Tiles.DOOR, Tiles.STAIRS_FLOOR])
+            point = self.current_level.find_random_open_position(avoid)
             npc.set_point(point)
             self.current_level.add_entity(npc)
 
-    def place_npc(self, room, player):
+    def place_npc(self, player):
         #this is where we decide the chance of each npc appearing.
-
-        #maximum number of npcs per room
-        max_npcs = from_dungeon_level([[1,2], [2, 2], [3, 4], [5, 5]], self.dungeon_level)
 
         #chance of each npc
         npc_chances = {}
@@ -236,15 +255,18 @@ class GameMap:
         npc_chances[Species.ORC] = from_dungeon_level([[95, 1],[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
         npc_chances[Species.TROLL] = from_dungeon_level([[95, 1],[95, 2], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
-        #choose random number of npcs
-        num_npcs = randint(1, max_npcs)
+        max_npcs = len(self.current_level.floors[0]) // 15
+        min_npcs = max(1, max_npcs // 4)
+        num_npcs = randint(min_npcs, max_npcs)
+
+        print (f"Min NPCs: {min_npcs}, Max NPCx: {max_npcs}, number of NPCs: {num_npcs}")
 
         for i in range(num_npcs):
             choice = random_choice_from_dict(npc_chances)
             npc = bestiary.generate_npc(choice, self.dungeon_level, player.level.current_level)
             avoid = npc.movement.routing_avoid.copy()
-            avoid.append(Tiles.DOOR)
-            point = self.current_level.find_random_open_position(avoid, room = room)
+            avoid.extend([Tiles.CAVERN_FLOOR, Tiles.FUNGAL_CAVERN_FLOOR, Tiles.CORRIDOR_FLOOR, Tiles.DOOR, Tiles.STAIRS_FLOOR])
+            point = self.current_level.find_random_open_position(avoid)
             npc.set_point(point)
             npc.ai.set_target(player)
             self.current_level.add_entity(npc)
