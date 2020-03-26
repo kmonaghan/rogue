@@ -295,6 +295,12 @@ class GameMap:
                 npc = bestiary.necromancer(point, self.dungeon_level)
                 npc.ai.set_target(player)
                 self.current_level.add_entity(npc)
+            elif room.name == "vampire_lair":
+                spawn = choice(room.spawnpoints)
+                point = Point(spawn[0] + room.x, spawn[1] + room.y)
+                npc = bestiary.generate_random_vampire(point, self.dungeon_level)
+                npc.ai.set_target(player)
+                self.current_level.add_entity(npc)
             elif room.name == "boss_room":
                 point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
                 npc = bestiary.warlord(point)

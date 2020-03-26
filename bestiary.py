@@ -441,27 +441,6 @@ def troll(point = None):
 
     return npc
 
-def vampire(point = None):
-    creature = Character(point, 'V', 'Vampire', COLORS.get('vampire'),
-                    ai=BasicNPC(),
-                    species=Species.UNDEAD, health=Health(20))
-
-    creature.add_component(Offence(base_power = 5), 'offence')
-    creature.add_component(Defence(defence = 5), 'defence')
-    creature.add_component(Level(xp_value = 10), 'level')
-
-    creature.movement.routing_avoid.extend(npc_avoid)
-    creature.movement.routing_avoid.extend([Tiles.SHALLOW_WATER])
-
-    teeth = equipment.teeth()
-    equipment.add_lifedrain(teeth)
-    teeth.lootable = False
-
-    creature.inventory.add_item(teeth)
-    creature.equipment.toggle_equip(teeth)
-
-    return creature
-
 def warlord(point = None):
     #create a warlord
     ai_component = WarlordNPC()
@@ -561,7 +540,7 @@ def reanmimate(npc):
         return convert_npc_to_skeleton(npc)
 
     return convert_npc_to_zombie(npc)
-    
+
 def generate_random_skeleton(point = None, dungeon_level = 1, player_level = 1):
     npc = random_npc(point = point, dungeon_level = dungeon_level, player_level = player_level)
 
@@ -579,6 +558,27 @@ def convert_npc_to_skeleton(npc):
 
     npc.species=Species.UNDEAD
     npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
+
+    return npc
+
+def generate_random_vampire(point = None, dungeon_level = 1, player_level = 1):
+    npc = random_npc(point = point, dungeon_level = dungeon_level, player_level = player_level)
+
+    return convert_npc_to_vampire(npc)
+
+def convert_npc_to_vampire(npc):
+    npc.char = 'V'
+    npc.add_component(Naming(npc.base_name, prefix='Vampiric'), 'naming')
+    npc.add_component(Health(npc.health.max_hp * 1.5), 'health')
+    npc.species=Species.UNDEAD
+    npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
+
+    teeth = equipment.teeth()
+    equipment.add_lifedrain(teeth)
+    teeth.lootable = False
+
+    npc.inventory.add_item(teeth)
+    npc.equipment.toggle_equip(teeth)
 
     return npc
 

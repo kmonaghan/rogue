@@ -53,6 +53,22 @@ def necromancer_lair(top = 1, middle = 1, bottom = 1):
 
     return room_map
 
+def vampire_lair(top = 1, middle = 1, bottom = 1):
+    room_map = ["vvv#####vvv",
+                "vvv#.S.#vvv",
+                "vvv#...#vvv",
+                "####.#.####",
+                "#.........#",
+                "#S.#...#.S#",
+                "#.........#",
+                "####.#.####",
+                "vvv#...#vvv",
+                "vvv#...#vvv",
+                "vvv#...#vvv",
+                "vvv##E##vvv",]
+
+    return room_map
+
 def prison_block(top = 1, middle = 1, bottom = 1):
     room_map = []
 
@@ -94,4 +110,5 @@ def barracks(top = 1, middle = 1, bottom = 1):
 list_of_prefabs = [treasure_room,
                     necromancer_lair,
                     prison_block,
+                    vampire_lair,
                     barracks]
