@@ -158,12 +158,12 @@ class NecromancerNPC(BaseAI):
                 Sequence(
                     Negate(NumberOfEntities(radius=2, species=Species.UNDEAD, number_of_entities=4)),
                     CoinFlip(p=0.3),
-                    SpawnEntity(bestiary.zombie, min_time=0, max_time=0),
+                    SpawnEntity(bestiary.generate_random_zombie, min_time=0, max_time=0),
                 ),
-                Sequence(
-                    #WithinL2Radius(radius=move_towards_radius),
-                    SeekTowardsLInfinityRadius(radius=seeking_radius)
-                ),
+#                Sequence(
+#                    #WithinL2Radius(radius=move_towards_radius),
+#                    SeekTowardsLInfinityRadius(radius=seeking_radius)
+#                ),
                 Sequence(
                     InNamespace(name="target"),
                     IsAdjacent(),

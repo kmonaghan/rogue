@@ -290,6 +290,7 @@ def necromancer(point = None, dungeon_level=1):
     npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), 'defence')
     npc.add_component(Level(xp_value = 10), 'level')
+    npc.add_component(Children(6), 'children')
 
     npc.movement.routing_avoid.extend(npc_avoid)
 
@@ -376,44 +377,6 @@ def ratsnest(point = None):
 
     return creature
 
-def reanmimate(old_npc):
-    if (old_npc.death.skeletal):
-        return skeleton(old_npc.point, old_npc)
-
-    return zombie(old_npc.point, old_npc)
-
-def skeleton(point = None, old_npc = None):
-    ai_component = BasicNPC()
-    health_component = Health(30)
-
-    if old_npc:
-        old_npc.blocks = True
-        old_npc.char = 'S'
-        old_npc.base_name = 'Skeletal ' + old_npc.base_name
-        old_npc.add_component(ai_component, 'ai')
-        old_npc.add_component(Health(old_npc.health.max_hp // 4), 'health')
-
-        return old_npc
-    else:
-        npc = Character(point, 'S', 'skeleton', COLORS.get('skeleton'),
-                        ai=ai_component, species=Species.NONDESCRIPT,
-                        health=health_component)
-
-        npc.add_component(Offence(base_power = 12), 'offence')
-        npc.add_component(Defence(defence = 8), 'defence')
-        npc.add_component(Resistance(sharp=0.8), 'resistance')
-
-        npc.movement.routing_avoid.extend(npc_avoid)
-        npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
-
-        item = equipment.longsword()
-        item.lootable = False
-
-        npc.inventory.add_item(item)
-        npc.equipment.toggle_equip(item)
-
-    return npc
-
 def snake(point = None):
     health_component = Health(8)
 
@@ -432,7 +395,7 @@ def snake(point = None):
 
     if randint(1, 100) >= 50:
         equipment.add_poison(teeth, 1, 5)
-        creature.base_name = 'Poisonous Snake'
+        creature.add_component(Naming(creature.base_name, prefix='Poisonous'), 'naming')
         creature.color = COLORS.get('poisonous_snake')
 
     teeth.lootable = False
@@ -593,8 +556,34 @@ def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrad
 
     return npc
 
-def generate_zombie(type, dungeon_level = 1, player_level = 1, point = None, upgrade_chance = 98):
-    npc = generate_npc(type, dungeon_level, player_level, point, upgrade_chance)
+def reanmimate(npc):
+    if (npc.death.skeletal):
+        return convert_npc_to_skeleton(npc)
+
+    return convert_npc_to_zombie(npc)
+    
+def generate_random_skeleton(point = None, dungeon_level = 1, player_level = 1):
+    npc = random_npc(point = point, dungeon_level = dungeon_level, player_level = player_level)
+
+    return convert_npc_to_skeleton(npc)
+
+def convert_npc_to_skeleton(npc):
+    npc.char = 'S'
+    npc.add_component(Naming(npc.base_name, prefix='Skeletal'), 'naming')
+    npc.add_component(BasicNPC(), 'ai')
+    npc.add_component(Health(max(1, npc.health.max_hp // 3)), 'health')
+    if npc.resistance:
+        npc.resistance.sharp = 0.8
+    else:
+        npc.add_component(Resistance(sharp=0.8), 'resistance')
+
+    npc.species=Species.UNDEAD
+    npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
+
+    return npc
+
+def generate_random_zombie(point = None, dungeon_level = 1, player_level = 1):
+    npc = random_npc(point = point, dungeon_level = dungeon_level, player_level = player_level)
 
     return convert_npc_to_zombie(npc)
 
@@ -604,6 +593,7 @@ def convert_npc_to_zombie(npc):
     npc.add_component(ZombieNPC(species=npc.species), 'ai')
     npc.add_component(Health(max(1, npc.health.max_hp // 2)), 'health')
     npc.species=Species.UNDEAD
+    npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
 
     teeth = equipment.teeth()
     teeth.lootable = False
