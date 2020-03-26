@@ -44,6 +44,9 @@ class DamageAura(Aura):
                     if entity == self.owner:
                         continue
 
+                    if not entity.animate:
+                        continue
+
                     if entity.health:
                         damage = die_roll(self.number_of_dice, self.type_of_dice)
                         damage_results, total_damage = entity.health.take_damage(damage, self.owner, self.damage_type)
