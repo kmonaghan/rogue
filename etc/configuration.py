@@ -23,7 +23,7 @@ CONFIG = {
     'fov_light_walls': True,
     'fov_radius': 10,
 
-    'debug': True,
+    'debug': False,
     'show_dijkstra_player': False,
     'show_dijkstra_flee': False,
 
