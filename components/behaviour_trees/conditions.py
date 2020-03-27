@@ -221,8 +221,6 @@ class NumberOfEntities(Node):
                 if entity.species == self.species:
                     count += 1
 
-        print("entity count: " + str(count))
-
         if count >= self.number_of_entities:
             return TreeStates.SUCCESS, []
         else:
