@@ -24,7 +24,6 @@ class BasicDeath:
         #attacked and doesn't move
         self.owner.char = '%'
         self.owner.color = COLORS.get('corpse')
-        #self.owner.species = Species.CORPSE
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
 
