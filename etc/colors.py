@@ -6,17 +6,13 @@ from tcod.color import Color
 COLORS = {
     'light_default': tcod.dark_grey,
     'dark_default': tcod.darkest_grey,
+    'foreground_default': tcod.white,
 
     'light_cavern_floor': tcod.lighter_sepia,
     'dark_cavern_floor': tcod.light_sepia,
 
     'light_fungal_cavern_floor': Color(94, 145, 79),
     'dark_fungal_cavern_floor': Color(64, 96, 52),
-
-    'dark_wall': tcod.darkest_sepia,
-    'dark_ground': tcod.darker_sepia,
-    'light_wall': tcod.dark_sepia,
-    'light_ground': tcod.sepia,
 
     'light_cavern_wall': tcod.dark_sepia,
     'dark_cavern_wall': tcod.darkest_sepia,

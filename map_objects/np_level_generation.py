@@ -71,10 +71,6 @@ def levelOneGenerator(map_width, map_height):
 
         dm.route_between(x3, y3, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
-    prefab = Prefab(vampire_lair)
-
-    room = dm.placeRoomRandomly(prefab)
-
     place_foliage(dm)
 
     dm.cleanUpMap()

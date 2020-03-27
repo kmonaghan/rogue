@@ -19,6 +19,7 @@ class Tile:
         self.explored = False
         self.fov_color = COLORS.get('light_default')
         self.out_of_fov_color = COLORS.get('dark_default')
+        self.foreground_color = COLORS.get('foreground_default')
         self.name = "Tile"
         self.char = None
 
@@ -47,7 +48,7 @@ class CavernFloor(Tile):
         super(CavernFloor, self).__init__(blocked, block_sight)
 
         self.fov_color = COLORS.get('light_cavern_floor')
-        self.out_of_fov_color = COLORS.get('light_cavern_floor')
+        self.out_of_fov_color = COLORS.get('dark_cavern_floor')
         self.name = "Cavern floor"
         self.char = choice([',','`',';',"'"])
 
@@ -55,8 +56,9 @@ class FungalCavernFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):
         super(FungalCavernFloor, self).__init__(blocked, block_sight)
 
-        self.fov_color = COLORS.get('light_fungal_cavern_floor')
-        self.out_of_fov_color = COLORS.get('dark_fungal_cavern_floor')
+        self.fov_color = COLORS.get('light_cavern_floor')
+        self.out_of_fov_color = COLORS.get('dark_cavern_floor')
+        self.foreground_color = COLORS.get('light_fungal_cavern_floor')
         self.name = "Fungus covered cavern floor"
         self.char = '"'
 
@@ -67,6 +69,7 @@ class CavernWall(Tile):
         self.fov_color = COLORS.get('light_cavern_wall')
         self.out_of_fov_color = COLORS.get('dark_cavern_wall')
         self.name = "Cavern wall"
+        self.char = '#'
 
 class CorridorWall(Tile):
     def __init__(self, blocked=True, block_sight=True):
@@ -74,7 +77,8 @@ class CorridorWall(Tile):
 
         self.fov_color = COLORS.get('light_cavern_wall')
         self.out_of_fov_color = COLORS.get('dark_cavern_wall')
-        self.name = "Cavern wall"
+        self.name = "Corridor wall"
+        self.char = '#'
 
 class Door(Tile):
     def __init__(self, blocked=False, block_sight=False):
@@ -132,7 +136,7 @@ class RoomWall(Tile):
         super(RoomWall, self).__init__(blocked, block_sight)
 
         self.fov_color = COLORS.get('light_room_wall')
-        self.out_of_fov_color = COLORS.get('dark_corridor_floor')
+        self.out_of_fov_color = COLORS.get('dark_room_wall')
         self.name = "Wall"
         self.char = '#'
 

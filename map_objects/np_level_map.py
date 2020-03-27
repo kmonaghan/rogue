@@ -36,13 +36,16 @@ class LevelMap(Map):
         self.blocked = np.zeros(self.walkable.shape, dtype=np.int8)
 
         self.dark_map_bg = np.full(
-            self.walkable.shape + (3,), COLORS.get('dark_wall'), dtype=np.uint8
+            self.walkable.shape + (3,), COLORS.get('dark_default'), dtype=np.uint8
         )
         self.light_map_bg = np.full(
-            self.walkable.shape + (3,), COLORS.get('light_wall'), dtype=np.uint8
+            self.walkable.shape + (3,), COLORS.get('light_default'), dtype=np.uint8
         )
         self.map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('console_background'), dtype=np.uint8
+        )
+        self.map_fg = np.full(
+            self.walkable.shape + (3,), COLORS.get('foreground_default'), dtype=np.uint8
         )
 
         self.map_char = np.zeros(self.walkable.shape, dtype=np.int8)
@@ -136,6 +139,7 @@ class LevelMap(Map):
             self.tiles[x][y] = current_tile
             self.dark_map_bg[x,y] = current_tile.out_of_fov_color
             self.light_map_bg[x,y] = current_tile.fov_color
+            self.map_fg[x, y] = current_tile.foreground_color
             if current_tile.char:
                 self.map_char[x,y] = ord(current_tile.char)
 
@@ -193,14 +197,16 @@ class LevelMap(Map):
     def update_and_draw_all(self, map_console, player):
         map_console.clear()
 
+        map_console.fg[:] = self.map_fg[:]
+
         if self.should_shimmer > 5:
             shimmering = np.isin(self.grid, SHIMMERING_TILES)
             shimmer_list = np.where(shimmering)
             for idx, x in enumerate(shimmer_list[0]):
                 y = shimmer_list[1][idx]
 
-                self.dark_map_bg[x,y] = self.tiles[x][y].fov_shimmer
-                self.light_map_bg[x,y] = self.tiles[x][y].out_of_fov_shimmer
+                self.dark_map_bg[x,y] = self.tiles[x][y].out_of_fov_shimmer
+                self.light_map_bg[x,y] = self.tiles[x][y].fov_shimmer
                 self.should_shimmer = 0
         else:
             self.should_shimmer += 1
