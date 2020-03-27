@@ -5,6 +5,7 @@ Roguelike tutorial:
 http://www.roguebasin.com/index.php?title=Complete_Roguelike_Tutorial,_using_python%2Blibtcod
 Updated/Python 3 version: http://rogueliketutorials.com/libtcod/3
 https://hexworks.org/posts/tutorials/
+http://bfnightly.bracketproductions.com/rustbook/chapter_0.html
 
 List of Resources
 https://github.com/marukrap/RoguelikeDevResources
@@ -37,6 +38,28 @@ https://www.reddit.com/search/?q=Procedural%20Challenge%20%234
 
 https://bytten-studio.com/devlog//2012/11/30/lock-and-key-puzzle-generation/
 
+https://www.reddit.com/r/roguelikedev/comments/fpf0pl/implementing_broguelike_dungeon_generation/
+
+http://www.darkgnosis.com/2018/03/03/contour-bombing-cave-generation-algorithm
+
+http://anderoonies.github.io/2020/03/17/brogue-generation.html
+
+Alternative numpy cavern generation:
+https://www.reddit.com/r/roguelikedev/comments/dik0dq/fast_tuneable_cavern_generation_with_numpy_and/
+import numpy as np
+from scipy import ndimage
+
+threshold = 0.5
+iterations = 10
+filter_size = 0.55
+
+a = np.random.random((width, height))
+==or==
+a = ndimage.gaussian_filter(a, filter_size, mode='constant', cval=1) (enclosed maps)
+for i in range(iterations):
+    a = ndimage.gaussian_filter(a, filter_size)
+
+console.ch[:] = np.where(a > threshold, 176, ord(' '))
 
 Other Roguelikes:
 https://github.com/Maugrift/GeneriCrawl See for nice FOV
@@ -47,6 +70,7 @@ https://www.reddit.com/r/roguelikedev/wiki/faq_friday
 Behaviour Trees
 http://www.gamasutra.com/blogs/ChrisSimpson/20140717/221339/Behavior_trees_for_AI_How_they_work.php
 https://py-trees.readthedocs.io/en/devel/background.html
+https://takinginitiative.wordpress.com/2020/01/07/behavior-trees-breaking-the-cycle-of-misuse/
 
 Pathfinding
 https://www.reddit.com/r/roguelikedev/comments/3slu9c/faq_friday_25_pathfinding/
@@ -70,3 +94,16 @@ http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/console_ascii.html?c
 
 Possible fire animation:
 https://www.reddit.com/r/roguelikedev/comments/cmfm60/to_switch_to_c_or_to_stick_with_python/ew1yude?utm_source=share&utm_medium=web2x
+
+Quest:
+https://www.reddit.com/r/roguelikedev/comments/dybb7v/data_structure_for_quests/
+
+Combat mechanics
+https://www.reddit.com/r/roguelikedev/comments/e3ijjz/how_to_avoid_breakpoints/
+
+AI:
+https://www.reddit.com/r/roguelikedev/comments/1f72ej/monster_ai_system_for_tinykeep_explained_part_4/
+
+Colour:
+RGB colours are just additive:
+https://www.reddit.com/r/roguelikedev/comments/eyn7sr/how_to_mix_two_colour_lights/
