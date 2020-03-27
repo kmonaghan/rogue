@@ -69,6 +69,11 @@ def bat(point = None):
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
 
+    if randint(1, 100) >= 50:
+        equipment.add_lifedrain(teeth)
+        creature.add_component(Naming(creature.base_name, prefix='Vampiric'), 'naming')
+        #creature.color = COLORS.get('poisonous_snake')
+
     return creature
 
 def bountyhunter(point):
@@ -171,6 +176,10 @@ def create_player():
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
 
+    armour = equipment.leathershirt()
+    player.inventory.add_item(armour)
+    player.equipment.toggle_equip(armour)
+
     if CONFIG.get('debug'):
         player.level.random_level_up(30)
         weapon = equipment.random_magic_weapon()
@@ -187,26 +196,26 @@ def create_player():
         player.inventory.add_item(ring)
         player.equipment.toggle_equip(ring)
 
-    potion = equipment.healing_potion()
-    player.inventory.add_item(potion)
+        potion = equipment.healing_potion()
+        player.inventory.add_item(potion)
 
-    scroll4 = equipment.map_scroll()
-    player.inventory.add_item(scroll4)
+        scroll4 = equipment.map_scroll()
+        player.inventory.add_item(scroll4)
 
-    scroll5 = equipment.identify_scroll()
-    player.inventory.add_item(scroll5)
+        scroll5 = equipment.identify_scroll()
+        player.inventory.add_item(scroll5)
 
-    potion2 = equipment.antidote_potion()
-    player.inventory.add_item(potion2)
+        potion2 = equipment.antidote_potion()
+        player.inventory.add_item(potion2)
 
-    scroll5 = equipment.fireball_scroll()
-    player.inventory.add_item(scroll5)
+        scroll5 = equipment.fireball_scroll()
+        player.inventory.add_item(scroll5)
 
-    scroll7 = equipment.map_scroll()
-    player.inventory.add_item(scroll7)
+        scroll7 = equipment.map_scroll()
+        player.inventory.add_item(scroll7)
 
-    scroll6 = equipment.teleport_scroll()
-    player.inventory.add_item(scroll6)
+        scroll6 = equipment.teleport_scroll()
+        player.inventory.add_item(scroll6)
 
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
@@ -278,7 +287,7 @@ def goblin(point = None):
 
     return npc
 
-def necromancer(point = None, dungeon_level=1):
+def necromancer(point = None, dungeon_level = 1, player_level = 1):
     #create a necromancer
     health_component = Health(30)
     ai_component = NecromancerNPC()
@@ -293,6 +302,11 @@ def necromancer(point = None, dungeon_level=1):
     npc.add_component(Children(6), 'children')
 
     npc.movement.routing_avoid.extend(npc_avoid)
+
+    npc_level = (dungeon_level - 1) + randint(-1, 1)
+
+    if npc_level > 1:
+        npc.level.random_level_up(npc_level - 1)
 
     weapon = equipment.random_magic_weapon(dungeon_level=dungeon_level)
     weapon.lootable = True
@@ -441,7 +455,7 @@ def troll(point = None):
 
     return npc
 
-def warlord(point = None):
+def warlord(point = None, dungeon_level = 1, player_level = 1):
     #create a warlord
     ai_component = WarlordNPC()
     health_component = Health(50)
@@ -455,6 +469,11 @@ def warlord(point = None):
     npc.add_component(Level(xp_value = 10), 'level')
 
     npc.movement.routing_avoid.extend(npc_avoid)
+
+    npc_level = (dungeon_level - 1) + randint(-1, 1)
+
+    if npc_level > 1:
+        npc.level.random_level_up(npc_level - 1)
 
     item = equipment.longsword()
     item.base_name = item.base_name + " of I'll FUCKING Have You"
