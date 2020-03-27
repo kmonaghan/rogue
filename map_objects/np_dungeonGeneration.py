@@ -37,6 +37,49 @@ def surrounding_tiles(x, y, grid):
 
     return tiles_slice
 
+#See http://www.darkgnosis.com/2018/03/03/contour-bombing-cave-generation-algorithm
+def random_walk(shape, reset=False, percentage=60):
+    cells = np.zeros(shape, dtype=np.int8)
+
+    current_x = start_x = randint(0,shape[0] - 1)
+    current_y = start_y = randint(0,shape[1] - 1)
+
+    path_length = ((shape[0] * shape[1]) * percentage) // 100
+    steps = 0
+
+    for i in range(path_length):
+        next = randint(0,3)
+        if next == 0:
+            #Move to the left
+            dx = -1
+            dy = 0
+        elif next == 1:
+            #Move to the right
+            dx = 1
+            dy = 0
+        elif next == 2:
+            #Move to up
+            dx = 0
+            dy = -1
+        elif next == 3:
+            #Move down
+            dx = 0
+            dy = 1
+
+        current_x = max(0, min(shape[0] - 1, current_x + dx))
+        current_y = max(0, min(shape[1] - 1, current_y + dy))
+
+        cells[current_x, current_y] = 1
+
+        steps = steps + 1
+
+        if reset and steps >= 100:
+            steps = 0
+            current_x = start_x
+            current_y = start_y
+
+    return cells
+
 def cellular_map(shape, probability = 45, smoothing = 4):
     cells = np.random.choice([0, 1], size=shape, p=[probability/100, (100 - probability)/100])
 

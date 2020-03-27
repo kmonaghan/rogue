@@ -5,10 +5,10 @@ from random import choice, randint
 from etc.enum import Tiles
 from etc.exceptions import FailedToPlaceEntranceError, FailedToPlaceExitError, BadMapError, FailedToPlaceRoomError, MapNotEnoughExitsError
 
-from map_objects.np_dungeonGeneration import dungeonGenerator, cellular_map
+from map_objects.np_dungeonGeneration import dungeonGenerator, cellular_map, random_walk
 from map_objects.np_level_map import LevelMap
 from map_objects.np_prefab import Prefab
-from map_objects.prefab import boss_room, treasure_room, barracks, stair_room, prison_block, necromancer_lair, list_of_prefabs
+from map_objects.prefab import boss_room, treasure_room, barracks, stair_room, prison_block, necromancer_lair, vampire_lair, list_of_prefabs
 
 from utils.utils import matprint
 
@@ -70,6 +70,10 @@ def levelOneGenerator(map_width, map_height):
         tile_index = randint(0, len(cavern[0])-1)
 
         dm.route_between(x3, y3, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
+
+    prefab = Prefab(vampire_lair)
+
+    room = dm.placeRoomRandomly(prefab)
 
     place_foliage(dm)
 
@@ -148,7 +152,8 @@ def level_cavern_rooms(dm, x, y):
 
     dm.placeRandomRooms((square_height//4), square_height-2, 2, 2, add_door = True, add_walls = True, attempts=5000)
 
-    cells = cellular_map(shape=(cavern_width,cavern_height), probability=43)
+    #cells = cellular_map(shape=(cavern_width,cavern_height), probability=43)
+    cells = random_walk(shape=(cavern_width,cavern_height), percentage=70)
 
     slice = dm.grid[width_offset:width_offset+cavern_width, height_offset:height_offset+cavern_height]
 
@@ -223,7 +228,7 @@ def levelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
     x = x - 2
     y = y - 2
-    levelType = randint(0,3)
+    levelType = randint(0,2)
     result = False
 
     if levelType == 0:
