@@ -200,7 +200,7 @@ def character_screen(player):
     return con
 
 def game_over():
-    header = "You have failed. Death's cold embrace envelops you. Loser."
+    header = "You have failed. Death's cold embrace envelops you."
     options = [['Start from scratch', tcod.white],
                 ['View Stats', tcod.white],
                 ['View Inventory', tcod.white],
