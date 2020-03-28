@@ -14,16 +14,20 @@ def get_names_under_mouse(x, y, current_level):
         #print("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
         return ''
 
+    location_description = location
     tile_description = ''
-    names = ''
+    names = None
 
-    if (current_level.fov[x, y] or CONFIG.get('debug')):
+    if (current_level.explored[x, y] or CONFIG.get('debug')):
         tile_description = str(current_level.tiles[x][y]) + ' '
 
+        location_description = location_description + ' ' + tile_description
+
+    if (current_level.fov[x, y] or CONFIG.get('debug')):
         names = [str(entity) for entity in current_level.entities.get_entities_in_position((x, y))]
         names = ', '.join(names)
-
-    return tile_description + location + ' ' + names
+        location_description = location + ' ' + names + ', ' + tile_description
+    return location_description
 
 def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color):
     bar_width = int(float(value / maximum) * total_width)

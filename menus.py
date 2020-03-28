@@ -35,7 +35,7 @@ def menu(con, header, options, width):
     tcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
 def ingame_menu(title, header, options):
-    con = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('map_height'), 'F')
+    con = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('info_panel_y'), 'F')
 
     header_height = con.get_height_rect(1, 1, con.width - 2, 10, header) + 1
     con.draw_frame(
@@ -147,11 +147,13 @@ def main_menu(con, background_image):
 
     tcod.console_set_default_foreground(0, tcod.light_yellow)
     tcod.console_print_ex(0, int(screen_width / 2), int(screen_height / 2) - 4, tcod.BKGND_NONE, tcod.CENTER,
-                             'Diablo inspired Roguelike')
+                             CONFIG.get('window_title'))
     tcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), tcod.BKGND_NONE, tcod.CENTER,
                              'By Karl Monaghan')
 
-    menu(con, '', [['Play a new game', tcod.white], ['Continue last game', tcod.white], ['Quit', tcod.white]], 24, screen_width, screen_height)
+    menu(con, '', [['Play a new game', tcod.white],
+                    ['Continue last game', tcod.white],
+                    ['Quit', tcod.white]], 24, screen_width, screen_height)
 
 def level_up_menu(player):
     title = 'Level up!'
@@ -207,7 +209,7 @@ def game_over():
                 ['View Quests', tcod.white],
                 ['Quit', tcod.white]]
 
-    return ingame_menu('Quest', header, options)
+    return ingame_menu('Game Over', header, options)
 
 def game_paused():
     header = ""
