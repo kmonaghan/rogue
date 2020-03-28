@@ -71,7 +71,7 @@ def levelOneGenerator(map_width, map_height):
 
         dm.route_between(x3, y3, cavern[0][tile_index], cavern[1][tile_index], avoid=[Tiles.ROOM_WALL], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
-    place_foliage(dm)
+    placeFoliage(dm)
 
     dm.cleanUpMap()
 
@@ -89,7 +89,7 @@ def addCaves(dm):
 
     dm.joinUnconnectedAreas(unconnected, connecting_tile = Tiles.CAVERN_FLOOR)
 
-    place_foliage(dm)
+    placeFoliage(dm)
 
 def cavernLevel(dm, x, y):
     addCaves(dm)
@@ -120,7 +120,7 @@ def cavernLevel(dm, x, y):
 
     dm.cleanUpMap()
 
-def level_cavern_rooms(dm, x, y):
+def cavernRoomsLevel(dm, x, y):
     square_height = dm.width // 3
 
     overwrite = randint(0,1)
@@ -173,7 +173,7 @@ def level_cavern_rooms(dm, x, y):
 
     dm.joinUnconnectedAreas(unconnected, connecting_tile = Tiles.CAVERN_FLOOR)
 
-    place_foliage(dm)
+    placeFoliage(dm)
 
     dm.cleanUpMap()
 
@@ -232,7 +232,7 @@ def levelGenerator(map_width, map_height, x, y):
     elif levelType == 1:
         result = cavernLevel(dm, x, y)
     elif levelType == 2:
-        result = level_cavern_rooms(dm, x, y)
+        result = cavernRoomsLevel(dm, x, y)
 
     if not dm.validateMap():
         raise BadMapError
@@ -406,7 +406,7 @@ def squares(dm, x, y):
 
     return dm
 
-def place_foliage(dm):
+def placeFoliage(dm):
     cells = cellular_map(shape=dm.grid.shape, probability=60)
 
     dm.grid[np.where((dm.grid == Tiles.CAVERN_FLOOR) & (cells == 1))] = Tiles.FUNGAL_CAVERN_FLOOR
