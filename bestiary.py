@@ -164,7 +164,7 @@ def create_player():
 
     player = Character(None, '@', 'player', COLORS.get('player'),
                        death=PlayerDeath(), health=health_component,
-                       species=Species.PLAYER)
+                       species=Species.PLAYER, act_energy=2)
 
     player.add_component(Offence(base_power = 6), 'offence')
     player.add_component(Defence(defence = 6), 'defence')
