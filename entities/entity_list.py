@@ -94,7 +94,7 @@ class EntityList:
                         if isinstance(entity, Character) and not entity.health.dead:
                             if species and (entity.species != species):
                                 continue
-                                
+
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
                                 #print("FOUND!")
@@ -103,3 +103,8 @@ class EntityList:
                 #    #print "no entites at " + str(x) + ", " + str(y)
 
         return npcs
+
+    def find_all_visible(self):
+        visible = [x for x in self.lst if x.always_visible == True]
+
+        return visible

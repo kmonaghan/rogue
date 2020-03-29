@@ -297,6 +297,12 @@ class LevelMap(Map):
             entities_in_render_order.clear()
             entity = None
 
+        always_visible = self.entities.find_all_visible()
+        for entity in always_visible:
+            if self.explored[entity.x, entity.y]:
+                map_console.ch[entity.x, entity.y] = ord(entity.display_char)
+                map_console.fg[entity.x, entity.y] = entity.display_color
+
         for entity in auras:
             slice = map_console.bg[entity.x-1:entity.x+2,entity.y-1:entity.y+2]
 
