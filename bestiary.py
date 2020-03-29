@@ -28,6 +28,7 @@ from components.spawn import Spawn
 from components.subspecies import Subspecies
 from components.vulnerability import Vulnerability
 
+from entities.entity import Entity
 from entities.character import Character
 
 from etc.colors import COLORS
@@ -69,10 +70,9 @@ def bat(point = None):
     creature.inventory.add_item(teeth)
     creature.equipment.toggle_equip(teeth)
 
-    if randint(1, 100) >= 50:
+    if randint(1, 100) >= 70:
         equipment.add_lifedrain(teeth)
         creature.add_component(Naming(creature.base_name, prefix='Vampiric'), 'naming')
-        #creature.color = COLORS.get('poisonous_snake')
 
     return creature
 
@@ -501,6 +501,20 @@ def warlord(point = None, dungeon_level = 1, player_level = 1):
 '''
 Helper methods to create npcs/creatures/objects
 '''
+def spawn_point(point = None, species = Species.GOBLIN, max_children=5):
+    npc = Entity(point, ' ', '', COLORS.get('warlord'), blocks=False, invisible=True)
+
+    if species == Species.TROLL:
+        underling = troll
+    elif species == Species.ORC:
+        underling = orc
+    elif species == Species.GOBLIN:
+        underling = goblin
+
+    npc.add_component(SpawningNPC(underling), 'ai')
+    npc.add_component(Children(max_children), 'children')
+
+    return npc
 
 def generate_creature(type, dungeon_level = 1, player_level = 1, point = None):
     creature = None

@@ -24,7 +24,7 @@ class Entity:
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
                  ai=None, item=None, equippable=None, render_order=RenderOrder.CORPSE,
                  death=None, health=None, usable=None, act_energy=3,
-                 interaction=Interactions.FOE, animate=True):
+                 interaction=Interactions.FOE, animate=True, invisible=False):
 
         self.x = None
         self.y = None
@@ -37,6 +37,7 @@ class Entity:
         self.always_visible = always_visible
         self.transparent = True
         self.animate = animate
+        self.invisible = invisible
 
         self.add_component(health, "health")
         self.add_component(ai, "ai")

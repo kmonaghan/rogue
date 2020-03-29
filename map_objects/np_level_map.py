@@ -284,24 +284,26 @@ class LevelMap(Map):
                     if self.dijkstra_flee[x,y] != 0:
                         map_console.bg[x,y] = tcod.color_lerp(COLORS.get('dijkstra_near'), COLORS.get('dijkstra_far'), 0.9 * self.dijkstra_player[x,y] / max_distance)
 
+        always_visible = self.entities.find_all_visible()
+        for entity in always_visible:
+            if self.explored[entity.x, entity.y]:
+                map_console.ch[entity.x, entity.y] = ord(entity.display_char)
+                map_console.fg[entity.x, entity.y] = entity.display_color
+                
         auras = []
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
             current_entities = self.entities.get_entities_in_position((x, y))
             entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
             for entity in entities_in_render_order:
+                if entity.invisible:
+                    continue
                 map_console.ch[x, y] = ord(entity.display_char)
                 map_console.fg[x, y] = entity.display_color
                 if entity.aura:
                     auras.append(entity)
             entities_in_render_order.clear()
             entity = None
-
-        always_visible = self.entities.find_all_visible()
-        for entity in always_visible:
-            if self.explored[entity.x, entity.y]:
-                map_console.ch[entity.x, entity.y] = ord(entity.display_char)
-                map_console.fg[entity.x, entity.y] = entity.display_color
 
         for entity in auras:
             slice = map_console.bg[entity.x-1:entity.x+2,entity.y-1:entity.y+2]

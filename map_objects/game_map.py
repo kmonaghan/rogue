@@ -71,10 +71,12 @@ class GameMap:
         self.current_level.dungeon_level = self.dungeon_level
 
     def generate_test_layout(self, map_width, map_height, player):
+        attempts = 0
+
         while attempts < CONFIG.get('map_generation_attempts'):
             try:
-                #dm = arena(map_width, map_height)
-                dm = levelGenerator(map_width, map_height, player.x, player.y)
+                dm = arena(map_width, map_height)
+                #dm = levelGenerator(map_width, map_height, player.x, player.y)
 
                 break
             except MapError as e:
@@ -92,10 +94,10 @@ class GameMap:
         self.place_stairs()
         self.place_doors()
 
+        #return self.test_popluate_map(player)
+
         player.set_point(self.up_stairs.point)
         self.current_level.add_entity(player)
-
-        #return test_popluate_map(self, player)
 
         level_theme = self.fill_prefab(player)
 
@@ -112,13 +114,15 @@ class GameMap:
         item2 = equipment.healing_potion(player.point)
         self.current_level.add_entity(item2)
 
-        cube = bestiary.gelatinous_cube(item.point)
-        self.current_level.add_entity(cube)
+        #cube = bestiary.gelatinous_cube(item.point)
+        #self.current_level.add_entity(cube)
 
-        npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level)
-        npc.set_point(Point(26,26))
+        #npc = bestiary.generate_npc(Species.TROLL, self.dungeon_level, player.level.current_level)
+        #npc.set_point(Point(26,26))
+        #self.current_level.add_entity(npc)
+
+        npc = bestiary.spawn_point(Point(26,26), Species.TROLL)
         self.current_level.add_entity(npc)
-
         self.place_doors()
 
     def place_doors(self):
