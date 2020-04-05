@@ -6,7 +6,7 @@ info_panel_height = 5
 message_panel_height = 10
 
 CONFIG = {
-    'window_title': 'Yet Another Unnamed Roguelike',
+    'window_title': 'Yet Another Unnamed Diablo Inspired Roguelike',
     'full_screen_width': screen_width,
     'full_screen_height': screen_height,
 
