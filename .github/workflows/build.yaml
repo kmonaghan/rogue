@@ -16,9 +16,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
           pip install -r dependencies.txt
-      - name: package binary
+      - name: package binary and rename
         run: |
           pyinstaller --clean engine.spec
+          chmod +x dist/engine
           mv dist/engine dist/yaudir_macosx
       - name: publish binary
         uses: actions/upload-artifact@master
