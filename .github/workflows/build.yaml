@@ -19,7 +19,7 @@ jobs:
       - name: package binary
         run: |
           pyinstaller --clean engine.spec
-          mv dist/yaudir dist/yaudir_macosx
+          mv dist/engine dist/yaudir_macosx
       - name: publish binary
         uses: actions/upload-artifact@master
         with:
@@ -46,7 +46,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: yaudir_windows
-          path: dist/yaudir.exe
+          path: dist/engine.exe
   build-ubuntu:
     name: Build for ubuntu-18.04
     runs-on: ubuntu-18.04
@@ -68,7 +68,7 @@ jobs:
       - name: package binary
         run: |
           pyinstaller --clean engine.spec
-          mv dist/yaudir dist/yaudir_ubuntu18
+          mv dist/engine dist/yaudir_ubuntu18
       - name: publish binary
         uses: actions/upload-artifact@master
         with:
