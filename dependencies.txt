@@ -1,4 +1,5 @@
 numpy
-PyInstaller
+wheel
 tcod
+pyinstaller
 pygame
