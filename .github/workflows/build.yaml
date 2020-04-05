@@ -42,11 +42,12 @@ jobs:
       - name: package binary
         run: |
           python -m PyInstaller --clean engine.spec
+          move dist/engine.exe dist/yaudir.exe
       - name: publish binary
         uses: actions/upload-artifact@master
         with:
           name: yaudir_windows
-          path: dist/engine.exe
+          path: dist/yaudir.exe
   build-ubuntu:
     name: Build for ubuntu-18.04
     runs-on: ubuntu-18.04
