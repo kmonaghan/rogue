@@ -1,0 +1,104 @@
+name: Build and package
+on: push
+
+jobs:
+  build-osx:
+    name: Build for macos-10.15
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel
+          pip install -r dependencies.txt
+      - name: package binary
+        run: |
+          pyinstaller --clean engine.spec
+          mv dist/yaudir dist/yaudir_macosx
+      - name: publish binary
+        uses: actions/upload-artifact@master
+        with:
+          name: yaudir_macosx
+          path: dist/yaudir_macosx
+  build-windows:
+    name: Build for windows-2019
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel
+          pip install -r dependencies.txt
+      - name: package binary
+        run: |
+          python -m PyInstaller --clean engine.spec
+      - name: publish binary
+        uses: actions/upload-artifact@master
+        with:
+          name: yaudir_windows
+          path: dist/yaudir.exe
+  build-ubuntu:
+    name: Build for ubuntu-18.04
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: install apt dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y $(cat apt_dependencies.txt)
+      - name: install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel
+          pip install -r dependencies.txt
+      - name: package binary
+        run: |
+          pyinstaller --clean engine.spec
+          mv dist/yaudir dist/yaudir_ubuntu18
+      - name: publish binary
+        uses: actions/upload-artifact@master
+        with:
+          name: yaudir_ubuntu18
+          path: dist/yaudir_ubuntu18
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/release')
+    name: Publish release to github
+    runs-on: ubuntu-18.04
+    needs: [build-osx, build-windows, build-ubuntu]
+    steps:
+      - name: Download osx artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: yaudir_macosx
+      - name: Download windows artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: yaudir_windows
+      - name: Download ubuntu18 artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: yaudir_ubuntu18
+      - name: Trimming tag
+        id: trimmer
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/release/}
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ steps.trimmer.outputs.tag }}
+          draft: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "yaudir_macosx/yaudir_macosx,yaudir_windows/yaudir.exe,yaudir_ubuntu18/yaudir_ubuntu18"
