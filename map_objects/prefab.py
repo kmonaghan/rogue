@@ -107,8 +107,7 @@ def barracks(top = 1, middle = 1, bottom = 1):
 
     return room_map
 
-list_of_prefabs = [treasure_room,
-                    necromancer_lair,
+list_of_prefabs = [necromancer_lair,
                     prison_block,
                     vampire_lair,
                     barracks]

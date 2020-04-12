@@ -105,6 +105,18 @@ def captain(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 
 
     npc.add_component(CaptainNPC(underling), 'ai')
     npc.add_component(Children(troops), 'children')
+    npc.add_component(Naming(npc.base_name, prefix='Captain'), 'naming')
+
+    npc.movement.routing_avoid.extend(npc_avoid)
+
+    return npc
+
+def jailor(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 98):
+    npc = random_npc(point, dungeon_level, player_level, upgrade_chance)
+
+    upgrade_npc(npc)
+
+    npc.add_component(Naming(npc.base_name, prefix='Jailor'), 'naming')
 
     npc.movement.routing_avoid.extend(npc_avoid)
 
@@ -746,7 +758,7 @@ def mimic_shimmer(sub, message, level_map):
             sub.entity.base_name = 'Mimic'
 
 def rat_swarm(sub, message, level_map):
-    if (message.entity.species == Species.PLAYER) and ((message.target.species == Species.RAT) or (message.target.species == Species.RATNEST)):
+    if (message.entity.species == Species.PLAYER) and (message.target.species == Species.RATNEST):
         if level_map.current_level.fov[sub.entity.x, sub.entity.y]:
             if sub.entity.ai:
                 sub.entity.ai.set_target(message.entity)

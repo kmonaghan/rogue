@@ -276,6 +276,8 @@ class GameMap:
             self.current_level.add_entity(npc)
 
     def fill_prefab(self, player):
+        npc = None
+        room_name = None
         for room in self.current_level.rooms:
             if room.name == "treasure_room":
                 point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
@@ -294,22 +296,39 @@ class GameMap:
                 npc = bestiary.captain(point, self.dungeon_level, player.level.current_level)
                 npc.ai.set_target(player)
                 self.current_level.add_entity(npc)
+                room_name = "the barracks"
             elif room.name == "necromancer_lair":
                 point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
                 npc = bestiary.necromancer(point, self.dungeon_level, player.level.current_level)
                 npc.ai.set_target(player)
                 self.current_level.add_entity(npc)
+                room_name = "his labratory of death"
             elif room.name == "vampire_lair":
                 spawn = choice(room.spawnpoints)
                 point = Point(spawn[0] + room.x, spawn[1] + room.y)
                 npc = bestiary.generate_random_vampire(point, self.dungeon_level, player.level.current_level)
                 npc.ai.set_target(player)
                 self.current_level.add_entity(npc)
+                room_name = "his lair"
+            elif room.name == "prison_block":
+                spawn = choice(room.spawnpoints)
+                point = Point(spawn[0] + room.x, spawn[1] + room.y)
+                npc = bestiary.jailor(point, self.dungeon_level, player.level.current_level)
+                npc.ai.set_target(player)
+                self.current_level.add_entity(npc)
+                room_name = "prison block"
             elif room.name == "boss_room":
                 point = Point(room.spawnpoints[0][0] + room.x, room.spawnpoints[0][1] + room.y)
                 npc = bestiary.warlord(point, self.dungeon_level, player.level.current_level)
                 npc.ai.set_target(player)
                 self.current_level.add_entity(npc)
+                room_name = room.name
+
+        if npc:
+            print(f"Adding quest for: {npc.name}")
+            self.add_bounty_hunter(npc, room_name = room_name)
+        else:
+            print("NO QUEST!")
 
     def place_object(self, room):
         return
@@ -391,3 +410,25 @@ class GameMap:
                                                                 RoutingOptions.AVOID_FOV])
 
         self.current_level.add_entity(bestiary.generate_npc(Species.GOBLIN, 1, 1, point))
+
+    def add_bounty_hunter(self, target_npc, room_name = None):
+        entrance = find(lambda room: room.name == 'entrance', self.current_level.rooms)
+        point = self.current_level.find_random_open_position([Tiles.STAIRS_FLOOR, Tiles.DOOR], room=entrance)
+
+        npc = bestiary.bountyhunter(point)
+
+        quest_text = f"Elimate the local problem: {target_npc.name}."
+
+        if room_name:
+            quest_text = quest_text + f" You'll find them in {room_name}."
+
+        q1 = quest.Quest('Elimate', quest_text, 100, target_npc=target_npc)
+
+        if self.down_stairs:
+            q2 = quest.Quest('Go down', 'Find the stairs down', 100, map_point = self.down_stairs.point)
+            q1.next_quest = q2
+        else:
+            print("No stairs down")
+
+        npc.questgiver.add_quest(q1)
+        self.current_level.add_entity(npc)

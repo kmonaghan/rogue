@@ -10,6 +10,9 @@ import pubsub
 active_quests = []
 
 def kill_quest_npc_death(sub, message, game_map):
+    if sub.entity.npc:
+        if sub.entity.npc.uuid == message.entity.uuid:
+            sub.entity.kill_count(message.entity)
     if (message.entity.species == sub.entity.kill_type) and (message.target.species == Species.PLAYER):
         sub.entity.kill_count(message.entity)
 
@@ -94,7 +97,7 @@ def kill_warlord():
     return q
 
 class Quest:
-    def __init__(self, title, description, xp, kill=0, kill_type=None, start_func = None, map_point = None):
+    def __init__(self, title, description, xp, kill=0, kill_type=None, start_func = None, map_point = None, target_npc = None):
         self.title = title
         self.description = description
         self.xp = xp
@@ -105,7 +108,9 @@ class Quest:
         self.completed = False
         self.return_to_quest_giver = False
         self.next_quest = None
-        self.npc = None
+        self.npc = target_npc
+        if self.npc:
+            self.kill = 1
         self.start_func = start_func
         self.map_point = map_point
 
@@ -118,6 +123,9 @@ class Quest:
         ##print "tsting kill condition: " + npc.name
         if (self.kill == 0):
             return
+
+        if self.npc == npc:
+            self.kill_total += 1
 
         if (self.kill_type == npc.species):
             ##print "add a kill"
@@ -142,13 +150,6 @@ class Quest:
 
         if (self.start_func):
             self.start_func()
-
-        if (self.npc):
-            room = choice(game_map.rooms)
-            aPoint = room.center()
-            self.npc.x = aPoint.x
-            self.npc.y = aPoint.y
-            game_map.current_level.add_entity(self.npc)
 
         if (self.kill > 0):
             pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.DEATH, kill_quest_npc_death))

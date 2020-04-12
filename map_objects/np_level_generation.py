@@ -118,6 +118,8 @@ def cavernLevel(dm, x, y):
 
     dm.route_between(x2, y2, cavern[0][0], cavern[1][0], avoid=[], weights = weights, tile=Tiles.CAVERN_FLOOR)
 
+    room = placePrefabs(dm)
+
     dm.cleanUpMap()
 
 def cavernRoomsLevel(dm, x, y):
@@ -145,6 +147,8 @@ def cavernRoomsLevel(dm, x, y):
 
     if overwrite == 1:
         dm.grid[width_offset:width_offset+cavern_width, height_offset:height_offset+cavern_height] = Tiles.IMPENETRABLE
+
+    placePrefabs(dm, overwrite=False)
 
     dm.placeRandomRooms((square_height//4), square_height-2, 2, 2, add_door = True, add_walls = True, attempts=5000)
 
@@ -211,14 +215,16 @@ def roomsLevel(dm, x, y):
     dm.cleanUpMap()
 
 def placePrefabs(dm, overwrite=True):
+    if randint(0,100) > 75:
+        prefab = Prefab(treasure_room)
+        dm.placeRoomRandomly(prefab)
+
     number_of_prefabs = randint(0, len(list_of_prefabs)-1)
 
-    for x in range(number_of_prefabs):
-        prefab = Prefab(choice(list_of_prefabs))
+    prefab_choice = choice(list_of_prefabs)
+    prefab = Prefab(prefab_choice)
 
-        room = dm.placeRoomRandomly(prefab, overwrite=overwrite)
-
-    return dm
+    return dm.placeRoomRandomly(prefab, overwrite=overwrite)
 
 def levelGenerator(map_width, map_height, x, y):
     dm = dungeonGenerator(width=map_width, height=map_height)
