@@ -20,8 +20,6 @@ from map_objects.tile import (CavernFloor, CavernWall, CorridorFloor,
 
 from utils.utils import matprint
 
-SQUARED_TORCH_RADIUS = CONFIG.get('fov_radius') * CONFIG.get('fov_radius')
-
 class LevelMap(Map):
     def __init__(self, grid, rooms = []):
         width, height = grid.shape
@@ -227,6 +225,8 @@ class LevelMap(Map):
         di = 0.0
 
         if not CONFIG.get('debug'):
+            SQUARED_TORCH_RADIUS = player.fov.fov_radius * player.fov.fov_radius
+
             # slightly change the perlin noise parameter
             self.torchx += 0.1
             # randomize the light position between -1.5 and 1.5
@@ -289,7 +289,7 @@ class LevelMap(Map):
             if self.explored[entity.x, entity.y]:
                 map_console.ch[entity.x, entity.y] = ord(entity.display_char)
                 map_console.fg[entity.x, entity.y] = entity.display_color
-                
+
         auras = []
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]

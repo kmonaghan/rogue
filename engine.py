@@ -113,9 +113,9 @@ class Rogue(tcod.event.EventDispatch):
         #---------------------------------------------------------------------
         if self.fov_recompute:
             self.game_map.current_level.compute_fov(self.player.x, self.player.y,
-                                                algorithm=CONFIG.get('fov_algorithm'),
-                                                radius=CONFIG.get('fov_radius'),
-                                                light_walls=CONFIG.get('fov_light_walls'))
+                                                algorithm=self.player.fov.fov_algorithm,
+                                                radius=self.player.fov.fov_radius,
+                                                light_walls=self.player.fov.fov_light_walls)
             generate_dijkstra_player_map(self.game_map, self.player)
             self.fov_recompute = False
 

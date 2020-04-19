@@ -14,6 +14,7 @@ from components.ai import (BasicNPC, CaptainNPC, CleanerNPC, GuardNPC,
                             TetheredNPC, ZombieNPC)
 from components.berserk import Berserk
 from components.children import Children
+from components.fov import FOV
 from components.health import Health
 from components.interaction import Interaction
 from components.level import Level
@@ -181,6 +182,7 @@ def create_player():
     player.add_component(Offence(base_power = 6), 'offence')
     player.add_component(Defence(defence = 6), 'defence')
     player.add_component(Level(), 'level')
+    player.add_component(FOV(), 'fov')
 
     #initial equipment: a dagger
     dagger = equipment.dagger()

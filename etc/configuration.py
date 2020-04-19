@@ -19,10 +19,6 @@ CONFIG = {
     'map_width': 45,
     'map_height': 45,
 
-    'fov_algorithm': tcod.FOV_RESTRICTIVE,
-    'fov_light_walls': True,
-    'fov_radius': 10,
-
     'debug': False,
     'show_dijkstra_player': False,
     'show_dijkstra_flee': False,
