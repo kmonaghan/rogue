@@ -107,3 +107,18 @@ https://www.reddit.com/r/roguelikedev/comments/1f72ej/monster_ai_system_for_tiny
 Colour:
 RGB colours are just additive:
 https://www.reddit.com/r/roguelikedev/comments/eyn7sr/how_to_mix_two_colour_lights/
+
+https://diablo.chaosforge.org/
+
+Pyinstaller:
+https://realpython.com/pyinstaller-python/
+https://pyinstaller.readthedocs.io/en/stable/index.html
+
+pyinstaller --clean engine.spec
+
+https://gameswithgrids.com/blog/automated-build/
+
+Numpy:
+  - Masks:
+      http://danielandreasen.github.io/:about/2015/01/19/masks-in-python/
+      https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.ma.masked_where.html#numpy.ma.masked_where
