@@ -15,5 +15,6 @@ Started off based on [rougelike tutorial revised](http://rogueliketutorials.com/
   - `e` opens the inventory for equipping items.
   - `g` picks up an item.
   - `q` shows current quests.
+  - `s` sleeps until you are full healed (or attacked my a NPC - they're still active!).
   - `,` or `.` to use a stairs.
   - `esc` quits a menu or the game.

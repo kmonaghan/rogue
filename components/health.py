@@ -71,8 +71,11 @@ class Health:
 
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.DEATH, target=npc))
 
-        elif npc and self.owner.ai:
-            self.owner.ai.set_target(npc)
+        else:
+            if self.owner.sleep:
+                self.owner.sleep.end()
+            if npc and self.owner.ai:
+                self.owner.ai.set_target(npc)
 
         return results, total_damage
 

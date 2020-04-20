@@ -6,6 +6,8 @@ from bestiary import create_player
 
 from utils.dijkstra_maps import generate_dijkstra_player_map, generate_dijkstra_flee_map
 
+from components.sleep import Sleep
+
 from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import (
@@ -268,6 +270,7 @@ class Rogue(tcod.event.EventDispatch):
 
         if action == InputTypes.LEVEL_UP:
             self.player.level.level_up_stats(action_value)
+            print(f"Going back to previous game state because of level up")
             self.game_state = self.previous_game_state
 
         #This needs to come after leveling up or we get stuck in a loop
@@ -325,10 +328,24 @@ class Rogue(tcod.event.EventDispatch):
         player_on_turn_results = self.player.on_turn(self.game_map)
         self.process_results_stack(self.player, player_on_turn_results)
 
-        if action == InputTypes.WAIT:
-            self.game_state = GameStates.ENEMY_TURN
-        elif self.player.health.dead:
+        if action == InputTypes.SLEEP:
+            if not self.player.sleep:
+                self.player.add_component(Sleep(), 'sleep')
+                self.player.sleep.start()
+                self.fov_recompute = True
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You have gone asleep.', COLORS.get('effect_text'))))
+
+        if self.player.health.dead:
             self.game_state = GameStates.GAME_OVER
+        elif self.player.sleep:
+            finished = self.player.sleep.on_turn(self.game_map)
+            if finished:
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You have woken up.', COLORS.get('effect_text'))))
+                self.fov_recompute = True
+
+            self.game_state = GameStates.ENEMY_TURN
+        elif action == InputTypes.WAIT:
+            self.game_state = GameStates.ENEMY_TURN
         elif action == InputTypes.MOVE:
             dx, dy = action_value
             point = Point(self.player.x + dx, self.player.y + dy)
@@ -515,23 +532,27 @@ class Rogue(tcod.event.EventDispatch):
         #-------------------------------------------------------------------
         # Player takes their turn.
         #-------------------------------------------------------------------
-        if self.game_state == GameStates.PLAYER_TURN:
+        if (self.game_state == GameStates.PLAYER_TURN
+            or self.game_state == GameStates.PLAYER_SLEEP):
             self.player_actions(action, action_value)
 
         #-------------------------------------------------------------------
         # NPCs take their turns.
         #-------------------------------------------------------------------
-        while self.game_state == GameStates.ENEMY_TURN:
-            self.npc_actions()
+        #while self.game_state == GameStates.ENEMY_TURN:
+        self.npc_actions()
 
-            self.player.energy.increase_energy()
-            if self.player.energy.can_act:
-                self.game_state = GameStates.PLAYER_TURN
-                break
+        self.player.energy.increase_energy()
+        if self.player.energy.can_act:
+            if self.player.sleep:
+                self.game_state = GameStates.PLAYER_SLEEP
             else:
-                sleep(0.1)
-                self.on_draw()
-                tcod.console_flush()
+                self.game_state = GameStates.PLAYER_TURN
+        else:
+            self.game_state = GameStates.ENEMY_TURN
+
+        if not self.game_state == GameStates.PLAYER_TURN:
+            sleep(0.1)
 
         #---------------------------------------------------------------------
         # And done...so broadcast a tick
@@ -736,9 +757,13 @@ def main():
         #    main_menu.on_draw()
         #else:
         current_game.on_draw()
-
         tcod.console_flush()
-        handle_events()
+
+        if (current_game.game_state == GameStates.ENEMY_TURN
+            or current_game.game_state == GameStates.PLAYER_SLEEP):
+            current_game.process_turn(None, None)
+        else:
+            handle_events()
 
 def handle_events():
     for event in tcod.event.get():

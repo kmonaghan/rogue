@@ -50,6 +50,8 @@ def handle_player_turn_keys(event):
         return {InputTypes.MOVE: (1, 1)}
     elif event.sym == ord('z'):
         return {InputTypes.WAIT: True}
+    elif event.sym == ord('s'):
+        return {InputTypes.SLEEP: True}
     elif event.sym == ord(']'):
         return {InputTypes.DEBUG_ON: True}
     elif event.sym == ord('['):
