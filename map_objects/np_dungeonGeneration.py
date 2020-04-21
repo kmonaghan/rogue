@@ -471,6 +471,8 @@ class dungeonGenerator:
                 idx = randint(1, len(possible_door_place[0]) - 1)
                 room_slice[possible_door_place[0][idx], possible_door_place[1][idx]] = Tiles.DOOR
 
+# Uses Numpy to carve a circle into the map
+# See: https://stackoverflow.com/questions/8647024/how-to-apply-a-disc-shaped-mask-to-a-numpy-array
     def addCircleShapedRoom(self, x, y, radius = 5, margin = 1, overlap = False, add_door = True, add_walls = False, tile = Tiles.ROOM_FLOOR, max_doors = 4):
 
         if add_walls:
@@ -506,7 +508,7 @@ class dungeonGenerator:
                 if y <= self.grid.shape[1] - width - 2:
                     possible_door_place.append((radius, width-1))
 
-                print(f"Doors: {num_doors} from: {possible_door_place}")
+                #print(f"Doors: {num_doors} from: {possible_door_place}")
                 for door in range(num_doors):
                     if len(possible_door_place):
                         idx = randint(0, len(possible_door_place)-1)

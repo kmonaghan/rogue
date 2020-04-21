@@ -24,7 +24,7 @@ class Poisoned:
         damage_results, total_damage = self.owner.health.take_damage(self.damage_per_turn, type=DamageType.POISON, npc=self.poisoner)
         results.extend(damage_results)
         results.append({
-            ResultTypes.MESSAGE: Message('The poison does {0} damage to {1}'.format(total_damage ,self.owner.name.title()), COLORS.get('damage_text'))
+            ResultTypes.MESSAGE: Message(f"The poison does {total_damage} damage to {self.owner.name.title()}", COLORS.get('damage_text'))
         })
 
         if (self.duration == 0):
@@ -36,7 +36,7 @@ class Poisoned:
         results = []
 
         results.append({
-            ResultTypes.MESSAGE: Message('{0} feels something is wrong...their veins are on fire...hopefully they can outlast it'.format(self.owner.name.title()), COLORS.get('effect_text'))
+            ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} feels something is wrong...their veins are on fire...hopefully they can outlast it", COLORS.get('effect_text'))
         })
 
         self.uuid = self.owner.register_turn(self)
@@ -50,7 +50,7 @@ class Poisoned:
             try:
                 self.owner.del_component("poisoned")
             except AttributeError:
-                print(f"tried to remove poison from {self.owner.name} - {self.owner.uuid}")
+                print(f"Tried to remove poison from {self.owner.name} - {self.owner.uuid}")
         else:
             print('****No owner to poisoned - already deleted?')
 
@@ -58,7 +58,7 @@ class Poisoned:
 
         if not self.owner.health.dead:
             results.append({
-                ResultTypes.MESSAGE: Message('The poison has run its course in {0}.'.format(self.owner.name.title()), COLORS.get('effect_text'))
+                ResultTypes.MESSAGE: Message(f"The poison has run its course in {self.owner.name.title()}", COLORS.get('effect_text'))
             })
 
         return results

@@ -483,7 +483,6 @@ class Rogue(tcod.event.EventDispatch):
             and self.previous_game_state != GameStates.GAME_OVER
             and action_value < len(self.player.inventory.items)):
 
-            print(f"action_value: {action_value} < {len(self.player.inventory.items)}")
             items = self.player.inventory.items.copy()
 
             if self.using_item:
