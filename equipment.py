@@ -14,7 +14,7 @@ from components.identifiable import Identifiable, IdentifiablePotion, Identifiab
 from components.item import Item
 from components.naming import Naming
 from components.regeneration import Regeneration
-from components.usable import AntidoteUsable, DefencePotionUsable, HealingPotionUsable, PowerPotionUsable, ScrollUsable
+from components.usable import ScrollUsable, PotionUsable
 from components.unlock import Unlock
 
 from entities.entity import Entity
@@ -68,6 +68,7 @@ def random_potion(point = None, dungeon_level = 1):
     item_chances['offence'] = 40
     item_chances['defence'] = 40
     item_chances['antidote'] = 40
+    item_chances['speed'] = 40
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'heal':
@@ -78,6 +79,8 @@ def random_potion(point = None, dungeon_level = 1):
         item = defence_potion(point)
     elif choice == 'antidote':
         item = antidote_potion(point)
+    elif choice == 'speed':
+        item = speed_potion(point)
 
     return item
 
@@ -105,6 +108,7 @@ def random_scroll(point = None, dungeon_level = 1):
     item_chances['map_scroll'] = 20
     item_chances['identify'] = 20
     item_chances['teleport'] = 20
+    item_chances['speed'] = 20
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'lightning':
@@ -124,6 +128,9 @@ def random_scroll(point = None, dungeon_level = 1):
 
     elif choice == 'teleport':
         item = teleport_scroll(point)
+
+    elif choice == 'speed':
+        item = speed_scroll(point)
 
     return item
 
@@ -279,32 +286,48 @@ def potion_description(item):
     return item
 
 def antidote_potion(point = None):
-    item = Entity(point, '!', 'Antidote', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=AntidoteUsable())
+    usable = PotionUsable(name="Antidote", spell=tome.antidote)
+
+    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
 
     return potion_description(item)
 
-def healing_potion(point = None):
-    item = Entity(point, '!', 'Healing Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=HealingPotionUsable())
+def healing_potion(point = None, number_of_die=1, type_of_die=8):
+    usable = PotionUsable(name="Healing Potion", spell=tome.heal, number_of_die=number_of_die, type_of_die=type_of_die)
+
+    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
 
     return potion_description(item)
 
-def power_potion(point = None):
-    item = Entity(point, '!', 'Power Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=PowerPotionUsable())
+def power_potion(point = None, number_of_die=1, type_of_die=8):
+    usable = PotionUsable(name="Power Potion", spell=tome.change_power, number_of_die=number_of_die, type_of_die=type_of_die)
+
+    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
 
     return potion_description(item)
 
-def defence_potion(point = None):
-    item = Entity(point, '!', 'Defence Potion', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=DefencePotionUsable())
+def defence_potion(point = None, number_of_die=1, type_of_die=8):
+    usable = PotionUsable(name="Defence Potion", spell=tome.change_defence, number_of_die=number_of_die, type_of_die=type_of_die)
+
+    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
+
+    return potion_description(item)
+
+def speed_potion(point = None):
+    usable = PotionUsable(name="Speed Potion", spell=tome.speed)
+
+    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
 
     return potion_description(item)
 
 def lighting_scroll(point = None):
     #create a lightning bolt scroll
-    item_component = Item(use_function=tome.cast_lightning, number_of_dice=2, type_of_dice=10, maximum_range=5)
+    item_component = Item(use_function=tome.lightning, number_of_dice=2, type_of_dice=10, maximum_range=5)
     item = Entity(point, '#', 'Lightning Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=item_component)
 
@@ -315,13 +338,13 @@ def lighting_scroll(point = None):
 def fireball_scroll(point = None):
     #create a fireball scroll
     usable = ScrollUsable(scroll_name="Fireball Scroll",
-                            scroll_spell=tome.cast_fireball,
+                            scroll_spell=tome.fireball,
                             number_of_die=3,
                             type_of_die=6,
                             radius=3,
                             targets_inventory=False)
     usable.needs_target = True
-    usable.targeting_message = Message('Left-click a target tile for the fireball, or right-click to cancel.', tcod.light_cyan)
+    usable.targeting_message = Message('Left-click a target tile for the fireball, or right-click to cancel.', COLORS.get('instruction_text'))
 
     item = Entity(point, '#', 'Fireball Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                                   item=Item(), usable=usable)
@@ -332,9 +355,9 @@ def fireball_scroll(point = None):
 
 def confusion_scroll(point = None):
     #create a confuse scroll
-    item_component = Item(use_function=tome.cast_confuse, targeting=True, targeting_message=Message(
-                        'Left-click an enemy to confuse it, or right-click to cancel.', tcod.light_cyan))
-    item = Entity(point, '#', 'Confusion Scroll', tcod.light_yellow, render_order=RenderOrder.ITEM,
+    item_component = Item(use_function=tome.confuse, targeting=True, targeting_message=Message(
+                        'Left-click an enemy to confuse it, or right-click to cancel.', COLORS.get('instruction_text')))
+    item = Entity(point, '#', 'Confusion Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=item_component)
 
     item.add_component(IdentifiableScroll(), "identifiable")
@@ -342,9 +365,9 @@ def confusion_scroll(point = None):
     return item
 
 def identify_scroll(point = None):
-    usable = ScrollUsable(scroll_name="Identify Scroll", scroll_spell=tome.cast_identify, targets_inventory=True)
+    usable = ScrollUsable(scroll_name="Identify Scroll", scroll_spell=tome.identify, targets_inventory=True)
 
-    item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
+    item = Entity(point, '#', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)
 
     item.add_component(IdentifiableScroll(), "identifiable")
@@ -352,9 +375,9 @@ def identify_scroll(point = None):
     return item
 
 def teleport_scroll(point = None):
-    usable = ScrollUsable(scroll_name="Teleport Scroll", scroll_spell=tome.cast_teleport, targets_inventory=False)
+    usable = ScrollUsable(scroll_name="Teleport Scroll", scroll_spell=tome.teleport, targets_inventory=False)
 
-    item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
+    item = Entity(point, '#', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)
 
     item.add_component(IdentifiableScroll(), "identifiable")
@@ -362,9 +385,9 @@ def teleport_scroll(point = None):
     return item
 
 def map_scroll(point = None):
-    usable = ScrollUsable(scroll_name="Mapping Scroll", scroll_spell=tome.cast_mapping)
+    usable = ScrollUsable(scroll_name="Mapping Scroll", scroll_spell=tome.mapping)
 
-    item = Entity(point, '#', usable.name, tcod.light_yellow, render_order=RenderOrder.ITEM,
+    item = Entity(point, '#', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)
 
     item.add_component(IdentifiableScroll(), "identifiable")

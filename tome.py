@@ -5,6 +5,7 @@ import numpy as np
 import bestiary
 
 from components.ai import (BasicNPC, ConfusedNPC)
+from components.speed import Speed
 
 from map_objects.point import Point
 
@@ -15,14 +16,101 @@ from utils.random_utils import die_roll
 from etc.enum import DamageType, ResultTypes
 from etc.colors import COLORS
 
-#spell values
-HEAL_AMOUNT = 40
-LIGHTNING_RANGE = 5
-CONFUSE_RANGE = 8
-CONFUSE_NUM_TURNS = 10
-FIREBALL_RADIUS = 3
+def antidote(*args, **kwargs):
+    target = kwargs.get('target')
 
-def cast_heal(*args, **kwargs):
+    results = []
+
+    if target.poisoned:
+        results.extend(target.poisoned.end())
+
+    results.append({ResultTypes.MESSAGE: Message('You feel clensed.', COLORS.get('success_text'))})
+
+    return results
+
+def confuse(*args, **kwargs):
+    game_map = kwargs.get('game_map')
+    target_x = kwargs.get('target_x')
+    target_y = kwargs.get('target_y')
+
+    results = []
+
+    if not game_map.current_level.fov[target_x, target_y]:
+        results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
+        return results
+
+    for entity in entities:
+        if entity.x == target_x and entity.y == target_y and entity.ai:
+            confused_ai = ConfusedNPC(entity.ai, 10)
+
+            confused_ai.owner = entity
+            entity.ai = confused_ai
+
+            results.append({ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), COLORS.get('effect_text'))})
+
+            break
+    else:
+        results.append({ResultTypes.MESSAGE: Message('There is no targetable enemy at that location.', COLORS.get('neutral_text'))})
+
+    return results
+
+def change_defence(*args, **kwargs):
+    number_of_die = kwargs.get('number_of_die')
+    type_of_die = kwargs.get('type_of_die')
+    caster = kwargs.get('caster')
+    target = kwargs.get('target')
+
+    results = []
+
+    extra = die_roll(number_of_die, type_of_die)
+    print(f"adding {extra} to base power from {number_of_die}d{type_of_die}")
+    target.defence.base_defence = target.defence.base_defence + extra
+    results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'))})
+
+    return results
+
+def change_power(*args, **kwargs):
+    number_of_die = kwargs.get('number_of_die')
+    type_of_die = kwargs.get('type_of_die')
+    caster = kwargs.get('caster')
+    target = kwargs.get('target')
+
+    results = []
+
+    extra = die_roll(number_of_die, type_of_die)
+    print(f"adding {extra} to base power from {number_of_die}d{type_of_die}")
+    target.offence.base_power = target.offence.base_power + extra
+    results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', COLORS.get('success_text'))})
+
+    return results
+
+def fireball(*args, **kwargs):
+    caster = kwargs.get('caster')
+    game_map = kwargs.get('game_map')
+    number_of_die = kwargs.get('number_of_die')
+    type_of_die = kwargs.get('type_of_die')
+    radius = kwargs.get('radius')
+    target_x = kwargs.get('target_x')
+    target_y = kwargs.get('target_y')
+
+    results = []
+
+    if not game_map.current_level.fov[target_x, target_y]:
+        results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
+        return results
+
+    results.append({ResultTypes.MESSAGE: Message('The fireball explodes, burning everything within {0} tiles!'.format(radius), COLORS.get('effect_text'))})
+
+    #TODO: refactor, this is probably horribly inefficent
+    for entity in game_map.current_level.entities:
+        if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.health:
+            damage = die_roll(number_of_die, type_of_die)
+            damage_results, total_damage = entity.health.take_damage(damage, caster, DamageType.FIRE)
+            results.extend(damage_results)
+
+    return results
+
+def heal(*args, **kwargs):
     number_of_die = kwargs.get('number_of_die')
     type_of_die = kwargs.get('type_of_die')
     caster = kwargs.get('caster')
@@ -38,7 +126,21 @@ def cast_heal(*args, **kwargs):
 
     return results
 
-def cast_lightning(*args, **kwargs):
+def identify(*args, **kwargs):
+    target = kwargs.get('target')
+
+    results = []
+
+    if target.identifiable and not target.identified:
+        target.identifiable.identified = True
+
+    results.append({ResultTypes.MESSAGE: Message(f"The item is a {target.name}", COLORS.get('effect_text'))})
+    if target.identifiable.common_ident:
+        results.append({ResultTypes.COMMON_IDENT: target.base_name})
+
+    return results
+
+def lightning(*args, **kwargs):
     caster = args[0]
     game_map = kwargs.get('game_map')
     number_of_die = kwargs.get('number_of_die')
@@ -67,59 +169,19 @@ def cast_lightning(*args, **kwargs):
 
     return results
 
-def cast_fireball(*args, **kwargs):
-    caster = kwargs.get('caster')
+def mapping(*args, **kwargs):
     game_map = kwargs.get('game_map')
-    number_of_die = kwargs.get('number_of_die')
-    type_of_die = kwargs.get('type_of_die')
-    radius = kwargs.get('radius')
-    target_x = kwargs.get('target_x')
-    target_y = kwargs.get('target_y')
 
     results = []
 
-    if not game_map.current_level.fov[target_x, target_y]:
-        results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
-        return results
+    game_map.current_level.explored = np.full(game_map.current_level.grid.shape, 1, dtype=np.int8)
 
-    results.append({ResultTypes.MESSAGE: Message('The fireball explodes, burning everything within {0} tiles!'.format(radius), COLORS.get('effect_text'))})
-
-    #TODO: refactor, this is probably horribly inefficent
-    for entity in game_map.current_level.entities:
-        if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.health:
-            damage = die_roll(number_of_die, type_of_die)
-            damage_results, total_damage = entity.health.take_damage(damage, caster, DamageType.FIRE)
-            results.extend(damage_results)
+    results.append({ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', COLORS.get('success_text'))})
+    results.append({ResultTypes.FOV_RECOMPUTE: True})
 
     return results
 
-def cast_confuse(*args, **kwargs):
-    game_map = kwargs.get('game_map')
-    target_x = kwargs.get('target_x')
-    target_y = kwargs.get('target_y')
-
-    results = []
-
-    if not game_map.current_level.fov[target_x, target_y]:
-        results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
-        return results
-
-    for entity in entities:
-        if entity.x == target_x and entity.y == target_y and entity.ai:
-            confused_ai = ConfusedNPC(entity.ai, 10)
-
-            confused_ai.owner = entity
-            entity.ai = confused_ai
-
-            results.append({ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), COLORS.get('effect_text'))})
-
-            break
-    else:
-        results.append({ResultTypes.MESSAGE: Message('There is no targetable enemy at that location.', COLORS.get('neutral_text'))})
-
-    return results
-
-def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
+def summon_npc(point, ncp_type, game_map, number_of_npc=6):
     dice = randint(1, number_of_npc)
 
     start_x = point.x - 1
@@ -145,13 +207,19 @@ def cast_summon_npc(point, ncp_type, game_map, number_of_npc=6):
                 if dice < 1:
                     return
 
-def resurrect_all_npc(npc_type, game_map, target):
-    for entity in game_map.entities:
-        if entity.health and entity.health.dead:
-            npc_type(entity)
-    return
+def speed(*args, **kwargs):
+    caster = kwargs.get('caster')
+    target = kwargs.get('target')
 
-def cast_teleport(*args, **kwargs):
+    results = []
+
+    target.add_component(Speed(), 'speed')
+    target.speed.start()
+    results.append({ResultTypes.MESSAGE: Message(f"{target.name} speeds up", COLORS.get('effect_text'))})
+
+    return results
+
+def teleport(*args, **kwargs):
     game_map = kwargs.get('game_map')
     caster = kwargs.get('caster')
 
@@ -184,28 +252,8 @@ def cast_teleport(*args, **kwargs):
 
     return results
 
-def cast_mapping(*args, **kwargs):
-    game_map = kwargs.get('game_map')
-
-    results = []
-
-    game_map.current_level.explored = np.full(game_map.current_level.grid.shape, 1, dtype=np.int8)
-
-    results.append({ResultTypes.MESSAGE: Message('The scroll contains a map of immediate area.', COLORS.get('success_text'))})
-    results.append({ResultTypes.FOV_RECOMPUTE: True})
-
-    return results
-
-def cast_identify(*args, **kwargs):
-    target = kwargs.get('target')
-
-    results = []
-
-    if target.identifiable and not target.identified:
-        target.identifiable.identified = True
-
-    results.append({ResultTypes.MESSAGE: Message(f"The item is a {target.name}", COLORS.get('effect_text'))})
-    if target.identifiable.common_ident:
-        results.append({ResultTypes.COMMON_IDENT: target.base_name})
-
-    return results
+def resurrect_all_npc(npc_type, game_map, target):
+    for entity in game_map.entities:
+        if entity.health and entity.health.dead:
+            npc_type(entity)
+    return

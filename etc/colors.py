@@ -98,6 +98,7 @@ COLORS = {
     'success_text': tcod.gold,
     'neutral_text': tcod.white,
     'normal_text': tcod.white,
+    'instruction_text': tcod.white,
 
     'quest_available': tcod.white,
     'quest_complete': tcod.blue,

@@ -5,8 +5,6 @@ from game_messages import Message
 
 from utils.random_utils import die_roll
 
-from tome import cast_heal
-
 class Usable:
     def __init__(self, name=""):
         self.name = name
@@ -27,62 +25,23 @@ class Usable:
 
         return results
 
-class AntidoteUsable(Usable):
-    def __init__(self):
-        super().__init__(name="Antidote")
-
-    def use(self, game_map, user = None, target = None):
-        results = []
-
-        if user.poisoned:
-            user.poisoned.duration = -1
-
-        results.append({ResultTypes.DISCARD_ITEM: self.owner})
-        results.append({ResultTypes.MESSAGE: Message('You feel clensed.', COLORS.get('success_text'))})
-
-        return results
-
-class HealingPotionUsable(Usable):
-    def __init__(self, number_of_die=1, type_of_die=8):
-        super().__init__(name="Healing Potion")
+class PotionUsable(Usable):
+    def __init__(self, name="", spell=None, number_of_die=0, type_of_die=0):
+        super().__init__(name=name)
         self.number_of_die = number_of_die
+        self.spell = spell
         self.type_of_die = type_of_die
 
-    def use(self, game_map, user = None, target = None):
+    def use(self, game_map, user = None):
         results = []
 
-        results.extend(cast_heal(caster=user, target=user, number_of_die=self.number_of_die, type_of_die=self.type_of_die))
+        results = self.spell(game_map=game_map,
+                                caster=user,
+                                target=user,
+                                number_of_die=self.number_of_die,
+                                type_of_die=self.type_of_die)
         results.append({ResultTypes.DISCARD_ITEM: self.owner})
-
-        return results
-
-class PowerPotionUsable(Usable):
-    def __init__(self, number_of_die=1, type_of_die=8):
-        super().__init__(name="Power Potion")
-        self.number_of_die = number_of_die
-        self.type_of_die = type_of_die
-
-    def use(self, game_map, user = None, target = None):
-        results = []
-
-        user.offence.base_power = user.offence.base_power + die_roll(self.number_of_die, self.type_of_die)
-        results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', COLORS.get('success_text'))})
-        results.append({ResultTypes.DISCARD_ITEM: self.owner})
-
-        return results
-
-class DefencePotionUsable(Usable):
-    def __init__(self, number_of_die=1, type_of_die=8):
-        super().__init__(name="Defence Potion")
-        self.number_of_die = number_of_die
-        self.type_of_die = type_of_die
-
-    def use(self, game_map, user = None, target = None):
-        results = []
-
-        user.defence.base_defence = user.defence.base_defence + die_roll(self.number_of_die, self.type_of_die)
-        results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'))})
-        results.append({ResultTypes.DISCARD_ITEM: self.owner})
+        results.append({ResultTypes.END_TURN: True})
 
         return results
 
