@@ -177,7 +177,7 @@ def create_player():
 
     player = Character(None, '@', 'player', COLORS.get('player'),
                        death=PlayerDeath(), health=health_component,
-                       species=Species.PLAYER, act_energy=2)
+                       species=Species.PLAYER, act_energy=4)
 
     player.add_component(Offence(base_power = 6), 'offence')
     player.add_component(Defence(defence = 6), 'defence')
@@ -218,9 +218,6 @@ def create_player():
 
         scroll5 = equipment.identify_scroll()
         player.inventory.add_item(scroll5)
-
-        potion2 = equipment.antidote_potion()
-        player.inventory.add_item(potion2)
 
         scroll5 = equipment.fireball_scroll()
         player.inventory.add_item(scroll5)
@@ -395,7 +392,7 @@ def ratsnest(point = None):
 
     creature = Character(point, 'N', 'rat\'s nest', COLORS.get('rats_nest'),
                     ai=SpawningNPC(rat),
-                    species=Species.RATNEST, health=health_component, act_energy=1)
+                    species=Species.RATNEST, health=health_component, act_energy=2)
 
     creature.add_component(Defence(defence = 4), 'defence')
     creature.add_component(Level(xp_value = 1), 'level')
@@ -442,7 +439,7 @@ def troll(point = None):
 
     npc = Character(point, 'T', 'troll', COLORS.get('troll'),
                     ai=ai_component, species=Species.TROLL,
-                    health=health_component, act_energy=3)
+                    health=health_component, act_energy=5)
 
     npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), 'defence')

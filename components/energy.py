@@ -1,5 +1,5 @@
 class Energy:
-    def __init__(self, act_energy = 1):
+    def __init__(self, act_energy = 4):
         self.current_energy = act_energy
         self.act_energy = act_energy
         self.owner = None

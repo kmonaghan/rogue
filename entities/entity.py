@@ -23,7 +23,7 @@ class Entity:
     #it's always represented by a character on screen.
     def __init__(self, point, char, name, color, blocks=False, always_visible=False,
                  ai=None, item=None, equippable=None, render_order=RenderOrder.CORPSE,
-                 death=None, health=None, usable=None, act_energy=3,
+                 death=None, health=None, usable=None, act_energy=4,
                  interaction=Interactions.FOE, animate=True, invisible=False):
 
         self.x = None
