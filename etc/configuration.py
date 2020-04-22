@@ -24,4 +24,7 @@ CONFIG = {
     'show_dijkstra_flee': False,
 
     'map_generation_attempts': 10,
+
+    'time_between_enemy_turns': 0.03,
+
 }

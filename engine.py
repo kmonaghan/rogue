@@ -551,7 +551,7 @@ class Rogue(tcod.event.EventDispatch):
             self.game_state = GameStates.ENEMY_TURN
 
         if not self.game_state == GameStates.PLAYER_TURN:
-            sleep(0.1)
+            sleep(CONFIG.get('time_between_enemy_turns'))
 
         #---------------------------------------------------------------------
         # And done...so broadcast a tick
