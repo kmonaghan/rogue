@@ -374,6 +374,16 @@ def identify_scroll(point = None):
 
     return item
 
+def speed_scroll(point = None):
+    usable = ScrollUsable(scroll_name="Speed Scroll", scroll_spell=tome.speed, targets_inventory=False)
+
+    item = Entity(point, '#', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                    item=Item(), usable=usable)
+
+    item.add_component(IdentifiableScroll(), "identifiable")
+
+    return item
+
 def teleport_scroll(point = None):
     usable = ScrollUsable(scroll_name="Teleport Scroll", scroll_spell=tome.teleport, targets_inventory=False)
 
