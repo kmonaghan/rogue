@@ -44,7 +44,7 @@ class WithinPlayerFov(Node):
     """Return success if owner is in the player's fov."""
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        if game_map.current_level.fov[owner.x, owner.y]:
+        if game_map.current_level.npc_fov[owner.x, owner.y]:
             return TreeStates.SUCCESS, []
         return TreeStates.FAILURE, []
 

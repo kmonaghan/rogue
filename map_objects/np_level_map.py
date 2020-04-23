@@ -32,7 +32,8 @@ class LevelMap(Map):
         self.explored = np.zeros(self.walkable.shape, dtype=np.int8)
         self.illuminated = np.zeros(self.walkable.shape, dtype=np.int8)
         self.blocked = np.zeros(self.walkable.shape, dtype=np.int8)
-
+        self.npc_fov = self.fov
+        
         self.dark_map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('dark_default'), dtype=np.uint8
         )

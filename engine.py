@@ -119,6 +119,16 @@ class Rogue(tcod.event.EventDispatch):
                                                 radius=self.player.fov.fov_radius,
                                                 light_walls=self.player.fov.fov_light_walls)
             generate_dijkstra_player_map(self.game_map, self.player)
+
+            if self.player.sleep:
+                self.game_map.current_level.npc_fov = tcod.map.compute_fov(self.game_map.current_level.transparent, pov=(self.player.x, self.player.y),
+                                                                    algorithm=tcod.FOV_RESTRICTIVE,
+                                                                    light_walls=True,
+                                                                    radius=10)
+
+            else:
+                self.game_map.current_level.npc_fov = self.game_map.current_level.fov
+
             self.fov_recompute = False
 
         #---------------------------------------------------------------------
@@ -710,7 +720,8 @@ def main():
 
     root_console = tcod.console_init_root(CONFIG.get('full_screen_width'),
                                             CONFIG.get('full_screen_height'),
-                                            CONFIG.get('window_title'), False, order='F')
+                                            CONFIG.get('window_title'), False,
+                                            order='F', vsync=False)
 
     current_game.start_fresh_game()
 
