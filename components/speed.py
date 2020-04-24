@@ -28,7 +28,7 @@ class Speed:
 
         self.act_energy_old = self.owner.energy.act_energy
 
-        self.owner.energy.act_energy = self.owner.energy.act_energy * self.act_energy_adjustment
+        self.owner.energy.act_energy = max(1, self.owner.energy.act_energy * self.act_energy_adjustment)
 
         speed_direction = "speed up"
         if self.owner.energy.act_energy > self.act_energy_old:
