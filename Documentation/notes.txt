@@ -43,6 +43,7 @@ https://www.reddit.com/r/roguelikedev/comments/fpf0pl/implementing_broguelike_du
 http://www.darkgnosis.com/2018/03/03/contour-bombing-cave-generation-algorithm
 
 http://anderoonies.github.io/2020/03/17/brogue-generation.html
+http://anderoonies.github.io/2020/02/25/dungeon-generation.html
 
 Alternative numpy cavern generation:
 https://www.reddit.com/r/roguelikedev/comments/dik0dq/fast_tuneable_cavern_generation_with_numpy_and/
@@ -94,6 +95,7 @@ http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/console_ascii.html?c
 
 Possible fire animation:
 https://www.reddit.com/r/roguelikedev/comments/cmfm60/to_switch_to_c_or_to_stick_with_python/ew1yude?utm_source=share&utm_medium=web2x
+https://www.reddit.com/r/roguelikedev/comments/g88qhh/animations_and_aoe_effects_libtcod_python_help/
 
 Quest:
 https://www.reddit.com/r/roguelikedev/comments/dybb7v/data_structure_for_quests/
