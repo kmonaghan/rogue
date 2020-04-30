@@ -77,7 +77,7 @@ class PubSub:
 Some default subscriptions
 '''
 def add_to_messages(sub, message, game_map):
-    sub.entity.add_message(message.message)
+    sub.entity.add_message(message.message, game_map)
 
 def entity_spawn(sub, message, game_map):
     npc = message.entity.spawn.spawn()

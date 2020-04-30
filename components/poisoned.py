@@ -1,7 +1,7 @@
 import pubsub
 
 from etc.colors import COLORS
-from etc.enum import DamageType, ResultTypes
+from etc.enum import DamageType, MessageType, ResultTypes
 
 from game_messages import Message
 
@@ -24,7 +24,7 @@ class Poisoned:
         damage_results, total_damage = self.owner.health.take_damage(self.damage_per_turn, type=DamageType.POISON, npc=self.poisoner)
         results.extend(damage_results)
         results.append({
-            ResultTypes.MESSAGE: Message(f"The poison does {total_damage} damage to {self.owner.name.title()}", COLORS.get('damage_text'))
+            ResultTypes.MESSAGE: Message(f"The poison does {total_damage} damage to {self.owner.name.title()}", COLORS.get('damage_text'), target=self.owner, type=MessageType.EFFECT)
         })
 
         if (self.duration == 0):
@@ -36,7 +36,7 @@ class Poisoned:
         results = []
 
         results.append({
-            ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} feels something is wrong...their veins are on fire...hopefully they can outlast it", COLORS.get('effect_text'))
+            ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} feels something is wrong...their veins are on fire...hopefully they can outlast it", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)
         })
 
         self.uuid = self.owner.register_turn(self)
@@ -58,7 +58,7 @@ class Poisoned:
 
         if not self.owner.health.dead:
             results.append({
-                ResultTypes.MESSAGE: Message(f"The poison has run its course in {self.owner.name.title()}", COLORS.get('effect_text'))
+                ResultTypes.MESSAGE: Message(f"The poison has run its course in {self.owner.name.title()}", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)
             })
 
         return results

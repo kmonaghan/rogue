@@ -21,8 +21,6 @@ class Usable:
     def use(self, game_map, user = None, target = None):
         results = []
 
-        results.append({ResultTypes.MESSAGE: Message('', COLORS.get('success_text'))})
-
         return results
 
 class PotionUsable(Usable):

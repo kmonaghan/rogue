@@ -2,7 +2,7 @@ from operator import itemgetter
 from random import randint
 
 from etc.colors import COLORS
-from etc.enum import EquipmentSlots, ResultTypes
+from etc.enum import EquipmentSlots, MessageType, ResultTypes
 
 from game_messages import Message
 
@@ -54,7 +54,8 @@ class Offence:
                 msg_text = '{0} smashes {1} with a massive blow from their {2} for {3} hit points.'
 
             if total_damage > 0:
-                message = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(total_damage)), COLORS.get('damage_text'))
+                message = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(total_damage)),
+                                COLORS.get('damage_text'), source=self.owner, target=target, type=MessageType.COMBAT)
                 results.append({ResultTypes.MESSAGE: message})
 
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
@@ -65,13 +66,13 @@ class Offence:
                         return results
                     else:
                         weapon.identifiable.identified = True
-                        message = Message(weapon.identifiable.identified_on_use_message, COLORS.get('success_text'))
+                        message = Message(weapon.identifiable.identified_on_use_message, COLORS.get('success_text'), target=self.owner, type=MessageType.EFFECT)
 
                         results.append({ResultTypes.MESSAGE: message})
 
                 results.extend(weapon.ablity.on_attack(source=self.owner, target=target))
         else:
-            message = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'))
+            message = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'), source=self.owner,target=target, type=MessageType.COMBAT)
             results.append({ResultTypes.MESSAGE: message})
 
         return results

@@ -42,7 +42,7 @@ from components.death import PlayerDeath, WarlordDeath
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
-from etc.enum import Interactions, RenderOrder, Species, Tiles
+from etc.enum import Interactions, MessageType, RenderOrder, Species, Tiles
 
 import pubsub
 
@@ -60,7 +60,7 @@ def bat(point = None):
 
     creature = Character(point, 'B', 'bat', COLORS.get('bat'),
                     ai=PatrollingNPC(),
-                    species=Species.BAT, health=health_component)
+                    species=Species.BAT, health=health_component, act_energy=3)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -280,7 +280,7 @@ def goblin(point = None):
 
     npc = Character(point, 'G', 'goblin', COLORS.get('goblin'),
                     ai=ai_component, species=Species.GOBLIN,
-                    health=health_component)
+                    health=health_component, act_energy=5)
 
     npc.add_component(Offence(base_power = 5), 'offence')
     npc.add_component(Defence(defence = 5), 'defence')
@@ -348,7 +348,7 @@ def orc(point = None):
 
     npc = Character(point, 'O', 'orc', COLORS.get('orc'),
                     ai=ai_component, species=Species.ORC,
-                    health=health_component)
+                    health=health_component, act_energy=5)
 
     npc.add_component(Offence(base_power = 10), 'offence')
     npc.add_component(Defence(defence = 4), 'defence')
@@ -369,7 +369,7 @@ def rat(point = None):
 
     creature = Character(point, 'R', 'rat', COLORS.get('rat'),
                     ai=PredatorNPC(species=Species.EGG),
-                    species=Species.RAT, health=health_component)
+                    species=Species.RAT, health=health_component, act_energy=3)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -407,7 +407,7 @@ def snake(point = None):
 
     creature = Character(point, 'S', 'snake', COLORS.get('snake'),
                     ai=PredatorNPC(species=Species.RAT),
-                    species=Species.SNAKE, health=health_component)
+                    species=Species.SNAKE, health=health_component, act_energy=3)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
@@ -439,7 +439,7 @@ def troll(point = None):
 
     npc = Character(point, 'T', 'troll', COLORS.get('troll'),
                     ai=ai_component, species=Species.TROLL,
-                    health=health_component, act_energy=5)
+                    health=health_component, act_energy=6)
 
     npc.add_component(Offence(base_power = 12), 'offence')
     npc.add_component(Defence(defence = 8), 'defence')
@@ -731,7 +731,7 @@ def goblin_observed_death(sub, message, level_map):
             if not sub.entity.berserk:
                 sub.entity.add_component(Berserk(), 'berserk')
                 sub.entity.berserk.start()
-                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} has gone berserk!'.format(sub.entity.name.title()), COLORS.get('effect_text'))))
+                pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message(f"{sub.entity.name.title()} has gone berserk!", COLORS.get('effect_text'), source=sub.entity, type=MessageType.EFFECT)))
 
 def mimic_activate(sub, message, level_map):
     if (sub.entity.uuid == message.target.uuid):
@@ -766,4 +766,4 @@ def earn_quest_xp(sub, message, level_map):
     if (message.target.uuid == sub.entity.uuid):
         xp = message.entity.xp
         sub.entity.level.add_xp(xp)
-        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('{0} gained {1} experience points.'.format(sub.entity.name, xp))))
+        pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message(f"{sub.entity.name} gained {xp} experience points.", target=sub.entity, type=MessageType.EVENT)))

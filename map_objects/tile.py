@@ -155,7 +155,7 @@ class ShallowWater(Tile):
         self.fov_color = COLORS.get('light_shallow_water')
         self.out_of_fov_color = COLORS.get('dark_shallow_water')
         self.name = "Shallow water"
-        self.char = '~'
+        self.char = chr(247)
 
 class DeepWater(Tile):
     def __init__(self, blocked=True, block_sight=False):
@@ -164,7 +164,7 @@ class DeepWater(Tile):
         self.fov_color = COLORS.get('light_deep_water')
         self.out_of_fov_color = COLORS.get('dark_deep_water')
         self.name = "Deep water"
-        self.char = '~'
+        self.char = chr(247)
 
 class EmptyTile(Tile):
     def __init__(self, blocked=False, block_sight=False):

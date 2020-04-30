@@ -3,7 +3,7 @@ from random import randint
 from components.poisoned import Poisoned
 
 from etc.colors import COLORS
-from etc.enum import DamageType, ResultTypes
+from etc.enum import DamageType, MessageType, ResultTypes
 
 from game_messages import Message
 
@@ -79,7 +79,7 @@ class ExtraDamage(Ablity):
         damage = die_roll(self.number_of_dice, self.type_of_dice)
         damage_results, total_damage = target.health.take_damage(damage, source, self.damage_type)
         if total_damage > 0:
-            msg = Message(f"{target.name} takes {str(damage)} {self.name} total_damage.", COLORS.get('damage_text'))
+            msg = Message(f"{target.name} takes {str(damage)} {self.name} total_damage.", COLORS.get('damage_text'), source=source, target=target, type=MessageType.EFFECT)
             results.extend(damage_results)
             results.extend([{ResultTypes.MESSAGE: msg}])
 
@@ -100,7 +100,7 @@ class LifeDrain(Ablity):
         damage_results, total_damage = target.health.take_damage(damage, source, DamageType.DEFAULT)
         if total_damage > 0:
             drain_amount = max(1, int(total_damage * self.transfer))
-            msg = Message(f"{target.name} takes {str(damage)} {self.name} damage.", COLORS.get('damage_text'))
+            msg = Message(f"{target.name} takes {str(damage)} {self.name} damage.", COLORS.get('damage_text'), source=source, target=target, type=MessageType.EFFECT)
             results.extend(damage_results)
             results.extend([{ResultTypes.MESSAGE: msg}])
             results.extend(source.health.heal(drain_amount))
@@ -137,7 +137,7 @@ class Paralysis(Ablity):
         #    return results
 
         target.energy.current_energy = -(target.energy.act_energy * self.turns_paralysed)
-        msg = Message(f"{target.name} is paralysed for {self.turns_paralysed} turns.", COLORS.get('damage_text'))
+        msg = Message(f"{target.name} is paralysed for {self.turns_paralysed} turns.", COLORS.get('damage_text'), source=source, target=target, type=MessageType.EFFECT)
         results.extend([{ResultTypes.MESSAGE: msg}])
 
         return results

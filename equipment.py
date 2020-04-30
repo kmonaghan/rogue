@@ -248,21 +248,27 @@ def add_infection(item, name="Infection", chance=50, on_turn=None, on_death=None
 
 def ring_of_power(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)
-    item = Entity(point, 'o', 'Ring of Power', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+    item = Entity(point, chr(9), 'Ring of Power', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
 
 def ring_of_defence(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, defence_bonus=1)
-    item = Entity(point, 'o', 'Ring of Health', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+    item = Entity(point, chr(9), 'Ring of Health', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
 
 def ring_of_regeneration(point = None):
     equippable_component = Equippable(EquipmentSlots.RING, attribute=Regeneration())
-    item = Entity(point, 'o', 'Ring of Regeneration', COLORS.get('equipment_rare'), render_order=RenderOrder.ITEM,
+    item = Entity(point, chr(9), 'Ring of Regeneration', COLORS.get('equipment_rare'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
+
+def create_potion(point, usable):
+    item = Entity(point, chr(173), usable.name, COLORS.get('equipment_uncommon'),
+                    render_order=RenderOrder.ITEM, item=Item(), usable=usable)
+
+    return potion_description(item)
 
 def potion_description(item):
     global potion_random_details
@@ -288,42 +294,27 @@ def potion_description(item):
 def antidote_potion(point = None):
     usable = PotionUsable(name="Antidote", spell=tome.antidote)
 
-    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=usable)
-
-    return potion_description(item)
+    return create_potion(point, usable)
 
 def healing_potion(point = None, number_of_die=1, type_of_die=8):
     usable = PotionUsable(name="Healing Potion", spell=tome.heal, number_of_die=number_of_die, type_of_die=type_of_die)
 
-    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=usable)
-
-    return potion_description(item)
+    return create_potion(point, usable)
 
 def power_potion(point = None, number_of_die=1, type_of_die=8):
     usable = PotionUsable(name="Power Potion", spell=tome.change_power, number_of_die=number_of_die, type_of_die=type_of_die)
 
-    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=usable)
-
-    return potion_description(item)
+    return create_potion(point, usable)
 
 def defence_potion(point = None, number_of_die=1, type_of_die=8):
     usable = PotionUsable(name="Defence Potion", spell=tome.change_defence, number_of_die=number_of_die, type_of_die=type_of_die)
 
-    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=usable)
-
-    return potion_description(item)
+    return create_potion(point, usable)
 
 def speed_potion(point = None):
     usable = PotionUsable(name="Speed Potion", spell=tome.speed)
 
-    item = Entity(point, '!', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=Item(), usable=usable)
-
-    return potion_description(item)
+    return create_potion(point, usable)
 
 def lighting_scroll(point = None):
     #create a lightning bolt scroll

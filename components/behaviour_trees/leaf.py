@@ -170,7 +170,7 @@ class Attack(Node):
         if not target:
             print(f"No target - how did we get here?")
             return TreeStates.FAILURE, []
-            
+
         if target.health.dead:
             print("Attack: FAILURE - target dead, removing")
             del self.namespace["target"]
@@ -244,7 +244,6 @@ class SpawnEntity(Node):
 
             if (game_map.current_level.walkable[x, y]
                 and not game_map.current_level.blocked[x, y]):
-                #and not game_map.current_level.water[x, y]):
                 entity = self.maker(Point(x, y))
                 target = self.namespace.get("target")
                 if target:

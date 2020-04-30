@@ -1,7 +1,7 @@
 import pubsub
 
 from etc.colors import COLORS
-from etc.enum import DamageType, ResultTypes
+from etc.enum import DamageType, MessageType, ResultTypes
 
 from game_messages import Message
 
@@ -35,7 +35,7 @@ class Speed:
             speed_direction = "slowed down"
 
         results.append({
-            ResultTypes.MESSAGE: Message(f"Everything has {speed_direction} for {self.owner.name.title()}.", COLORS.get('effect_text'))
+            ResultTypes.MESSAGE: Message(f"Everything has {speed_direction} for {self.owner.name.title()}.", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)
         })
 
         self.uuid = self.owner.register_turn(self)
@@ -52,15 +52,15 @@ class Speed:
         self.owner.deregister_turn(self.uuid)
 
         results.append({
-            ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} returns to normal.", COLORS.get('effect_text'))
+            ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} returns to normal.", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)
         })
 
         if self.damage_on_end:
             dmg = int(self.act_energy_adjustment * self.total_duration)
             damage_results, total_damage = self.owner.health.take_damage(dmg)
             results.extend(damage_results)
-            results.append({ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} takes {total_damage} damage.", COLORS.get('damage_text'))})
-            results.append({ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} feels drained and everything feels like it's in gel.", COLORS.get('effect_text'))})
+            results.append({ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} takes {total_damage} damage.", COLORS.get('damage_text'), target=self.owner, type=MessageType.EFFECT)})
+            results.append({ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} feels drained and everything feels like it's in gel.", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)})
 
         print(results)
         return results

@@ -1,7 +1,7 @@
 import pubsub
 
 from etc.colors import COLORS
-from etc.enum import ResultTypes
+from etc.enum import MessageType, ResultTypes
 
 from game_messages import Message
 
@@ -28,7 +28,7 @@ class Berserk:
         self.owner.health.base_max_hp += self.health_modifier
         self.owner.health.heal(self.health_modifier)
         results.append({
-            ResultTypes.MESSAGE: Message('{0} has gone berserk!'.format(self.owner.name.title()), COLORS.get('effect_text'))
+            ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} has gone berserk!", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)
         })
 
         self.uuid = self.owner.register_turn(self)
@@ -39,7 +39,7 @@ class Berserk:
         results = []
         if not self.owner.health.dead:
             results.append({
-                ResultTypes.MESSAGE: Message('{0} has regained their composure'.format(self.owner.name.title()), COLORS.get('effect_text'))
+                ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} has regained their composure", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)
             })
             self.owner.health.base_max_hp -= self.health_modifier
             damage_results, total_damage = self.owner.health.take_damage(self.health_modifier)

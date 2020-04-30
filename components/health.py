@@ -5,7 +5,7 @@ from math import floor
 from game_messages import Message
 
 from etc.colors import COLORS
-from etc.enum import DamageType, ResultTypes, HealthStates
+from etc.enum import DamageType, HealthStates, MessageType, ResultTypes
 
 class Health:
     def __init__(self, hp):
@@ -61,7 +61,7 @@ class Health:
             if npc and npc.ai:
                 npc.ai.remove_target(self.owner)
 
-            message = Message(f"{self.owner.name.title()} is dead!", COLORS.get('death_text'))
+            message = Message(f"{self.owner.name.title()} is dead!", COLORS.get('death_text'), source=self.owner, target=npc, type=MessageType.COMBAT)
             results.append({ResultTypes.MESSAGE: message})
             results.append({ResultTypes.DEAD_ENTITY: {'dead': self.owner, 'attacker': npc}})
 
@@ -93,7 +93,7 @@ class Health:
             suffix = 's'
 
         results.append({
-            ResultTypes.MESSAGE: Message('{1} heals for {0} point{2}.'.format(amt ,self.owner.name.title(), suffix), COLORS.get('effect_text'))
+            ResultTypes.MESSAGE: Message('{1} heals for {0} point{2}.'.format(amt ,self.owner.name.title(), suffix), COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)
         })
 
         return results

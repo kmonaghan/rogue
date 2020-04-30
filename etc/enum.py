@@ -344,3 +344,9 @@ class EquipmentSlots(Enum):
     RING = auto()
     LEFT_RING_FINGER = auto()
     RIGHT_RING_FINGER = auto()
+
+class MessageType(Enum):
+    SYSTEM = auto()
+    EVENT = auto()
+    EFFECT = auto()
+    COMBAT = auto()

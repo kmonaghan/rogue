@@ -27,4 +27,10 @@ CONFIG = {
 
     'time_between_enemy_turns': 0.03,
 
+
+    'font': 'data/fonts/Alloy_curses_12x12.png',
+    #'font': 'data/fonts/arial10x10.png',
+    #'font': 'data/fonts/Unknown_curses_12x12.png',
+    #'font_type': tcod.FONT_LAYOUT_TCOD,
+    'font_type': tcod.FONT_LAYOUT_ASCII_INROW,
 }

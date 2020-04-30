@@ -11,7 +11,7 @@ from components.sleep import Sleep
 from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import (
-    ResultTypes, InputTypes, GameStates, LevelUp, StairOption,
+    ResultTypes, InputTypes, GameStates, LevelUp, MessageType, StairOption,
     INVENTORY_STATES, INPUT_STATES, CANCEL_STATES, Interactions)
 from equipment import identified_items, potion_descriptions
 
@@ -545,6 +545,9 @@ class Rogue(tcod.event.EventDispatch):
             or self.game_state == GameStates.PLAYER_SLEEP):
             self.player_actions(action, action_value)
 
+            if self.game_state == GameStates.GAME_OVER:
+                return
+
         #-------------------------------------------------------------------
         # NPCs take their turns.
         #-------------------------------------------------------------------
@@ -606,7 +609,7 @@ class Rogue(tcod.event.EventDispatch):
             if result_type == ResultTypes.EARN_XP:
                 if result_data['xp'] > 0:
                     result_data['earner'].level.add_xp(result_data['xp'])
-                    message = Message(f"{result_data['earner'].name} gained {result_data['xp']} xp", COLORS.get('success_text'))
+                    message = Message(f"{result_data['earner'].name} gained {result_data['xp']} xp", COLORS.get('success_text'), target=result_data['earner'], type=MessageType.EVENT)
                     turn_results.extend([{ResultTypes.MESSAGE: message}])
 
             # Handle death.
@@ -639,7 +642,7 @@ class Rogue(tcod.event.EventDispatch):
             # Remove dropped items from inventory and place on the map
             if result_type == ResultTypes.DROP_ITEM_FROM_INVENTORY:
                 self.game_map.current_level.add_entity(result_data)
-                message = Message(f"{entity.name} dropped the {result_data.name}", COLORS.get('success_text'))
+                message = Message(f"{entity.name} dropped the {result_data.name}", COLORS.get('success_text'), target=entity, type=MessageType.EVENT)
                 turn_results.extend([{ResultTypes.MESSAGE: message}])
                 self.game_state = GameStates.ENEMY_TURN
 
@@ -651,10 +654,10 @@ class Rogue(tcod.event.EventDispatch):
                     dequipped = equip_result.get('dequipped')
 
                     if equipped:
-                        message = Message(f"{entity.name} equipped the {equipped.name}")
+                        message = Message(f"{entity.name} equipped the {equipped.name}", target=entity, type=MessageType.EVENT)
 
                     if dequipped:
-                        message = Message(f"{entity.name} dequipped the {dequipped.name}")
+                        message = Message(f"{entity.name} dequipped the {dequipped.name}", target=entity, type=MessageType.EVENT)
 
                     turn_results.extend([{ResultTypes.MESSAGE: message}])
 
@@ -714,8 +717,8 @@ def main():
     global current_game, root_console
 
     tcod.console_set_custom_font(
-        resource_path("arial10x10.png"),
-        tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
+        CONFIG.get('font'),
+        CONFIG.get('font_type') | tcod.FONT_TYPE_GREYSCALE,
     )
 
     root_console = tcod.console_init_root(CONFIG.get('full_screen_width'),

@@ -13,7 +13,7 @@ from game_messages import Message
 
 from utils.random_utils import die_roll
 
-from etc.enum import DamageType, ResultTypes
+from etc.enum import DamageType, MessageType, ResultTypes
 from etc.colors import COLORS
 
 def antidote(*args, **kwargs):
@@ -24,7 +24,7 @@ def antidote(*args, **kwargs):
     if target.poisoned:
         results.extend(target.poisoned.end())
 
-    results.append({ResultTypes.MESSAGE: Message('You feel clensed.', COLORS.get('success_text'))})
+    results.append({ResultTypes.MESSAGE: Message(f"{target.name} feels clensed.", COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
 
     return results
 
@@ -46,7 +46,7 @@ def confuse(*args, **kwargs):
             confused_ai.owner = entity
             entity.ai = confused_ai
 
-            results.append({ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), COLORS.get('effect_text'))})
+            results.append({ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), COLORS.get('effect_text'), target=entity, type=MessageType.EFFECT)})
 
             break
     else:
@@ -65,7 +65,7 @@ def change_defence(*args, **kwargs):
     extra = die_roll(number_of_die, type_of_die)
     print(f"adding {extra} to base power from {number_of_die}d{type_of_die}")
     target.defence.base_defence = target.defence.base_defence + extra
-    results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'))})
+    results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
 
     return results
 
@@ -119,10 +119,10 @@ def heal(*args, **kwargs):
     results = []
 
     if target.health.hp == target.health.max_hp:
-        results.append({ResultTypes.MESSAGE: Message(f"{target.name} is already at full health.", COLORS.get('neutral_text'))})
+        results.append({ResultTypes.MESSAGE: Message(f"{target.name} is already at full health.", COLORS.get('neutral_text'), target=target, type=MessageType.EFFECT)})
     else:
         target.health.heal(die_roll(number_of_die, type_of_die))
-        results.append({ResultTypes.MESSAGE: Message(f"{target.name} wounds start to close up.", COLORS.get('success_text'))})
+        results.append({ResultTypes.MESSAGE: Message(f"{target.name} wounds start to close up.", COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
 
     return results
 
@@ -162,7 +162,7 @@ def lightning(*args, **kwargs):
 
     if target:
         damage = die_roll(number_of_die, type_of_die)
-        results.extend({ResultTypes.MESSAGE: Message('A lighting bolt strikes the {0} with a loud thunder!'.format(target.name), COLORS.get('effect_text'))})
+        results.extend({ResultTypes.MESSAGE: Message('A lighting bolt strikes the {0} with a loud thunder!'.format(target.name), COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
         results.extend(target.health.take_damage(damage, caster, DamageType.ELECTRIC))
     else:
         results.append({ResultTypes.MESSAGE: Message('No enemy is close enough to strike.', COLORS.get('failure_text'))})
@@ -215,7 +215,7 @@ def speed(*args, **kwargs):
 
     target.add_component(Speed(), 'speed')
     target.speed.start()
-    results.append({ResultTypes.MESSAGE: Message(f"{target.name} speeds up", COLORS.get('effect_text'))})
+    results.append({ResultTypes.MESSAGE: Message(f"{target.name} speeds up", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
 
     return results
 
