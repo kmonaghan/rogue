@@ -561,7 +561,8 @@ class Rogue(tcod.event.EventDispatch):
             else:
                 self.game_state = GameStates.PLAYER_TURN
         else:
-            self.game_state = GameStates.ENEMY_TURN
+            if not self.game_state in INPUT_STATES:
+                self.game_state = GameStates.ENEMY_TURN
 
         if not self.game_state == GameStates.PLAYER_TURN:
             sleep(CONFIG.get('time_between_enemy_turns'))
@@ -717,7 +718,7 @@ def main():
     global current_game, root_console
 
     tcod.console_set_custom_font(
-        CONFIG.get('font'),
+        resource_path(CONFIG.get('font')),
         CONFIG.get('font_type') | tcod.FONT_TYPE_GREYSCALE,
     )
 
