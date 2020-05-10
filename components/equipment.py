@@ -1,4 +1,4 @@
-from etc.enum import EquipmentSlots
+from etc.enum import EquipmentSlot
 
 
 class Equipment:
@@ -91,7 +91,7 @@ class Equipment:
         equipped = None
         dequipped = None
 
-        if slot == EquipmentSlots.MAIN_HAND:
+        if slot == EquipmentSlot.MAIN_HAND:
             if self.main_hand == equippable_entity:
                 self.main_hand = None
                 results.append({'dequipped': equippable_entity})
@@ -104,7 +104,7 @@ class Equipment:
                     self.main_hand = equippable_entity
                     results.append({'equipped': equippable_entity})
                     equipped = equippable_entity
-        elif slot == EquipmentSlots.OFF_HAND:
+        elif slot == EquipmentSlot.OFF_HAND:
             if self.off_hand == equippable_entity:
                 self.off_hand = None
                 results.append({'dequipped': equippable_entity})
@@ -117,7 +117,7 @@ class Equipment:
                 self.off_hand = equippable_entity
                 results.append({'equipped': equippable_entity})
                 equipped = equippable_entity
-        elif slot == EquipmentSlots.CHEST:
+        elif slot == EquipmentSlot.CHEST:
             if self.chest == equippable_entity:
                 self.chest = None
                 results.append({'dequipped': equippable_entity})
@@ -130,7 +130,7 @@ class Equipment:
                 self.chest = equippable_entity
                 results.append({'equipped': equippable_entity})
                 equipped = equippable_entity
-        elif slot == EquipmentSlots.HEAD:
+        elif slot == EquipmentSlot.HEAD:
             if self.head == equippable_entity:
                 self.head = None
                 results.append({'dequipped': equippable_entity})
@@ -144,7 +144,7 @@ class Equipment:
                     self.head = equippable_entity
                     results.append({'equipped': equippable_entity})
                     equipped = equippable_entity
-        elif slot == EquipmentSlots.RING or EquipmentSlots.LEFT_RING_FINGER or EquipmentSlots.RIGHT_RING_FINGER:
+        elif slot == EquipmentSlot.RING or EquipmentSlot.LEFT_RING_FINGER or EquipmentSlot.RIGHT_RING_FINGER:
             results.extend(self.equip_ring(equippable_entity))
             equipped = equippable_entity
 
@@ -183,22 +183,22 @@ class Equipment:
         return results
 
     def get_equipped_in_slot(self, slot):  #returns the equipment in a slot, or None if it's empty
-        if slot == EquipmentSlots.MAIN_HAND:
+        if slot == EquipmentSlot.MAIN_HAND:
             return self.main_hand
 
-        if slot == EquipmentSlots.OFF_HAND:
+        if slot == EquipmentSlot.OFF_HAND:
             return self.off_hand
 
-        if slot == EquipmentSlots.CHEST:
+        if slot == EquipmentSlot.CHEST:
             return self.chest
 
-        if slot == EquipmentSlots.HEAD:
+        if slot == EquipmentSlot.HEAD:
             return self.head
 
-        if slot == EquipmentSlots.LEFT_RING_FINGER:
+        if slot == EquipmentSlot.LEFT_RING_FINGER:
             return self.left_ring_finger
 
-        if slot == EquipmentSlots.RIGHT_RING_FINGER:
+        if slot == EquipmentSlot.RIGHT_RING_FINGER:
             return self.right_ring_finger
 
         return None

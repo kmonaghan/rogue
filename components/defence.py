@@ -1,4 +1,4 @@
-from etc.enum import EquipmentSlots
+from etc.enum import EquipmentSlot
 
 class Defence:
     def __init__(self, defence = 0):

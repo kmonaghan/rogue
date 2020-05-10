@@ -1,4 +1,6 @@
-from random import randint
+import json
+
+from random import randint, choice
 
 import tcod
 
@@ -6,6 +8,7 @@ import tome
 
 from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
+from utils.utils import resource_path
 
 from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain, Infection, Paralysis
 from components.aura import DamageAura
@@ -21,12 +24,21 @@ from entities.entity import Entity
 
 from game_messages import Message
 
-from etc.enum import DamageType, EquipmentSlots, Interactions, RenderOrder
+from etc.enum import (DamageType,
+                        EquipmentSlot,
+                        Interactions,
+                        RenderOrder,
+                        string_to_damage_type,
+                        string_to_equipment_slot,)
+
 from utils.utils import resource_path
 
 identified_items = {}
 potion_descriptions = {}
 potion_random_details = False
+
+armour = {}
+weapons = {}
 
 def random_armour(point = None, dungeon_level = 1):
     item_chances = {}
@@ -134,31 +146,17 @@ def random_scroll(point = None, dungeon_level = 1):
 
     return item
 
+def create_weapon(name, point = None, dungeon_level = 1):
+    weapon = weapons.get(name)
+
+    if weapon:
+        return weapon_from_json(weapon, point = point)
+
+    return Nones
+
 def random_weapon(point = None, dungeon_level = 1):
-    item_chances = {}
-    item_chances['dagger'] = from_dungeon_level([[60, 1], [40, 2], [20, 3], [10, 4]], dungeon_level)
-    item_chances['short sword'] = from_dungeon_level([[30, 1], [40, 2], [45, 3], [40, 4]], dungeon_level)
-    item_chances['long sword'] = from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
-    item_chances['axe'] = from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
-    item_chances['mace'] = from_dungeon_level([[10, 1], [20, 2], [35, 3], [40, 4], [60, 5]], dungeon_level)
-
-    choice = random_choice_from_dict(item_chances)
-    if choice == 'dagger':
-        item = dagger(point)
-
-    elif choice == 'short sword':
-        item = shortsword(point)
-
-    elif choice == 'long sword':
-        item = longsword(point)
-
-    elif choice == 'axe':
-        item = axe(point)
-
-    elif choice == 'mace':
-        item = mace(point)
-
-    return item
+    data = choice(list(weapons.values()))
+    return weapon_from_json(data, point = point)
 
 def random_magic_weapon(dungeon_level = 1):
     item = random_weapon(None, dungeon_level)
@@ -247,19 +245,19 @@ def add_infection(item, name="Infection", chance=50, on_turn=None, on_death=None
         item.add_component(Naming(item.base_name, suffix = f"of {name}"), 'naming')
 
 def ring_of_power(point = None):
-    equippable_component = Equippable(EquipmentSlots.RING, power_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.RING, power_bonus=1)
     item = Entity(point, chr(9), 'Ring of Power', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
 
 def ring_of_defence(point = None):
-    equippable_component = Equippable(EquipmentSlots.RING, defence_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.RING, defence_bonus=1)
     item = Entity(point, chr(9), 'Ring of Health', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
 
 def ring_of_regeneration(point = None):
-    equippable_component = Equippable(EquipmentSlots.RING, attribute=Regeneration())
+    equippable_component = Equippable(EquipmentSlot.RING, attribute=Regeneration())
     item = Entity(point, chr(9), 'Ring of Regeneration', COLORS.get('equipment_rare'), render_order=RenderOrder.ITEM,
                         equippable=equippable_component)
     return item
@@ -397,118 +395,73 @@ def map_scroll(point = None):
 
 def shield(point = None):
     #create a shield
-    equippable_component = Equippable(EquipmentSlots.OFF_HAND, defence_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.OFF_HAND, defence_bonus=1)
     item = Entity(point, '[', 'shield', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def helmet(point = None):
     #create a helmet
-    equippable_component = Equippable(EquipmentSlots.HEAD, defence_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.HEAD, defence_bonus=1)
     item = Entity(point, '^', 'helmet', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def leathershirt(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=1)
     item = Entity(point, '=', 'leather shirt', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def splint(point = None):
     #create a breastplate
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=2)
+    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=2)
     item = Entity(point, '=', 'splint armour', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def scalemail(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=3)
+    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=3)
     item = Entity(point, '=', 'scalemail', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def chainmail(point = None):
     #create a chainmail
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=4)
+    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=4)
     item = Entity(point, '=', 'chainmail', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def breastplate(point = None):
     #create a breastplate
-    equippable_component = Equippable(EquipmentSlots.CHEST, defence_bonus=5)
+    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=5)
     item = Entity(point, '=', 'breastplate', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def axe(point = None):
-    #create a sword
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
-    equippable_component.type_of_dice = 8
-    equippable_component.damage_type = DamageType.SHARP
-    item = Entity(point, '-', 'axe', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def dagger(point = None):
-    #create a sword
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
-    equippable_component.type_of_dice = 4
-    equippable_component.damage_type = DamageType.SHARP
-    item = Entity(point, '-', 'dagger', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def shortsword(point = None):
-    #create a sword
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=3)
-    equippable_component.type_of_dice = 6
-    equippable_component.damage_type = DamageType.SHARP
-    item = Entity(point, '/', 'short sword', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def longsword(point = None):
-    #create a sword
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=4)
-    equippable_component.type_of_dice = 8
-    equippable_component.damage_type = DamageType.SHARP
-    item = Entity(point, '\\', 'long sword', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def mace(point = None):
-    #create a mace
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=2)
-    equippable_component.type_of_dice = 10
-    equippable_component.damage_type = DamageType.BLUNT
-    item = Entity(point, '-', 'mace', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def teeth(point = None):
     #create teeth for animals
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power_bonus=1)
     equippable_component.type_of_dice = 2
-    equippable_component.damage_type = DamageType.SHARP
+    equippable_component.damage_type = DamageType.SLASHING
     item = Entity(point, '"', 'teeth', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def claw(point = None):
     #create claw for animals
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power_bonus=1)
     equippable_component.type_of_dice = 4
-    equippable_component.damage_type = DamageType.SHARP
+    equippable_component.damage_type = DamageType.SLASHING
     item = Entity(point, ',', 'claw', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
 
     return item
 
 def pseudopod(point = None):
-    equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power_bonus=1)
     equippable_component.type_of_dice = 6
     equippable_component.damage_type = DamageType.BLUNT
     item = Entity(point, ',', 'pseudopod', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
@@ -525,3 +478,67 @@ def key(point = None, unlocks = None):
 
 def add_damage_aura(item):
     item.add_component(DamageAura(), 'aura')
+
+def add_random_loot(npc, dungeon_level = 1, player_level = 1, min_items = 0):
+    total_items = randint(min_items, min_items + dungeon_level)
+
+    for i in range(total_items):
+        pick = randint(0,4)
+        if pick == 0:
+            item = random_armour(dungeon_level = dungeon_level)
+        elif pick == 1:
+            item = random_potion(dungeon_level = dungeon_level)
+        elif pick == 2:
+            item = random_ring(dungeon_level = dungeon_level)
+        elif pick == 3:
+            item = random_scroll(dungeon_level = dungeon_level)
+        elif pick == 4:
+            item = random_magic_weapon(dungeon_level = dungeon_level)
+
+        item.lootable = True
+        npc.inventory.add_item(item)
+
+def weapon_from_json(data, point = None):
+    slot = string_to_damage_type.get(data['Equipment Slots'], EquipmentSlot.MAIN_HAND)
+
+    equippable_component = Equippable(slot, power_bonus=data['Power Bonus'])
+    equippable_component.damage_type = string_to_damage_type.get(data['Damage']['Damage Type'], DamageType.DEFAULT)
+    equippable_component.number_of_dice = data['Damage']['number_of_dice']
+    equippable_component.type_of_dice = data['Damage']['type_of_dice']
+
+    item = Entity(point,
+                    data['Character'],
+                    data['Name'],
+                    COLORS.get('equipment_common'),
+                    equippable=equippable_component,
+                    render_order=RenderOrder.ITEM)
+
+    return item
+
+def armour_from_json(data, point = None):
+    slot = string_to_damage_type.get(data['Equipment Slots'], EquipmentSlot.CHEST)
+
+    equippable_component = Equippable(slot, defence_bonus=data['Defence Bonus'])
+
+    item = Entity(point,
+                    data['Character'],
+                    data['Name'],
+                    COLORS.get('equipment_common'),
+                    equippable=equippable_component,
+                    render_order=RenderOrder.ITEM)
+
+    return item
+
+def import_armour():
+    with open(resource_path('data/equipment/armour.json')) as json_file:
+        data = json.load(json_file)
+
+        for detail in data:
+            armour[detail["Name"]] = detail
+
+def import_weapons():
+    with open(resource_path('data/equipment/weapons.json')) as json_file:
+        data = json.load(json_file)
+
+        for detail in data:
+            weapons[detail["Name"]] = detail

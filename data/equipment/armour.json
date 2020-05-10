@@ -1,0 +1,107 @@
+[
+  {
+    "Name" : "Padded",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 1,
+    "Description" : "More than simple clothing, padded armor combines heavy, quilted cloth and layers of densely packed stuffing to create a cheap and basic protection. It is typically worn by those not intending to face lethal combat or those who wish their maneuverability to be impacted as little as possible."
+  },
+  {
+    "Name" : "Quilted cloth",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 1,
+    "Description" : "This enhanced form of padded armor has internal layers specifically designed to trap arrows, bolts, darts, shuriken, thrown daggers, and other small ranged piercing weapons. When these kinds of weapons strike you, they tend to become snagged in these layers and fail to harm you. "
+  },
+  {
+    "Name" : "Leather",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 2,
+    "Description" : "Leather armor is made up of multiple overlapping pieces of leather, boiled to increase their natural toughness and then deliberately stitched together. Although not as sturdy as metal armor, the flexibility it allows wearers makes it among the most widely used types of armor."
+  },
+  {
+    "Name" : "Hide Shirt",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 3,
+    "Description" : "Made from animal hide and giant lizard scales over a shirt of interwoven cords, these chest and shoulder coverings protect without restricting mobility.\n\nMade from animal hide and giant lizard scales over a shirt of interwoven cords, these chest and shoulder coverings protect without restricting mobility.\n\nMade from animal hide and giant lizard scales over a shirt of interwoven cords, these chest and shoulder coverings protect without restricting mobility.\n"
+  },
+  {
+    "Name" : "Studded Leather",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 3,
+    "Description" : "An improved form of leather armor, studded leather armor is covered with dozens of metal protuberances. While these rounded studs offer little defense individually, in the numbers they are arrayed in upon such armor, they help catch lethal edges and channel them away from vital spots. The rigidity caused by the additional metal does, however, result in less mobility than is afforded by a suit of normal leather armor."
+  },
+  {
+    "Name" : "Chain Shirt",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 4,
+    "Description" : "Covering the torso, this shirt is made up of thousands of interlocking metal rings."
+  },
+  {
+    "Name" : "Scale Mail",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 5,
+    "Description" : "Scale mail is made up of dozens of small, overlapping metal plates. Similar to both splint mail and banded mail, scalemail has a flexible arrangement of scales in an attempt to avoid hindering the wearer’s mobility, but at the expense of omitting additional protective layers of armor. A suit of scale mail includes gauntlets."
+  },
+  {
+    "Name" : "Breastplate",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 6,
+    "Description" : "A breastplate protects a wearer’s torso with a single piece of sculpted metal, similar to the core piece of a suit of full plate. Despite its sturdiness, its inflexibility and open back make it inferior to complete suits of metal armor, but still an improvement over most non-metal armors."
+  },
+  {
+    "Name" : "Chainmail",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 6,
+    "Description" : "Unlike a chain shirt, which covers only the chest, chainmail protects the wearer with a complete mesh of chain links that cover the torso and arms, and extends below the waist. Multiple interconnected pieces offer additional protection over vital areas. The suit includes gauntlets."
+  },
+  {
+    "Name" : "Banded mail",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 7,
+    "Description" : "Banded mail is made up of overlapping strips of metal, fastened to a sturdy backing of leather and chain. The size of the metal plates, interconnected metal bands, and layers of underlying armor make it a more significant defense than similar armors, like scale mail or splint mail."
+  },
+  {
+    "Name" : "Field Plate",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 7,
+    "Description" : "This heavy armor is similar to full plate but lighter in construction, sacrificing a bit of protection for greater flexibility and mobility."
+  },
+  {
+    "Name" : "Splint Mail",
+    "Character" : "=",
+    "Equipment Slots" : "CHEST",
+    "Defence Bonus" : 7,
+    "Description" : "This heavy armor is similar to full plate but lighter in construction, sacrificing a bit of protection for greater flexibility and mobility."
+  },
+  {
+    "Name" : "Buckler",
+    "Character" : "[",
+    "Equipment Slots" : "OFF HAND",
+    "Defence Bonus" : 1,
+    "Description" : ""
+  },
+  {
+    "Name" : "Steel Shield",
+    "Character" : "[",
+    "Equipment Slots" : "OFF HAND",
+    "Defence Bonus" : 2,
+    "Description" : ""
+  },
+  {
+    "Name" : "Helmet",
+    "Character" : "^",
+    "Equipment Slots" : "HEAD",
+    "Defence Bonus" : 1,
+    "Description" : ""
+  }
+]

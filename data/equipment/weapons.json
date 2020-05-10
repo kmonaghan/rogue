@@ -1,0 +1,184 @@
+[
+  {
+    "Name" : "battleaxe",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "SLASHING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 8,
+      "Critical" : "3",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "dagger",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "SLASHING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 4,
+      "Critical" : "2",
+      "Critical Range" : "19"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "cutlass",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "SLASHING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 6,
+      "Critical" : "2",
+      "Critical Range" : "18"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "light flail",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "BLUNT",
+      "number_of_dice" : 1,
+      "type_of_dice" : 8,
+      "Critical" : "2",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "longsword",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "SLASHING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 8,
+      "Critical" : "2",
+      "Critical Range" : "19"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "heavy pick",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "PIERCING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 6,
+      "Critical" : "4",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "rapier",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "PIERCING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 6,
+      "Critical" : "2",
+      "Critical Range" : "18"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "scimitar",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "SLASHING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 6,
+      "Critical" : "2",
+      "Critical Range" : "18"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "trident",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "PIERCING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 8,
+      "Critical" : "2",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "warhammer",
+    "Character" : "/",
+    "Power Bonus" : 3,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "BLUNT",
+      "number_of_dice" : 1,
+      "type_of_dice" : 8,
+      "Critical" : "3",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "shortsword",
+    "Character" : "/",
+    "Power Bonus" : 2,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "PIERCING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 6,
+      "Critical" : "2",
+      "Critical Range" : "19"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "light mace",
+    "Character" : "/",
+    "Power Bonus" : 2,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "BLUNT",
+      "number_of_dice" : 1,
+      "type_of_dice" : 6,
+      "Critical" : "2",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use."
+  },
+  {
+    "Name" : "heavy mace",
+    "Character" : "/",
+    "Power Bonus" : 2,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "BLUNT",
+      "number_of_dice" : 1,
+      "type_of_dice" : 8,
+      "Critical" : "2",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use."
+  }
+]

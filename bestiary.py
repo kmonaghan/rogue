@@ -55,7 +55,7 @@ npc_avoid = [Tiles.DEEP_WATER]
 Create npc/creatures/player
 '''
 
-def bat(point = None):
+def bat(point = None, dungeon_level = 1, player_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'B', 'bat', COLORS.get('bat'),
@@ -83,7 +83,7 @@ def bountyhunter(point):
     ai_component = TetheredNPC(4, point)
     npc = Character(point, '?', 'Bounty Hunter', COLORS.get('bounty_hunter'),
                     ai=ai_component, interaction=Interactions.QUESTGIVER,
-                    species=Species.NONDESCRIPT)
+                    species=Species.NONDESCRIPT, act_energy=6)
     npc.add_component(Offence(base_power = 0), 'offence')
     npc.add_component(Defence(defence = 0), 'defence')
     npc.add_component(Questgiver(), 'questgiver')
@@ -185,21 +185,20 @@ def create_player():
     player.add_component(FOV(), 'fov')
 
     #initial equipment: a dagger
-    dagger = equipment.dagger()
+    dagger = equipment.create_weapon('dagger')
 
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
 
     armour = equipment.leathershirt()
     player.inventory.add_item(armour)
-    player.equipment.toggle_equip(armour)
+    player.equipment.toggle_equip(armour)   
 
     if CONFIG.get('debug'):
         player.level.random_level_up(30)
         weapon = equipment.random_magic_weapon()
         player.inventory.add_item(weapon)
         player.equipment.toggle_equip(weapon)
-        #equipment.add_lifedrain(dagger)
 
         armour = equipment.random_armour()
         equipment.add_damage_aura(armour)
@@ -232,7 +231,7 @@ def create_player():
 
     return player
 
-def egg(point = None):
+def egg(point = None, dungeon_level = 1, player_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'E', 'Snake Egg', COLORS.get('snake_egg'),
@@ -246,7 +245,7 @@ def egg(point = None):
 
     return creature
 
-def gelatinous_cube(point = None):
+def gelatinous_cube(point = None, dungeon_level = 1, player_level = 1):
     npc = Character(point, 'C', 'gelatinous cube', COLORS.get('gelatinous_cube'),
                     ai=CleanerNPC(), species=Species.OOZE,
                     render_order=RenderOrder.OVERLAY, health=Health(20))
@@ -273,7 +272,7 @@ def gelatinous_cube(point = None):
 
     return npc
 
-def goblin(point = None):
+def goblin(point = None, dungeon_level = 1, player_level = 1):
     #create a goblin
     health_component = Health(20)
     ai_component = BasicNPC()
@@ -288,7 +287,7 @@ def goblin(point = None):
 
     npc.movement.routing_avoid.extend(npc_avoid)
 
-    dagger = equipment.dagger()
+    dagger = equipment.create_weapon('dagger')
     dagger.lootable = False
 
     npc.inventory.add_item(dagger)
@@ -341,7 +340,7 @@ def necromancer(point = None, dungeon_level = 1, player_level = 1):
 
     return npc
 
-def orc(point = None):
+def orc(point = None, dungeon_level = 1, player_level = 1):
     #create an orc
     health_component = Health(20)
     ai_component = BasicNPC()
@@ -356,7 +355,7 @@ def orc(point = None):
 
     npc.movement.routing_avoid.extend(npc_avoid)
 
-    item = equipment.shortsword()
+    item = equipment.create_weapon('shortsword')
     item.lootable = False
 
     npc.inventory.add_item(item)
@@ -364,7 +363,7 @@ def orc(point = None):
 
     return npc
 
-def rat(point = None):
+def rat(point = None, dungeon_level = 1, player_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'R', 'rat', COLORS.get('rat'),
@@ -387,7 +386,7 @@ def rat(point = None):
 
     return creature
 
-def ratsnest(point = None):
+def ratsnest(point = None, dungeon_level = 1, player_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'N', 'rat\'s nest', COLORS.get('rats_nest'),
@@ -400,9 +399,11 @@ def ratsnest(point = None):
 
     creature.movement.routing_avoid.extend(creature_avoid)
 
+    equipment.add_random_loot(creature, dungeon_level, player_level)
+
     return creature
 
-def snake(point = None):
+def snake(point = None, dungeon_level = 1, player_level = 1):
     health_component = Health(8)
 
     creature = Character(point, 'S', 'snake', COLORS.get('snake'),
@@ -432,7 +433,7 @@ def snake(point = None):
 
     return creature
 
-def troll(point = None):
+def troll(point = None, dungeon_level = 1, player_level = 1):
     #create a troll
     health_component = Health(30)
     ai_component = BasicNPC()
@@ -454,10 +455,10 @@ def troll(point = None):
     item = None
     dice = randint(1,100)
     if dice > 75:
-        item = equipment.mace()
+        item = equipment.create_weapon('heavy mace')
         equipment.add_smashing(item)
     else:
-        item = equipment.longsword()
+        item = equipment.create_weapon('longsword')
 
     item.lootable = False
 
@@ -486,7 +487,7 @@ def warlord(point = None, dungeon_level = 1, player_level = 1):
     if npc_level > 1:
         npc.level.random_level_up(npc_level - 1)
 
-    item = equipment.longsword()
+    item = equipment.create_weapon('longsword')
     item.base_name = item.base_name + " of I'll FUCKING Have You"
     item.color = COLORS.get('equipment_epic')
     item.equippable.power_bonus = item.equippable.power_bonus * 2
@@ -596,9 +597,9 @@ def convert_npc_to_skeleton(npc):
     npc.add_component(BasicNPC(), 'ai')
     npc.add_component(Health(max(1, npc.health.max_hp // 3)), 'health')
     if npc.resistance:
-        npc.resistance.sharp = 0.8
+        npc.resistance.slashing = 0.8
     else:
-        npc.add_component(Resistance(sharp=0.8), 'resistance')
+        npc.add_component(Resistance(slashing=0.8), 'resistance')
 
     npc.species=Species.UNDEAD
     npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)

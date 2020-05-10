@@ -2,7 +2,7 @@ from operator import itemgetter
 from random import randint
 
 from etc.colors import COLORS
-from etc.enum import EquipmentSlots, MessageType, ResultTypes
+from etc.enum import EquipmentSlot, MessageType, ResultTypes
 
 from game_messages import Message
 
@@ -41,7 +41,7 @@ class Offence:
         total = total + self.power
         hit = total - target.defence.defence
 
-        weapon = self.owner.equipment.get_equipped_in_slot(EquipmentSlots.MAIN_HAND)
+        weapon = self.owner.equipment.get_equipped_in_slot(EquipmentSlot.MAIN_HAND)
 
         if (hit > 0) or (multiplier == 2):
             #make the target take some damage

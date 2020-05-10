@@ -2,6 +2,8 @@ import tcod
 import tcod.event
 from time import sleep
 
+import equipment
+
 from bestiary import create_player
 
 from utils.dijkstra_maps import generate_dijkstra_player_map, generate_dijkstra_flee_map
@@ -716,6 +718,9 @@ main_menu = MainMenu()
 
 def main():
     global current_game, root_console
+
+    equipment.import_armour()
+    equipment.import_weapons()
 
     tcod.console_set_custom_font(
         resource_path(CONFIG.get('font')),

@@ -330,13 +330,25 @@ class Interactions(Enum):
 class DamageType(Enum):
     DEFAULT = auto()
     BLUNT = auto()
-    SHARP = auto()
+    SLASHING = auto()
+    PIERCING = auto()
     FIRE = auto()
     ICE = auto()
     ELECTRIC = auto()
     POISON = auto()
 
-class EquipmentSlots(Enum):
+string_to_damage_type = {
+    'DEFAULT': DamageType.DEFAULT,
+    'BLUNT': DamageType.BLUNT,
+    'SLASHING': DamageType.SLASHING,
+    'PIERCING': DamageType.PIERCING,
+    'FIRE': DamageType.FIRE,
+    'ICE': DamageType.ICE,
+    'ELECTRIC': DamageType.ELECTRIC,
+    'POISON': DamageType.POISON,
+}
+
+class EquipmentSlot(Enum):
     MAIN_HAND = auto()
     OFF_HAND = auto()
     HEAD = auto()
@@ -344,6 +356,16 @@ class EquipmentSlots(Enum):
     RING = auto()
     LEFT_RING_FINGER = auto()
     RIGHT_RING_FINGER = auto()
+
+string_to_equipment_slot = {
+    'MAIN_HAND': EquipmentSlot.MAIN_HAND,
+    'OFF_HAND': EquipmentSlot.OFF_HAND,
+    'HEAD': EquipmentSlot.HEAD,
+    'CHEST': EquipmentSlot.CHEST,
+    'RING': EquipmentSlot.RING,
+    'LEFT_RING_FINGER': EquipmentSlot.LEFT_RING_FINGER,
+    'RIGHT_RING_FINGER': EquipmentSlot.RIGHT_RING_FINGER,
+}
 
 class MessageType(Enum):
     SYSTEM = auto()
