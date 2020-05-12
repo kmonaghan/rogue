@@ -190,9 +190,9 @@ def create_player():
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
 
-    armour = equipment.leathershirt()
+    armour = equipment.create_armour('leather')
     player.inventory.add_item(armour)
-    player.equipment.toggle_equip(armour)   
+    player.equipment.toggle_equip(armour)
 
     if CONFIG.get('debug'):
         player.level.random_level_up(30)
@@ -494,14 +494,14 @@ def warlord(point = None, dungeon_level = 1, player_level = 1):
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
 
-    shield = equipment.shield()
+    shield = equipment.create_armour('steel shield')
     shield.base_name = shield.base_name + " of Hide and Seek"
     shield.color = COLORS.get('equipment_epic')
     shield.equippable.power_bonus = item.equippable.defence_bonus * 2
     npc.inventory.add_item(shield)
     npc.equipment.toggle_equip(shield)
 
-    breastplate = equipment.breastplate()
+    breastplate = equipment.create_armour('breastplate')
     breastplate.base_name = breastplate.base_name + " of Rebounding"
     breastplate.color = COLORS.get('equipment_epic')
     breastplate.equippable.power_bonus = item.equippable.defence_bonus * 2

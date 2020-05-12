@@ -37,42 +37,12 @@ identified_items = {}
 potion_descriptions = {}
 potion_random_details = False
 
-armour = {}
+armours = {}
 weapons = {}
 
 def random_armour(point = None, dungeon_level = 1):
-    item_chances = {}
-    item_chances['shield'] = from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
-    item_chances['helmet'] = from_dungeon_level([[30, 2], [15, 3], [10, 4]], dungeon_level)
-    item_chances['leather shirt'] = from_dungeon_level([[40, 1], [20, 2], [15, 3]], dungeon_level)
-    item_chances['splint armour'] = from_dungeon_level([[40, 2], [20, 3], [15, 4]], dungeon_level)
-    item_chances['scalemail'] = from_dungeon_level([[10, 1], [40, 2], [30, 3], [15, 4]], dungeon_level)
-    item_chances['chainmail'] = from_dungeon_level([[40, 3], [30, 4]], dungeon_level)
-    item_chances['breastplate'] = from_dungeon_level([[15, 4]], dungeon_level)
-
-    choice = random_choice_from_dict(item_chances)
-    if choice == 'shield':
-        item = shield(point)
-
-    elif choice == 'helmet':
-        item = helmet(point)
-
-    elif choice == 'leather shirt':
-        item = leathershirt(point)
-
-    elif choice == 'splint armour':
-        item = splint(point)
-
-    elif choice == 'scalemail':
-        item = scalemail(point)
-
-    elif choice == 'chainmail':
-        item = chainmail(point)
-
-    elif choice == 'breastplate':
-        item = breastplate(point)
-
-    return item
+    data = choice(list(armours.values()))
+    return armour_from_json(data, point = point)
 
 def random_potion(point = None, dungeon_level = 1):
     item_chances = {}
@@ -146,13 +116,21 @@ def random_scroll(point = None, dungeon_level = 1):
 
     return item
 
+def create_armour(name, point = None, dungeon_level = 1):
+    armour = armours.get(name)
+
+    if armour:
+        return armour_from_json(armour, point = point)
+
+    return None
+
 def create_weapon(name, point = None, dungeon_level = 1):
     weapon = weapons.get(name)
 
     if weapon:
         return weapon_from_json(weapon, point = point)
 
-    return Nones
+    return None
 
 def random_weapon(point = None, dungeon_level = 1):
     data = choice(list(weapons.values()))
@@ -393,55 +371,6 @@ def map_scroll(point = None):
 
     return item
 
-def shield(point = None):
-    #create a shield
-    equippable_component = Equippable(EquipmentSlot.OFF_HAND, defence_bonus=1)
-    item = Entity(point, '[', 'shield', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def helmet(point = None):
-    #create a helmet
-    equippable_component = Equippable(EquipmentSlot.HEAD, defence_bonus=1)
-    item = Entity(point, '^', 'helmet', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def leathershirt(point = None):
-    #create a chainmail
-    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=1)
-    item = Entity(point, '=', 'leather shirt', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def splint(point = None):
-    #create a breastplate
-    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=2)
-    item = Entity(point, '=', 'splint armour', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def scalemail(point = None):
-    #create a chainmail
-    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=3)
-    item = Entity(point, '=', 'scalemail', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def chainmail(point = None):
-    #create a chainmail
-    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=4)
-    item = Entity(point, '=', 'chainmail', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
-def breastplate(point = None):
-    #create a breastplate
-    equippable_component = Equippable(EquipmentSlot.CHEST, defence_bonus=5)
-    item = Entity(point, '=', 'breastplate', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
-
-    return item
-
 def teeth(point = None):
     #create teeth for animals
     equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power_bonus=1)
@@ -516,7 +445,7 @@ def weapon_from_json(data, point = None):
     return item
 
 def armour_from_json(data, point = None):
-    slot = string_to_damage_type.get(data['Equipment Slots'], EquipmentSlot.CHEST)
+    slot = string_to_equipment_slot.get(data['Equipment Slot'], EquipmentSlot.CHEST)
 
     equippable_component = Equippable(slot, defence_bonus=data['Defence Bonus'])
 
@@ -534,7 +463,7 @@ def import_armour():
         data = json.load(json_file)
 
         for detail in data:
-            armour[detail["Name"]] = detail
+            armours[detail["Name"]] = detail
 
 def import_weapons():
     with open(resource_path('data/equipment/weapons.json')) as json_file:
