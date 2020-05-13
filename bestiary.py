@@ -212,20 +212,33 @@ def create_player():
         potion = equipment.healing_potion()
         player.inventory.add_item(potion)
 
-        scroll4 = equipment.map_scroll()
+        scroll1 = equipment.lighting_scroll()
+        scroll1.identifiable.identified = True
+        player.inventory.add_item(scroll1)
+
+        scroll2 = equipment.fireball_scroll()
+        scroll2.identifiable.identified = True
+        player.inventory.add_item(scroll2)
+
+        scroll3 = equipment.confusion_scroll()
+        scroll3.identifiable.identified = True
+        player.inventory.add_item(scroll3)
+
+        scroll4 = equipment.identify_scroll()
+        scroll4.identifiable.identified = True
         player.inventory.add_item(scroll4)
 
-        scroll5 = equipment.identify_scroll()
+        scroll5 = equipment.speed_scroll()
+        scroll5.identifiable.identified = True
         player.inventory.add_item(scroll5)
-
-        scroll5 = equipment.fireball_scroll()
-        player.inventory.add_item(scroll5)
-
-        scroll7 = equipment.map_scroll()
-        player.inventory.add_item(scroll7)
 
         scroll6 = equipment.teleport_scroll()
+        scroll6.identifiable.identified = True
         player.inventory.add_item(scroll6)
+
+        scroll7 = equipment.map_scroll()
+        scroll7.identifiable.identified = True
+        player.inventory.add_item(scroll7)
 
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
