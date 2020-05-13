@@ -172,12 +172,12 @@ class Attack(Node):
             return TreeStates.FAILURE, []
 
         if target.health.dead:
-            print("Attack: FAILURE - target dead, removing")
+            #print("Attack: FAILURE - target dead, removing")
             del self.namespace["target"]
             return TreeStates.FAILURE, []
 
         return (TreeStates.SUCCESS,
-                    owner.offence.attack(target))
+                    owner.offence.attack(target, game_map))
 
 class PointToTarget(Node):
     def __init__(self, target_point, target_point_name):

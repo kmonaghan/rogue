@@ -10,7 +10,7 @@ from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
-from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain, Infection, Paralysis
+from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain, Infection, Paralysis, SpellAbility
 from components.aura import DamageAura
 from components.equippable import Equippable
 from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
@@ -197,6 +197,11 @@ def add_flaming(item):
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = 'of flaming'), 'naming')
 
+def add_lightning(item):
+    item.add_component(SpellAbility(spell=tome.lightning, number_of_dice=2, type_of_dice=10, radius=2), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of lightning'), 'naming')
+
 def add_shocking(item):
     item.add_component(ExtraDamage(number_of_dice=1, type_of_dice=6, name="shock", damage_type=DamageType.ELECTRIC), 'ablity')
     if not item.naming:
@@ -272,18 +277,18 @@ def antidote_potion(point = None):
 
     return create_potion(point, usable)
 
-def healing_potion(point = None, number_of_die=1, type_of_die=8):
-    usable = PotionUsable(name="Healing Potion", spell=tome.heal, number_of_die=number_of_die, type_of_die=type_of_die)
+def healing_potion(point = None, number_of_dice=1, type_of_dice=8):
+    usable = PotionUsable(name="Healing Potion", spell=tome.heal, number_of_dice=number_of_dice, type_of_dice=type_of_dice)
 
     return create_potion(point, usable)
 
-def power_potion(point = None, number_of_die=1, type_of_die=8):
-    usable = PotionUsable(name="Power Potion", spell=tome.change_power, number_of_die=number_of_die, type_of_die=type_of_die)
+def power_potion(point = None, number_of_dice=1, type_of_dice=8):
+    usable = PotionUsable(name="Power Potion", spell=tome.change_power, number_of_dice=number_of_dice, type_of_dice=type_of_dice)
 
     return create_potion(point, usable)
 
-def defence_potion(point = None, number_of_die=1, type_of_die=8):
-    usable = PotionUsable(name="Defence Potion", spell=tome.change_defence, number_of_die=number_of_die, type_of_die=type_of_die)
+def defence_potion(point = None, number_of_dice=1, type_of_dice=8):
+    usable = PotionUsable(name="Defence Potion", spell=tome.change_defence, number_of_dice=number_of_dice, type_of_dice=type_of_dice)
 
     return create_potion(point, usable)
 
@@ -294,20 +299,25 @@ def speed_potion(point = None):
 
 def lighting_scroll(point = None):
     #create a lightning bolt scroll
-    item_component = Item(use_function=tome.lightning, number_of_dice=2, type_of_dice=10, maximum_range=5)
+    usable = ScrollUsable(scroll_name="Lightning Scroll",
+                            scroll_spell=tome.lightning,
+                            number_of_dice=3,
+                            type_of_dice=10,
+                            radius=2,
+                            targets_inventory=False)
+
     item = Entity(point, '#', 'Lightning Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=item_component)
+                                  item=Item(), usable=usable)
 
     item.add_component(IdentifiableScroll(), "identifiable")
-
     return item
 
 def fireball_scroll(point = None):
     #create a fireball scroll
     usable = ScrollUsable(scroll_name="Fireball Scroll",
                             scroll_spell=tome.fireball,
-                            number_of_die=3,
-                            type_of_die=6,
+                            number_of_dice=3,
+                            type_of_dice=6,
                             radius=3,
                             targets_inventory=False)
     usable.needs_target = True
@@ -322,10 +332,14 @@ def fireball_scroll(point = None):
 
 def confusion_scroll(point = None):
     #create a confuse scroll
-    item_component = Item(use_function=tome.confuse, targeting=True, targeting_message=Message(
-                        'Left-click an enemy to confuse it, or right-click to cancel.', COLORS.get('instruction_text')))
+    usable = ScrollUsable(scroll_name="Confusion Scroll",
+                            scroll_spell=tome.confuse,
+                            targets_inventory=False)
+    usable.needs_target = True
+    usable.targeting_message = Message('Left-click a target NPC for the confusion spell, or right-click to cancel.', COLORS.get('instruction_text'))
+
     item = Entity(point, '#', 'Confusion Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                    item=item_component)
+                                  item=Item(), usable=usable)
 
     item.add_component(IdentifiableScroll(), "identifiable")
 
@@ -343,6 +357,8 @@ def identify_scroll(point = None):
 
 def speed_scroll(point = None):
     usable = ScrollUsable(scroll_name="Speed Scroll", scroll_spell=tome.speed, targets_inventory=False)
+    usable.needs_target = True
+    usable.targeting_message = Message('Left-click a target NPC for the speed spell, or right-click to cancel.', COLORS.get('instruction_text'))
 
     item = Entity(point, '#', usable.name, COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                     item=Item(), usable=usable)

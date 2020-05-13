@@ -75,6 +75,14 @@ class MainMenu(tcod.event.EventDispatch):
             for (x,y), value in np.ndenumerate(self.dijkstra):
                 self.map_console.ch[x, y] = ord(str(int(value % 10)))
 
+        for x in range(16):
+            for y in range(16):
+                car = x + (16 * y)
+                self.map_console.ch[x, y] = car
+                self.map_console.fg[x, y] = tcod.white
+
+        self.map_console.ch[16,16] = ord(chr(9)) #car
+
         self.map_console.blit(root_console, 0, 0, 0, 0,
                           self.map_console.width, self.map_console.height)
 
@@ -161,6 +169,7 @@ class MainMenu(tcod.event.EventDispatch):
 
             dm = dungeonGenerator(CONFIG.get('map_width'), CONFIG.get('map_height'))
 
+            '''
             if self.map_type == 1:
                 dm = levelOneGenerator(CONFIG.get('map_width'), CONFIG.get('map_height'))
             elif self.map_type == 2:
@@ -169,6 +178,7 @@ class MainMenu(tcod.event.EventDispatch):
                 cavernRoomsLevel(dm, x, y)
             elif self.map_type == 4:
                 roomsLevel(dm, x, y)
+            '''
 
             self.current_level = LevelMap(dm.grid, dm.rooms)
 
@@ -183,8 +193,8 @@ def main():
     global current_game, root_console
 
     tcod.console_set_custom_font(
-        "arial10x10.png",
-        tcod.FONT_LAYOUT_TCOD | tcod.FONT_TYPE_GREYSCALE,
+        CONFIG.get('font'),
+        CONFIG.get('font_type') | tcod.FONT_TYPE_GREYSCALE,
     )
 
     root_console = tcod.console_init_root(CONFIG.get('full_screen_width'),

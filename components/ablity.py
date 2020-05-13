@@ -20,7 +20,7 @@ class Ablity:
     def __repr__(self):
         return f"{self.__class__} {self.name}"
 
-    def on_attack(self, source, target):
+    def on_attack(self, source, target, game_map):
         pass
 
     def on_defend(self, source, target):
@@ -33,7 +33,7 @@ class Poisoning(Ablity):
         self.damage_per_turn = damage_per_turn
         self.duration = duration
 
-    def on_attack(self, source, target):
+    def on_attack(self, source, target, game_map):
         results = []
 
         if randint(1, 100) > self.chance_to_poison:
@@ -50,7 +50,7 @@ class PushBack(Ablity):
         self.damage = damage
         self.chance = chance
 
-    def on_attack(self, source, target):
+    def on_attack(self, source, target, game_map):
         results = []
 
         if randint(1,100) < self.chance:
@@ -73,7 +73,7 @@ class ExtraDamage(Ablity):
         self.name = name
         self.damage_type = damage_type
 
-    def on_attack(self, source, target):
+    def on_attack(self, source, target, game_map):
         results = []
 
         damage = die_roll(self.number_of_dice, self.type_of_dice)
@@ -93,7 +93,7 @@ class LifeDrain(Ablity):
         self.type_of_dice = type_of_dice
         self.transfer = transfer
 
-    def on_attack(self, source, target):
+    def on_attack(self, source, target, game_map):
         results = []
 
         damage = die_roll(self.number_of_dice, self.type_of_dice)
@@ -114,7 +114,7 @@ class Infection(Ablity):
         self.on_turn = on_turn
         self.on_death = on_death
 
-    def on_attack(self, source, target):
+    def on_attack(self, source, target, game_map):
         results = []
 
         if randint(1,100) < self.chance:
@@ -130,14 +130,45 @@ class Paralysis(Ablity):
         self.chance = chance
         self.turns_paralysed = turns_paralysed
 
-    def on_attack(self, source, target):
+    def on_attack(self, source, target, game_map):
         results = []
 
-        #if randint(1,100) < self.chance:
-        #    return results
+        if randint(1,100) < self.chance:
+            return results
 
         target.energy.current_energy = -(target.energy.act_energy * self.turns_paralysed)
         msg = Message(f"{target.name} is paralysed for {self.turns_paralysed} turns.", COLORS.get('damage_text'), source=source, target=target, type=MessageType.EFFECT)
         results.extend([{ResultTypes.MESSAGE: msg}])
 
+        return results
+
+class SpellAbility(Ablity):
+    def __init__(self, name="", spell=None, number_of_dice=0, type_of_dice=0, radius=3, targets_inventory=False, chance=50):
+        super().__init__(name=name)
+        self.chance = chance
+        self.number_of_dice = number_of_dice
+        self.radius = radius
+        self.spell = spell
+        self.type_of_dice = type_of_dice
+        self.targets_inventory = targets_inventory
+
+    def on_attack(self, source, target, game_map):
+        results = []
+
+        #if randint(1,100) < self.chance:
+        #    return results
+
+        if not target and self.targets_inventory:
+            results.append({ResultTypes.TARGET_ITEM_IN_INVENTORY: source})
+        #elif not target_x and self.needs_target:
+        #    if self.targeting_message:
+        #        results.append({ResultTypes.MESSAGE: self.targeting_message})
+        #    results.append({ResultTypes.TARGETING: self.owner})
+        else:
+            results = self.spell(game_map=game_map,
+                                        caster=source,
+                                        target=target,
+                                        number_of_dice=self.number_of_dice,
+                                        type_of_dice=self.type_of_dice,
+                                        radius=self.radius)
         return results

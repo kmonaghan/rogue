@@ -24,11 +24,11 @@ class Usable:
         return results
 
 class PotionUsable(Usable):
-    def __init__(self, name="", spell=None, number_of_die=0, type_of_die=0):
+    def __init__(self, name="", spell=None, number_of_dice=0, type_of_dice=0):
         super().__init__(name=name)
-        self.number_of_die = number_of_die
+        self.number_of_dice = number_of_dice
         self.spell = spell
-        self.type_of_die = type_of_die
+        self.type_of_dice = type_of_dice
 
     def use(self, game_map, user = None):
         results = []
@@ -36,20 +36,20 @@ class PotionUsable(Usable):
         results = self.spell(game_map=game_map,
                                 caster=user,
                                 target=user,
-                                number_of_die=self.number_of_die,
-                                type_of_die=self.type_of_die)
+                                number_of_dice=self.number_of_dice,
+                                type_of_dice=self.type_of_dice)
         results.append({ResultTypes.DISCARD_ITEM: self.owner})
         results.append({ResultTypes.END_TURN: True})
 
         return results
 
 class ScrollUsable(Usable):
-    def __init__(self, scroll_name="", scroll_spell=None, number_of_die=0, type_of_die=0, radius=3, targets_inventory=False):
+    def __init__(self, scroll_name="", scroll_spell=None, number_of_dice=0, type_of_dice=0, radius=3, targets_inventory=False):
         super().__init__(name=scroll_name)
-        self.number_of_die = number_of_die
+        self.number_of_dice = number_of_dice
         self.radius = radius
         self.scroll_spell = scroll_spell
-        self.type_of_die = type_of_die
+        self.type_of_dice = type_of_dice
         self.targets_inventory = targets_inventory
 
     def use(self, game_map, user = None, target = None, target_x=None, target_y=None):
@@ -65,8 +65,8 @@ class ScrollUsable(Usable):
             results = self.scroll_spell(game_map=game_map,
                                         caster=user,
                                         target=target,
-                                        number_of_die=self.number_of_die,
-                                        type_of_die=self.type_of_die,
+                                        number_of_dice=self.number_of_dice,
+                                        type_of_dice=self.type_of_dice,
                                         radius=self.radius,
                                         target_x=target_x,
                                         target_y=target_y)

@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, shuffle
 
 import numpy as np
 
@@ -55,30 +55,30 @@ def confuse(*args, **kwargs):
     return results
 
 def change_defence(*args, **kwargs):
-    number_of_die = kwargs.get('number_of_die')
-    type_of_die = kwargs.get('type_of_die')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
     caster = kwargs.get('caster')
     target = kwargs.get('target')
 
     results = []
 
-    extra = die_roll(number_of_die, type_of_die)
-    print(f"adding {extra} to base power from {number_of_die}d{type_of_die}")
+    extra = die_roll(number_of_dice, type_of_dice)
+    print(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
     target.defence.base_defence = target.defence.base_defence + extra
     results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
 
     return results
 
 def change_power(*args, **kwargs):
-    number_of_die = kwargs.get('number_of_die')
-    type_of_die = kwargs.get('type_of_die')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
     caster = kwargs.get('caster')
     target = kwargs.get('target')
 
     results = []
 
-    extra = die_roll(number_of_die, type_of_die)
-    print(f"adding {extra} to base power from {number_of_die}d{type_of_die}")
+    extra = die_roll(number_of_dice, type_of_dice)
+    print(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
     target.offence.base_power = target.offence.base_power + extra
     results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', COLORS.get('success_text'))})
 
@@ -87,8 +87,8 @@ def change_power(*args, **kwargs):
 def fireball(*args, **kwargs):
     caster = kwargs.get('caster')
     game_map = kwargs.get('game_map')
-    number_of_die = kwargs.get('number_of_die')
-    type_of_die = kwargs.get('type_of_die')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
     radius = kwargs.get('radius')
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
@@ -104,15 +104,15 @@ def fireball(*args, **kwargs):
     #TODO: refactor, this is probably horribly inefficent
     for entity in game_map.current_level.entities:
         if entity.point.distance_to(Point(target_x, target_y)) <= radius and entity.health:
-            damage = die_roll(number_of_die, type_of_die)
+            damage = die_roll(number_of_dice, type_of_dice)
             damage_results, total_damage = entity.health.take_damage(damage, caster, DamageType.FIRE)
             results.extend(damage_results)
 
     return results
 
 def heal(*args, **kwargs):
-    number_of_die = kwargs.get('number_of_die')
-    type_of_die = kwargs.get('type_of_die')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
     caster = kwargs.get('caster')
     target = kwargs.get('target')
 
@@ -121,7 +121,7 @@ def heal(*args, **kwargs):
     if target.health.hp == target.health.max_hp:
         results.append({ResultTypes.MESSAGE: Message(f"{target.name} is already at full health.", COLORS.get('neutral_text'), target=target, type=MessageType.EFFECT)})
     else:
-        target.health.heal(die_roll(number_of_die, type_of_die))
+        target.health.heal(die_roll(number_of_dice, type_of_dice))
         results.append({ResultTypes.MESSAGE: Message(f"{target.name} wounds start to close up.", COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
 
     return results
@@ -141,31 +141,52 @@ def identify(*args, **kwargs):
     return results
 
 def lightning(*args, **kwargs):
-    caster = args[0]
+    caster = kwargs.get('caster')
+    target = kwargs.get('target')
     game_map = kwargs.get('game_map')
-    number_of_die = kwargs.get('number_of_die')
-    type_of_die = kwargs.get('type_of_die')
-    maximum_range = kwargs.get('maximum_range')
+    number_of_dice = kwargs.get('number_of_dice')
+    type_of_dice = kwargs.get('type_of_dice')
+    radius = kwargs.get('radius')
 
     results = []
+    targets = []
 
-    target = None
-    closest_distance = maximum_range + 1
+    start_x = max(0, caster.x - radius)
+    start_y = max(0, caster.y - radius)
 
-    for entity in game_map.current_level.entities:
-        if entity.fighter and entity != caster and game_map.current_level.fov[entity.x, entity.y]:
-            distance = caster.point.distance_to(entity.point)
+    end_x = min(caster.x + radius, game_map.current_level.width)
+    end_y = min(caster.y + radius, game_map.current_level.width)
 
-            if distance < closest_distance:
-                target = entity
-                closest_distance = distance
+    for x in range(start_x, end_x):
+        for y in range(start_y, end_y):
+            entities = game_map.current_level.entities.get_entities_in_position((x,y))
+            for entity in entities:
+                if entity == caster:
+                    continue
+                if not entity.health:
+                    continue
+                if entity.health.dead:
+                    continue
+
+                targets.append(entity)
 
     if target:
-        damage = die_roll(number_of_die, type_of_die)
-        results.extend({ResultTypes.MESSAGE: Message('A lighting bolt strikes the {0} with a loud thunder!'.format(target.name), COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
-        results.extend(target.health.take_damage(damage, caster, DamageType.ELECTRIC))
+        targets.insert(0, target)
+
+    if targets:
+        for i in range(number_of_dice):
+            target = targets.pop()
+            damage = die_roll(1, type_of_dice)
+            if i > 0:
+                results.append({ResultTypes.MESSAGE: Message(f"The bolt bounces and strikes {target.name} with a loud crack of thunder!", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
+            else:
+                results.append({ResultTypes.MESSAGE: Message(f"A lighting bolt strikes the {target.name} with a loud crack of thunder!", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
+
+            damage_results, total_damage = target.health.take_damage(damage, caster, DamageType.ELECTRIC)
+            results.append({ResultTypes.MESSAGE: Message(f"{target.name} takes {str(total_damage)} damage.", COLORS.get('damage_text'))})
+            results.extend(damage_results)
     else:
-        results.append({ResultTypes.MESSAGE: Message('No enemy is close enough to strike.', COLORS.get('failure_text'))})
+        results.append({ResultTypes.MESSAGE: Message("No enemy is close enough to strike.", COLORS.get('failure_text'))})
 
     return results
 
@@ -249,6 +270,7 @@ def teleport(*args, **kwargs):
     elif (chance_of_teleport_going_wrong >= 90):
         damage_results, total_damage = caster.health.take_damage(die_roll(1, 6, int(orginal_point.distance_to(point))))
         results.append({ResultTypes.MESSAGE: Message(f"You take {str(total_damage)} damage.", COLORS.get('damage_text'))})
+        results.extend(damage_results)
 
     return results
 

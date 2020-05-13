@@ -30,7 +30,7 @@ class Offence:
 
         return (self.base_power + bonus) * multiplier
 
-    def attack(self, target):
+    def attack(self, target, game_map):
         results = []
 
         total = randint(1, 20)
@@ -70,7 +70,7 @@ class Offence:
 
                         results.append({ResultTypes.MESSAGE: message})
 
-                results.extend(weapon.ablity.on_attack(source=self.owner, target=target))
+                results.extend(weapon.ablity.on_attack(source=self.owner, target=target, game_map=game_map))
         else:
             message = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'), source=self.owner,target=target, type=MessageType.COMBAT)
             results.append({ResultTypes.MESSAGE: message})

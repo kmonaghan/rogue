@@ -52,11 +52,14 @@ class GameStates(Enum):
 
 # Game states that can be canceled out of.
 CANCEL_STATES = {
-    GameStates.CHARACTER_SCREEN, GameStates.GAME_PAUSED,
+    GameStates.CHARACTER_SCREEN,
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_SELECT,
-    GameStates.INVENTORY_USE, GameStates.QUEST_LIST,
-    GameStates.QUEST_ONBOARDING, GameStates.TARGETING,}
+    GameStates.INVENTORY_USE,
+    GameStates.LEVEL_UP,
+    GameStates.QUEST_LIST, GameStates.GAME_PAUSED,
+    GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
+    GameStates.TARGETING}
 
 # Game states where an inventory is displayed.
 INVENTORY_STATES = {
@@ -64,8 +67,8 @@ INVENTORY_STATES = {
         GameStates.INVENTORY_THROW, GameStates.INVENTORY_SELECT,
         GameStates.INVENTORY_USE,}
 
-# Game states accepting of user input.
-INPUT_STATES = {
+# Game states that display a menu to the user.
+MENU_STATES = {
     GameStates.CHARACTER_SCREEN,
     GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
     GameStates.INVENTORY_THROW, GameStates.INVENTORY_SELECT,
@@ -74,6 +77,18 @@ INPUT_STATES = {
     GameStates.QUEST_LIST, GameStates.GAME_PAUSED,
     GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
     GameStates.GAME_OVER, GameStates.GAME_COMPLETE}
+
+# Game states that display a menu to the user.
+INPUT_STATES = {
+    GameStates.CHARACTER_SCREEN,
+    GameStates.INVENTORY_DROP, GameStates.INVENTORY_EXAMINE,
+    GameStates.INVENTORY_THROW, GameStates.INVENTORY_SELECT,
+    GameStates.INVENTORY_USE,
+    GameStates.LEVEL_UP,
+    GameStates.QUEST_LIST, GameStates.GAME_PAUSED,
+    GameStates.QUEST_LIST, GameStates.QUEST_ONBOARDING,
+    GameStates.GAME_OVER, GameStates.GAME_COMPLETE,
+    GameStates.TARGETING}
 
 class InputTypes(Enum):
     CHARACTER_SCREEN = auto()

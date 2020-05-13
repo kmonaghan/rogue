@@ -14,7 +14,7 @@ from etc.colors import COLORS
 from etc.configuration import CONFIG
 from etc.enum import (
     ResultTypes, InputTypes, GameStates, LevelUp, MessageType, StairOption,
-    INVENTORY_STATES, INPUT_STATES, CANCEL_STATES, Interactions)
+    INVENTORY_STATES, INPUT_STATES, MENU_STATES, CANCEL_STATES, Interactions)
 from equipment import identified_items, potion_descriptions
 
 from game_messages import MessageLog
@@ -174,7 +174,7 @@ class Rogue(tcod.event.EventDispatch):
         self.message_console.blit(root_console, 0, CONFIG.get('message_panel_y'), 0, 0,
                           CONFIG.get('full_screen_width'), CONFIG.get('message_panel_height'))
 
-        if self.game_state in INPUT_STATES:
+        if self.game_state in MENU_STATES:
             #---------------------------------------------------------------------
             # Render any menus.
             #---------------------------------------------------------------------
@@ -282,7 +282,6 @@ class Rogue(tcod.event.EventDispatch):
 
         if action == InputTypes.LEVEL_UP:
             self.player.level.level_up_stats(action_value)
-            print(f"Going back to previous game state because of level up")
             self.game_state = self.previous_game_state
 
         #This needs to come after leveling up or we get stuck in a loop
@@ -398,7 +397,7 @@ class Rogue(tcod.event.EventDispatch):
                                 player_turn_results.extend([{ResultTypes.MESSAGE: message}])
                     elif target.interaction.interaction_type == Interactions.FOE:
                         if target.health and not target.health.dead:
-                            attack_results = self.player.offence.attack(target)
+                            attack_results = self.player.offence.attack(target, self.game_map)
                             player_turn_results.extend(attack_results)
                 else:
                     self.player.movement.move(dx, dy, self.game_map.current_level)
@@ -491,6 +490,26 @@ class Rogue(tcod.event.EventDispatch):
 
         self.quest_actions(action, action_value)
 
+        if action == InputTypes.EXIT:
+            if self.game_state in CANCEL_STATES:
+                self.game_state = self.previous_game_state
+                self.using_item = None
+                if self.game_state == GameStates.QUEST_ONBOARDING:
+                    player_turn_results.append({ResultTypes.QUEST_CANCELLED: True})
+            else:
+                self.previous_game_state = self.game_state
+                self.game_state = GameStates.GAME_PAUSED
+                return
+
+        if (action == InputTypes.TARGETING
+            and self.game_state == GameStates.TARGETING):
+            target_x, target_y = action_value
+
+            player_turn_results.extend(self.using_item.usable.use(game_map=self.game_map,
+                                                            user=self.player,
+                                                            target_x=target_x,
+                                                            target_y=target_y))
+
         if (action == InputTypes.INVENTORY_INDEX
             and self.previous_game_state != GameStates.GAME_OVER
             and action_value < len(self.player.inventory.items)):
@@ -517,28 +536,9 @@ class Rogue(tcod.event.EventDispatch):
             elif self.game_state == GameStates.INVENTORY_EXAMINE:
                 player_turn_results.extend(self.player.inventory.examine_item(item))
 
-
-        if (action == InputTypes.TARGETING
-            and self.game_state == GameStates.TARGETING):
-            target_x, target_y = action_value
-
-            player_turn_results.extend(self.using_item.usable.use(game_map=self.game_map,
-                                                            user=self.player,
-                                                            target_x=target_x,
-                                                            target_y=target_y))
-
-        if action == InputTypes.EXIT:
-            if self.game_state in CANCEL_STATES:
-                self.game_state = self.previous_game_state
-                self.using_item = None
-            elif self.game_state == GameStates.QUEST_ONBOARDING:
-                player_turn_results.append({'quest_cancelled': True})
-            else:
-                self.previous_game_state = self.game_state
-                self.game_state = GameStates.GAME_PAUSED
-                return
-
         self.process_results_stack(self.player, player_turn_results)
+
+        pubsub.pubsub.process_queue(self.game_map)
 
         #-------------------------------------------------------------------
         # Player takes their turn.
@@ -547,13 +547,13 @@ class Rogue(tcod.event.EventDispatch):
             or self.game_state == GameStates.PLAYER_SLEEP):
             self.player_actions(action, action_value)
 
-            if self.game_state == GameStates.GAME_OVER:
-                return
+        if (self.game_state in INPUT_STATES
+            or self.game_state == GameStates.GAME_OVER):
+            return
 
         #-------------------------------------------------------------------
         # NPCs take their turns.
         #-------------------------------------------------------------------
-        #while self.game_state == GameStates.ENEMY_TURN:
         self.npc_actions()
 
         self.player.energy.increase_energy()
@@ -561,7 +561,8 @@ class Rogue(tcod.event.EventDispatch):
             if self.player.sleep:
                 self.game_state = GameStates.PLAYER_SLEEP
             else:
-                self.game_state = GameStates.PLAYER_TURN
+                if not self.game_state in INPUT_STATES:
+                    self.game_state = GameStates.PLAYER_TURN
         else:
             if not self.game_state in INPUT_STATES:
                 self.game_state = GameStates.ENEMY_TURN
@@ -621,7 +622,6 @@ class Rogue(tcod.event.EventDispatch):
                 if entity == result_data['dead']:
                     turn_results = []
                 if result_data['attacker'] and result_data['attacker'].ai:
-                    print(f"Removing target {result_data['dead']}")
                     result_data['attacker'].ai.remove_target(target=result_data['dead'])
                 result_data['dead'].deregister_turn_all()
 
@@ -670,7 +670,7 @@ class Rogue(tcod.event.EventDispatch):
                 self.previous_game_state = self.game_state
                 self.game_state = GameStates.QUEST_ONBOARDING
 
-            if result_type == GameStates.QUEST_RESPONSE:
+            if result_type == ResultTypes.QUEST_CANCELLED:
                 pass
 
             if result_type == ResultTypes.SET_POSITION:
