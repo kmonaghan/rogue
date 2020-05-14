@@ -192,6 +192,14 @@ class GameMap:
             nest.set_point(point)
             self.current_level.add_entity(nest)
 
+        roosts = randint(0, 3)
+
+        for i in range(roosts):
+            nest = bestiary.generate_creature(Species.BATROOST, self.dungeon_level, player.level.current_level)
+            point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
+            nest.set_point(point)
+            self.current_level.add_entity(nest)
+
     def level_generic(self, player):
         if len(self.current_level.caves[0]) > 0:
             self.place_creatures(player)
@@ -232,6 +240,7 @@ class GameMap:
         npc_chances[Species.EGG] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
         npc_chances[Species.RATNEST] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
         npc_chances[Species.BAT] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.BATROOST] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
 
         max_npcs = len(self.current_level.caves[0]) // 15
         min_npcs = max(1, max_npcs // 4)

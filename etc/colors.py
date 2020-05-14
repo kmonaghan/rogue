@@ -60,6 +60,7 @@ COLORS = {
     'elite': tcod.silver,
 
     'bat': tcod.darker_red,
+    'bat_roost': tcod.darker_red,
     'bounty_hunter': tcod.gold,
     'chest': tcod.blue,
     'gelatinous_cube': tcod.white,

@@ -77,6 +77,23 @@ def bat(point = None, dungeon_level = 1, player_level = 1):
 
     return creature
 
+def batroost(point = None, dungeon_level = 1, player_level = 1):
+    health_component = Health(20)
+
+    creature = Character(point, chr(225), 'Bat Roost', COLORS.get('bat_roost'),
+                    ai=SpawningNPC(bat),
+                    species=Species.BATROOST, health=health_component, act_energy=2)
+
+    creature.add_component(Defence(defence = 5), 'defence')
+    creature.add_component(Level(xp_value = 50), 'level')
+    creature.add_component(Children(5), 'children')
+
+    creature.movement.routing_avoid.extend(creature_avoid)
+
+    equipment.add_random_loot(creature, dungeon_level, player_level)
+
+    return creature
+
 def bountyhunter(point):
     #create a questgiver
 
@@ -400,14 +417,14 @@ def rat(point = None, dungeon_level = 1, player_level = 1):
     return creature
 
 def ratsnest(point = None, dungeon_level = 1, player_level = 1):
-    health_component = Health(4)
+    health_component = Health(20)
 
     creature = Character(point, 'N', 'rat\'s nest', COLORS.get('rats_nest'),
                     ai=SpawningNPC(rat),
                     species=Species.RATNEST, health=health_component, act_energy=2)
 
-    creature.add_component(Defence(defence = 4), 'defence')
-    creature.add_component(Level(xp_value = 1), 'level')
+    creature.add_component(Defence(defence = 5), 'defence')
+    creature.add_component(Level(xp_value = 50), 'level')
     creature.add_component(Children(5), 'children')
 
     creature.movement.routing_avoid.extend(creature_avoid)
@@ -545,15 +562,17 @@ def generate_creature(type, dungeon_level = 1, player_level = 1, point = None):
     creature = None
 
     if (type == Species.BAT):
-        creature = bat(point)
+        creature = bat(point, dungeon_level, player_level)
+    elif (type == Species.BATROOST):
+        creature = batroost(point, dungeon_level, player_level)
     elif (type == Species.RAT):
-        creature = rat(point)
+        creature = rat(point, dungeon_level, player_level)
     elif (type == Species.SNAKE):
-        creature = snake(point)
+        creature = snake(point, dungeon_level, player_level)
     elif (type == Species.RATNEST):
-        creature = ratsnest(point)
+        creature = ratsnest(point, dungeon_level, player_level)
     elif (type == Species.EGG):
-        creature = egg(point)
+        creature = egg(point, dungeon_level, player_level)
 
     return creature
 

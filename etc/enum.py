@@ -269,6 +269,7 @@ class Species(Enum):
     INANIMATE = auto()
     CREATURE = auto()
     BAT = auto()
+    BATROOST = auto()
     PLAYER = auto()
     CORPSE = auto()
     UNDEAD = auto()
