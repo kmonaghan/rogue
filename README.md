@@ -4,6 +4,10 @@
 
 Started off based on [rougelike tutorial revised](http://rogueliketutorials.com/), but has somewhat diverged.
 
+![](gifs/killedbyratswarm.gif)
+
+![](gifs/snakesratsbats.gif)
+
 ## Controls
 
   - `hjkl` moves horizontally and vertically.  You can also use the arrow keys.
