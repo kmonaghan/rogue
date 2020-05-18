@@ -60,7 +60,7 @@ class PushBack(Ablity):
         dx = target.x - source.x
         dy = target.y - source.y
 
-        for i in range(spaces):
+        for _ in range(spaces):
             results.extend([{ResultTypes.MOVE_FORCE: (target, dx, dy, self.damage)}])
 
         return results

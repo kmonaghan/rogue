@@ -39,10 +39,8 @@ class Children:
     def addChild(self, entity):
         if self.can_have_children:
             self.children.append(entity.uuid) if entity.uuid not in self.children else self.children
-            print(f"Added child to {self.owner.name}")
             return True
         return False
 
     def removeChild(self, entity):
         self.children.remove(entity.uuid) if entity.uuid in self.children else self.children
-        print(f"removed child from {self.owner.name}")

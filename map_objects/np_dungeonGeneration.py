@@ -669,7 +669,7 @@ class dungeonGenerator:
 
         current_door_tuples = tuple(zip(doors[0],doors[1]))
 
-        if len(current_door_tuples) < 0:
+        if len(current_door_tuples) == 0:
             #print(f"No doors in {room}")
             return
 

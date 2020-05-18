@@ -235,8 +235,7 @@ class SpawnEntity(Node):
         if self.current_time < self.min_time:
             return TreeStates.FAILURE, []
 
-        if owner.children:
-            if not owner.children.can_have_children:
+        if owner.children and not owner.children.can_have_children:
                 return TreeStates.FAILURE, []
 
         if self.current_time > self.max_time or (uniform(0, 1) , (self.current_time/self.max_time)):
