@@ -55,7 +55,7 @@ npc_avoid = [Tiles.DEEP_WATER]
 Create npc/creatures/player
 '''
 
-def bat(point = None, dungeon_level = 1, player_level = 1):
+def bat(point = None, dungeon_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'B', 'bat', COLORS.get('bat'),
@@ -77,7 +77,7 @@ def bat(point = None, dungeon_level = 1, player_level = 1):
 
     return creature
 
-def batroost(point = None, dungeon_level = 1, player_level = 1):
+def batroost(point = None, dungeon_level = 1):
     health_component = Health(20)
 
     creature = Character(point, chr(225), 'Bat Roost', COLORS.get('bat_roost'),
@@ -90,7 +90,7 @@ def batroost(point = None, dungeon_level = 1, player_level = 1):
 
     creature.movement.routing_avoid.extend(creature_avoid)
 
-    equipment.add_random_loot(creature, dungeon_level, player_level)
+    equipment.add_random_loot(creature, dungeon_level)
 
     return creature
 
@@ -109,8 +109,8 @@ def bountyhunter(point):
 
     return npc
 
-def captain(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 98, troops=5):
-    npc = random_npc(point, dungeon_level, player_level, upgrade_chance)
+def captain(point = None, dungeon_level = 1, upgrade_chance = 98, troops=5):
+    npc = random_npc(point, dungeon_level, upgrade_chance)
 
     upgrade_npc(npc)
 
@@ -129,8 +129,8 @@ def captain(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 
 
     return npc
 
-def jailor(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 98):
-    npc = random_npc(point, dungeon_level, player_level, upgrade_chance)
+def jailor(point = None, dungeon_level = 1, upgrade_chance = 98):
+    npc = random_npc(point, dungeon_level, upgrade_chance)
 
     upgrade_npc(npc)
 
@@ -218,7 +218,7 @@ def create_player():
         player.equipment.toggle_equip(weapon)
 
         armour = equipment.random_armour()
-        equipment.add_damage_aura(armour)
+        #equipment.add_damage_aura(armour)
         player.inventory.add_item(armour)
         player.equipment.toggle_equip(armour)
 
@@ -261,7 +261,7 @@ def create_player():
 
     return player
 
-def egg(point = None, dungeon_level = 1, player_level = 1):
+def egg(point = None, dungeon_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'E', 'Snake Egg', COLORS.get('snake_egg'),
@@ -275,7 +275,7 @@ def egg(point = None, dungeon_level = 1, player_level = 1):
 
     return creature
 
-def gelatinous_cube(point = None, dungeon_level = 1, player_level = 1):
+def gelatinous_cube(point = None, dungeon_level = 1):
     npc = Character(point, 'C', 'gelatinous cube', COLORS.get('gelatinous_cube'),
                     ai=CleanerNPC(), species=Species.OOZE,
                     render_order=RenderOrder.OVERLAY, health=Health(20))
@@ -302,7 +302,7 @@ def gelatinous_cube(point = None, dungeon_level = 1, player_level = 1):
 
     return npc
 
-def goblin(point = None, dungeon_level = 1, player_level = 1):
+def goblin(point = None, dungeon_level = 1):
     #create a goblin
     health_component = Health(20)
     ai_component = BasicNPC()
@@ -327,7 +327,7 @@ def goblin(point = None, dungeon_level = 1, player_level = 1):
 
     return npc
 
-def necromancer(point = None, dungeon_level = 1, player_level = 1):
+def necromancer(point = None, dungeon_level = 1):
     #create a necromancer
     health_component = Health(30)
     ai_component = NecromancerNPC()
@@ -356,21 +356,21 @@ def necromancer(point = None, dungeon_level = 1, player_level = 1):
 
     num_of_potions = randint(0,3)
 
-    for i in range(num_of_potions):
+    for _ in range(num_of_potions):
         potion = equipment.random_potion(dungeon_level=dungeon_level)
         potion.lootable = True
         npc.inventory.add_item(potion)
 
     num_of_scrolls = randint(0,3)
 
-    for i in range(num_of_scrolls):
+    for _ in range(num_of_scrolls):
         scroll = equipment.random_scroll(dungeon_level=dungeon_level)
         scroll.lootable = True
         npc.inventory.add_item(scroll)
 
     return npc
 
-def orc(point = None, dungeon_level = 1, player_level = 1):
+def orc(point = None, dungeon_level = 1):
     #create an orc
     health_component = Health(20)
     ai_component = BasicNPC()
@@ -393,7 +393,7 @@ def orc(point = None, dungeon_level = 1, player_level = 1):
 
     return npc
 
-def rat(point = None, dungeon_level = 1, player_level = 1):
+def rat(point = None, dungeon_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'R', 'rat', COLORS.get('rat'),
@@ -416,7 +416,7 @@ def rat(point = None, dungeon_level = 1, player_level = 1):
 
     return creature
 
-def ratsnest(point = None, dungeon_level = 1, player_level = 1):
+def ratsnest(point = None, dungeon_level = 1):
     health_component = Health(20)
 
     creature = Character(point, 'N', 'rat\'s nest', COLORS.get('rats_nest'),
@@ -429,11 +429,11 @@ def ratsnest(point = None, dungeon_level = 1, player_level = 1):
 
     creature.movement.routing_avoid.extend(creature_avoid)
 
-    equipment.add_random_loot(creature, dungeon_level, player_level)
+    equipment.add_random_loot(creature, dungeon_level)
 
     return creature
 
-def snake(point = None, dungeon_level = 1, player_level = 1):
+def snake(point = None, dungeon_level = 1):
     health_component = Health(8)
 
     creature = Character(point, 'S', 'snake', COLORS.get('snake'),
@@ -463,7 +463,7 @@ def snake(point = None, dungeon_level = 1, player_level = 1):
 
     return creature
 
-def troll(point = None, dungeon_level = 1, player_level = 1):
+def troll(point = None, dungeon_level = 1):
     #create a troll
     health_component = Health(30)
     ai_component = BasicNPC()
@@ -497,7 +497,7 @@ def troll(point = None, dungeon_level = 1, player_level = 1):
 
     return npc
 
-def warlord(point = None, dungeon_level = 1, player_level = 1):
+def warlord(point = None, dungeon_level = 1):
     #create a warlord
     ai_component = WarlordNPC()
     health_component = Health(50)
@@ -558,30 +558,30 @@ def spawn_point(point = None, species = Species.GOBLIN, max_children=5):
 
     return npc
 
-def generate_creature(type, dungeon_level = 1, player_level = 1, point = None):
+def generate_creature(type, dungeon_level = 1, point = None):
     creature = None
 
     if (type == Species.BAT):
-        creature = bat(point, dungeon_level, player_level)
+        creature = bat(point, dungeon_level)
     elif (type == Species.BATROOST):
-        creature = batroost(point, dungeon_level, player_level)
+        creature = batroost(point, dungeon_level)
     elif (type == Species.RAT):
-        creature = rat(point, dungeon_level, player_level)
+        creature = rat(point, dungeon_level)
     elif (type == Species.SNAKE):
-        creature = snake(point, dungeon_level, player_level)
+        creature = snake(point, dungeon_level)
     elif (type == Species.RATNEST):
-        creature = ratsnest(point, dungeon_level, player_level)
+        creature = ratsnest(point, dungeon_level)
     elif (type == Species.EGG):
-        creature = egg(point, dungeon_level, player_level)
+        creature = egg(point, dungeon_level)
 
     return creature
 
-def random_npc(point = None, dungeon_level = 1, player_level = 1, upgrade_chance = 98):
+def random_npc(point = None, dungeon_level = 1, upgrade_chance = 98):
     npc_types = [Species.GOBLIN, Species.ORC, Species.TROLL]
 
-    return generate_npc(choice(npc_types), dungeon_level, player_level, point, upgrade_chance)
+    return generate_npc(choice(npc_types), dungeon_level, point, upgrade_chance)
 
-def generate_npc(type, dungeon_level = 1, player_level = 1, point = None, upgrade_chance = 98):
+def generate_npc(type, dungeon_level = 1, point = None, upgrade_chance = 98):
     global names
 
     if (type == Species.GOBLIN):
@@ -618,8 +618,8 @@ def reanmimate(npc):
 
     return convert_npc_to_zombie(npc)
 
-def generate_random_skeleton(point = None, dungeon_level = 1, player_level = 1):
-    npc = random_npc(point = point, dungeon_level = dungeon_level, player_level = player_level)
+def generate_random_skeleton(point = None, dungeon_level = 1):
+    npc = random_npc(point = point, dungeon_level = dungeon_level)
 
     return convert_npc_to_skeleton(npc)
 
@@ -638,8 +638,8 @@ def convert_npc_to_skeleton(npc):
 
     return npc
 
-def generate_random_vampire(point = None, dungeon_level = 1, player_level = 1):
-    npc = random_npc(point = point, dungeon_level = dungeon_level, player_level = player_level)
+def generate_random_vampire(point = None, dungeon_level = 1):
+    npc = random_npc(point = point, dungeon_level = dungeon_level)
 
     return convert_npc_to_vampire(npc)
 
@@ -659,8 +659,8 @@ def convert_npc_to_vampire(npc):
 
     return npc
 
-def generate_random_zombie(point = None, dungeon_level = 1, player_level = 1):
-    npc = random_npc(point = point, dungeon_level = dungeon_level, player_level = player_level)
+def generate_random_zombie(point = None, dungeon_level = 1):
+    npc = random_npc(point = point, dungeon_level = dungeon_level)
 
     return convert_npc_to_zombie(npc)
 
@@ -693,7 +693,7 @@ def place_chest(point, level_map, player):
     npc_chances[Species.TROLL] = from_dungeon_level([[1, 1], [5,3], [10, 3], [15, 4], [20, 5], [25, 6]], level_map.dungeon_level)
     npc_choice = random_choice_from_dict(npc_chances)
 
-    for i in range(guards):
+    for _ in range(guards):
         npc = generate_npc(npc_choice, dungeon_level=level_map.dungeon_level, point=point)
         ai_component = GuardNPC(guard_point = chest.point)
         npc.add_component(ai_component, 'ai')
