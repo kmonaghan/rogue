@@ -62,5 +62,4 @@ class Speed:
             results.append({ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} takes {total_damage} damage.", COLORS.get('damage_text'), target=self.owner, type=MessageType.EFFECT)})
             results.append({ResultTypes.MESSAGE: Message(f"{self.owner.name.title()} feels drained and everything feels like it's in gel.", COLORS.get('effect_text'), target=self.owner, type=MessageType.EFFECT)})
 
-        print(results)
         return results

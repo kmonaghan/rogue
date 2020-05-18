@@ -1,3 +1,4 @@
+import logging
 from math import sqrt
 import numpy as np
 import operator
@@ -185,7 +186,7 @@ class dungeonGenerator:
         room_bounds = self.grid[top_x:bottom_x, top_y:bottom_y]
 
         if np.count_nonzero(room_bounds) > 0:
-            #print("Another feature is too close.")
+            #logging.info("Another feature is too close.")
             return False
 
         return True
@@ -407,11 +408,11 @@ class dungeonGenerator:
         room_slice = self.grid[x:x+width+offset, y:y+height+offset]
 
         if room_slice.shape[0] != (width + offset) or room_slice.shape[1] != (height + offset):
-            #print("Room position out of bounds")
+            #logging.info("Room position out of bounds")
             raise RoomOutOfBoundsError
 
         if not overlap and not self.quadFits(x, y, room_slice.shape[0], room_slice.shape[1], margin):
-            #print("Failed due to overlap/quadfits")
+            #logging.info("Failed due to overlap/quadfits")
             raise RoomOverlapsError
 
         room_slice[:] = tile
@@ -437,16 +438,16 @@ class dungeonGenerator:
         door_mask = ((a > x) & (a < x+width+1)) | ((b > y) & (b < y+height+1))
         #There needs to 2 spaces between the wall and the edge of the map.
         #If there isn't, mask it out.
-        #print(f"{x} <= 1")
+        #logging.info(f"{x} <= 1")
         if (x <= 1):
             door_mask[0] = False
-        #print(f"{x+width+3} >= {self.grid.shape[0]}")
+        #logging.info(f"{x+width+3} >= {self.grid.shape[0]}")
         if (x+width+3 >= self.grid.shape[0]):
             door_mask[-1] = False
-        #print(f"{y} <= 1")
+        #logging.info(f"{y} <= 1")
         if (y <= 1):
             door_mask[:, 0] = False
-        #print(f"{y+height+3} >= {self.grid.shape[1]}")
+        #logging.info(f"{y+height+3} >= {self.grid.shape[1]}")
         if (y+height+3 >= self.grid.shape[1]):
             door_mask[:, -1] = False
 
@@ -483,11 +484,11 @@ class dungeonGenerator:
         room_slice = self.grid[x:x+width, y:y+width]
 
         if room_slice.shape[0] < width or room_slice.shape[1] < width:
-            #print("Circle room out of bounds")
+            #logging.info("Circle room out of bounds")
             return None
 
         if not overlap and not self.quadFits(x, y, room_slice.shape[0], room_slice.shape[1], margin):
-            #print("Circle room failed quad fit")
+            #logging.info("Circle room failed quad fit")
             return None
 
         if add_walls:
@@ -508,7 +509,7 @@ class dungeonGenerator:
                 if y <= self.grid.shape[1] - width - 2:
                     possible_door_place.append((radius, width-1))
 
-                #print(f"Doors: {num_doors} from: {possible_door_place}")
+                #logging.info(f"Doors: {num_doors} from: {possible_door_place}")
                 for door in range(num_doors):
                     if len(possible_door_place):
                         idx = randint(0, len(possible_door_place)-1)
@@ -551,14 +552,14 @@ class dungeonGenerator:
             start_x, start_y = self.randomPoint(tile=Tiles.EMPTY, x_inset = prefab.layout.shape[0] + (margin * 2), y_inset = prefab.layout.shape[1] + (margin * 2))
 
             if not start_x:
-                #print("Failed to place room as ran out of empty tiles")
+                #logging.info("Failed to place room as ran out of empty tiles")
                 return None
 
             if overwrite or self.quadFits(start_x, start_y, prefab.layout.shape[0], prefab.layout.shape[1], margin):
                 try:
                     self.grid[start_x:start_x+prefab.layout.shape[0], start_y:start_y+prefab.layout.shape[1]] = prefab.layout
                 except ValueError:
-                    #print(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
+                    #logging.info(f"placeRoomRandomly failed: {start_x},{start_y} {prefab.shape}")
                     return None
 
                 room = prefabRoom(start_x, start_y, prefab.layout, prefab.name, prefab.exits, prefab.spawnpoints)
@@ -595,7 +596,7 @@ class dungeonGenerator:
             floor = np.where(room == Tiles.ROOM_FLOOR)
 
             if len(floor[0]) < 1:
-                print("Out of space to place room")
+                logging.info("Out of space to place room")
                 return
 
             pick = randint(0,len(floor[0]) - 1)
@@ -610,7 +611,7 @@ class dungeonGenerator:
 
             room_slice[1:template.shape[0]-1, 1:template.shape[1]-1] = Tiles.ROOM_FLOOR
 
-            print(f"Added detail at {x} {y}")
+            logging.info(f"Added detail at {x} {y}")
             matprint(room)
 
     def placeRandomRooms(self, minRoomSize, maxRoomSize, roomStep = 1, margin = 3,
@@ -623,7 +624,7 @@ class dungeonGenerator:
             voids = np.where(self.grid == Tiles.EMPTY)
 
             if len(voids[0]) < 1:
-                print("Out of space to place room")
+                logging.info("Out of space to place room")
                 return
 
             pick = randint(0,len(voids[0]) - 1)
@@ -670,7 +671,7 @@ class dungeonGenerator:
         current_door_tuples = tuple(zip(doors[0],doors[1]))
 
         if len(current_door_tuples) == 0:
-            #print(f"No doors in {room}")
+            #logging.info(f"No doors in {room}")
             return
 
         idx = 0
@@ -809,9 +810,9 @@ class dungeonGenerator:
                 x, y = cells[0]
             elif mode == 'm':
                 x, y = cells[len(cells)//2]
-            #print(f"corridor: {x}, {y}")
+            #logging.info(f"corridor: {x}, {y}")
             possMoves = self.getPossibleMoves(x, y)
-            #print(possMoves)
+            #logging.info(possMoves)
             if possMoves:
                 xi, yi = choice(possMoves)
                 self.grid[xi, yi] = Tiles.POTENTIAL_CORRIDOR_FLOOR
@@ -821,11 +822,11 @@ class dungeonGenerator:
 
     def boundedDrunkenWalk(self, source_x, source_y, target_x, target_y, previous_x = None, previous_y = None, total = 0, tile = Tiles.CAVERN_FLOOR, walk_grid = None, overwrite = False):
         if source_x == target_x and source_y == target_y:
-            print("Joy!")
+            logging.info("Joy!")
             return True
 
         if total > 500:
-            print("Too many attempts")
+            logging.info("Too many attempts")
             return False
 
         if walk_grid is None:
@@ -849,7 +850,7 @@ class dungeonGenerator:
         moves = self.getPossibleMoves(source_x, source_y, previous_x, previous_y, walk_grid)
 
         if (len(moves) < 1):
-            print("out of moves")
+            logging.info("out of moves")
             return False
 
         previous_x = source_x
@@ -859,7 +860,7 @@ class dungeonGenerator:
         for x, y in moves:
             distance = self.distanceBetween(x, y, target_x, target_y)
             #if distance == 1:
-            #    print("Within 1 space", total)
+            #    logging.info("Within 1 space", total)
             #    return True
             distances.append((distance, (x,y)))
 
@@ -872,7 +873,7 @@ class dungeonGenerator:
         source_x, source_y = distances[idx][1]
 
         if source_x == target_x and source_y == target_y:
-            print("Joy!")
+            logging.info("Joy!")
             return True
 
         total += 1
@@ -883,7 +884,7 @@ class dungeonGenerator:
             return True
 
         if total > 500:
-            print("Too many attempts")
+            logging.info("Too many attempts")
             return False
 
         if overwrite or (self.grid[source_x, source_y] == Tiles.EMPTY or self.grid[source_x, source_y] in BLOCKING_TILES):
@@ -892,7 +893,7 @@ class dungeonGenerator:
         moves = self.getPossibleMoves(source_x, source_y, previous_x, previous_y, check_carve = False)
 
         if (len(moves) < 1):
-            print("out of moves")
+            logging.info("out of moves")
             return False
 
         previous_x = source_x
@@ -972,7 +973,7 @@ class dungeonGenerator:
         stairs = np.where(self.grid == Tiles.STAIRS_FLOOR)
 
         if len(stairs[0]) < 2:
-            print("Not enough exits")
+            logging.info("Not enough exits")
             return False
 
         walkable = self.grid.copy()
@@ -983,10 +984,10 @@ class dungeonGenerator:
         path = astar.get_path(stairs[0][0], stairs[1][0], stairs[0][1], stairs[1][1])
 
         if len(path) < 1:
-            print("Can't route between stairs")
+            logging.info("Can't route between stairs")
             return False
         #elif len(path) < 30:
-        #    print("Path between stairs too short")
+        #    logging.info("Path between stairs too short")
         #    return False
 
         return True

@@ -1,3 +1,5 @@
+import logging
+
 import pubsub
 
 from etc.colors import COLORS
@@ -50,6 +52,6 @@ class Berserk:
             try:
                 self.owner.del_component('berserk')
             except AttributeError:
-                print(f"tried to remove berserk from {self.owner.name} - {self.owner.uuid}")
+                logging.info(f"tried to remove berserk from {self.owner.name} - {self.owner.uuid}")
 
         return results

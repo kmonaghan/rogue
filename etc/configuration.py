@@ -1,3 +1,5 @@
+import logging
+
 import tcod
 
 screen_width = 45
@@ -22,11 +24,10 @@ CONFIG = {
     'debug': False,
     'show_dijkstra_player': False,
     'show_dijkstra_flee': False,
-
+    'logging_level': logging.INFO,
     'map_generation_attempts': 10,
 
     'time_between_enemy_turns': 0.03,
-
 
     'font': 'data/fonts/Alloy_curses_12x12.png',
     #'font': 'data/fonts/arial10x10.png',

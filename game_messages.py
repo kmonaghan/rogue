@@ -1,3 +1,5 @@
+import logging
+
 import tcod
 
 import textwrap
@@ -19,6 +21,8 @@ class MessageLog:
         self.height = height
 
     def add_message(self, message, game_map = None):
+        logging.info(message.text)
+
         if not message.type == MessageType.SYSTEM:
             if game_map and message.target:
                 if not game_map.current_level.fov[message.target.x, message.target.y]:

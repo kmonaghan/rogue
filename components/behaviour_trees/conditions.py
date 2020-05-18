@@ -1,5 +1,6 @@
 '''via https://github.com/madrury/roguelike
 '''
+import logging
 
 import random
 
@@ -59,7 +60,7 @@ class WithinL2Radius(Node):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
         if not target:
-            print(f"No target for WithinL2Radius")
+            logging.info(f"No target for WithinL2Radius")
             return TreeStates.FAILURE, []
         distance = owner.point.distance_to(target.point)
         if distance <= self.radius:
@@ -107,7 +108,7 @@ class OutsideL2Radius(Node):
         radius_point = self.namespace.get("radius_point")
 
         if not radius_point:
-            print("Nothing to check for outside of radius.")
+            logging.info("Nothing to check for outside of radius.")
             return
 
         distance = owner.point.distance_to(radius_point)
@@ -175,7 +176,7 @@ class CheckHealthStatus(Node):
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        print(f"Current health: {owner.health.health_percentage} against {self.health_level}")
+        logging.info(f"Current health: {owner.health.health_percentage} against {self.health_level}")
         if owner.health.health_percentage <= self.health_level:
             return TreeStates.SUCCESS, []
         else:
@@ -199,7 +200,7 @@ class SetNamespace(Node):
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        print(f"Setting {self.name}")
+        logging.info(f"Setting {self.name}")
         self.namespace[self.name] = self.name
 
         return TreeStates.SUCCESS, []

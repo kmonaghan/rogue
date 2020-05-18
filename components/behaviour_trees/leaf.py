@@ -1,5 +1,6 @@
 '''via https://github.com/madrury/roguelike
 '''
+import logging
 
 from random import choice, randint, uniform
 
@@ -168,11 +169,11 @@ class Attack(Node):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
         if not target:
-            print(f"No target - how did we get here?")
+            logging.info(f"No target - how did we get here?")
             return TreeStates.FAILURE, []
 
         if target.health.dead:
-            #print("Attack: FAILURE - target dead, removing")
+            #logging.info("Attack: FAILURE - target dead, removing")
             del self.namespace["target"]
             return TreeStates.FAILURE, []
 
@@ -258,7 +259,7 @@ class SpawnEntity(Node):
                 self.current_time = 0
                 return TreeStates.SUCCESS, results
             #else:
-            #    print("Can't spawn as no room.")
+            #    logging.info("Can't spawn as no room.")
         return TreeStates.FAILURE, []
 
 class PickUp(Node):

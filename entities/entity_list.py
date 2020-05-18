@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 from entities.character import Character
 
@@ -26,13 +27,13 @@ class EntityList:
             self.lst.remove(entity)
             self.coordinate_map[(entity.x, entity.y)].remove(entity)
         except ValueError:
-            print(f"{entity} not found in list")
+            logging.info(f"{entity} not found in list")
 
     def update_position(self, entity, old_position, new_position):
         try:
             self.coordinate_map[old_position].remove(entity)
         except ValueError:
-            print("Could not remove entity: " + entity.name)
+            logging.info("Could not remove entity: " + entity.name)
         self.coordinate_map[new_position].append(entity)
 
     def get_entities_in_position(self, position):
@@ -52,10 +53,10 @@ class EntityList:
 
         dist = max_distance + 1
 
-        #print("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
+        #logging.info("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
         for x in range(start_x, end_x):
             for y in range(start_y, end_y):
-                #print ("checking " + str(x) + ", " + str(y))
+                #logging.info ("checking " + str(x) + ", " + str(y))
 
                 if (len(self.coordinate_map[(x, y)])):
                     for entity in self.coordinate_map[(x, y)]:
@@ -64,10 +65,10 @@ class EntityList:
                         if isinstance(entity, Character) and (entity.species == species) and not entity.health.dead:
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
-                                #print("FOUND!")
+                                #logging.info("FOUND!")
                                 npc = entity
                 #else:
-                #    #print "no entites at " + str(x) + ", " + str(y)
+                #    #logging.info "no entites at " + str(x) + ", " + str(y)
 
         return npc
 
@@ -82,10 +83,10 @@ class EntityList:
 
         dist = max_distance + 1
 
-        #print("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
+        #logging.info("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
         for x in range(start_x, end_x):
             for y in range(start_y, end_y):
-                #print ("checking " + str(x) + ", " + str(y))
+                #logging.info ("checking " + str(x) + ", " + str(y))
 
                 if (len(self.coordinate_map[(x, y)])):
                     for entity in self.coordinate_map[(x, y)]:
@@ -97,10 +98,10 @@ class EntityList:
 
                             entity_distance = abs(x - point.x)
                             if (entity_distance < dist):
-                                #print("FOUND!")
+                                #logging.info("FOUND!")
                                 npcs.append(entity)
                 #else:
-                #    #print "no entites at " + str(x) + ", " + str(y)
+                #    #logging.info "no entites at " + str(x) + ", " + str(y)
 
         return npcs
 

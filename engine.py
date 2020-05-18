@@ -1,3 +1,6 @@
+import datetime
+import logging
+
 import tcod
 import tcod.event
 from time import sleep
@@ -49,7 +52,7 @@ class MainMenu(tcod.event.EventDispatch):
         pass
 
     def ev_keydown(self, event: tcod.event.KeyDown):
-        print(event.sym)
+        logging.info(event.sym)
         '''
             key_char = chr(key.c)
 
@@ -84,6 +87,8 @@ class Rogue(tcod.event.EventDispatch):
         self.using_item = None
 
     def start_fresh_game(self):
+        logging.basicConfig(filename=f'log/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}.log', filemode='w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=CONFIG.get('logging_level'))
+
         pubsub.pubsub = pubsub.PubSub()
 
         self.message_log = MessageLog(CONFIG.get('message_width'), CONFIG.get('message_height'))
@@ -195,7 +200,7 @@ class Rogue(tcod.event.EventDispatch):
 
         if (len(input_result) == 0):
             if CONFIG.get('debug'):
-                #print("No corresponding result for key press.")
+                #logging.info("No corresponding result for key press.")
                 pass
             return
 
@@ -777,6 +782,9 @@ def main():
         #else:
         current_game.on_draw()
         tcod.console_flush()
+
+        #Uncomment the following line to take a screenshot each turn
+        #tcod.sys_save_screenshot()
 
         if (current_game.game_state == GameStates.ENEMY_TURN
             or current_game.game_state == GameStates.PLAYER_SLEEP):

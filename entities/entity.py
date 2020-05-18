@@ -1,7 +1,9 @@
 __metaclass__ = type
 
-import equipment
+import logging
 import math
+
+import equipment
 
 from components.energy import Energy
 from components.item import Item
@@ -139,7 +141,7 @@ class Entity:
         if component:
             component.owner = self
 
-        #print(f"Adding component: {type(component).__name__}")
+        #logging.info(f"Adding component: {type(component).__name__}")
 
         setattr(self, component_name, component)
 
@@ -150,7 +152,7 @@ class Entity:
         try:
             delattr(self, component_name)
         except AttributeError:
-            print(f"No component_name {component_name} to remove.")
+            logging.info(f"No component_name {component_name} to remove.")
 
     def register_turn(self, item):
         key = str(uuid.uuid4())
@@ -162,7 +164,7 @@ class Entity:
         try:
             del self.turn[key]
         except KeyError:
-            print(f"Key {key} not found")
+            logging.info(f"Key {key} not found")
 
     def deregister_turn_all(self):
         self.turn.clear()
@@ -178,10 +180,10 @@ class Entity:
             try:
                 results.extend(turn_copy[key].tick(game_map))
             except TypeError as e:
-                print(f"Error proccessing turn: {e}")
+                logging.info(f"Error proccessing turn: {e}")
 
         return results
 
     def clone(self):
         for att in dir(self):
-            print (att, getattr(self, att))
+            logging.info (att, getattr(self, att))

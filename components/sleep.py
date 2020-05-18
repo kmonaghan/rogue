@@ -1,3 +1,5 @@
+import logging
+
 from components.fov import FOV
 
 class Sleep:
@@ -24,4 +26,4 @@ class Sleep:
             self.owner.add_component(self.old_fov, 'fov')
             self.owner.del_component('sleep')
         else:
-            print('no owner?')
+            logging.info('no owner?')

@@ -1,3 +1,5 @@
+import logging
+
 from random import randint, shuffle
 
 import numpy as np
@@ -63,7 +65,7 @@ def change_defence(*args, **kwargs):
     results = []
 
     extra = die_roll(number_of_dice, type_of_dice)
-    print(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
+    logging.info(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
     target.defence.base_defence = target.defence.base_defence + extra
     results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
 
@@ -78,7 +80,7 @@ def change_power(*args, **kwargs):
     results = []
 
     extra = die_roll(number_of_dice, type_of_dice)
-    print(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
+    logging.info(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
     target.offence.base_power = target.offence.base_power + extra
     results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', COLORS.get('success_text'))})
 

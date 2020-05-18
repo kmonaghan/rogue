@@ -1,3 +1,5 @@
+import logging
+
 import pubsub
 
 from etc.colors import COLORS
@@ -50,9 +52,9 @@ class Poisoned:
             try:
                 self.owner.del_component("poisoned")
             except AttributeError:
-                print(f"Tried to remove poison from {self.owner.name} - {self.owner.uuid}")
+                logging.info(f"Tried to remove poison from {self.owner.name} - {self.owner.uuid}")
         else:
-            print('****No owner to poisoned - already deleted?')
+            logging.info('****No owner to poisoned - already deleted?')
 
         self.owner.deregister_turn(self.uuid)
 

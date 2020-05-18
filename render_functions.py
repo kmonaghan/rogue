@@ -11,7 +11,7 @@ def get_names_under_mouse(x, y, current_level):
     if current_level.within_bounds(x, y):
             location = str(x) + ',' + str(y)
     else:
-        #print("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
+        #logging.info("get_names_under_mouse IndexError: " + str(x) + ',' + str(y))
         return ''
 
     location_description = location

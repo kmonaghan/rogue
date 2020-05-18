@@ -1,3 +1,5 @@
+import logging
+
 import tcod
 
 from random import choice
@@ -17,7 +19,7 @@ class Movement:
                 return
 
             if not current_level.within_bounds(self.owner.x + dx, self.owner.y + dy):
-                print(f"{self.owner.name} {self.owner.point} attempt to move out of bounds: {self.owner.x + dx} {self.owner.y + dy}")
+                logging.info(f"{self.owner.name} {self.owner.point} attempt to move out of bounds: {self.owner.x + dx} {self.owner.y + dy}")
                 return
 
             #move by the given amount, if the destination is not blocked
@@ -26,7 +28,7 @@ class Movement:
                 self.has_moved = True
                 return True
             else:
-                print(f"{self.owner.name} can't move as blocked")
+                logging.info(f"{self.owner.name} can't move as blocked")
 
                 return False
 

@@ -1,3 +1,4 @@
+import logging
 import tcod
 import numpy as np
 from random import choice, sample, randint, getrandbits, shuffle
@@ -60,7 +61,7 @@ class GameMap:
                         dm = levelGenerator(map_width, map_height, player.x, player.y)
                 break
             except MapError as e:
-                print(f"===Map generation failed=== {e}")
+                logging.info(f"===Map generation failed=== {e}")
                 attempts = attempts + 1
                 dm = None
 
@@ -80,7 +81,7 @@ class GameMap:
 
                 break
             except MapError as e:
-                print(f"===Map generation failed=== {e}")
+                logging.info(f"===Map generation failed=== {e}")
                 attempts = attempts + 1
                 dm = None
 
@@ -241,7 +242,7 @@ class GameMap:
         min_npcs = max(1, max_npcs // 4)
         num_npcs = randint(min_npcs, max_npcs)
 
-        print (f"Max creatures: {max_npcs}, number of creatures: {num_npcs}")
+        logging.info (f"Max creatures: {max_npcs}, number of creatures: {num_npcs}")
 
         for i in range(num_npcs):
             #choose random spot for this npc
@@ -267,7 +268,7 @@ class GameMap:
         min_npcs = max(1, max_npcs // 4)
         num_npcs = randint(min_npcs, max_npcs)
 
-        print (f"Min NPCs: {min_npcs}, Max NPCx: {max_npcs}, number of NPCs: {num_npcs}")
+        logging.info (f"Min NPCs: {min_npcs}, Max NPCx: {max_npcs}, number of NPCs: {num_npcs}")
 
         for i in range(num_npcs):
             choice = random_choice_from_dict(npc_chances)
@@ -329,10 +330,10 @@ class GameMap:
                 room_name = room.name
 
         if npc:
-            print(f"Adding quest for: {npc.name}")
+            logging.info(f"Adding quest for: {npc.name}")
             self.add_bounty_hunter(npc, room_name = room_name)
         else:
-            print("NO QUEST!")
+            logging.info("NO QUEST!")
 
     def create_floor(self, player):
         self.down_stairs = None
@@ -400,7 +401,7 @@ class GameMap:
             q2 = quest.Quest('Go down', 'Find the stairs down', 100, map_point = self.down_stairs.point)
             q1.next_quest = q2
         else:
-            print("No stairs down")
+            logging.info("No stairs down")
 
         npc.questgiver.add_quest(q1)
         self.current_level.add_entity(npc)

@@ -1,3 +1,4 @@
+import logging
 import pubsub
 
 from etc.colors import COLORS
@@ -49,9 +50,9 @@ class Regeneration:
             try:
                 self.owner.del_component("regeneration")
             except AttributeError:
-                print(f"tried to remove regeneration from {self.owner.name} - {self.owner.uuid}")
+                logging.info(f"tried to remove regeneration from {self.owner.name} - {self.owner.uuid}")
         else:
-            print('****No owner to regeneration - already deleted?')
+            logging.info('****No owner to regeneration - already deleted?')
 
         self.owner.deregister_turn(self.uuid)
 

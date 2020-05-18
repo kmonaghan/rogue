@@ -1,3 +1,5 @@
+import logging
+
 import pubsub
 from game_messages import Message
 
@@ -26,11 +28,11 @@ class Children:
 
     def possibleChildDeath(self, sub, message, game_map):
         if message.target is None:
-            print("Children.possibleChildDeath: the target is none?")
+            logging.info("Children.possibleChildDeath: the target is none?")
             return
 
         if sub.entity is None:
-            print("Children.possibleChildDeath: the subscriber is none?")
+            logging.info("Children.possibleChildDeath: the subscriber is none?")
             return
 
         if message.entity.uuid in self.children:

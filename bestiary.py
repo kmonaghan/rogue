@@ -1,3 +1,5 @@
+import logging
+
 import tcod
 
 from random import choice, randint
@@ -737,11 +739,11 @@ Subscription methods
 '''
 def eat_rat(sub, message, level_map):
     if message.target is None:
-        print("eat_rat: the target is none?")
+        logging.info("eat_rat: the target is none?")
         return
 
     if sub.entity is None:
-        print("eat_rat: the subscriber is none?")
+        logging.info("eat_rat: the subscriber is none?")
         return
 
     if (message.entity.species == Species.RAT) and (message.target.uuid == sub.entity.uuid):
@@ -750,11 +752,11 @@ def eat_rat(sub, message, level_map):
 
 def goblin_observed_death(sub, message, level_map):
     if message.target is None:
-        print("goblin_observed_death: the target is none?")
+        logging.info("goblin_observed_death: the target is none?")
         return
 
     if sub.entity is None:
-        print("goblin_observed_death: the subscriber is none?")
+        logging.info("goblin_observed_death: the subscriber is none?")
         return
 
     if ((message.entity.species == Species.GOBLIN) and (message.target.species == Species.PLAYER)):

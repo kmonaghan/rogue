@@ -1,3 +1,5 @@
+import logging
+
 import pubsub
 
 from math import floor
@@ -56,6 +58,8 @@ class Health:
         self.hp -= amount
 
         if self.dead:
+            logging.info(f"Death of {self.owner} by {npc}")
+
             self.hp = 0
 
             if npc and npc.ai:
