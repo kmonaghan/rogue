@@ -45,6 +45,8 @@ http://www.darkgnosis.com/2018/03/03/contour-bombing-cave-generation-algorithm
 http://anderoonies.github.io/2020/03/17/brogue-generation.html
 http://anderoonies.github.io/2020/02/25/dungeon-generation.html
 
+https://www.reddit.com/r/roguelikedev/comments/glsq6w/map_generation_using_bezier_curves/
+
 Alternative numpy cavern generation:
 https://www.reddit.com/r/roguelikedev/comments/dik0dq/fast_tuneable_cavern_generation_with_numpy_and/
 import numpy as np
