@@ -1,3 +1,5 @@
+import logging
+
 import tcod
 
 from etc.enum import LevelUp
@@ -29,18 +31,19 @@ class Level:
     def experience_to_next_level(self):
         return self.current_level_xp + self.next_level_xp
 
-    def xp_worth(self, npc = None):
+    def xp_worth(self, npc):
+        logging.info(f"Getting xp value for {self.owner} to give to {npc}")
+
         earned_xp = self.xp_value
 
-        if (npc):
-            level_difference = self.owner.level.current_level - npc.level.current_level
+        level_difference = self.owner.level.current_level - npc.level.current_level
 
-            if (level_difference < -4):
-                earned_xp = 0
-            elif (level_difference < 0):
-                earned_xp = int(earned_xp * ((5 - abs(level_difference)) / 5))
-            elif (level_difference > 0):
-                earned_xp = int(earned_xp * (1 + ((5 - abs(level_difference)) / 5)))
+        if (level_difference < -4):
+            earned_xp = 0
+        elif (level_difference < 0):
+            earned_xp = int(earned_xp * ((5 - abs(level_difference)) / 5))
+        elif (level_difference > 0):
+            earned_xp = int(earned_xp * (1 + ((5 - abs(level_difference)) / 5)))
 
         return earned_xp
 
