@@ -16,6 +16,7 @@ from components.ai import (BasicNPC, CaptainNPC, CleanerNPC, GuardNPC,
                             TetheredNPC, ZombieNPC)
 from components.berserk import Berserk
 from components.children import Children
+from components.damagemodifier import DamageModifier
 from components.fov import FOV
 from components.health import Health
 from components.interaction import Interaction
@@ -25,11 +26,9 @@ from components.defence import Defence
 from components.naming import Naming
 from components.questgiver import Questgiver
 from components.regeneration import Regeneration
-from components.resistance import Resistance
 from components.shimmer import Shimmer
 from components.spawn import Spawn
 from components.subspecies import Subspecies
-from components.vulnerability import Vulnerability
 
 from entities.entity import Entity
 from entities.character import Character
@@ -479,7 +478,7 @@ def troll(point = None, dungeon_level = 1):
     npc.add_component(Level(xp_value = 10), 'level')
     regen = Regeneration()
     npc.add_component(regen, 'regeneration')
-    npc.add_component(Vulnerability(fire=1.5), 'vulnerability')
+    npc.add_component(DamageModifier(fire=1.5), 'damagemodifier')
     regen.start()
 
     npc.movement.routing_avoid.extend(npc_avoid)
@@ -630,10 +629,7 @@ def convert_npc_to_skeleton(npc):
     npc.add_component(Naming(npc.base_name, prefix='Skeletal'), 'naming')
     npc.add_component(BasicNPC(), 'ai')
     npc.add_component(Health(max(1, npc.health.max_hp // 3)), 'health')
-    if npc.resistance:
-        npc.resistance.slashing = 0.8
-    else:
-        npc.add_component(Resistance(slashing=0.8), 'resistance')
+    npc.add_component(DamageModifier(blunt=1.2, slashing=0.8, poison=0), 'damagemodifier')
 
     npc.species=Species.UNDEAD
     npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
@@ -671,12 +667,14 @@ def convert_npc_to_zombie(npc):
     npc.add_component(Naming(npc.base_name, prefix='Zombie'), 'naming')
     npc.add_component(ZombieNPC(species=npc.species), 'ai')
     npc.add_component(Health(max(1, npc.health.max_hp // 2)), 'health')
+    npc.add_component(DamageModifier(blunt=0.8, slashing=1.2, poison=0), 'damagemodifier')
     npc.species=Species.UNDEAD
     npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
 
     teeth = equipment.teeth()
     teeth.lootable = False
-    equipment.add_infection(teeth, name="Zombification", chance=101, on_turn=None, on_death=convert_npc_to_zombie)
+    equipment.add_infection(teeth, name="Zombification", chance=50,
+                            on_turn=None, on_death=convert_npc_to_zombie)
 
     npc.inventory.add_item(teeth)
     npc.equipment.toggle_equip(teeth)
