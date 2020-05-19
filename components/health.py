@@ -69,7 +69,7 @@ class Health:
             results.append({ResultTypes.MESSAGE: message})
             results.append({ResultTypes.DEAD_ENTITY: {'dead': self.owner, 'attacker': npc}})
 
-            if self.owner.level:
+            if npc and self.owner.level:
                 xp = self.owner.level.xp_worth(npc)
                 results.extend([{ResultTypes.EARN_XP: {'xp': xp, 'earner': npc}}])
 
