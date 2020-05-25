@@ -18,7 +18,7 @@ class Offence:
         multiplier = 1
 
         if self.owner and self.owner.equipment:
-            bonus = self.owner.equipment.power_bonus
+            bonus = self.owner.equipment.power
         else:
             bonus = 0
 

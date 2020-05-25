@@ -1,4 +1,5 @@
 import json
+import logging
 
 from random import randint, choice
 
@@ -10,10 +11,13 @@ from etc.colors import COLORS
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
-from components.ablity import ExtraDamage, Poisoning, PushBack, LifeDrain, Infection, Paralysis, SpellAbility
+from components.ablity import (Defence, ExtraDamage, Poisoning, PushBack,
+                                LifeDrain, Infection, Paralysis, Speed,
+                                SpellAbility)
 from components.aura import DamageAura
 from components.equippable import Equippable
-from components.identifiable import Identifiable, IdentifiablePotion, IdentifiableScroll, IdentifiableWeapon
+from components.identifiable import (Identifiable, IdentifiablePotion,
+                                        IdentifiableScroll, IdentifiableWeapon)
 from components.item import Item
 from components.naming import Naming
 from components.regeneration import Regeneration
@@ -72,14 +76,15 @@ def random_ring(point = None, dungeon_level = 1):
     item_chances['defence'] = 50
     item_chances['regeneration'] = 5
 
+    item = Entity(point, chr(9), 'Ring', COLORS.get('equipment_rare'), render_order=RenderOrder.ITEM)
+
     choice = random_choice_from_dict(item_chances)
     if choice == 'power':
-        item = ring_of_power(point)
-
+        add_power(item)
     elif choice == 'defence':
-        item = ring_of_defence(point)
+        add_defence(item)
     elif choice == 'regeneration':
-        item = ring_of_regeneration(point)
+        add_regeneration(item)
     return item
 
 def random_scroll(point = None, dungeon_level = 1):
@@ -116,6 +121,10 @@ def random_scroll(point = None, dungeon_level = 1):
 
     return item
 
+def random_weapon(point = None, dungeon_level = 1):
+    data = choice(list(weapons.values()))
+    return weapon_from_json(data, point = point)
+
 def create_armour(name, point = None, dungeon_level = 1):
     armour = armours.get(name)
 
@@ -130,38 +139,44 @@ def create_weapon(name, point = None, dungeon_level = 1):
     if weapon:
         return weapon_from_json(weapon, point = point)
 
+    logging.info(f"No loaded weapon called {name}")
+
     return None
 
-def random_weapon(point = None, dungeon_level = 1):
-    data = choice(list(weapons.values()))
-    return weapon_from_json(data, point = point)
 
 def random_magic_weapon(dungeon_level = 1):
-    item = random_weapon(None, dungeon_level)
+    item = random_weapon(dungeon_level = dungeon_level)
 
     dice = randint(1, 1000)
 
     item.add_component(IdentifiableWeapon(item.base_name),"identifiable")
 
     naming = Naming(item.base_name)
+
     if (dice <= 500):
-        naming.suffix = "of Stabby Stabby"
+        naming.prefix = "Remarkable"
         item.color = COLORS.get('equipment_uncommon')
-        item.equippable.power_bonus = item.equippable.power_bonus * 1.25
+        item.equippable.number_of_dice = 2
     elif (dice <= 750):
-        naming.suffix = "of YORE MA"
+        naming.prefix = "Excellent"
         item.color = COLORS.get('equipment_rare')
-        item.equippable.power_bonus = item.equippable.power_bonus * 1.5
+        item.equippable.number_of_dice = 3
     elif (dice <= 990):
-        naming.suffix = " of I'll FUCKING Have You"
+        naming.prefix = "Exceptional"
         item.color = COLORS.get('equipment_epic')
-        item.equippable.power_bonus = item.equippable.power_bonus * 2
+        item.equippable.number_of_dice = 4
     else:
-        naming.suffix = "of Des and Troy"
+        naming.prefix = "Phenomenal"
         item.color = COLORS.get('equipment_legendary')
-        item.equippable.power_bonus = item.equippable.power_bonus * 4
+        item.equippable.number_of_dice = 5
     item.add_component(naming, 'naming')
-    item.equippable.number_of_dice = 2
+
+    '''
+    naming.suffix = "of Stabby Stabby"
+    naming.suffix = "of YORE MA"
+    naming.suffix = "of I'll FUCKING Have You"
+    naming.suffix = "of Des and Troy"
+    '''
 
     add_random_weapon_ablity(item)
 
@@ -186,6 +201,17 @@ def add_random_weapon_ablity(item):
         add_smashing(item)
     elif dice <= 90:
         add_lifedrain(item)
+    elif dice <= 95:
+        add_defence(item)
+    elif dice <= 95:
+        add_defence(item)
+    elif dice <= 95:
+        add_defence(item)
+
+def add_defence(item):
+    item.add_component(Defence(defence=10), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of defence'), 'naming')
 
 def add_poison(item, damage = 1, duration = 10):
     item.add_component(Poisoning(0, damage, duration), 'ablity')
@@ -195,12 +221,16 @@ def add_poison(item, damage = 1, duration = 10):
 def add_flaming(item):
     item.add_component(ExtraDamage(number_of_dice=1, type_of_dice=6, name="fire", damage_type=DamageType.FIRE), 'ablity')
     if not item.naming:
-        item.add_component(Naming(item.base_name, suffix = 'of flaming'), 'naming')
+        item.add_component(Naming(item.base_name, prefix = 'Flaming'), 'naming')
+    else:
+        item.naming.prefix += " flaming"
 
 def add_lightning(item):
     item.add_component(SpellAbility(spell=tome.lightning, number_of_dice=2, type_of_dice=10, radius=2), 'ablity')
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = 'of lightning'), 'naming')
+    else:
+        item.naming.prefix += " shocking"
 
 def add_shocking(item):
     item.add_component(ExtraDamage(number_of_dice=1, type_of_dice=6, name="shock", damage_type=DamageType.ELECTRIC), 'ablity')
@@ -222,22 +252,25 @@ def add_paralysis(item):
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = 'of paralysis'), 'naming')
 
+def add_power(item):
+    item.add_component(Defence(defence=1), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of power'), 'naming')
+
+def add_regeneration(item):
+    item.add_component(Defence(defence=10), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of regeneration'), 'naming')
+
+def add_speed(item):
+    item.add_component(Speed(), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of speed'), 'naming')
+
 def add_infection(item, name="Infection", chance=50, on_turn=None, on_death=None):
     item.add_component(Infection(name=name, chance=chance, on_turn=on_turn, on_death=on_death), 'ablity')
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = f"of {name}"), 'naming')
-
-def ring_of_power(point = None):
-    equippable_component = Equippable(EquipmentSlot.RING, power_bonus=1)
-    item = Entity(point, chr(9), 'Ring of Power', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                        equippable=equippable_component)
-    return item
-
-def ring_of_defence(point = None):
-    equippable_component = Equippable(EquipmentSlot.RING, defence_bonus=1)
-    item = Entity(point, chr(9), 'Ring of Health', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
-                        equippable=equippable_component)
-    return item
 
 def ring_of_regeneration(point = None):
     equippable_component = Equippable(EquipmentSlot.RING, attribute=Regeneration())
@@ -389,7 +422,7 @@ def map_scroll(point = None):
 
 def teeth(point = None):
     #create teeth for animals
-    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power=1)
     equippable_component.type_of_dice = 2
     equippable_component.damage_type = DamageType.SLASHING
     item = Entity(point, '"', 'teeth', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
@@ -398,7 +431,7 @@ def teeth(point = None):
 
 def claw(point = None):
     #create claw for animals
-    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power=1)
     equippable_component.type_of_dice = 4
     equippable_component.damage_type = DamageType.SLASHING
     item = Entity(point, ',', 'claw', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
@@ -406,7 +439,7 @@ def claw(point = None):
     return item
 
 def pseudopod(point = None):
-    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power_bonus=1)
+    equippable_component = Equippable(EquipmentSlot.MAIN_HAND, power=1)
     equippable_component.type_of_dice = 6
     equippable_component.damage_type = DamageType.BLUNT
     item = Entity(point, ',', 'pseudopod', COLORS.get('equipment_uncommon'), equippable=equippable_component, render_order=RenderOrder.ITEM)
@@ -424,7 +457,7 @@ def key(point = None, unlocks = None):
 def add_damage_aura(item):
     item.add_component(DamageAura(), 'aura')
 
-def add_random_loot(npc, dungeon_level = 1, player_level = 1, min_items = 0):
+def add_random_loot(npc, dungeon_level = 1, min_items = 0):
     total_items = randint(min_items, min_items + dungeon_level)
 
     for i in range(total_items):
@@ -446,7 +479,7 @@ def add_random_loot(npc, dungeon_level = 1, player_level = 1, min_items = 0):
 def weapon_from_json(data, point = None):
     slot = string_to_damage_type.get(data['Equipment Slots'], EquipmentSlot.MAIN_HAND)
 
-    equippable_component = Equippable(slot, power_bonus=data['Power Bonus'])
+    equippable_component = Equippable(slot, power=data['Power'])
     equippable_component.damage_type = string_to_damage_type.get(data['Damage']['Damage Type'], DamageType.DEFAULT)
     equippable_component.number_of_dice = data['Damage']['number_of_dice']
     equippable_component.type_of_dice = data['Damage']['type_of_dice']
@@ -463,7 +496,7 @@ def weapon_from_json(data, point = None):
 def armour_from_json(data, point = None):
     slot = string_to_equipment_slot.get(data['Equipment Slot'], EquipmentSlot.CHEST)
 
-    equippable_component = Equippable(slot, defence_bonus=data['Defence Bonus'])
+    equippable_component = Equippable(slot, defence=data['Defence'])
 
     item = Entity(point,
                     data['Character'],
@@ -487,3 +520,22 @@ def import_weapons():
 
         for detail in data:
             weapons[detail["Name"]] = detail
+
+def fingfangfoom(item):
+    if item.equippable.slot == EquipmentSlot.HEAD:
+        name = "gloom"
+    elif item.equippable.slot == EquipmentSlot.CHEST:
+        name = "doom"
+    elif item.equippable.slot == EquipmentSlot.LEGS:
+        name = "doom"
+    elif item.equippable.slot == EquipmentSlot.FEET:
+        add_speed(item)
+        name = "zoom"
+    elif item.equippable.slot == EquipmentSlot.MAIN_HAND:
+        name = "kaboom"
+        add_smashing(item)
+    else:
+        return
+
+    item.naming.prefix = "Fing Fang Foom"
+    item.suffix = f"of {name}"

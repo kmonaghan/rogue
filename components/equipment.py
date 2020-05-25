@@ -1,89 +1,69 @@
-from etc.enum import EquipmentSlot
-
+from etc.enum import EquipmentSlot, string_to_equipment_slot
 
 class Equipment:
-    #an object that can be equipped, yielding bonuses. automatically adds the Item component.
+    '''
+    An object that manages all the items that an enity has equipped.
+
+    Attributes
+    ----------
+    equipped : dictionary
+        Stores all the equipped items.
+    '''
     def __init__(self):
-        self.main_hand = None
-        self.off_hand = None
-        self.chest = None
-        self.head = None
-        self.left_ring_finger = None
-        self.right_ring_finger = None
+        self.equipped = {}
+        for value in string_to_equipment_slot.values():
+            self.equipped[value] = None
+
+    @property
+    def defence(self):
+        """Return the total defence bonus from all equipped items."""
+        bonus = 0
+
+        for item in self.equipped.values():
+            if item:
+                bonus += item.equippable.defence
+
+        return bonus
 
     @property
     def max_hp_bonus(self):
+        """Return the hit point bonus from all equipped items."""
         bonus = 0
-
-        if self.main_hand and self.main_hand.equippable:
-            bonus += self.main_hand.equippable.max_hp_bonus
-
-        if self.off_hand and self.off_hand.equippable:
-            bonus += self.off_hand.equippable.max_hp_bonus
-
-        if self.chest and self.chest.equippable:
-            bonus += self.chest.equippable.max_hp_bonus
-
-        if self.head and self.head.equippable:
-            bonus += self.head.equippable.max_hp_bonus
-
-        if self.left_ring_finger and self.left_ring_finger.equippable:
-            bonus += self.left_ring_finger.equippable.max_hp_bonus
-
-        if self.right_ring_finger and self.right_ring_finger.equippable:
-            bonus += self.right_ring_finger.equippable.max_hp_bonus
+        for item in self.equipped.values():
+            if item:
+                bonus += item.equippable.max_hp_bonus
 
         return bonus
 
     @property
-    def power_bonus(self):
+    def power(self):
+        """Return the total power bonus from all equipped items."""
         bonus = 0
 
-        if self.main_hand and self.main_hand.equippable:
-            bonus += self.main_hand.equippable.power_bonus
-
-        if self.off_hand and self.off_hand.equippable:
-            bonus += self.off_hand.equippable.power_bonus
-
-        if self.chest and self.chest.equippable:
-            bonus += self.chest.equippable.power_bonus
-
-        if self.head and self.head.equippable:
-            bonus += self.head.equippable.power_bonus
-
-        if self.left_ring_finger and self.left_ring_finger.equippable:
-            bonus += self.left_ring_finger.equippable.power_bonus
-
-        if self.right_ring_finger and self.right_ring_finger.equippable:
-            bonus += self.right_ring_finger.equippable.power_bonus
-
-        return bonus
-
-    @property
-    def defence_bonus(self):
-        bonus = 0
-
-        if self.main_hand and self.main_hand.equippable:
-            bonus += self.main_hand.equippable.defence_bonus
-
-        if self.off_hand and self.off_hand.equippable:
-            bonus += self.off_hand.equippable.defence_bonus
-
-        if self.chest and self.chest.equippable:
-            bonus += self.chest.equippable.defence_bonus
-
-        if self.head and self.head.equippable:
-            bonus += self.head.equippable.defence_bonus
-
-        if self.left_ring_finger and self.left_ring_finger.equippable:
-            bonus += self.left_ring_finger.equippable.defence_bonus
-
-        if self.right_ring_finger and self.right_ring_finger.equippable:
-            bonus += self.right_ring_finger.equippable.defence_bonus
+        for item in self.equipped.values():
+            if item:
+                bonus += item.equippable.power
 
         return bonus
 
     def toggle_equip(self, equippable_entity):
+        '''Attempt to equip an item.
+
+        If an item is already equipped in the appropriate slot, the current item
+        will be depuipped first and then the new item equipped.
+
+        Rings are handled seperately.
+
+        Parameters
+        ----------
+        equippable_entity : Entity
+            The item to attempt to equip.
+
+        Returns
+        -------
+        results
+            An array with the processed results.
+        '''
         results = []
 
         slot = equippable_entity.equippable.slot
@@ -91,62 +71,23 @@ class Equipment:
         equipped = None
         dequipped = None
 
-        if slot == EquipmentSlot.MAIN_HAND:
-            if self.main_hand == equippable_entity:
-                self.main_hand = None
+        if (slot == EquipmentSlot.RING
+            or slot == EquipmentSlot.LEFT_RING_FINGER
+            or slot == EquipmentSlot.RIGHT_RING_FINGER):
+            return results.extend(self.toggle_equip_ring(equippable_entity))
+        else:
+            if self.equipped[slot] == equippable_entity:
+                self.equipped[slot] = None
                 results.append({'dequipped': equippable_entity})
                 dequipped = equippable_entity
             else:
-                if self.main_hand:
-                    results.append({'dequipped': self.main_hand})
+                if self.equipped[slot]:
+                    results.append({'dequipped': self.equipped[slot]})
                     dequipped = equippable_entity
-                if self.main_hand != equippable_entity:
-                    self.main_hand = equippable_entity
+                if self.equipped[slot] != equippable_entity:
+                    self.equipped[slot] = equippable_entity
                     results.append({'equipped': equippable_entity})
                     equipped = equippable_entity
-        elif slot == EquipmentSlot.OFF_HAND:
-            if self.off_hand == equippable_entity:
-                self.off_hand = None
-                results.append({'dequipped': equippable_entity})
-                dequipped = equippable_entity
-            else:
-                if self.off_hand:
-                    results.append({'dequipped': self.off_hand})
-                    dequipped = equippable_entity
-
-                self.off_hand = equippable_entity
-                results.append({'equipped': equippable_entity})
-                equipped = equippable_entity
-        elif slot == EquipmentSlot.CHEST:
-            if self.chest == equippable_entity:
-                self.chest = None
-                results.append({'dequipped': equippable_entity})
-                dequipped = equippable_entity
-            else:
-                if self.chest:
-                    results.append({'dequipped': self.chest})
-                    dequipped = equippable_entity
-
-                self.chest = equippable_entity
-                results.append({'equipped': equippable_entity})
-                equipped = equippable_entity
-        elif slot == EquipmentSlot.HEAD:
-            if self.head == equippable_entity:
-                self.head = None
-                results.append({'dequipped': equippable_entity})
-                dequipped = equippable_entity
-            else:
-                if self.head:
-                    results.append({'dequipped': self.head})
-                    dequipped = equippable_entity
-
-                if self.head != equippable_entity:
-                    self.head = equippable_entity
-                    results.append({'equipped': equippable_entity})
-                    equipped = equippable_entity
-        elif slot == EquipmentSlot.RING or EquipmentSlot.LEFT_RING_FINGER or EquipmentSlot.RIGHT_RING_FINGER:
-            results.extend(self.equip_ring(equippable_entity))
-            equipped = equippable_entity
 
         if equipped:
             equipped.equippable.on_equip(self.owner)
@@ -156,49 +97,72 @@ class Equipment:
 
         return results
 
-    def equip_ring(self, equippable_entity):
+    def toggle_equip_ring(self, equippable_entity):
+        '''Attempt to equip a ring.
+        If the entity has no rings equipped, the ring is equipped on the left
+        hand.
+        If the entity has a ring on the left hand, the ring is equipped on the
+        right hand.
+        If the entity has a ring on both hands, the current ring on the left
+        hand is dequipped and the
+
+        Parameters
+        ----------
+        equippable_entity : Entity
+            The ring to attempt to equip.
+
+        Returns
+        -------
+        results
+            An array with the processed results.
+        '''
         results = []
 
-        currently_equiped = None
+        equipped = None
+        dequipped = None
 
-        if self.left_ring_finger == equippable_entity:
-            currently_equiped = self.left_ring_finger
-            self.left_ring_finger = None
+        if self.equipped[EquipmentSlot.LEFT_RING_FINGER] == equippable_entity:
+            dequipped = self.equipped[EquipmentSlot.LEFT_RING_FINGER]
+            self.equipped[EquipmentSlot.LEFT_RING_FINGER] = None
             results.append({'dequipped': equippable_entity})
-        elif self.right_ring_finger == equippable_entity:
-            currently_equiped = self.right_ring_finger
-            self.right_ring_finger = None
+        elif self.equipped[EquipmentSlot.LEFT_RING_FINGER] == equippable_entity:
+            dequipped = self.equipped[EquipmentSlot.RIGHT_RING_FINGER]
+            self.equipped[EquipmentSlot.RIGHT_RING_FINGER] = None
             results.append({'dequipped': equippable_entity})
         else:
-            if not self.left_ring_finger:
-                self.left_ring_finger = equippable_entity
+            if not self.equipped[EquipmentSlot.LEFT_RING_FINGER]:
+                self.equipped[EquipmentSlot.LEFT_RING_FINGER] = equippable_entity
                 results.append({'equipped': equippable_entity})
-            elif not self.right_ring_finger:
-                self.right_ring_finger = equippable_entity
+                equipped = equippable_entity
+            elif not self.equipped[EquipmentSlot.RIGHT_RING_FINGER]:
+                self.equipped[EquipmentSlot.RIGHT_RING_FINGER] = equippable_entity
                 results.append({'equipped': equippable_entity})
+                equipped = equippable_entity
             else:
-                results.append({'dequipped': self.left_ring_finger})
+                dequipped = self.equipped[EquipmentSlot.LEFT_RING_FINGER]
+                results.append({'dequipped': self.equipped[EquipmentSlot.LEFT_RING_FINGER]})
                 results.append({'equipped': equippable_entity})
+                equipped = equippable_entity
+
+        if equipped:
+            equipped.equippable.on_equip(self.owner)
+
+        if dequipped:
+            dequipped.equippable.on_dequip(self.owner)
 
         return results
 
-    def get_equipped_in_slot(self, slot):  #returns the equipment in a slot, or None if it's empty
-        if slot == EquipmentSlot.MAIN_HAND:
-            return self.main_hand
+    def get_equipped_in_slot(self, slot):
+        '''Return the item (if any) equipped in a particular slot.
 
-        if slot == EquipmentSlot.OFF_HAND:
-            return self.off_hand
+        Parameters
+        ----------
+        slot : EquipmentSlot
+            The slot to be checked for an item.
 
-        if slot == EquipmentSlot.CHEST:
-            return self.chest
-
-        if slot == EquipmentSlot.HEAD:
-            return self.head
-
-        if slot == EquipmentSlot.LEFT_RING_FINGER:
-            return self.left_ring_finger
-
-        if slot == EquipmentSlot.RIGHT_RING_FINGER:
-            return self.right_ring_finger
-
-        return None
+        Returns
+        -------
+        Entity or None
+            Item that is equipped in slot.
+        '''
+        return self.equipped.get(slot)

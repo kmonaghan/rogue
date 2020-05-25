@@ -368,7 +368,10 @@ class EquipmentSlot(Enum):
     MAIN_HAND = auto()
     OFF_HAND = auto()
     HEAD = auto()
+    NECK = auto()
     CHEST = auto()
+    LEGS = auto()
+    FEET = auto()
     RING = auto()
     LEFT_RING_FINGER = auto()
     RIGHT_RING_FINGER = auto()
@@ -377,7 +380,10 @@ string_to_equipment_slot = {
     'MAIN_HAND': EquipmentSlot.MAIN_HAND,
     'OFF_HAND': EquipmentSlot.OFF_HAND,
     'HEAD': EquipmentSlot.HEAD,
+    'NECK': EquipmentSlot.NECK,
     'CHEST': EquipmentSlot.CHEST,
+    'LEGS': EquipmentSlot.LEGS,
+    'FEET': EquipmentSlot.FEET,
     'RING': EquipmentSlot.RING,
     'LEFT_RING_FINGER': EquipmentSlot.LEFT_RING_FINGER,
     'RIGHT_RING_FINGER': EquipmentSlot.RIGHT_RING_FINGER,

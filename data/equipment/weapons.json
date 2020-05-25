@@ -2,7 +2,7 @@
   {
     "Name" : "battleaxe",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "SLASHING",
@@ -16,7 +16,7 @@
   {
     "Name" : "dagger",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "SLASHING",
@@ -30,7 +30,7 @@
   {
     "Name" : "cutlass",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "SLASHING",
@@ -44,7 +44,7 @@
   {
     "Name" : "light flail",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "BLUNT",
@@ -58,7 +58,7 @@
   {
     "Name" : "longsword",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "SLASHING",
@@ -72,7 +72,7 @@
   {
     "Name" : "heavy pick",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "PIERCING",
@@ -86,7 +86,7 @@
   {
     "Name" : "rapier",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "PIERCING",
@@ -100,7 +100,7 @@
   {
     "Name" : "scimitar",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "SLASHING",
@@ -114,7 +114,7 @@
   {
     "Name" : "trident",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "PIERCING",
@@ -128,7 +128,7 @@
   {
     "Name" : "warhammer",
     "Character" : "/",
-    "Power Bonus" : 3,
+    "Power" : 3,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "BLUNT",
@@ -142,7 +142,7 @@
   {
     "Name" : "shortsword",
     "Character" : "/",
-    "Power Bonus" : 2,
+    "Power" : 2,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "PIERCING",
@@ -156,7 +156,7 @@
   {
     "Name" : "light mace",
     "Character" : "/",
-    "Power Bonus" : 2,
+    "Power" : 2,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "BLUNT",
@@ -170,7 +170,7 @@
   {
     "Name" : "heavy mace",
     "Character" : "/",
-    "Power Bonus" : 2,
+    "Power" : 2,
     "Equipment Slots" : "MAIN_HAND",
     "Damage" : {
       "Damage Type" : "BLUNT",

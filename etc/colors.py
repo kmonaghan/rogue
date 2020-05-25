@@ -65,6 +65,7 @@ COLORS = {
     'chest': tcod.blue,
     'gelatinous_cube': tcod.white,
     'goblin': tcod.desaturated_green,
+    'hornet': tcod.light_yellow,
     'mimic': tcod.darker_blue,
     'orc': tcod.light_green,
     'player': tcod.darker_green,

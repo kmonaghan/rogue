@@ -17,6 +17,7 @@ from components.ai import (BasicNPC, CaptainNPC, CleanerNPC, GuardNPC,
 from components.berserk import Berserk
 from components.children import Children
 from components.damagemodifier import DamageModifier
+from components.display import Display
 from components.fov import FOV
 from components.health import Health
 from components.interaction import Interaction
@@ -65,6 +66,7 @@ def bat(point = None, dungeon_level = 1):
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
+    creature.add_component(Level(xp_value = 10), 'level')
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -147,7 +149,7 @@ def mimic(point = None, dungeon_level = 1):
     npc.add_component(Health(30), 'health')
     npc.add_component(Offence(base_power = 3), 'offence')
     npc.add_component(Defence(defence = 3), 'defence')
-    npc.add_component(Level(), 'level')
+    npc.add_component(Level(xp_value = 50), 'level')
     npc.add_component(Shimmer(alt_char = 'M', alt_chance = 95), 'shimmer')
 
     teeth = equipment.teeth()
@@ -327,6 +329,27 @@ def goblin(point = None, dungeon_level = 1):
     pubsub.pubsub.subscribe(pubsub.Subscription(npc, pubsub.PubSubTypes.DEATH, goblin_observed_death))
 
     return npc
+
+def hornets(point = None, dungeon_level = 1):
+    health_component = Health(2)
+
+    creature = Character(point, chr(178), 'hornet', COLORS.get('hornet'),
+                    ai=BasicNPC(),
+                    species=Species.BAT, health=health_component, act_energy=3)
+
+    creature.add_component(Offence(base_power = 1), 'offence')
+    creature.add_component(Defence(defence = 1), 'defence')
+    creature.add_component(Level(xp_value = 10), 'level')
+    creature.add_component(Display([chr(176),chr(176),chr(176),chr(177),chr(177),chr(177),chr(178),chr(178),chr(178)]), 'display')
+    creature.add_component(DamageModifier(blunt=1.2, slashing=0.8, poison=0), 'damagemodifier')
+
+    teeth = equipment.teeth()
+    teeth.lootable = False
+
+    creature.inventory.add_item(teeth)
+    creature.equipment.toggle_equip(teeth)
+
+    return creature
 
 def necromancer(point = None, dungeon_level = 1):
     #create a necromancer
@@ -521,21 +544,21 @@ def warlord(point = None, dungeon_level = 1):
     item = equipment.create_weapon('longsword')
     item.base_name = item.base_name + " of I'll FUCKING Have You"
     item.color = COLORS.get('equipment_epic')
-    item.equippable.power_bonus = item.equippable.power_bonus * 2
+    item.equippable.power = item.equippable.power * 2
     npc.inventory.add_item(item)
     npc.equipment.toggle_equip(item)
 
     shield = equipment.create_armour('steel shield')
     shield.base_name = shield.base_name + " of Hide and Seek"
     shield.color = COLORS.get('equipment_epic')
-    shield.equippable.power_bonus = item.equippable.defence_bonus * 2
+    shield.equippable.power = item.equippable.defence * 2
     npc.inventory.add_item(shield)
     npc.equipment.toggle_equip(shield)
 
     breastplate = equipment.create_armour('breastplate')
     breastplate.base_name = breastplate.base_name + " of Rebounding"
     breastplate.color = COLORS.get('equipment_epic')
-    breastplate.equippable.power_bonus = item.equippable.defence_bonus * 2
+    breastplate.equippable.power = item.equippable.defence * 2
     npc.inventory.add_item(breastplate)
     npc.equipment.toggle_equip(breastplate)
 

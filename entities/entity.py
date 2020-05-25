@@ -119,6 +119,9 @@ class Entity:
         if self.shimmer:
             return self.shimmer.display_char
 
+        if self.display:
+            return self.display.display_char
+
         return self.char
 
     @property

@@ -1,6 +1,7 @@
 from random import randint
 
 from components.poisoned import Poisoned
+from components.speed import Speed
 
 from etc.colors import COLORS
 from etc.enum import DamageType, MessageType, ResultTypes
@@ -20,11 +21,30 @@ class Ablity:
     def __repr__(self):
         return f"{self.__class__} {self.name}"
 
+    def on_equip(self, source):
+        pass
+
     def on_attack(self, source, target, game_map):
         pass
 
     def on_defend(self, source, target):
         pass
+
+    def on_dequip(self, source):
+        pass
+
+class Defence(Ablity):
+    def __init__(self, name = "Defence", defence=0):
+        super().__init__(name=name)
+        self.defence = defence
+
+    def on_equip(self, source):
+        pass
+        #source.defence.equipment_defence += self.defence
+
+    def on_dequip(self, source):
+        pass
+        #source.defence.equipment_defence -= self.defence
 
 class Poisoning(Ablity):
     def __init__(self, chance_to_poison=50, damage_per_turn=1, duration=1):
@@ -42,6 +62,17 @@ class Poisoning(Ablity):
             results.extend(poison.start())
 
         return results
+
+class Power(Ablity):
+    def __init__(self, name = "Power", power=0):
+        super().__init__(name=name)
+        self.power = power
+
+    def on_equip(self, source):
+        pass
+
+    def on_dequip(self, source):
+        pass
 
 class PushBack(Ablity):
     def __init__(self, distance=3, damage=10, chance=75):
@@ -141,6 +172,19 @@ class Paralysis(Ablity):
         results.extend([{ResultTypes.MESSAGE: msg}])
 
         return results
+
+class Speed(Ablity):
+    def __init__(self, name = "Speed", act_energy_adjustment=0.5):
+        super().__init__(name=name)
+        self.act_energy_adjustment = act_energy_adjustment
+        self.old_speed = None
+
+    def on_equip(self, source):
+        self.old_speed = source.speed
+        source.add_component(Speed(act_energy_adjustment=self.act_energy_adjustment, duration=-1, damage_on_end=False), 'speed')
+
+    def on_dequip(self, source):
+        source.speed = self.old_speed
 
 class SpellAbility(Ablity):
     def __init__(self, name="", spell=None, number_of_dice=0, type_of_dice=0, radius=3, targets_inventory=False, chance=50):

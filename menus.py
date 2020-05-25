@@ -97,6 +97,7 @@ def inventory_menu(header, player, exclude = []):
 
         for item in current_items:
             formated_name = item.name
+            '''
             if player.equipment.main_hand == item:
                 formated_name += ' (in main hand)'
             elif player.equipment.off_hand == item:
@@ -109,7 +110,7 @@ def inventory_menu(header, player, exclude = []):
                 formated_name += ' (on left hand)'
             elif player.equipment.right_ring_finger == item:
                 formated_name += ' (on right hand)'
-
+            '''
             if item.identifiable and not item.identifiable.identified:
                 item_colour = tcod.red
                 formated_name += ' (identifiable)'

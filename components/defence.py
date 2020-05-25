@@ -10,7 +10,7 @@ class Defence:
         multiplier = 1
 
         if self.owner and self.owner.equipment:
-            bonus = self.owner.equipment.defence_bonus
+            bonus = self.owner.equipment.defence
         else:
             bonus = 0
 
