@@ -61,7 +61,7 @@ def bat(point = None, dungeon_level = 1):
     health_component = Health(4)
 
     creature = Character(point, 'B', 'bat', COLORS.get('bat'),
-                    ai=PatrollingNPC(),
+                    ai=PredatorNPC(species=Species.INSECT),
                     species=Species.BAT, health=health_component, act_energy=3)
 
     creature.add_component(Offence(base_power = 1), 'offence')
@@ -335,13 +335,13 @@ def hornets(point = None, dungeon_level = 1):
 
     creature = Character(point, chr(178), 'hornet', COLORS.get('hornet'),
                     ai=BasicNPC(),
-                    species=Species.BAT, health=health_component, act_energy=3)
+                    species=Species.INSECT, health=health_component, act_energy=3)
 
     creature.add_component(Offence(base_power = 1), 'offence')
     creature.add_component(Defence(defence = 1), 'defence')
     creature.add_component(Level(xp_value = 10), 'level')
     creature.add_component(Display([chr(176),chr(176),chr(176),chr(177),chr(177),chr(177),chr(178),chr(178),chr(178)]), 'display')
-    creature.add_component(DamageModifier(blunt=1.2, slashing=0.8, poison=0), 'damagemodifier')
+    creature.add_component(DamageModifier(blunt=0.8, slashing=0.8, fire=1.2, ice=1.2, electric=1.2), 'damagemodifier')
 
     teeth = equipment.teeth()
     teeth.lootable = False

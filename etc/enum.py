@@ -257,23 +257,24 @@ class RoutingOptions(Enum):
     AVOID_STEAM = auto()
 
 class Species(Enum):
-    NONDESCRIPT = auto()
-    GOBLIN = auto()
-    ORC = auto()
-    TROLL = auto()
     ANIMAL = auto()
-    RAT = auto()
-    SNAKE = auto()
-    EGG = auto()
-    RATNEST = auto()
-    INANIMATE = auto()
-    CREATURE = auto()
     BAT = auto()
     BATROOST = auto()
-    PLAYER = auto()
     CORPSE = auto()
-    UNDEAD = auto()
+    CREATURE = auto()
+    EGG = auto()
+    GOBLIN = auto()
+    INANIMATE = auto()
+    INSECT = auto()
+    NONDESCRIPT = auto()
     OOZE = auto()
+    ORC = auto()
+    PLAYER = auto()
+    RAT = auto()
+    RATNEST = auto()
+    SNAKE = auto()
+    TROLL = auto()
+    UNDEAD = auto()
 
 class Tiles(IntEnum):
     EMPTY = 0
@@ -370,6 +371,7 @@ class EquipmentSlot(Enum):
     HEAD = auto()
     NECK = auto()
     CHEST = auto()
+    BELT = auto()
     LEGS = auto()
     FEET = auto()
     RING = auto()
@@ -382,6 +384,7 @@ string_to_equipment_slot = {
     'HEAD': EquipmentSlot.HEAD,
     'NECK': EquipmentSlot.NECK,
     'CHEST': EquipmentSlot.CHEST,
+    'BELT': EquipmentSlot.BELT,
     'LEGS': EquipmentSlot.LEGS,
     'FEET': EquipmentSlot.FEET,
     'RING': EquipmentSlot.RING,
