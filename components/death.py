@@ -27,6 +27,9 @@ class BasicDeath:
         self.owner.ai = None
         self.owner.render_order = RenderOrder.CORPSE
 
+        if self.owner.display:
+            self.owner.del_component("display")
+            
         if self.owner.inventory:
             for item in self.owner.inventory.items:
                 if (item.lootable):
