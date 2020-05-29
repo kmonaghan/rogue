@@ -74,7 +74,8 @@ class Equipment:
         if (slot == EquipmentSlot.RING
             or slot == EquipmentSlot.LEFT_RING_FINGER
             or slot == EquipmentSlot.RIGHT_RING_FINGER):
-            return results.extend(self.toggle_equip_ring(equippable_entity))
+            results.extend(self.toggle_equip_ring(equippable_entity))
+            return results
         else:
             if self.equipped[slot] == equippable_entity:
                 self.equipped[slot] = None
@@ -125,7 +126,7 @@ class Equipment:
             dequipped = self.equipped[EquipmentSlot.LEFT_RING_FINGER]
             self.equipped[EquipmentSlot.LEFT_RING_FINGER] = None
             results.append({'dequipped': equippable_entity})
-        elif self.equipped[EquipmentSlot.LEFT_RING_FINGER] == equippable_entity:
+        elif self.equipped[EquipmentSlot.RIGHT_RING_FINGER] == equippable_entity:
             dequipped = self.equipped[EquipmentSlot.RIGHT_RING_FINGER]
             self.equipped[EquipmentSlot.RIGHT_RING_FINGER] = None
             results.append({'dequipped': equippable_entity})
