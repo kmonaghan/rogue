@@ -1,9 +1,11 @@
 from random import choice
 
+import bestiary
+
 from game_messages import Message
 
 from etc.colors import COLORS
-from etc.enum import ResultTypes, Species
+from etc.enum import ResultTypes, Species, VERMIN_GENERATORS, RoutingOptions
 
 import pubsub
 
@@ -29,72 +31,6 @@ def check_quest_for_location(player):
                 pubsub.pubsub.add_message(pubsub.Publish(quest, pubsub.PubSubTypes.EARNEDXP, target=player))
 
     return results
-
-def kill_vermin(kill = 10):
-    title = "Kill Vermin"
-    description = "These caves are riddled with rats and snakes. Clear them out."
-
-    q = Quest(title, description, 100)
-    q.kill = kill
-    q.kill_type = Species.RAT
-    q.return_to_quest_giver = True
-
-    return q
-
-def kill_rats_nests(kill = 3):
-    title = "Kill Vermin"
-    description = "These caves are riddled with rats. Get rid of thier nests."
-
-    q = Quest(title, description, 100)
-    q.kill = kill
-    q.kill_type = Species.RATNEST
-    q.return_to_quest_giver = True
-
-    return q
-
-def kill_gobbos(kill = 5):
-    title = "Kill Gobbos"
-    description = "Get rid of them. I don't care how."
-
-    q = Quest(title, description, 100)
-    q.kill = kill
-    q.kill_type = Species.GOBLIN
-    q.return_to_quest_giver = True
-
-    return q
-
-def kill_orcs(kill = 5):
-    title = "Kill Orcs"
-    description = "Get rid of them. I don't care how."
-
-    q = Quest(title, description, 200)
-    q.kill = kill
-    q.kill_type = Species.ORC
-    q.return_to_quest_giver = True
-
-    return q
-
-def kill_trolls(kill = 5):
-    title = "Kill Trolls"
-    description = "Get rid of them. I don't care how."
-
-    q = Quest(title, description, 300)
-    q.kill = kill
-    q.kill_type = Species.TROLL
-    q.return_to_quest_giver = True
-
-    return q
-
-def kill_warlord():
-    title = "Kill the Warlord"
-    description = "Time to take down the king of the hill. Or dungeon as it is in this case."
-
-    q = Quest(title, description, 500)
-    q.kill = 1
-    q.kill_type = "warlord"
-    q.return_to_quest_giver = True
-
-    return q
 
 class Quest:
     def __init__(self, title, description, xp, kill=0, kill_type=None, start_func = None, map_point = None, target_npc = None):
@@ -149,10 +85,23 @@ class Quest:
         active_quests.append(self)
 
         if (self.start_func):
-            self.start_func()
+            self.start_func(game_map)
 
         if (self.kill > 0):
             pubsub.pubsub.subscribe(pubsub.Subscription(self, pubsub.PubSubTypes.DEATH, kill_quest_npc_death))
+
+        if self.kill_type:
+            entities = game_map.current_level.find_entities_of_type(self.kill_type)
+
+            if len(entities) < self.kill:
+                gen = self.kill - len(entities)
+                for _ in range(gen):
+                    entity = bestiary.generate_entity(self.kill_type, game_map.dungeon_level)
+                    avoid = entity.movement.routing_avoid
+                    avoid.append(RoutingOptions.AVOID_FOV)
+                    point = game_map.current_level.find_random_open_position(avoid)
+                    entity.set_point(point)
+                    game_map.current_level.add_entity(entity)
 
     def finish_quest(self):
         global active_quests

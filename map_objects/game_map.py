@@ -5,7 +5,7 @@ from random import choice, sample, randint, getrandbits, shuffle
 
 import bestiary
 import buildings
-import quest
+from quest_generation import generate_quest_chain
 
 from components.stairs import Stairs
 from components.locked import Locked
@@ -100,7 +100,7 @@ class GameMap:
         player.set_point(self.up_stairs.point)
         self.current_level.add_entity(player)
 
-        level_theme = self.fill_prefab(player)
+        self.fill_prefab(player)
 
         if (self.dungeon_level == 1):
             self.level_one(player)
@@ -159,22 +159,8 @@ class GameMap:
             self.current_level.add_entity(self.up_stairs)
 
     def level_one(self, player):
-        entrance = find(lambda room: room.name == 'entrance', self.current_level.rooms)
-        point = self.current_level.find_random_open_position([Tiles.STAIRS_FLOOR, Tiles.DOOR], room=entrance)
-        npc = bestiary.bountyhunter(point)
+        self.add_bounty_hunter()
 
-        q = quest.kill_rats_nests()
-        q2 = quest.Quest('Interloper', 'Someone has been sneaking around here. Find them and take care of it.', 100, start_func=self.level_one_goblin)
-        q2.kill = 1
-        q2.kill_type = Species.GOBLIN
-
-        q.next_quest = q2
-
-        q3 = quest.Quest('Go down', 'Find the stairs down', 100, map_point = self.down_stairs.point)
-        q2.next_quest = q3
-
-        npc.questgiver.add_quest(q)
-        self.current_level.add_entity(npc)
         #Snakes and Rats
         for i in range(10):
             snake = bestiary.generate_creature(Species.SNAKE, self.dungeon_level)
@@ -197,6 +183,14 @@ class GameMap:
 
         for i in range(roosts):
             nest = bestiary.generate_creature(Species.BATROOST, self.dungeon_level)
+            point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
+            nest.set_point(point)
+            self.current_level.add_entity(nest)
+
+        hives = randint(0, 3)
+
+        for i in range(hives):
+            nest = bestiary.generate_creature(Species.HORNETNEST, self.dungeon_level)
             point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
             nest.set_point(point)
             self.current_level.add_entity(nest)
@@ -231,12 +225,14 @@ class GameMap:
 
     def place_creatures(self, player):
         npc_chances = {}
-        npc_chances[Species.RAT] = from_dungeon_level([[95, 1], [95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances[Species.SNAKE] = from_dungeon_level([[95, 1], [4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances[Species.EGG] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        npc_chances[Species.RATNEST] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        npc_chances[Species.BAT] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
-        npc_chances[Species.BATROOST] = from_dungeon_level([[95, 1], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.RAT] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.SNAKE] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.EGG] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.RATNEST] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.BAT] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.BATROOST] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.HORNET] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.HORNETNEST] = from_dungeon_level([[95, 1]], self.dungeon_level)
 
         max_npcs = len(self.current_level.caves[0]) // 15
         min_npcs = max(1, max_npcs // 4)
@@ -260,9 +256,9 @@ class GameMap:
 
         #chance of each npc
         npc_chances = {}
-        npc_chances[Species.GOBLIN] = from_dungeon_level([[95, 1],[95, 2], [30, 3], [15, 4], [10, 5], [5, 6]], self.dungeon_level)
-        npc_chances[Species.ORC] = from_dungeon_level([[95, 1],[4,2], [65, 3], [65, 4], [50, 5], [45, 6]], self.dungeon_level)
-        npc_chances[Species.TROLL] = from_dungeon_level([[95, 1],[95, 2], [1,3], [5, 3], [20, 4], [40, 5], [60, 6]], self.dungeon_level)
+        npc_chances[Species.GOBLIN] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.ORC] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.TROLL] = from_dungeon_level([[95, 1]], self.dungeon_level)
 
         max_npcs = len(self.current_level.floors[0]) // 15
         min_npcs = max(1, max_npcs // 4)
@@ -375,33 +371,11 @@ class GameMap:
 
         return StairOption.NOSTAIR
 
-    def level_one_goblin(self):
-        point = self.current_level.find_random_open_position([Tiles.CORRIDOR_FLOOR,
-                                                                Tiles.DOOR,
-                                                                Tiles.ROOM_FLOOR,
-                                                                Tiles.STAIRS_FLOOR,
-                                                                RoutingOptions.AVOID_FOV])
-
-        self.current_level.add_entity(bestiary.generate_npc(Species.GOBLIN, 1, 1, point))
-
-    def add_bounty_hunter(self, target_npc, room_name = None):
+    def add_bounty_hunter(self, target_npc = None, room_name = None):
         entrance = find(lambda room: room.name == 'entrance', self.current_level.rooms)
         point = self.current_level.find_random_open_position([Tiles.STAIRS_FLOOR, Tiles.DOOR], room=entrance)
 
         npc = bestiary.bountyhunter(point)
 
-        quest_text = f"Elimate the local problem: {target_npc.name}."
-
-        if room_name:
-            quest_text = quest_text + f" You'll find them in {room_name}."
-
-        q1 = quest.Quest('Elimate', quest_text, 100, target_npc=target_npc)
-
-        if self.down_stairs:
-            q2 = quest.Quest('Go down', 'Find the stairs down', 100, map_point = self.down_stairs.point)
-            q1.next_quest = q2
-        else:
-            logging.info("No stairs down")
-
-        npc.questgiver.add_quest(q1)
+        npc.questgiver.add_quest(generate_quest_chain(self, npc, room_name))
         self.current_level.add_entity(npc)
