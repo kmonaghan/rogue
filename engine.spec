@@ -10,6 +10,7 @@ a = Analysis(['engine.py'],
                       ( 'data/liquids.txt', 'data' ),
                       ( 'data/fonts', 'data/fonts' ),
                       ( 'data/equipment', 'data/equipment' ),
+                      ( 'log', 'log')
                       ],
              hiddenimports=[],
              hookspath=[],

@@ -87,7 +87,7 @@ class Rogue(tcod.event.EventDispatch):
         self.using_item = None
 
     def start_fresh_game(self):
-        logging.basicConfig(filename=f'log/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}.log', filemode='w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=CONFIG.get('logging_level'))
+        logging.basicConfig(filename=f'{resource_path("log")}/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}.log', filemode='w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=CONFIG.get('logging_level'))
 
         pubsub.pubsub = pubsub.PubSub()
 
