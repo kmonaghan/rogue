@@ -1,7 +1,7 @@
 import json
 import logging
 
-from random import randint, choice
+from random import randint, choice, shuffle
 
 import tcod
 
@@ -44,6 +44,14 @@ potion_random_details = False
 armours = {}
 weapons = {}
 
+unique_weapon = [
+        "Stabby Stabby",
+        "YORE MA",
+        "I'll FUCKING Have You",
+        "Des",
+        "Troy",
+]
+
 def random_armour(point = None, dungeon_level = 1):
     data = choice(list(armours.values()))
     return armour_from_json(data, point = point)
@@ -76,7 +84,9 @@ def random_ring(point = None, dungeon_level = 1):
     item_chances['defence'] = 50
     item_chances['regeneration'] = 5
 
-    item = Entity(point, chr(9), 'Ring', COLORS.get('equipment_rare'), render_order=RenderOrder.ITEM)
+    item = Entity(point, chr(9), 'Ring', COLORS.get('equipment_rare'),
+                    item=Item(), equippable=Equippable(EquipmentSlot.RING),
+                    render_order=RenderOrder.ITEM)
 
     choice = random_choice_from_dict(item_chances)
     if choice == 'power':
@@ -143,7 +153,6 @@ def create_weapon(name, point = None, dungeon_level = 1):
 
     return None
 
-
 def random_magic_weapon(dungeon_level = 1):
     item = random_weapon(dungeon_level = dungeon_level)
 
@@ -161,22 +170,18 @@ def random_magic_weapon(dungeon_level = 1):
         naming.prefix = "Excellent"
         item.color = COLORS.get('equipment_rare')
         item.equippable.number_of_dice = 3
-    elif (dice <= 990):
+    elif (dice <= 900):
         naming.prefix = "Exceptional"
         item.color = COLORS.get('equipment_epic')
         item.equippable.number_of_dice = 4
-    else:
+    elif (dice <= 950):
         naming.prefix = "Phenomenal"
         item.color = COLORS.get('equipment_legendary')
         item.equippable.number_of_dice = 5
-    item.add_component(naming, 'naming')
+    else:
+        create_unique_weapon(item)
 
-    '''
-    naming.suffix = "of Stabby Stabby"
-    naming.suffix = "of YORE MA"
-    naming.suffix = "of I'll FUCKING Have You"
-    naming.suffix = "of Des and Troy"
-    '''
+    item.add_component(naming, 'naming')
 
     add_random_weapon_ablity(item)
 
@@ -520,6 +525,13 @@ def import_weapons():
 
         for detail in data:
             weapons[detail["Name"]] = detail
+
+def create_unique_weapon(item):
+    shuffle(unique_weapon)
+
+    name = unique_weapon.pop()
+
+    item.suffix = f"of {name}"
 
 def fingfangfoom(item):
     if item.equippable.slot == EquipmentSlot.HEAD:
