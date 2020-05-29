@@ -109,3 +109,8 @@ class EntityList:
         visible = [x for x in self.lst if x.always_visible == True]
 
         return visible
+
+    def find_all_of_type(self, entity_type):
+        visible = [x for x in self.lst if x.species == entity_type]
+
+        return visible

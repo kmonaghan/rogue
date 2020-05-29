@@ -33,7 +33,7 @@ class LevelMap(Map):
         self.illuminated = np.zeros(self.walkable.shape, dtype=np.int8)
         self.blocked = np.zeros(self.walkable.shape, dtype=np.int8)
         self.npc_fov = self.fov
-        
+
         self.dark_map_bg = np.full(
             self.walkable.shape + (3,), COLORS.get('dark_default'), dtype=np.uint8
         )
@@ -404,3 +404,6 @@ class LevelMap(Map):
 
     def find_closest_entity(self, point, range = 2, species_type = None):
         return self.entities.find_closest(point, species_type, max_distance=range)
+
+    def find_entities_of_type(self, species_type):
+        return self.entities.find_all_of_type(species_type)
