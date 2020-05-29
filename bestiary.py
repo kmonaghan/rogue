@@ -44,7 +44,8 @@ from components.death import PlayerDeath, WarlordDeath
 from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
-from etc.enum import Interactions, MessageType, RenderOrder, Species, Tiles
+from etc.enum import (Interactions, MessageType, RenderOrder, Species,
+                        VERMIN_GENERATORS, Tiles)
 
 import pubsub
 
@@ -83,7 +84,7 @@ def bat(point = None, dungeon_level = 1):
 def batroost(point = None, dungeon_level = 1):
     health_component = Health(20)
 
-    creature = Character(point, chr(225), 'Bat Roost', COLORS.get('bat_roost'),
+    creature = Character(point, chr(225), VERMIN_GENERATORS[Species.BATROOST], COLORS.get('bat_roost'),
                     ai=SpawningNPC(bat),
                     species=Species.BATROOST, health=health_component, act_energy=2)
 
@@ -351,6 +352,24 @@ def hornets(point = None, dungeon_level = 1):
 
     return creature
 
+def hornets_nest(point = None, dungeon_level = 1):
+    health_component = Health(20)
+
+    creature = Character(point, chr(234), VERMIN_GENERATORS[Species.HORNETNEST],
+                        COLORS.get('hornets_nest'), ai=SpawningNPC(hornets),
+                        species=Species.HORNETNEST, health=health_component,
+                        act_energy=2)
+
+    creature.add_component(Defence(defence = 5), 'defence')
+    creature.add_component(Level(xp_value = 50), 'level')
+    creature.add_component(Children(5), 'children')
+
+    creature.movement.routing_avoid.extend(creature_avoid)
+
+    equipment.add_random_loot(creature, dungeon_level)
+
+    return creature
+
 def necromancer(point = None, dungeon_level = 1):
     #create a necromancer
     health_component = Health(30)
@@ -440,10 +459,10 @@ def rat(point = None, dungeon_level = 1):
 
     return creature
 
-def ratsnest(point = None, dungeon_level = 1):
+def rats_nest(point = None, dungeon_level = 1):
     health_component = Health(20)
 
-    creature = Character(point, 'N', 'rat\'s nest', COLORS.get('rats_nest'),
+    creature = Character(point, 'N', VERMIN_GENERATORS[Species.RATNEST], COLORS.get('rats_nest'),
                     ai=SpawningNPC(rat),
                     species=Species.RATNEST, health=health_component, act_energy=2)
 
@@ -582,6 +601,14 @@ def spawn_point(point = None, species = Species.GOBLIN, max_children=5):
 
     return npc
 
+def generate_entity(type, dungeon_level = 1, point = None):
+    entity = generate_creature(type, dungeon_level, point)
+
+    if not entity:
+        entity = generate_npc(type, dungeon_level, point)
+
+    return entity
+
 def generate_creature(type, dungeon_level = 1, point = None):
     creature = None
 
@@ -589,12 +616,16 @@ def generate_creature(type, dungeon_level = 1, point = None):
         creature = bat(point, dungeon_level)
     elif (type == Species.BATROOST):
         creature = batroost(point, dungeon_level)
+    elif (type == Species.HORNETNEST):
+        creature = hornets_nest(point, dungeon_level)
+    elif (type == Species.INSECT):
+        creature = hornets(point, dungeon_level)
     elif (type == Species.RAT):
         creature = rat(point, dungeon_level)
     elif (type == Species.SNAKE):
         creature = snake(point, dungeon_level)
     elif (type == Species.RATNEST):
-        creature = ratsnest(point, dungeon_level)
+        creature = rats_nest(point, dungeon_level)
     elif (type == Species.EGG):
         creature = egg(point, dungeon_level)
 
@@ -614,6 +645,10 @@ def generate_npc(type, dungeon_level = 1, point = None, upgrade_chance = 98):
         npc = orc(point)
     elif (type == Species.TROLL):
         npc = troll(point)
+
+    if not npc:
+        print(f"No {type} for NPC?")
+        return None
 
     if not names:
         tcod.namegen_parse(resource_path("data/names.txt"))

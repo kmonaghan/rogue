@@ -264,6 +264,7 @@ class Species(Enum):
     CREATURE = auto()
     EGG = auto()
     GOBLIN = auto()
+    HORNETNEST = auto()
     INANIMATE = auto()
     INSECT = auto()
     NONDESCRIPT = auto()
@@ -275,6 +276,18 @@ class Species(Enum):
     SNAKE = auto()
     TROLL = auto()
     UNDEAD = auto()
+
+VERMIN_GENERATORS = {
+        Species.BATROOST: "Bat Roost",
+        Species.HORNETNEST: "Hornet's Nest",
+        Species.RATNEST: "Rat's Nest",
+        }
+
+HUMANOIDS = {
+        Species.GOBLIN: "Goblin",
+        Species.ORC: "Orc",
+        Species.TROLL: "Troll",
+        }
 
 class Tiles(IntEnum):
     EMPTY = 0
@@ -397,3 +410,9 @@ class MessageType(Enum):
     EVENT = auto()
     EFFECT = auto()
     COMBAT = auto()
+
+class LevelTheme(Enum):
+    GOBLINS = auto()
+    ORCS = auto()
+    VAMPIRES = auto()
+    ZOMBIES = auto()
