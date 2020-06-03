@@ -18,7 +18,7 @@ def levelOneGenerator(map_width, map_height):
     addCaves(dm)
 
     number_of_water_areas = randint(0,3)
-    for i in range(number_of_water_areas):
+    for _ in range(number_of_water_areas):
         dm.waterFeature()
 
     x1, y1, entrance = placeStairAlongEdge(dm)
@@ -95,7 +95,7 @@ def cavernLevel(dm, x, y):
     addCaves(dm)
 
     number_of_water_areas = randint(0,3)
-    for i in range(number_of_water_areas):
+    for _ in range(number_of_water_areas):
         dm.waterFeature()
 
     x1, y1, room = placeStairRoom(dm, x, y, name="entrance")
@@ -163,7 +163,7 @@ def cavernRoomsLevel(dm, x, y):
     else:
         slice[np.where((cells == 1) & (slice == Tiles.EMPTY))] = Tiles.CAVERN_FLOOR
 
-    for i in range (5):
+    for _ in range (5):
         x, y = dm.findEmptySpace()
 
         if not x and not y:
@@ -202,7 +202,7 @@ def roomsLevel(dm, x, y):
 
     dm.placeRandomRooms((square_height//4), square_height-2, 2, 2, add_door = True, add_walls = True, attempts=5000)
 
-    for i in range (5):
+    for _ in range (5):
         x, y = dm.findEmptySpace()
 
         if not x and not y:
@@ -398,7 +398,7 @@ def squares(dm, x, y):
 
     dm.placeRandomRooms((square_height//4), square_height-2, 2, 2, add_door = True, add_walls = True, attempts=5000)
 
-    for i in range (5):
+    for _ in range (5):
         x, y = dm.findEmptySpace()
 
         if not x and not y:

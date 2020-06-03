@@ -58,7 +58,7 @@ def generate_quest_chain(game_map, npc = None, room_name = None):
     if game_map.dungeon_level == 1:
         return level_one_chain(game_map)
 
-    return prefab_chain(game_map, dungeon_level, npc, room_name)
+    return prefab_chain(game_map, npc, room_name)
 
 def level_one_chain(game_map):
     q1 = kill_vermin()

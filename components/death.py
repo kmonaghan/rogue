@@ -29,7 +29,7 @@ class BasicDeath:
 
         if self.owner.display:
             self.owner.del_component("display")
-            
+
         if self.owner.inventory:
             for item in self.owner.inventory.items:
                 if (item.lootable):
@@ -65,9 +65,7 @@ class BasicDeath:
 
 class WarlordDeath(BasicDeath):
     def npc_death(self, game_map):
-        #transform it into a nasty corpse! it doesn't block, can't be
-        #attacked and doesn't move
-        game_state = super(WarlordDeath, self).npc_death(game_map)
+        super(WarlordDeath, self).npc_death(game_map)
 
         return GameStates.GAME_COMPLETE
 

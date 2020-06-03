@@ -43,7 +43,6 @@ class Inventory:
         return results
 
     def examine_item(self, item):
-        results = []
         return item.examine()
 
     def search(self, name=None):

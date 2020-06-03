@@ -105,8 +105,6 @@ class Rogue(tcod.event.EventDispatch):
         self.fov_recompute = True
 
         quest.active_quests = []
-        identified_items = {}
-        potion_descriptions = {}
 
         self.game_state = GameStates.PLAYER_TURN
         self.previous_game_state = None
@@ -364,7 +362,6 @@ class Rogue(tcod.event.EventDispatch):
             self.game_state = GameStates.ENEMY_TURN
         elif action == InputTypes.MOVE:
             dx, dy = action_value
-            point = Point(self.player.x + dx, self.player.y + dy)
 
             if self.game_map.current_level.accessible_tile(self.player.x + dx, self.player.y + dy):
                 if self.game_map.current_level.blocked[self.player.x + dx, self.player.y + dy]:

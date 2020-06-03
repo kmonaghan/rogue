@@ -471,7 +471,7 @@ def add_damage_aura(item):
 def add_random_loot(npc, dungeon_level = 1, min_items = 0):
     total_items = randint(min_items, min_items + dungeon_level)
 
-    for i in range(total_items):
+    for _ in range(total_items):
         pick = randint(0,4)
         if pick == 0:
             item = random_armour(dungeon_level = dungeon_level)

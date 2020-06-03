@@ -75,5 +75,5 @@ class Level:
         if (total_levels < 1):
             return
 
-        for x in range(total_levels):
+        for _ in range(total_levels):
             self.level_up_stats(choice(list(LevelUp)))

@@ -133,7 +133,7 @@ class Swarm(Node):
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
-        results = []
+
         if randint(1,100) < self.chance:
             npcs = game_map.current_level.entities.find_all_closest(owner.point, self.species, max_distance=self.radius)
             moved = []

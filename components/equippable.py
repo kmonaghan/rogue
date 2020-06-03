@@ -68,7 +68,7 @@ class Equippable:
 
     def equipment_description(self):
         """Return a string describing the item."""
-        desription = ""
+        description = ""
         if (self.number_of_dice):
             description = self.damage_description()
 

@@ -46,11 +46,8 @@ class Health:
         if self.dead:
             return results, total_damage
 
-        if self.owner.resistance:
-            amount = floor(amount * self.owner.resistance.modifier(type))
-
-        if self.owner.vulnerability:
-            amount = floor(amount * self.owner.vulnerability.modifier(type))
+        if self.owner.damagemodifier:
+            amount = floor(amount * self.owner.damagemodifier.modifier(type))
 
         total_damage = min(self.hp, amount)
 

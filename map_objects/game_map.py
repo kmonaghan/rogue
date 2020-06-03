@@ -162,7 +162,7 @@ class GameMap:
         self.add_bounty_hunter()
 
         #Snakes and Rats
-        for i in range(10):
+        for _ in range(10):
             snake = bestiary.generate_creature(Species.SNAKE, self.dungeon_level)
             point = self.current_level.find_random_open_position(snake.movement.routing_avoid)
             snake.set_point(point)
@@ -173,7 +173,7 @@ class GameMap:
             rat.set_point(point)
             self.current_level.add_entity(rat)
 
-        for i in range(6):
+        for _ in range(6):
             nest = bestiary.generate_creature(Species.RATNEST, self.dungeon_level)
             point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
             nest.set_point(point)
@@ -181,7 +181,7 @@ class GameMap:
 
         roosts = randint(0, 3)
 
-        for i in range(roosts):
+        for _ in range(roosts):
             nest = bestiary.generate_creature(Species.BATROOST, self.dungeon_level)
             point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
             nest.set_point(point)
@@ -189,7 +189,7 @@ class GameMap:
 
         hives = randint(0, 3)
 
-        for i in range(hives):
+        for _ in range(hives):
             nest = bestiary.generate_creature(Species.HORNETNEST, self.dungeon_level)
             point = self.current_level.find_random_open_position(nest.movement.routing_avoid)
             nest.set_point(point)
@@ -206,7 +206,7 @@ class GameMap:
 
             num_cubes = randint(0, max_cubes)
 
-            for i in range(0, num_cubes):
+            for _ in range(0, num_cubes):
                 cube = bestiary.gelatinous_cube()
                 point = self.current_level.find_random_open_position(cube.movement.routing_avoid)
                 cube.set_point(point)
@@ -229,7 +229,7 @@ class GameMap:
 
         logging.info (f"Max creatures: {max_npcs}, number of creatures: {num_npcs}")
 
-        for i in range(num_npcs):
+        for _ in range(num_npcs):
             #choose random spot for this npc
             creature_choice = random_choice_from_dict(npc_chances)
 
@@ -255,7 +255,7 @@ class GameMap:
 
         logging.info (f"Min NPCs: {min_npcs}, Max NPCx: {max_npcs}, number of NPCs: {num_npcs}")
 
-        for i in range(num_npcs):
+        for _ in range(num_npcs):
             choice = random_choice_from_dict(npc_chances)
             npc = bestiary.generate_npc(choice, self.dungeon_level)
             avoid = npc.movement.routing_avoid.copy()
