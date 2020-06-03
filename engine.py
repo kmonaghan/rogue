@@ -238,7 +238,8 @@ class Rogue(tcod.event.EventDispatch):
             return True
 
         if action == InputTypes.GAME_SAVE:
-            save_game(self.player, self.game_map, message_log, self.game_state, pubsub.pubsub)
+            #FIXME: Saves don't work
+            #save_game(self.player, self.game_map, message_log, self.game_state, pubsub.pubsub)
             return True
 
         if action == InputTypes.GAME_RESTART:

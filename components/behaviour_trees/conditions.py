@@ -138,7 +138,7 @@ class ChangeAI(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         owner.del_component('ai')
-        owner.add_component(ai, 'ai')
+        owner.add_component(self.ai, 'ai')
         return TreeStates.SUCCESS, []
 
 class FindNearestTargetEntity(Node):

@@ -9,7 +9,7 @@ def menu(con, header, options, width):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
 
     # calculate total height for the header (after auto-wrap) and one line per option
-    header_height = tcod.console_get_height_rect(con, 0, 0, width, screen_height, header)
+    header_height = tcod.console_get_height_rect(con, 0, 0, width, CONFIG.get('full_screen_height'), header)
     height = len(options) + header_height
 
     # create an off-screen console that represents the menu's window
@@ -30,8 +30,8 @@ def menu(con, header, options, width):
         letter_index += 1
 
     # blit the contents of "window" to the root console
-    x = int(screen_width / 2 - width / 2)
-    y = int(screen_height / 2 - height / 2)
+    x = int(CONFIG.get('full_screen_width') // 2 - width // 2)
+    y = int(CONFIG.get('full_screen_height') // 2 - height // 2)
     tcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
 def ingame_menu(title, header, options):
@@ -154,7 +154,7 @@ def main_menu(con, background_image):
 
     menu(con, '', [['Play a new game', tcod.white],
                     ['Continue last game', tcod.white],
-                    ['Quit', tcod.white]], 24, screen_width, screen_height)
+                    ['Quit', tcod.white]], 24)
 
 def level_up_menu(player):
     title = 'Level up!'
@@ -229,4 +229,4 @@ def game_completed():
     return ingame_menu('Victory!', header, options)
 
 def message_box(con, header):
-    menu(con, header, [], width)
+    menu(con, header, [])

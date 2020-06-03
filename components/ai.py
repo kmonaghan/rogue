@@ -23,7 +23,7 @@ from components.behaviour_trees.conditions import (
     IsAdjacent, IsFinished, IsItemInSpot, WithinPlayerFov, InNamespace, CoinFlip,
     FindNearestTargetEntity, WithinL2Radius, OtherEntityInSameSpot,
     OutsideL2Radius, CheckHealthStatus, SetNamespace, NumberOfEntities,
-    IsNPCInSpot, IsCorpseInSpot, IsNPCAdjacent, IsNPCAParalyzed)
+    IsNPCInSpot, IsCorpseInSpot, IsNPCAdjacent, IsNPCAParalyzed, ChangeAI)
 
 class BaseAI:
     """Base class for NPC AI.
