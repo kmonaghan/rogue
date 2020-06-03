@@ -15,7 +15,7 @@ def door(point = None, locked=False):
 
     door.add_component(Defence(defence = 1), 'defence')
     if locked:
-        make_lockable(item, locked_character='X', unlocked_character='+')
+        make_lockable(door, locked_character='X', unlocked_character='+')
 
     return door
 

@@ -1,3 +1,4 @@
+import logging
 from random import choice, randint
 
 import bestiary
@@ -77,7 +78,7 @@ def level_one_chain(game_map):
 def prefab_chain(game_map, npc, room_name = None):
     q1 = kill_humanoid()
 
-    q2 = kill_mini_boss()
+    q2 = kill_mini_boss(npc, room_name)
 
     if game_map.down_stairs:
         q2.next_quest = exit_level_quest(game_map)

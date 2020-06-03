@@ -196,22 +196,28 @@ def add_random_weapon_ablity(item):
     if not item.identifiable:
         item.add_component(IdentifiableWeapon(item.base_name),"identifiable")
 
-    if dice <= 50:
+    if dice <= 30:
         add_poison(item, 1, 10)
-    elif dice <= 60:
+    elif dice <= 35:
         add_flaming(item)
-    elif dice <= 70:
+    elif dice <= 40:
         add_shocking(item)
-    elif dice <= 80:
+    elif dice <= 45:
         add_smashing(item)
-    elif dice <= 90:
+    elif dice <= 50:
         add_lifedrain(item)
-    elif dice <= 95:
-        add_defence(item)
-    elif dice <= 95:
-        add_defence(item)
-    elif dice <= 95:
-        add_defence(item)
+    elif dice <= 55:
+        add_lightning(item)
+    elif dice <= 60:
+        add_paralysis(item)
+    elif dice <= 65:
+        add_power(item)
+    elif dice <= 70:
+        add_regeneration(item)
+    elif dice <= 75:
+        add_speed(item)
+    elif dice <= 80:
+        add_infection(item)
 
 def add_defence(item):
     item.add_component(Defence(defence=10), 'ablity')

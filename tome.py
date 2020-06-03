@@ -41,14 +41,15 @@ def confuse(*args, **kwargs):
         results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
         return results
 
+    entities = game_map.current_level.entities.get_entities_in_position((x,y))
     for entity in entities:
-        if entity.x == target_x and entity.y == target_y and entity.ai:
+        if entity.ai:
             confused_ai = ConfusedNPC(entity.ai, 10)
 
             confused_ai.owner = entity
             entity.ai = confused_ai
 
-            results.append({ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant, as he starts to stumble around!'.format(entity.name), COLORS.get('effect_text'), target=entity, type=MessageType.EFFECT)})
+            results.append({ResultTypes.MESSAGE: Message('The eyes of the {0} look vacant and they start to stumble around!'.format(entity.name), COLORS.get('effect_text'), target=entity, type=MessageType.EFFECT)})
 
             break
     else:
@@ -176,7 +177,8 @@ def lightning(*args, **kwargs):
         targets.insert(0, target)
 
     if targets:
-        for i in range(number_of_dice):
+        total_targets = min(len(target), number_of_dice)
+        for i in range(total_targets):
             target = targets.pop()
             damage = die_roll(1, type_of_dice)
             if i > 0:

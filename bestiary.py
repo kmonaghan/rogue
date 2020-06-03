@@ -27,7 +27,6 @@ from components.defence import Defence
 from components.naming import Naming
 from components.questgiver import Questgiver
 from components.regeneration import Regeneration
-from components.shimmer import Shimmer
 from components.spawn import Spawn
 from components.subspecies import Subspecies
 
@@ -151,7 +150,13 @@ def mimic(point = None, dungeon_level = 1):
     npc.add_component(Offence(base_power = 3), 'offence')
     npc.add_component(Defence(defence = 3), 'defence')
     npc.add_component(Level(xp_value = 50), 'level')
-    npc.add_component(Shimmer(alt_char = 'M', alt_chance = 95), 'shimmer')
+    display_char = ['C'] * 10
+    display_char.append('M')
+    display_char.append('M')
+    display_char.append('M')
+    display_char.append('M')
+    display_char.append('M')
+    npc.add_component(Display(display_char), 'display')
 
     teeth = equipment.teeth()
     teeth.lootable = False
@@ -832,20 +837,6 @@ def mimic_activate(sub, message, level_map):
         sub.entity.del_component('shimmer')
         sub.entity.ai.set_target(message.entity)
         pubsub.pubsub.mark_subscription_for_removal(sub)
-
-def mimic_shimmer(sub, message, level_map):
-    if sub.entity.ai:
-        pubsub.pubsub.mark_subscription_for_removal(sub)
-        return
-
-    if (sub.entity.char == 'M'):
-        sub.entity.char = 'C'
-        sub.entity.base_name = 'Chest'
-    else:
-        mimic_chance = randint(1, 100)
-        if (mimic_chance >= 99):
-            sub.entity.char = 'M'
-            sub.entity.base_name = 'Mimic'
 
 def rat_swarm(sub, message, level_map):
     if (message.entity.species == Species.PLAYER) and (message.target.species == Species.RATNEST):

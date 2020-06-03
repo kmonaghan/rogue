@@ -15,7 +15,7 @@ from game_messages import Message
 
 from map_objects.point import Point
 
-from etc.colors import COLORS, random_color_shimmer
+from etc.colors import COLORS
 from etc.enum import ResultTypes, RenderOrder, Interactions
 
 import uuid
@@ -116,9 +116,6 @@ class Entity:
 
     @property
     def display_char(self):
-        if self.shimmer:
-            return self.shimmer.display_char
-
         if self.display:
             return self.display.display_char
 
@@ -126,9 +123,6 @@ class Entity:
 
     @property
     def display_color(self):
-        if self.shimmer:
-            return random_color_shimmer(self.color)
-
         if self.health:
             return self.health.display_color()
 

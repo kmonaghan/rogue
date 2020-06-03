@@ -739,7 +739,7 @@ def main():
 
     current_game.start_fresh_game()
 
-    while not tcod.console_is_window_closed():
+    while True:
         root_console.clear(fg=COLORS.get('console_background'))
 
         if current_game.game_state == GameStates.GAME_EXIT:

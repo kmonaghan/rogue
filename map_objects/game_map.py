@@ -212,17 +212,6 @@ class GameMap:
                 cube.set_point(point)
                 self.current_level.add_entity(cube)
 
-    def level_boss(self, player):
-        npc = bestiary.bountyhunter(Point(player.x-1,player.y-1))
-
-        q = quest.kill_warlord()
-        npc.questgiver.add_quest(q)
-        self.current_level.add_entity(npc)
-
-        for room in self.current_level.rooms:
-            if not room.name:
-                self.place_npc(room, player)
-
     def place_creatures(self, player):
         npc_chances = {}
         npc_chances[Species.RAT] = from_dungeon_level([[95, 1]], self.dungeon_level)
