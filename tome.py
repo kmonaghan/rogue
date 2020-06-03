@@ -178,7 +178,7 @@ def lightning(*args, **kwargs):
 
     if targets:
         total_targets = min(len(target), number_of_dice)
-        for _ in range(total_targets):
+        for i in range(total_targets):
             target = targets.pop()
             damage = die_roll(1, type_of_dice)
             if i > 0:
