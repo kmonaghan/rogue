@@ -5,7 +5,7 @@ import quest
 from etc.colors import COLORS
 from etc.configuration import CONFIG
 
-def menu(con, header, options, width):
+def menu(con, header, options):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
 
     # calculate total height for the header (after auto-wrap) and one line per option
@@ -147,9 +147,9 @@ def main_menu(con, background_image):
     #tcod.image_blit_2x(background_image, 0, 0, 0)
 
     tcod.console_set_default_foreground(0, tcod.light_yellow)
-    tcod.console_print_ex(0, int(screen_width / 2), int(screen_height / 2) - 4, tcod.BKGND_NONE, tcod.CENTER,
+    tcod.console_print_ex(0, int(CONFIG.get('full_screen_width') // 2), int(CONFIG.get('full_screen_height') / 2) - 4, tcod.BKGND_NONE, tcod.CENTER,
                              CONFIG.get('window_title'))
-    tcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), tcod.BKGND_NONE, tcod.CENTER,
+    tcod.console_print_ex(0, int(CONFIG.get('full_screen_width') // 2), int(CONFIG.get('full_screen_height') - 2), tcod.BKGND_NONE, tcod.CENTER,
                              'By Karl Monaghan')
 
     menu(con, '', [['Play a new game', tcod.white],
