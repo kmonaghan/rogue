@@ -4,10 +4,11 @@ from random import choice, randint
 import bestiary
 import quest
 
-from etc.enum import RoutingOptions, Species, Tiles, HUMANOIDS, VERMIN_GENERATORS
+from etc.enum import RoutingOptions, Species, SPECIES_STRINGS, Tiles, HUMANOIDS, VERMIN_GENERATORS
 
 def kill_vermin():
-    key, value = choice(list(VERMIN_GENERATORS.items()))
+    key = choice(VERMIN_GENERATORS)
+    value = SPECIES_STRINGS[key]
     title = "The Verminator"
     description = f"These caves are riddled with vermin. Clear out the {value}s."
 
@@ -20,9 +21,10 @@ def kill_vermin():
 
 def kill_humanoid(type = None):
     if not type:
-        type, value = choice(list(HUMANOIDS.items()))
+        type = choice(HUMANOIDS)
+        value = SPECIES_STRINGS[key]
     else:
-        value = HUMANOIDS[type]
+        value = SPECIES_STRINGS[type]
 
     title = f"Tread on the {value}s."
     description = f"There is an awful lot of {value} in here. Get rid of them. I don't care how."

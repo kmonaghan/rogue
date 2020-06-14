@@ -260,7 +260,6 @@ class Species(Enum):
     ANIMAL = auto()
     BAT = auto()
     BATROOST = auto()
-    CORPSE = auto()
     CREATURE = auto()
     EGG = auto()
     GOBLIN = auto()
@@ -277,17 +276,38 @@ class Species(Enum):
     TROLL = auto()
     UNDEAD = auto()
 
-VERMIN_GENERATORS = {
-        Species.BATROOST: "Bat Roost",
-        Species.HORNETNEST: "Hornet's Nest",
-        Species.RATNEST: "Rat's Nest",
-        }
+SPECIES_STRINGS = {
+    Species.ANIMAL: "animal",
+    Species.BAT: "bat",
+    Species.BATROOST: "Bat Roost",
+    Species.CREATURE: "creature",
+    Species.EGG: "egg",
+    Species.GOBLIN: "goblin",
+    Species.HORNETNEST: "Hornet's Nest",
+    Species.INANIMATE: "inanimate",
+    Species.INSECT: "insect",
+    Species.NONDESCRIPT: "not much",
+    Species.OOZE: "ooze",
+    Species.ORC: "orc",
+    Species.PLAYER: "player",
+    Species.RAT: "rat",
+    Species.RATNEST: "Rat's Nest",
+    Species.SNAKE: "snake",
+    Species.TROLL: "troll",
+    Species.UNDEAD: "undead",
+}
 
-HUMANOIDS = {
-        Species.GOBLIN: "Goblin",
-        Species.ORC: "Orc",
-        Species.TROLL: "Troll",
-        }
+VERMIN_GENERATORS = [
+        Species.BATROOST,
+        Species.HORNETNEST,
+        Species.RATNEST
+        ]
+
+HUMANOIDS = [
+        Species.GOBLIN,
+        Species.ORC,
+        Species.TROLL,
+        ]
 
 class Tiles(IntEnum):
     EMPTY = 0

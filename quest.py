@@ -5,7 +5,7 @@ import bestiary
 from game_messages import Message
 
 from etc.colors import COLORS
-from etc.enum import ResultTypes, Species, VERMIN_GENERATORS, RoutingOptions
+from etc.enum import ResultTypes, Species, SPECIES_STRINGS, VERMIN_GENERATORS, RoutingOptions
 
 import pubsub
 
@@ -56,7 +56,6 @@ class Quest:
         if self.completed:
             return results
 
-        ##print "tsting kill condition: " + npc.name
         if (self.kill == 0):
             return
 
@@ -64,11 +63,9 @@ class Quest:
             self.kill_total += 1
 
         if (self.kill_type == npc.species):
-            ##print "add a kill"
             self.kill_total += 1
 
         if (self.kill == self.kill_total):
-            #print "quest complete"
             pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message=Message('Quest ' + self.title + ' completed!', COLORS.get('success_text'))))
             pubsub.pubsub.unsubscribe_entity(self)
 
@@ -111,6 +108,6 @@ class Quest:
     def status(self):
         message = self.title
         if (self.kill_type):
-            message += ' ' + str(self.kill_total) + ' of ' + str(self.kill) + ' killed'
+            message += f': {str(self.kill_total)} of {str(self.kill)} {SPECIES_STRINGS[self.kill_type]} killed'
 
         return Message(message, COLORS.get('success_text'))

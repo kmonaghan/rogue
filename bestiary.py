@@ -44,7 +44,7 @@ from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
 from etc.enum import (Interactions, MessageType, RenderOrder, Species,
-                        VERMIN_GENERATORS, Tiles)
+                        SPECIES_STRINGS, Tiles)
 
 import pubsub
 
@@ -83,7 +83,7 @@ def bat(point = None, dungeon_level = 1):
 def batroost(point = None, dungeon_level = 1):
     health_component = Health(20)
 
-    creature = Character(point, chr(225), VERMIN_GENERATORS[Species.BATROOST], COLORS.get('bat_roost'),
+    creature = Character(point, chr(225), SPECIES_STRINGS[Species.BATROOST], COLORS.get('bat_roost'),
                     ai=SpawningNPC(bat),
                     species=Species.BATROOST, health=health_component, act_energy=2)
 
@@ -360,7 +360,7 @@ def hornets(point = None, dungeon_level = 1):
 def hornets_nest(point = None, dungeon_level = 1):
     health_component = Health(20)
 
-    creature = Character(point, chr(234), VERMIN_GENERATORS[Species.HORNETNEST],
+    creature = Character(point, chr(234), SPECIES_STRINGS[Species.HORNETNEST],
                         COLORS.get('hornets_nest'), ai=SpawningNPC(hornets),
                         species=Species.HORNETNEST, health=health_component,
                         act_energy=2)
@@ -467,7 +467,7 @@ def rat(point = None, dungeon_level = 1):
 def rats_nest(point = None, dungeon_level = 1):
     health_component = Health(20)
 
-    creature = Character(point, 'N', VERMIN_GENERATORS[Species.RATNEST], COLORS.get('rats_nest'),
+    creature = Character(point, 'N', SPECIES_STRINGS[Species.RATNEST], COLORS.get('rats_nest'),
                     ai=SpawningNPC(rat),
                     species=Species.RATNEST, health=health_component, act_energy=2)
 
