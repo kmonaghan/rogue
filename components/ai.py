@@ -226,7 +226,7 @@ class ConfusedNPC(BaseAI):
     Will randomly wander and attack random entities
     """
     def __init__(self, previous_ai, number_of_turns=10):
-        self.number_of_turns
+        self.number_of_turns = number_of_turns
         self.tree = Root(
             Selection(
                 Sequence(
