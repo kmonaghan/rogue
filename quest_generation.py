@@ -102,4 +102,4 @@ def level_one_goblin(game_map):
                                                                 Tiles.STAIRS_FLOOR,
                                                                 RoutingOptions.AVOID_FOV])
 
-    game_map.current_level.add_entity(bestiary.generate_npc(Species.GOBLIN, 1, 1, point))
+    game_map.current_level.add_entity(bestiary.generate_npc(Species.GOBLIN, game_map.dungeon_level, point))

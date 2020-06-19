@@ -289,7 +289,7 @@ class Rogue(tcod.event.EventDispatch):
             self.game_state = self.previous_game_state
 
         #This needs to come after leveling up or we get stuck in a loop
-        if self.player.level.can_level_up():
+        if not (self.game_state in MENU_STATES) and self.player.level.can_level_up():
             self.previous_game_state = self.game_state
             self.game_state = GameStates.LEVEL_UP
             return True
