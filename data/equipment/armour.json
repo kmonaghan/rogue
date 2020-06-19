@@ -1,6 +1,6 @@
 [
   {
-    "Name" : "padded",
+    "Name" : "padded vest",
     "Character" : "=",
     "Equipment Slot" : "CHEST",
     "Defence" : 1,
@@ -14,7 +14,7 @@
     "Description" : "This enhanced form of padded armor has internal layers specifically designed to trap arrows, bolts, darts, shuriken, thrown daggers, and other small ranged piercing weapons. When these kinds of weapons strike you, they tend to become snagged in these layers and fail to harm you. "
   },
   {
-    "Name" : "leather",
+    "Name" : "leather shirt",
     "Character" : "=",
     "Equipment Slot" : "CHEST",
     "Defence" : 2,

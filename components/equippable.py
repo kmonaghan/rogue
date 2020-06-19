@@ -13,8 +13,8 @@ class Equippable:
         self.defence_bonus = defence_bonus
         self.max_hp_bonus = max_hp_bonus
         self.bonus_damage = bonus_damage
-        self.number_of_dice = 1
-        self.type_of_dice = 6
+        self.number_of_dice = 0
+        self.type_of_dice = 0
         self.bonus_damage = 0
         self.attribute = attribute
         self.damage_type = damage_type
@@ -69,7 +69,9 @@ class Equippable:
     def equipment_description(self):
         """Return a string describing the item."""
         description = ""
-        if (self.number_of_dice):
-            description = self.damage_description()
+        if self.number_of_dice:
+            description += self.damage_description()
+        elif self.defence:
+            description += f"Defence: {self.defence}"
 
         return description
