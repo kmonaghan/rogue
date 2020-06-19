@@ -100,6 +100,7 @@ def random_ring(point = None, dungeon_level = 1):
 def random_scroll(point = None, dungeon_level = 1):
     item_chances = {}
     item_chances['lightning'] = 40
+    item_chances['chain_lightning'] = 40
     item_chances['fireball'] = 30
     item_chances['confuse'] = 30
     item_chances['map_scroll'] = 20
@@ -110,6 +111,9 @@ def random_scroll(point = None, dungeon_level = 1):
     choice = random_choice_from_dict(item_chances)
     if choice == 'lightning':
         item = lighting_scroll(point)
+
+    if choice == 'chain_lightning':
+        item = chain_lightning_scroll(point)
 
     elif choice == 'fireball':
         item = fireball_scroll(point)
@@ -207,7 +211,7 @@ def add_random_weapon_ablity(item):
     elif dice <= 50:
         add_lifedrain(item)
     elif dice <= 55:
-        add_lightning(item)
+        add_chain_lightning(item)
     elif dice <= 60:
         add_paralysis(item)
     elif dice <= 65:
@@ -236,10 +240,10 @@ def add_flaming(item):
     else:
         item.naming.prefix += " flaming"
 
-def add_lightning(item):
-    item.add_component(SpellAbility(spell=tome.lightning, number_of_dice=2, type_of_dice=10, radius=2), 'ablity')
+def add_chain_lightning(item):
+    item.add_component(SpellAbility(spell=tome.chain_lightning, number_of_dice=2, type_of_dice=10, radius=2), 'ablity')
     if not item.naming:
-        item.add_component(Naming(item.base_name, suffix = 'of lightning'), 'naming')
+        item.add_component(Naming(item.base_name, suffix = 'of chain lightning'), 'naming')
     else:
         item.naming.prefix += " shocking"
 
@@ -341,14 +345,31 @@ def speed_potion(point = None):
 
     return create_potion(point, usable)
 
+def chain_lightning_scroll(point = None):
+    #create a lightning bolt scroll
+    usable = ScrollUsable(scroll_name="Chain Lightning Scroll",
+                            scroll_spell=tome.chain_lightning,
+                            number_of_dice=3,
+                            type_of_dice=10,
+                            targets_inventory=False)
+    usable.needs_target = True
+    usable.targeting_message = Message('Left-click a target tile for the lightning bolt, or right-click to cancel.', COLORS.get('instruction_text'))
+
+    item = Entity(point, '#', 'Chain Lightning Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
+                                  item=Item(), usable=usable)
+
+    item.add_component(IdentifiableScroll(), "identifiable")
+    return item
+
 def lighting_scroll(point = None):
     #create a lightning bolt scroll
     usable = ScrollUsable(scroll_name="Lightning Scroll",
                             scroll_spell=tome.lightning,
                             number_of_dice=3,
                             type_of_dice=10,
-                            radius=2,
                             targets_inventory=False)
+    usable.needs_target = True
+    usable.targeting_message = Message('Left-click a target tile for the lightning bolt, or right-click to cancel.', COLORS.get('instruction_text'))
 
     item = Entity(point, '#', 'Lightning Scroll', COLORS.get('equipment_uncommon'), render_order=RenderOrder.ITEM,
                                   item=Item(), usable=usable)
@@ -377,6 +398,7 @@ def fireball_scroll(point = None):
 def confusion_scroll(point = None):
     #create a confuse scroll
     usable = ScrollUsable(scroll_name="Confusion Scroll",
+                            number_of_dice=10,
                             scroll_spell=tome.confuse,
                             targets_inventory=False)
     usable.needs_target = True

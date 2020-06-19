@@ -199,15 +199,8 @@ class SpellAbility(Ablity):
     def on_attack(self, source, target, game_map):
         results = []
 
-        #if randint(1,100) < self.chance:
-        #    return results
-
         if not target and self.targets_inventory:
             results.append({ResultTypes.TARGET_ITEM_IN_INVENTORY: source})
-        #elif not target_x and self.needs_target:
-        #    if self.targeting_message:
-        #        results.append({ResultTypes.MESSAGE: self.targeting_message})
-        #    results.append({ResultTypes.TARGETING: self.owner})
         else:
             results = self.spell(game_map=game_map,
                                         caster=source,

@@ -73,7 +73,7 @@ def _bresenham_ray(game_map, source, target):
     idx, target_idx = 0, 0
     if dx > dy:
         err = dx / 2.0
-        while game_map.within_bounds(x, y) and game_map.walkable[x, y]:
+        while game_map.current_level.within_bounds(x, y) and game_map.current_level.walkable[x, y]:
             ray.append((x, y))
             if (x, y) == target:
                 target_idx = idx
@@ -85,7 +85,7 @@ def _bresenham_ray(game_map, source, target):
             idx += 1
     else:
         err = dy / 2.0
-        while game_map.within_bounds(x, y) and game_map.walkable[x, y]:
+        while game_map.current_level.within_bounds(x, y) and game_map.current_level.walkable[x, y]:
             ray.append((x, y))
             if (x, y) == target:
                 target_idx = idx
@@ -100,10 +100,38 @@ def _bresenham_ray(game_map, source, target):
     return ray, idx, target_idx
 
 def bresenham_line(game_map, source, target):
+    '''Use Bresenham's line drawing algorithm to draw a ray joining two
+    points.
+
+    Parameters
+    ----------
+    game_map (GameMap): Current game map.
+    source (Tuple): start point for line.
+    target (Tuple): end point for line.
+
+    Returns
+    -------
+    ray (list)
+        List of tuples.
+    '''
     ray, _, target_idx = _bresenham_ray(game_map, source, target)
     return ray[:target_idx]
 
 def bresenham_ray(game_map, source, target):
+    '''Use Bresenham's line drawing algorithm to draw a ray starting at [source],
+    passing through the [target] and only stopping when it hits a blocking tile.
+
+    Parameters
+    ----------
+    game_map (GameMap): Current game map.
+    source (Tuple): start point for line.
+    target (Tuple): end point for line.
+
+    Returns
+    -------
+    ray (list)
+        List of tuples.
+    '''
     ray, last_idx, target_idx = _bresenham_ray(game_map, source, target)
     return ray[:last_idx]
 

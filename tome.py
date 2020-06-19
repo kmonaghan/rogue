@@ -9,16 +9,33 @@ import bestiary
 from components.ai import (BasicNPC, ConfusedNPC)
 from components.speed import Speed
 
+from entities.character import Character
+
 from map_objects.point import Point
 
 from game_messages import Message
 
 from utils.random_utils import die_roll
+from utils.utils import bresenham_ray
 
 from etc.enum import DamageType, MessageType, ResultTypes
 from etc.colors import COLORS
 
-def antidote(*args, **kwargs):
+def antidote(**kwargs):
+    '''Cast antidote.
+
+    Remove poisoned component from an entity (if it exists).
+
+    Parameters
+    ----------
+    kwargs:
+       target (Entity): The entity that is being targetted by the spell.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     target = kwargs.get('target')
 
     results = []
@@ -30,8 +47,158 @@ def antidote(*args, **kwargs):
 
     return results
 
-def confuse(*args, **kwargs):
+def chain_lightning(**kwargs):
+    '''Cast chain lightning.
+
+    Does ELECTRIC damage to a max of [number_of_dice] entities within a [radius].
+    Each entity recieves 1D[type_of_dice] damage.
+
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       game_map (GameMap): Current game map.
+       number_of_dice (int): number of die to roll.
+       radius (int): radius of the spell effect.
+       target_x (int): x co-ordinate.
+       target_y (int): y co-ordinate.
+       type_of_dice (int): Type of die to roll.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
+    caster = kwargs.get('caster')
     game_map = kwargs.get('game_map')
+    number_of_dice = kwargs.get('number_of_dice')
+    radius = kwargs.get('radius')
+    target_x = kwargs.get('target_x')
+    target_y = kwargs.get('target_y')
+    type_of_dice = kwargs.get('type_of_dice')
+
+    results = []
+    targets = []
+
+    start_x = max(0, target_x - radius)
+    start_y = max(0, target_y - radius)
+
+    end_x = min(target_x + radius, game_map.current_level.width)
+    end_y = min(target_y + radius, game_map.current_level.width)
+
+    for x in range(start_x, end_x):
+        for y in range(start_y, end_y):
+            entities = game_map.current_level.entities.get_entities_in_position((x,y))
+            for entity in entities:
+                if entity == caster:
+                    continue
+                if not entity.health:
+                    continue
+                if entity.health.dead:
+                    continue
+
+                targets.append(entity)
+
+    if targets:
+        total_targets = min(len(targets), number_of_dice)
+        for i in range(total_targets):
+            target = targets.pop()
+            damage = die_roll(1, type_of_dice)
+            if i > 0:
+                results.append({ResultTypes.MESSAGE: Message(f"The bolt bounces and strikes {target.name} with a loud crack of thunder!", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
+            else:
+                results.append({ResultTypes.MESSAGE: Message(f"A lighting bolt strikes the {target.name} with a loud crack of thunder!", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
+
+            damage_results, total_damage = target.health.take_damage(damage, caster, DamageType.ELECTRIC)
+            results.append({ResultTypes.MESSAGE: Message(f"{target.name} takes {str(total_damage)} damage.", COLORS.get('damage_text'))})
+            results.extend(damage_results)
+    else:
+        results.append({ResultTypes.MESSAGE: Message("No enemy is close enough to strike.", COLORS.get('failure_text'))})
+
+    return results
+
+def change_defence(**kwargs):
+    '''Cast change defence.
+
+    Update an entity's defence by [number_of_dice]D[type_of_dice].
+
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       number_of_dice (int): number of die to roll.
+       target (Entity): The entity that is being targetted by the spell.
+       type_of_dice (int): Type of die to roll.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
+    caster = kwargs.get('caster')
+    number_of_dice = kwargs.get('number_of_dice')
+    target = kwargs.get('target')
+    type_of_dice = kwargs.get('type_of_dice')
+
+    results = []
+
+    extra = die_roll(number_of_dice, type_of_dice)
+    target.defence.base_defence = target.defence.base_defence + extra
+    results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
+
+    return results
+
+def change_power(**kwargs):
+    '''Cast increase power.
+
+    Update an entity's power by [number_of_dice]D[type_of_dice].
+
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       number_of_dice (int): number of die to roll.
+       target (Entity): The entity that is being targetted by the spell.
+       type_of_dice (int): Type of die to roll.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
+    caster = kwargs.get('caster')
+    number_of_dice = kwargs.get('number_of_dice')
+    target = kwargs.get('target')
+    type_of_dice = kwargs.get('type_of_dice')
+
+    results = []
+
+    extra = die_roll(number_of_dice, type_of_dice)
+    target.offence.base_power = target.offence.base_power + extra
+    results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', COLORS.get('success_text'))})
+
+    return results
+
+def confuse(**kwargs):
+    '''Cast confuse.
+
+    Replace an entity's AI with the ConfusedNPC AI for a [number_of_dice] turns.
+
+    Parameters
+    ----------
+    kwargs:
+       game_map (GameMap): Current game map.
+       number_of_dice = kwargs.get('number_of_dice')
+       target_x (int): x co-ordinate.
+       target_y (int): y co-ordinate.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
+    game_map = kwargs.get('game_map')
+    number_of_dice = kwargs.get('number_of_dice')
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
 
@@ -44,7 +211,7 @@ def confuse(*args, **kwargs):
     entities = game_map.current_level.entities.get_entities_in_position((target_x, target_y))
     for entity in entities:
         if entity.ai:
-            confused_ai = ConfusedNPC(entity.ai, 10)
+            confused_ai = ConfusedNPC(entity.ai, number_of_dice)
 
             confused_ai.owner = entity
             entity.ai = confused_ai
@@ -57,44 +224,35 @@ def confuse(*args, **kwargs):
 
     return results
 
-def change_defence(*args, **kwargs):
-    number_of_dice = kwargs.get('number_of_dice')
-    type_of_dice = kwargs.get('type_of_dice')
-    caster = kwargs.get('caster')
-    target = kwargs.get('target')
+def fireball(**kwargs):
+    '''Cast a fireball.
 
-    results = []
+    Does FIRE damage to all damagable entities in a circle centered on the
+    target point.
 
-    extra = die_roll(number_of_dice, type_of_dice)
-    logging.info(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
-    target.defence.base_defence = target.defence.base_defence + extra
-    results.append({ResultTypes.MESSAGE: Message('You feel more secure in yourself!', COLORS.get('success_text'), target=target, type=MessageType.EFFECT)})
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       game_map (GameMap): Current game map.
+       number_of_dice (int): number of die to roll.
+       radius (int): radius of the spell effect.
+       target_x (int): x co-ordinate.
+       target_y (int): y co-ordinate.
+       type_of_dice (int): Type of die to roll.
 
-    return results
-
-def change_power(*args, **kwargs):
-    number_of_dice = kwargs.get('number_of_dice')
-    type_of_dice = kwargs.get('type_of_dice')
-    caster = kwargs.get('caster')
-    target = kwargs.get('target')
-
-    results = []
-
-    extra = die_roll(number_of_dice, type_of_dice)
-    logging.info(f"adding {extra} to base power from {number_of_dice}d{type_of_dice}")
-    target.offence.base_power = target.offence.base_power + extra
-    results.append({ResultTypes.MESSAGE: Message('You feel like you can take anything on!', COLORS.get('success_text'))})
-
-    return results
-
-def fireball(*args, **kwargs):
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     caster = kwargs.get('caster')
     game_map = kwargs.get('game_map')
     number_of_dice = kwargs.get('number_of_dice')
-    type_of_dice = kwargs.get('type_of_dice')
     radius = kwargs.get('radius')
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
+    type_of_dice = kwargs.get('type_of_dice')
 
     results = []
 
@@ -113,11 +271,26 @@ def fireball(*args, **kwargs):
 
     return results
 
-def heal(*args, **kwargs):
+def heal(**kwargs):
+    '''Cast heal.
+
+    Heal a target entity.
+
+    Parameters
+    ----------
+    kwargs:
+       number_of_dice (int): number of die to roll.
+       target (Entity): The entity that is being targetted by the spell.
+       type_of_dice (int): Type of die to roll.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     number_of_dice = kwargs.get('number_of_dice')
-    type_of_dice = kwargs.get('type_of_dice')
-    caster = kwargs.get('caster')
     target = kwargs.get('target')
+    type_of_dice = kwargs.get('type_of_dice')
 
     results = []
 
@@ -129,12 +302,27 @@ def heal(*args, **kwargs):
 
     return results
 
-def identify(*args, **kwargs):
+def identify(**kwargs):
+    '''Cast identify.
+
+    If and entity has the Identifiable component and identifiable.identified is
+    FALSE, switch to TRUE and print out a description of the entity.
+
+    Parameters
+    ----------
+    kwargs:
+       target (Entity): The entity that is being targetted by the spell.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     target = kwargs.get('target')
 
     results = []
 
-    if target.identifiable and not target.identified:
+    if target.identifiable and not target.identifiable.identified:
         target.identifiable.identified = True
 
     results.append({ResultTypes.MESSAGE: Message(f"The item is a {target.name}", COLORS.get('effect_text'))})
@@ -143,58 +331,68 @@ def identify(*args, **kwargs):
 
     return results
 
-def lightning(*args, **kwargs):
+def lightning(**kwargs):
+    '''Cast a lightning bolt.
+
+    A bolt does ELECTRIC damage to all damagable entities in a line. The line is
+    drawn between the caster, through the target point and stops when it hits a
+    blocking tile.
+
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       game_map (GameMap): Current game map.
+       number_of_dice (int): number of die to roll.
+       target_x (int): x co-ordinate.
+       target_y (int): y co-ordinate.
+       type_of_dice (int): Type of die to roll.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     caster = kwargs.get('caster')
-    target = kwargs.get('target')
     game_map = kwargs.get('game_map')
     number_of_dice = kwargs.get('number_of_dice')
+    target_x = kwargs.get('target_x')
+    target_y = kwargs.get('target_y')
     type_of_dice = kwargs.get('type_of_dice')
-    radius = kwargs.get('radius')
+
+    ray = bresenham_ray(game_map, (caster.x, caster.y), (target_x, target_y))
 
     results = []
-    targets = []
 
-    start_x = max(0, caster.x - radius)
-    start_y = max(0, caster.y - radius)
+    ray.pop(0) #first item is caster xy
 
-    end_x = min(caster.x + radius, game_map.current_level.width)
-    end_y = min(caster.y + radius, game_map.current_level.width)
-
-    for x in range(start_x, end_x):
-        for y in range(start_y, end_y):
-            entities = game_map.current_level.entities.get_entities_in_position((x,y))
-            for entity in entities:
-                if entity == caster:
-                    continue
-                if not entity.health:
-                    continue
-                if entity.health.dead:
-                    continue
-
-                targets.append(entity)
-
-    if target:
-        targets.insert(0, target)
-
-    if targets:
-        total_targets = min(len(target), number_of_dice)
-        for i in range(total_targets):
-            target = targets.pop()
-            damage = die_roll(1, type_of_dice)
-            if i > 0:
-                results.append({ResultTypes.MESSAGE: Message(f"The bolt bounces and strikes {target.name} with a loud crack of thunder!", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
-            else:
-                results.append({ResultTypes.MESSAGE: Message(f"A lighting bolt strikes the {target.name} with a loud crack of thunder!", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
-
-            damage_results, total_damage = target.health.take_damage(damage, caster, DamageType.ELECTRIC)
-            results.append({ResultTypes.MESSAGE: Message(f"{target.name} takes {str(total_damage)} damage.", COLORS.get('damage_text'))})
-            results.extend(damage_results)
-    else:
-        results.append({ResultTypes.MESSAGE: Message("No enemy is close enough to strike.", COLORS.get('failure_text'))})
+    for x,y in ray:
+        entities = game_map.current_level.entities.get_entities_in_position((x,y))
+        for entity in entities:
+            if entity.health and not entity.health.dead:
+                damage = die_roll(number_of_dice, type_of_dice)
+                results.append({ResultTypes.MESSAGE: Message(f"A lighting bolt strikes the {entity.name} with a loud crack of thunder!", COLORS.get('effect_text'), target=entity, type=MessageType.EFFECT)})
+                damage_results, total_damage = entity.health.take_damage(damage, caster, DamageType.ELECTRIC)
+                results.append({ResultTypes.MESSAGE: Message(f"{entity.name} takes {str(total_damage)} damage.", COLORS.get('damage_text'))})
+                results.extend(damage_results)
 
     return results
 
-def mapping(*args, **kwargs):
+def mapping(**kwargs):
+    '''Cast mapping.
+
+    Reveal the entire game map.
+
+    Parameters
+    ----------
+    kwargs:
+       game_map (GameMap): Current game map.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     game_map = kwargs.get('game_map')
 
     results = []
@@ -206,47 +404,75 @@ def mapping(*args, **kwargs):
 
     return results
 
-def summon_npc(point, ncp_type, game_map, number_of_npc=6):
-    dice = randint(1, number_of_npc)
+def speed(**kwargs):
+    '''Cast speed.
 
-    start_x = point.x - 1
-    start_y = point.y - 1
+    Adjust an entities speed.
 
-    offset = 3
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       game_map (GameMap): Current game map.
+       target (Entity): The entity that is being targetted by the spell.
+       target_x (int): x co-ordinate.
+       target_y (int): y co-ordinate.
+       type_of_dice (int): Type of die to roll.
 
-    if (start_x < 0):
-        start_x = 0
-        offset = 2
-
-    if (start_y < 0):
-        start_y = 0
-        offset = 2
-
-    for x in range(start_x, start_x + offset):
-        for y in range(start_y, start_y + offset):
-            if not game_map.current_level.blocked[x, y]:
-                npc = ncp_type(Point(x, y))
-                game_map.current_level.add_entity(npc)
-                dice -= 1
-
-                if dice < 1:
-                    return
-
-def speed(*args, **kwargs):
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     caster = kwargs.get('caster')
+    game_map = kwargs.get('game_map')
+    target_x = kwargs.get('target_x')
+    target_y = kwargs.get('target_y')
     target = kwargs.get('target')
 
     results = []
 
-    target.add_component(Speed(), 'speed')
-    target.speed.start()
-    results.append({ResultTypes.MESSAGE: Message(f"{target.name} speeds up", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
+    if not target:
+        if not game_map.current_level.fov[target_x, target_y]:
+            results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
+            return results
+
+        entities = game_map.current_level.entities.get_entities_in_position((target_x, target_y))
+        for entity in entities:
+            if isinstance(entity, Character):
+                target = entity
+                break
+
+    if target:
+        target.add_component(Speed(), 'speed')
+        target.speed.start()
+        results.append({ResultTypes.MESSAGE: Message(f"{target.name} speeds up", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
+    else:
+        results.append({ResultTypes.MESSAGE: Message(f"Nothing to target", COLORS.get('effect_text'))})
 
     return results
 
-def teleport(*args, **kwargs):
-    game_map = kwargs.get('game_map')
+def teleport(**kwargs):
+    '''Cast teleport.
+
+    Transport the casting entity to a random open tile on the map.
+    There is a chance the teleport will have a secondary negative effect:
+    10% of entity being damaged for 1d6 + distance between start and end points.
+    1% chance a clone of the entity is created which hunts them down.
+
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       game_map (GameMap): Current game map.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
     caster = kwargs.get('caster')
+    game_map = kwargs.get('game_map')
 
     results = []
 
@@ -271,15 +497,9 @@ def teleport(*args, **kwargs):
         game_map.current_level.add_entity(clone)
         results.append({ResultTypes.MESSAGE: Message(f"You feel as if you are split in two.", COLORS.get('damage_text'))})
 
-    elif (chance_of_teleport_going_wrong >= 90):
+    elif (chance_of_teleport_going_wrong >= 89):
         damage_results, total_damage = caster.health.take_damage(die_roll(1, 6, int(orginal_point.distance_to(point))))
         results.append({ResultTypes.MESSAGE: Message(f"You take {str(total_damage)} damage.", COLORS.get('damage_text'))})
         results.extend(damage_results)
 
     return results
-
-def resurrect_all_npc(npc_type, game_map, target):
-    for entity in game_map.entities:
-        if entity.health and entity.health.dead:
-            npc_type(entity)
-    return
