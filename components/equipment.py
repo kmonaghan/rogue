@@ -167,3 +167,12 @@ class Equipment:
             Item that is equipped in slot.
         '''
         return self.equipped.get(slot)
+
+    def get_ablities(self):
+        ablities = []
+
+        for item in self.equipped.values():
+            if item and item.ablity:
+                ablities.append(item.ablity)
+
+        return ablities

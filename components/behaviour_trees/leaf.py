@@ -258,8 +258,8 @@ class SpawnEntity(Node):
 
                 self.current_time = 0
                 return TreeStates.SUCCESS, results
-            #else:
-            #    logging.info("Can't spawn as no room.")
+            else:
+                logging.info(f"{owner} can't spawn {self.maker} as no room.")
         return TreeStates.FAILURE, []
 
 class PickUp(Node):

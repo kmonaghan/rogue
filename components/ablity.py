@@ -8,7 +8,10 @@ from etc.enum import DamageType, MessageType, ResultTypes
 
 from game_messages import Message
 
+from map_objects.point import Point
+
 from utils.random_utils import die_roll
+from utils.utils import random_adjacent
 
 class Ablity:
     def __init__(self, name = ""):
@@ -27,7 +30,7 @@ class Ablity:
     def on_attack(self, source, target, game_map):
         pass
 
-    def on_defend(self, source, target):
+    def on_defend(self, source, target, game_map):
         pass
 
     def on_dequip(self, source):
@@ -185,6 +188,30 @@ class Speed(Ablity):
 
     def on_dequip(self, source):
         source.speed = self.old_speed
+
+class Spawning(Ablity):
+    def __init__(self, name = "Spawning", maker=None):
+        super().__init__(name=name)
+        self.maker = maker
+
+    def on_attack(self, source, target, game_map):
+        pass
+
+    def on_defend(self, source, target, game_map):
+        results = []
+
+        x, y = random_adjacent((source.x, source.y))
+
+        if (game_map.current_level.walkable[x, y] and not game_map.current_level.blocked[x, y]):
+            entity = self.maker(Point(x, y))
+            entity.ai.set_target(source)
+
+            results = [{ResultTypes.ADD_ENTITY: entity}]
+
+            if source.children:
+                source.children.addChild(entity)
+
+        return results
 
 class SpellAbility(Ablity):
     def __init__(self, name="", spell=None, number_of_dice=0, type_of_dice=0, radius=3, targets_inventory=False, chance=50):

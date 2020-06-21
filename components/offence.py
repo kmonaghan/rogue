@@ -1,3 +1,5 @@
+import logging
+
 from operator import itemgetter
 from random import randint
 
@@ -43,6 +45,8 @@ class Offence:
 
         weapon = self.owner.equipment.get_equipped_in_slot(EquipmentSlot.MAIN_HAND)
 
+        logging.info(f"{self.owner.name} attacking {target.name} with {weapon.name}")
+
         if (hit > 0) or (multiplier == 2):
             #make the target take some damage
             damage = weapon.equippable.damage() * multiplier
@@ -57,6 +61,9 @@ class Offence:
                 message = Message(msg_text.format(self.owner.name.title(), target.name, weapon.name, str(total_damage)),
                                 COLORS.get('damage_text'), source=self.owner, target=target, type=MessageType.COMBAT)
                 results.append({ResultTypes.MESSAGE: message})
+                logging.info(message)
+            else:
+                logging.info(f"{self.owner.name} misses {target.name}")
 
             pubsub.pubsub.add_message(pubsub.Publish(self.owner, pubsub.PubSubTypes.ATTACKED, target=target))
 
@@ -71,8 +78,17 @@ class Offence:
                         results.append({ResultTypes.MESSAGE: message})
 
                 results.extend(weapon.ablity.on_attack(source=self.owner, target=target, game_map=game_map))
+
+            if target.equipment:
+                abilities = target.equipment.get_ablities()
+
+                for ablity in abilities:
+                    ablity_result = ablity.on_defend(source=self.owner, target=target, game_map=game_map)
+                    if ablity_result:
+                        results.extend(ablity_result)
         else:
             message = Message('{0} attacks {1} with {2} but does no damage.'.format(self.owner.name.title(), target.name, weapon.name), COLORS.get('damage_text'), source=self.owner,target=target, type=MessageType.COMBAT)
             results.append({ResultTypes.MESSAGE: message})
+            logging.info(message)
 
         return results

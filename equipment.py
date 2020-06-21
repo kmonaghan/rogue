@@ -12,8 +12,8 @@ from utils.random_utils import from_dungeon_level, random_choice_from_dict
 from utils.utils import resource_path
 
 from components.ablity import (Defence, ExtraDamage, Poisoning, PushBack,
-                                LifeDrain, Infection, Paralysis, Speed,
-                                SpellAbility)
+                                LifeDrain, Infection, Paralysis, Spawning,
+                                Speed, SpellAbility)
 from components.aura import DamageAura
 from components.equippable import Equippable
 from components.identifiable import (Identifiable, IdentifiablePotion,
@@ -80,9 +80,9 @@ def random_potion(point = None, dungeon_level = 1):
 
 def random_ring(point = None, dungeon_level = 1):
     item_chances = {}
-    item_chances['power'] = 50
-    item_chances['defence'] = 50
-    item_chances['regeneration'] = 5
+    item_chances['power'] = 40
+    item_chances['defence'] = 40
+    item_chances['regeneration'] = 20
 
     item = Entity(point, chr(9), 'Ring', COLORS.get('equipment_rare'),
                     item=Item(), equippable=Equippable(EquipmentSlot.RING),
@@ -256,6 +256,11 @@ def add_smashing(item):
     item.add_component(PushBack(), 'ablity')
     if not item.naming:
         item.add_component(Naming(item.base_name, suffix = 'of smashing'), 'naming')
+
+def add_spawning(item, entity):
+    item.add_component(Spawning(maker=entity), 'ablity')
+    if not item.naming:
+        item.add_component(Naming(item.base_name, suffix = 'of spawning'), 'naming')
 
 def add_lifedrain(item):
     item.add_component(LifeDrain(), 'ablity')

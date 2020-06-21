@@ -23,7 +23,7 @@ class Spawn:
     def spawn(self):
         if not self.owner.health.dead:
             spawned = self.npc(self.owner.point)
-            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message(f"{self.owner.name.title()} has spawned a {spawned.name.title()}", COLORS.get('effect_text'), source=self.owner,type=MessageType.EFFECT)))
+            pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message(f"{self.owner.name.title()} has spawned a {spawned.name.title()}", COLORS.get('effect_text'), source=self.owner, target=spawned, type=MessageType.EFFECT)))
             self.current_energy = 0
             return spawned
 

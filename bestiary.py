@@ -216,7 +216,7 @@ def create_player():
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
 
-    armour = equipment.create_armour('leather')
+    armour = equipment.create_armour('leather shirt')
     player.inventory.add_item(armour)
     player.equipment.toggle_equip(armour)
 
@@ -237,6 +237,18 @@ def create_player():
 
         potion = equipment.healing_potion()
         player.inventory.add_item(potion)
+
+        potion2 = equipment.power_potion()
+        potion2.identifiable.identified = True
+        player.inventory.add_item(potion2)
+
+        potion3 = equipment.defence_potion()
+        potion3.identifiable.identified = True
+        player.inventory.add_item(potion3)
+
+        potion4 = equipment.speed_potion()
+        potion4.identifiable.identified = True
+        player.inventory.add_item(potion4)
 
         scroll1 = equipment.lighting_scroll()
         scroll1.identifiable.identified = True
@@ -265,6 +277,10 @@ def create_player():
         scroll7 = equipment.map_scroll()
         scroll7.identifiable.identified = True
         player.inventory.add_item(scroll7)
+
+        scroll8 = equipment.chain_lightning_scroll()
+        scroll8.identifiable.identified = True
+        player.inventory.add_item(scroll8)
 
     pubsub.pubsub.subscribe(pubsub.Subscription(player, pubsub.PubSubTypes.EARNEDXP, earn_quest_xp))
 
@@ -370,6 +386,12 @@ def hornets_nest(point = None, dungeon_level = 1):
     creature.add_component(Children(5), 'children')
 
     creature.movement.routing_avoid.extend(creature_avoid)
+
+    armour = equipment.random_armour(dungeon_level=dungeon_level)
+    armour.lootable = False
+    equipment.add_spawning(item=armour, entity=hornets)
+    creature.inventory.add_item(armour)
+    creature.equipment.toggle_equip(armour)
 
     equipment.add_random_loot(creature, dungeon_level)
 
