@@ -1,2 +1,4 @@
 *.pyc
 savegame
+env
+log/*.log
