@@ -64,6 +64,8 @@ for i in range(iterations):
 
 console.ch[:] = np.where(a > threshold, 176, ord(' '))
 
+https://www.jamisbuck.org/mazes/
+
 Other Roguelikes:
 https://github.com/Maugrift/GeneriCrawl See for nice FOV
 https://bitbucket.org/Lewatw/ticronem See for Esper intergration
@@ -122,7 +124,14 @@ pyinstaller --clean engine.spec
 
 https://gameswithgrids.com/blog/automated-build/
 
+Item generation:
+https://diablo2.diablowiki.net/Category:Item_Generation
+
 Numpy:
   - Masks:
       http://danielandreasen.github.io/:about/2015/01/19/masks-in-python/
       https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.ma.masked_where.html#numpy.ma.masked_where
+
+convert s*.png screen.gif
+
+pip3 install -r requirements.txt
