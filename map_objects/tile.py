@@ -1,7 +1,50 @@
-__metaclass__ = type
-
 from random import choice
+from typing import Tuple
+
+import numpy as np
+
 from etc.colors import COLORS, random_color_shimmer
+
+# Tile graphics structured type compatible with Console.tiles_rgb.
+graphic_dt = np.dtype(
+    [
+        ("ch", np.int32),  # Unicode codepoint.
+        ("fg", "3B"),  # 3 unsigned bytes, for RGB colors.
+        ("bg", "3B"),
+    ]
+)
+
+# Tile struct used for statically defined tile data.
+tile_dt = np.dtype(
+    [
+        ("name", "<U50"),  # Name of the tile to be displayed.
+        ("walkable", np.bool),  # True if this tile can be walked over.
+        ("transparent", np.bool),  # True if this tile doesn't block FOV.
+        ("dark", graphic_dt),  # Graphics for when this tile is not in FOV.
+        ("light", graphic_dt),  # Graphics for when the tile is in FOV.
+    ]
+)
+
+def new_tile(
+    *,  # Enforce the use of keywords, so that parameter order doesn't matter.
+    name: str,
+    walkable: int,
+    transparent: int,
+    dark: Tuple[int, Tuple[int, int, int], Tuple[int, int, int]],
+    light: Tuple[int, Tuple[int, int, int], Tuple[int, int, int]],
+) -> np.ndarray:
+    """Helper function for defining individual tile types """
+    return np.array((name, walkable, transparent, dark, light), dtype=tile_dt)
+
+# SHROUD represents unexplored, unseen tiles
+SHROUD = np.array((ord(" "), (255, 255, 255), (0, 0, 0)), dtype=graphic_dt)
+EMPTY = new_tile(
+    name="Nothingness",
+    walkable=False,
+    transparent=False,
+    dark=(ord(" "), (255, 255, 255), (0, 0, 0)),
+    light=(ord(" "), (255, 255, 255), (0, 0, 0)),
+)
 
 class Tile:
     """
@@ -15,13 +58,14 @@ class Tile:
             block_sight = blocked
 
         self.block_sight = block_sight
-
+        self.walkable = not self.blocked
         self.explored = False
         self.fov_color = COLORS.get('light_default')
         self.out_of_fov_color = COLORS.get('dark_default')
         self.foreground_color = COLORS.get('foreground_default')
         self.name = "Tile"
-        self.char = None
+        self.char = " "
+        self._glyph = None
 
     def __str__(self):
         return f"{self.name}"
@@ -30,18 +74,17 @@ class Tile:
         return f"{self.name}"
 
     @property
-    def fov_shimmer(self):
-        return random_color_shimmer(self.fov_color)
+    def glyph(self):
+        if not self._glyph:
+            self._glyph = new_tile(
+                name=np.string_(self.name),
+                walkable=self.walkable,
+                transparent=self.block_sight,
+                dark=(ord(self.char), self.foreground_color, self.out_of_fov_color),
+                light=(ord(self.char), self.foreground_color, self.fov_color),
+            )
 
-    @property
-    def out_of_fov_shimmer(self):
-        return random_color_shimmer(self.out_of_fov_color)
-
-    def isFloor(self):
-        return not (self.blocked and self.block_sight)
-
-    def isWall(self):
-        return (self.blocked and self.block_sight)
+        return self._glyph
 
 class CavernFloor(Tile):
     def __init__(self, blocked=False, block_sight=False):

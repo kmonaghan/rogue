@@ -344,9 +344,6 @@ BLOCKING_TILES = {
     Tiles.DEEP_WATER, Tiles.IMPENETRABLE
 }
 
-SHIMMERING_TILES = [
-    Tiles.SHALLOW_WATER, Tiles.DEEP_WATER]
-
 class TreeStates(Enum):
     SUCCESS = auto()
     FAILURE = auto()

@@ -3,20 +3,21 @@ from random import randint
 
 import tcod
 
+from tcod.console import Console
 from tcod.map import Map
 
 from entities.entity_list import EntityList
 
 from etc.colors import COLORS, random_color_shimmer
 from etc.configuration import CONFIG
-from etc.enum import RoutingOptions, Tiles, WALKABLE_TILES, SHIMMERING_TILES
+from etc.enum import RoutingOptions, Tiles, WALKABLE_TILES
 
 from map_objects.point import Point
 from map_objects.tile import (CavernFloor, CavernWall, CorridorFloor,
                                 CorridorWall, DeepWater, Door, FungalCavernFloor,
                                 ImpenetrableTile, RoomFloor, RoomWall,
                                 ShallowWater, StairsFloor, EmptyTile,
-                                PotentialCorridorFloor)
+                                PotentialCorridorFloor, SHROUD, EMPTY)
 
 from utils.utils import matprint
 
@@ -30,36 +31,18 @@ class LevelMap(Map):
         # These need to be int8's to work with the tcod pathfinder
         self.grid = np.zeros(self.walkable.shape, dtype=np.int8)
         self.explored = np.zeros(self.walkable.shape, dtype=np.int8)
-        self.illuminated = np.zeros(self.walkable.shape, dtype=np.int8)
         self.blocked = np.zeros(self.walkable.shape, dtype=np.int8)
         self.npc_fov = self.fov
 
-        self.dark_map_bg = np.full(
-            self.walkable.shape + (3,), COLORS.get('dark_default'), dtype=np.uint8
-        )
-        self.light_map_bg = np.full(
-            self.walkable.shape + (3,), COLORS.get('light_default'), dtype=np.uint8
-        )
-        self.map_bg = np.full(
-            self.walkable.shape + (3,), COLORS.get('console_background'), dtype=np.uint8
-        )
-        self.map_fg = np.full(
-            self.walkable.shape + (3,), COLORS.get('foreground_default'), dtype=np.uint8
-        )
-
-        self.map_char = np.zeros(self.walkable.shape, dtype=np.int8)
-
         self.dungeon_level = 1
 
-        self.tiles = [[None for x in range(height)] for y in range(width)]
+        self.tiles = np.full((width, height), fill_value=EMPTY, order="F")
 
         self.blit_floor(grid)
 
         self.paths = []
         self.walkables = []
 
-        self.torch = True
-        self.noise = None
         self.torchx = 0.0
         # 1d noise for the torch flickering
         self.noise = tcod.noise_new(1, 1.0, 1.0)
@@ -68,8 +51,6 @@ class LevelMap(Map):
         self.dijkstra_flee = None
 
         self.rooms = rooms
-
-        self.should_shimmer = 0
 
     @property
     def caves(self):
@@ -135,12 +116,8 @@ class LevelMap(Map):
                 self.make_transparent_and_walkable(x, y)
 
             self.grid = grid
-            self.tiles[x][y] = current_tile
-            self.dark_map_bg[x,y] = current_tile.out_of_fov_color
-            self.light_map_bg[x,y] = current_tile.fov_color
-            self.map_fg[x, y] = current_tile.foreground_color
-            if current_tile.char:
-                self.map_char[x,y] = ord(current_tile.char)
+
+            self.tiles[x,y] = current_tile.glyph
 
     def make_transparent_and_walkable(self, x, y):
         self.walkable[x, y] = True
@@ -157,9 +134,6 @@ class LevelMap(Map):
         return (
             (0 + buffer <= x < self.width - buffer) and
             (0 + buffer <= y < self.height - buffer))
-
-    def visible(self, x, y):
-        return self.fov[x, y] or self.illuminated[x, y]
 
     def is_wall(self, x, y):
             return (not self.door[x, y]
@@ -193,22 +167,34 @@ class LevelMap(Map):
 
         return Point(available[0][position], available[1][position])
 
+    def render(self, console: Console) -> None:
+        """
+        Renders the map.
+        If a tile is in the "visible" array, then draw it with the "light" colors.
+        If it isn't, but it's in the "explored" array, then draw it with the "dark" colors.
+        Otherwise, the default is "SHROUD".
+        """
+        console.tiles_rgb[:] = np.select(
+            condlist=[self.fov, self.explored],
+            choicelist=[self.tiles["light"], self.tiles["dark"]],
+            default=SHROUD
+        )
+
+        where_fov = np.where(self.fov[:])
+
+        for idx, x in enumerate(where_fov[0]):
+            y = where_fov[1][idx]
+            current_entities = self.entities.get_entities_in_position((x, y))
+            entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
+            for entity in entities_in_render_order:
+                if not entity.invisible:
+                    console.print(entity.x, entity.y, entity.display_char, fg=entity.display_color)
+            entities_in_render_order.clear()
+            entity = None
+
     def update_and_draw_all(self, map_console, player):
+        return self.render(map_console)
         map_console.clear()
-
-        map_console.fg[:] = self.map_fg[:]
-
-        if self.should_shimmer > 5:
-            shimmering = np.isin(self.grid, SHIMMERING_TILES)
-            shimmer_list = np.where(shimmering)
-            for idx, x in enumerate(shimmer_list[0]):
-                y = shimmer_list[1][idx]
-
-                self.dark_map_bg[x,y] = self.tiles[x][y].out_of_fov_shimmer
-                self.light_map_bg[x,y] = self.tiles[x][y].fov_shimmer
-                self.should_shimmer = 0
-        else:
-            self.should_shimmer += 1
 
         if not CONFIG.get('debug'):
             where_fov = np.where(self.fov[:])
