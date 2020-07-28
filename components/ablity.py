@@ -1,7 +1,7 @@
 from random import randint
 
 from components.poisoned import Poisoned
-from components.speed import Speed
+from components.speed import Speed as Components_Speed
 
 from etc.colors import COLORS
 from etc.enum import DamageType, MessageType, ResultTypes
@@ -184,7 +184,7 @@ class Speed(Ablity):
 
     def on_equip(self, source):
         self.old_speed = source.speed
-        source.add_component(Speed(act_energy_adjustment=self.act_energy_adjustment, duration=-1, damage_on_end=False), 'speed')
+        source.add_component(Components_Speed(act_energy_adjustment=self.act_energy_adjustment, duration=-1, damage_on_end=False), 'speed')
 
     def on_dequip(self, source):
         source.speed = self.old_speed

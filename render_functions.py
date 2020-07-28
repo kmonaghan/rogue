@@ -6,12 +6,10 @@ from etc.enum import (GameStates, INVENTORY_STATES)
 from menus import character_screen, inventory_menu, level_up_menu, quest_menu, quest_list_menu, game_completed, game_over, game_paused
 
 def get_names_under_mouse(x, y, current_level):
-    location = ''
+    if not current_level.within_bounds(x, y):
+        return ''
 
-    if current_level.within_bounds(x, y):
-        location = str(x) + ',' + str(y)
-
-    location_description = location
+    location_description = f"{x}, {y}"
 
     if (current_level.explored[x, y] or CONFIG.get('debug')):
         location_description = location_description + ' ' + current_level.tiles[x, y]['name']
