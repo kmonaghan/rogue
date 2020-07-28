@@ -92,6 +92,7 @@ COLORS = {
     'equipment_legendary': tcod.crimson,
 
     'show_path_track': tcod.silver,
+    'show_path2_track': tcod.purple,
     'show_walkable_path': tcod.lightest_blue,
 
     'damage_text': tcod.dark_red,
