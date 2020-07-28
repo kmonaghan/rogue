@@ -30,7 +30,9 @@ class LevelMap(Map):
 
         # These need to be int8's to work with the tcod pathfinder
         self.grid = np.zeros(self.walkable.shape, dtype=np.int8)
-        self.explored = np.zeros(self.walkable.shape, dtype=np.int8)
+        self.explored = np.full(
+            self.walkable.shape, fill_value=False, order="F"
+        )
         self.blocked = np.zeros(self.walkable.shape, dtype=np.int8)
         self.npc_fov = self.fov
 
@@ -41,14 +43,10 @@ class LevelMap(Map):
         self.blit_floor(grid)
 
         self.paths = []
-        self.walkables = []
 
         self.torchx = 0.0
         # 1d noise for the torch flickering
         self.noise = tcod.noise_new(1, 1.0, 1.0)
-
-        self.dijkstra_player = None
-        self.dijkstra_flee = None
 
         self.rooms = rooms
 
@@ -74,7 +72,6 @@ class LevelMap(Map):
     def blit_floor(self, grid):
         self.walkable[:] = False
         self.transparent[:] = False
-        self.explored[:] = False
 
         for (x,y), value in np.ndenumerate(grid):
             if grid[x,y] == Tiles.EMPTY:
@@ -130,10 +127,10 @@ class LevelMap(Map):
             return False
         return True
 
-    def within_bounds(self, x, y, buffer=0):
+    def within_bounds(self, x, y):
         return (
-            (0 + buffer <= x < self.width - buffer) and
-            (0 + buffer <= y < self.height - buffer))
+            (0 <= x < self.width) and
+            (0 <= y < self.height))
 
     def is_wall(self, x, y):
             return (not self.door[x, y]
@@ -180,7 +177,11 @@ class LevelMap(Map):
             default=SHROUD
         )
 
-        where_fov = np.where(self.fov[:])
+        if not CONFIG.get('debug'):
+            where_fov = np.where(self.fov[:])
+        else:
+            where_fov = np.where(self.tiles[:])
+            self.render_debug(console)
 
         for idx, x in enumerate(where_fov[0]):
             y = where_fov[1][idx]
@@ -192,18 +193,33 @@ class LevelMap(Map):
             entities_in_render_order.clear()
             entity = None
 
+        always_visible = self.entities.find_all_visible()
+        for entity in always_visible:
+            if self.explored[entity.x, entity.y]:
+                console.print(entity.x, entity.y, entity.display_char, fg=entity.display_color)
+
+    def render_debug(self, console: Console) -> None:
+        for current_path in self.paths:
+            for x,y in current_path:
+                console.bg[x,y] = COLORS.get('show_path_track')
+
+    def render_dijkstra(self, dijkstra, console: Console) -> None:
+        dijkstra = np.where(dijkstra==np.iinfo(np.int32).max, -1, dijkstra)
+        max_distance = np.amax(dijkstra)
+        for (x,y), value in np.ndenumerate(self.grid):
+            if dijkstra[x,y] > 0:
+                console.bg[x,y] = tcod.color_lerp(COLORS.get('dijkstra_near'), COLORS.get('dijkstra_far'), 0.9 * dijkstra[x,y] / max_distance)
+
+    def render_entity_detail(self, highlighted_path, target, console: Console) -> None:
+        if highlighted_path:
+            for x,y in highlighted_path:
+                console.bg[x,y] = COLORS.get('show_path2_track')
+        if target:
+            console.bg[target.x,target.y] = tcod.black
+
     def update_and_draw_all(self, map_console, player):
         return self.render(map_console)
         map_console.clear()
-
-        if not CONFIG.get('debug'):
-            where_fov = np.where(self.fov[:])
-            self.explored[where_fov] = True
-            explored = np.where(self.explored[:])
-        else:
-            where_fov = np.where(self.light_map_bg[:])
-            self.explored[:] = True
-            explored = np.where(self.explored[:])
 
         self.map_bg[explored] = self.dark_map_bg[explored]
 
@@ -245,31 +261,9 @@ class LevelMap(Map):
         else:
             map_console.bg[explored] = self.dark_map_bg[explored]
             map_console.bg[where_fov] = self.light_map_bg[where_fov]
+            self.render_debug(map_console)
 
         map_console.ch[explored] = self.map_char[explored]
-        if CONFIG.get('debug'):
-            for current_path in self.paths:
-                for x,y in current_path:
-                    map_console.bg[x,y] = COLORS.get('show_path_track')
-
-            for current_walkable in self.walkables:
-                for (x,y), value in np.ndenumerate(self.grid):
-                    if (current_walkable[x, y]):
-                        map_console.bg[x,y] = COLORS.get('show_walkable_path')
-
-            self.walkables.clear()
-
-            if CONFIG.get('show_dijkstra_player'):
-                max_distance = np.amax(self.dijkstra_player)
-                for (x,y), value in np.ndenumerate(self.grid):
-                    map_console.ch[x, y] = ord(str(int(self.dijkstra_player[x,y] % 10)))
-                    if self.dijkstra_player[x,y] != 0:
-                        map_console.bg[x,y] = tcod.color_lerp(COLORS.get('dijkstra_near'), COLORS.get('dijkstra_far'), 0.9 * self.dijkstra_player[x,y] / max_distance)
-            elif CONFIG.get('show_dijkstra_flee') and type(self.dijkstra_flee) is np.ndarray:
-                max_distance = np.amax(self.dijkstra_flee)
-                for (x,y), value in np.ndenumerate(self.grid):
-                    if self.dijkstra_flee[x,y] != 0:
-                        map_console.bg[x,y] = tcod.color_lerp(COLORS.get('dijkstra_near'), COLORS.get('dijkstra_far'), 0.9 * self.dijkstra_player[x,y] / max_distance)
 
         always_visible = self.entities.find_all_visible()
         for entity in always_visible:
@@ -380,13 +374,6 @@ class LevelMap(Map):
             pass
 
         return walkable
-
-    def walkable_for_entity_under_mouse(self, x, y):
-        if self.within_bounds(x,y):
-            current_entities = self.entities.get_entities_in_position((x, y))
-            for entity in current_entities:
-                entity_walkable = self.make_walkable_array(entity.movement.routing_avoid)
-                self.walkables.append(entity_walkable)
 
     def find_closest_entity(self, point, range = 2, species_type = None):
         return self.entities.find_closest(point, species_type, max_distance=range)

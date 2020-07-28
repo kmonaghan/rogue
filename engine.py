@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
 import datetime
 import logging
+
+import numpy as np
 
 import tcod
 import tcod.event
@@ -8,8 +11,6 @@ from time import sleep
 import equipment
 
 from bestiary import create_player
-
-from utils.dijkstra_maps import generate_dijkstra_player_map, generate_dijkstra_flee_map
 
 from components.sleep import Sleep
 
@@ -40,6 +41,8 @@ from utils.utils import (
     unpack_single_key_dict,
     get_key_from_single_key_dict,
     resource_path)
+
+from utils.pathfinding import calculate_dijkstra
 
 class MainMenu(tcod.event.EventDispatch):
     def __init__(self):
@@ -73,7 +76,6 @@ class Rogue(tcod.event.EventDispatch):
     def __init__(self):
         self.recompute = True
         self.game_map = None
-        self.fov_recompute = True
         self.map_console = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('map_height'), 'F')
         self.info_console = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('info_panel_height'), 'F')
         self.message_console = tcod.console.Console(CONFIG.get('map_width'), CONFIG.get('message_panel_height'), 'F')
@@ -102,7 +104,7 @@ class Rogue(tcod.event.EventDispatch):
         self.start_game()
 
     def start_game(self):
-        self.fov_recompute = True
+        self.update_fov()
 
         quest.active_quests = []
 
@@ -114,16 +116,11 @@ class Rogue(tcod.event.EventDispatch):
     def on_enter(self):
         tcod.sys_set_fps(60)
 
-    def on_draw(self):
-        #---------------------------------------------------------------------
-        # Recompute the player's field of view.
-        #---------------------------------------------------------------------
-        if self.fov_recompute:
+    def update_fov(self):
             self.game_map.current_level.compute_fov(self.player.x, self.player.y,
                                                 algorithm=self.player.fov.fov_algorithm,
                                                 radius=self.player.fov.fov_radius,
                                                 light_walls=self.player.fov.fov_light_walls)
-            generate_dijkstra_player_map(self.game_map, self.player)
 
             if self.player.sleep:
                 self.game_map.current_level.npc_fov = tcod.map.compute_fov(self.game_map.current_level.transparent, pov=(self.player.x, self.player.y),
@@ -134,13 +131,37 @@ class Rogue(tcod.event.EventDispatch):
             else:
                 self.game_map.current_level.npc_fov = self.game_map.current_level.fov
 
-            self.fov_recompute = False
+            if not CONFIG.get('debug'):
+                where_fov = np.where(self.game_map.current_level.fov[:])
+                self.game_map.current_level.explored[where_fov] = True
+            else:
+                self.game_map.current_level.fov[:] = True
+                self.game_map.current_level.explored[:] = True
+
+    def on_draw(self):
+        #---------------------------------------------------------------------
+        # Recompute the player's field of view.
+        #---------------------------------------------------------------------
+        self.update_fov()
 
         #---------------------------------------------------------------------
         # Render and display the dungeon and its inhabitates.
         #---------------------------------------------------------------------
         self.game_map.current_level.update_and_draw_all(self.map_console, self.player)
 
+        if CONFIG.get('debug') and self.game_map.current_level.within_bounds(self.motion.tile.x, self.motion.tile.y):
+            for entity in self.game_map.current_level.entities.get_entities_in_position((self.motion.tile.x, self.motion.tile.y)):
+                if entity.movement:
+                    dijkstra = calculate_dijkstra(self.game_map,
+                                                    [(entity.x, entity.y)],
+                                                    avoid_entity=self.player)
+                    self.game_map.current_level.render_dijkstra(dijkstra, self.map_console)
+
+                    if entity.ai:
+                        path = entity.ai.tree.namespace.get("path")
+                        target = entity.ai.tree.namespace.get("target")
+                        if path or target:
+                            self.game_map.current_level.render_entity_detail(path, target, self.map_console)
         #---------------------------------------------------------------------
         # Render infomation panels.
         #---------------------------------------------------------------------
@@ -151,9 +172,6 @@ class Rogue(tcod.event.EventDispatch):
         # Blit the subconsoles to the main console and flush all rendering.
         #---------------------------------------------------------------------
         root_console.clear(fg=COLORS.get('console_background'))
-
-        if CONFIG.get('debug'):
-            self.game_map.current_level.walkable_for_entity_under_mouse(self.motion.tile.x, self.motion.tile.y)
 
         self.map_console.blit(root_console, 0, 0, 0, 0,
                           self.map_console.width, self.map_console.height)
@@ -253,7 +271,7 @@ class Rogue(tcod.event.EventDispatch):
 
         if action == InputTypes.RELOAD_LEVEL:
             self.game_map.next_floor(self.player)
-            self.fov_recompute = True
+            self.update_fov()
             return True
 
         return False
@@ -304,19 +322,11 @@ class Rogue(tcod.event.EventDispatch):
     def debug_actions(self, action, action_value):
         if action == InputTypes.DEBUG_ON:
             CONFIG.update({'debug': True})
-            self.fov_recompute = True
+            self.update_fov()
 
         if action == InputTypes.DEBUG_OFF:
             CONFIG.update({'debug': False})
-            self.fov_recompute = True
-
-        if action == InputTypes.SHOW_DIJKSTRA_PLAYER:
-            CONFIG.update({'show_dijkstra_player': not CONFIG.get('show_dijkstra_player')})
-            self.fov_recompute = True
-
-        if action == InputTypes.SHOW_DIJKSTRA_FLEE:
-            CONFIG.update({'show_dijkstra_flee': not CONFIG.get('show_dijkstra_flee')})
-            self.fov_recompute = True
+            self.update_fov()
 
     def menu_actions(self, action, action_value):
         pass
@@ -347,7 +357,7 @@ class Rogue(tcod.event.EventDispatch):
             if not self.player.sleep:
                 self.player.add_component(Sleep(), 'sleep')
                 self.player.sleep.start()
-                self.fov_recompute = True
+                self.update_fov()
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You have gone asleep.', COLORS.get('effect_text'))))
 
         if self.player.health.dead:
@@ -356,7 +366,7 @@ class Rogue(tcod.event.EventDispatch):
             finished = self.player.sleep.on_turn(self.game_map)
             if finished:
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = Message('You have woken up.', COLORS.get('effect_text'))))
-                self.fov_recompute = True
+                self.update_fov()
 
             self.game_state = GameStates.ENEMY_TURN
         elif action == InputTypes.WAIT:
@@ -391,7 +401,7 @@ class Rogue(tcod.event.EventDispatch):
                             if can_unlock:
                                 target.locked.toggle()
                                 self.game_map.current_level.update_entity_position(target)
-                                self.fov_recompute = True
+                                self.update_fov()
 
                                 message = Message(f"You have unlocked the {target.name}.", tcod.yellow)
                                 player_turn_results.extend([{ResultTypes.MESSAGE: message}])
@@ -406,7 +416,7 @@ class Rogue(tcod.event.EventDispatch):
                     self.player.movement.move(dx, dy, self.game_map.current_level)
                     player_turn_results.extend(quest.check_quest_for_location(self.player))
 
-                    self.fov_recompute = True
+                    self.update_fov()
 
                 self.game_state = GameStates.ENEMY_TURN
         elif action == InputTypes.PICKUP:
@@ -425,7 +435,7 @@ class Rogue(tcod.event.EventDispatch):
                 player_turn_results.extend([{ResultTypes.MESSAGE: message}])
         elif action == InputTypes.DOWN_LEVEL:
             self.game_map.next_floor(self.player)
-            self.fov_recompute = True
+            self.update_fov()
             message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
             player_turn_results.extend([{ResultTypes.MESSAGE: message}])
 
@@ -435,7 +445,7 @@ class Rogue(tcod.event.EventDispatch):
             stair_state = self.game_map.check_for_stairs(self.player.x, self.player.y)
             if stair_state == StairOption.GODOWN:
                 self.game_map.next_floor(self.player)
-                self.fov_recompute = True
+                self.update_fov()
                 message = Message('You take a moment to rest and recover your strength.', tcod.light_violet)
                 player_turn_results.extend([{ResultTypes.MESSAGE: message}])
 
@@ -443,7 +453,7 @@ class Rogue(tcod.event.EventDispatch):
                 return
             elif stair_state == StairOption.GOUP:
                 self.game_map.previous_floor(self.player)
-                self.fov_recompute = True
+                self.update_fov()
 
                 return
             elif stair_state == StairOption.EXIT:
@@ -608,7 +618,7 @@ class Rogue(tcod.event.EventDispatch):
                 pubsub.pubsub.add_message(pubsub.Publish(None, pubsub.PubSubTypes.MESSAGE, message = message))
 
             if result_type == ResultTypes.FOV_RECOMPUTE:
-                self.fov_recompute = True
+                self.update_fov()
 
             if result_type == ResultTypes.END_TURN:
                 self.game_state = GameStates.ENEMY_TURN
