@@ -10,7 +10,7 @@ from etc.enum import TreeStates, ResultTypes
 
 from map_objects.point import Point
 
-from utils.pathfinding import get_shortest_path, move_to_radius_of_target
+from utils.pathfinding import get_path_to, move_to_radius_of_target
 from utils.utils import random_walkable_position, random_adjacent
 
 class MoveTowardsTargetEntity(Node):
@@ -21,46 +21,46 @@ class MoveTowardsTargetEntity(Node):
         if not target:
             return TreeStates.FAILURE, []
 
-        self.path = get_shortest_path(
-            game_map,
-            owner.point,
-            target.point,
-            routing_avoid=owner.movement.routing_avoid)
-        if len(self.path) < 1:
+        self.namespace["path"] = get_path_to((owner.x, owner.y),
+                                                (target.x, target.y),
+                                                game_map,
+                                                routing_avoid=owner.movement.routing_avoid)
+        if len(self.namespace["path"]) < 1:
             self.target_position = None
             return TreeStates.SUCCESS, []
         results = [{
-            ResultTypes.MOVE_WITH_PATH: (owner, self.path)}]
+            ResultTypes.MOVE_WITH_PATH: (owner, self.namespace["path"])}]
         return TreeStates.SUCCESS, results
 
 class MoveTowardsPointInNamespace(Node):
 
     def __init__(self, name):
         self.name = name
-        self.target_path = None
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         if not self.namespace.get(self.name):
             raise ValueError(f"{self.name} is not in tree namespace!")
         point = self.namespace.get(self.name)
+        path = self.namespace.get("path")
 
-        if self.target_path and len(self.target_path) > 1 and (Point(self.target_path[0][0], self.target_path[0][1]) == owner.point):
-            self.target_path.pop(0)
+        if path and len(path) > 1 and (Point(path[0][0], path[0][1]) == owner.point):
+            path.pop(0)
 
-            if not game_map.current_level.blocked[self.target_path[0][0], self.target_path[0][1]]:
-                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
+            if not game_map.current_level.blocked[path[0][0], path[0][1]]:
+                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
 
-        self.target_path = get_shortest_path(
-            game_map,
-            owner.point,
-            point,
-            routing_avoid=owner.movement.routing_avoid)
-        if len(self.target_path) < 1:
+        path = get_path_to((owner.x, owner.y),
+                                (point.x, point.y),
+                                game_map,
+                                routing_avoid=owner.movement.routing_avoid)
+        self.namespace["path"] = path
+
+        if len(path) < 1:
             self.target_position = None
             return TreeStates.SUCCESS, []
 
-        return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
+        return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
 
 class SeekTowardsLInfinityRadius(Node):
     """Seek to stay a fixed radius from a target."""
@@ -89,33 +89,35 @@ class TravelToRandomPosition(Node):
 
     Attributes:
         target_position: the target point
-        target_path: the current path the entity is following
     """
     def __init__(self):
         self.target_position = None
-        self.target_path = None
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         if not self.target_position or (self.target_position == owner.point):
             self.target_position = random_walkable_position(game_map, owner)
 
-        if self.target_path and len(self.target_path) > 1:
-            self.target_path.pop(0)
+        path = self.namespace.get("path")
 
-            if game_map.current_level.accessible_tile(self.target_path[0][0], self.target_path[0][1]):
-                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
-        self.target_path = get_shortest_path(
-            game_map,
-            owner.point,
-            self.target_position,
-            routing_avoid=owner.movement.routing_avoid)
-        if len(self.target_path) < 1:
+        if path and len(path) > 1:
+            path.pop(0)
+
+            if game_map.current_level.accessible_tile(path[0][0], path[0][1]):
+                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
+
+        path = get_path_to((owner.x, owner.y),
+                            (self.target_position.x, self.target_position.y),
+                            game_map,
+                            routing_avoid=owner.movement.routing_avoid)
+
+        self.namespace["path"] = path
+
+        if len(path) < 1:
             self.target_position = None
-            self.target_path = None
             return TreeStates.SUCCESS, []
 
-        return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, self.target_path)}]
+        return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
 
 class Skitter(Node):
     """Move the owner to a random adjacent tile."""
@@ -144,16 +146,15 @@ class Swarm(Node):
             if len(moved) > 0:
                 follow_npc = choice(moved)
 
-                target_path = get_shortest_path(
-                    game_map,
-                    owner.point,
-                    follow_npc.point,
-                    routing_avoid=owner.movement.routing_avoid)
+                path = get_path_to((owner.x, owner.y),
+                                    (follow_npc.x, follow_npc.y),
+                                    game_map,
+                                    routing_avoid=owner.movement.routing_avoid)
 
-                if len(target_path) < 1:
+                if len(path) < 1:
                     return TreeStates.FAILURE, []
 
-                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, target_path)}]
+                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
 
         return TreeStates.FAILURE, []
 
