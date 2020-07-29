@@ -12,7 +12,7 @@ a = Analysis(['engine.py'],
                       ( 'data/equipment', 'data/equipment' ),
                       ( 'log', 'log')
                       ],
-             hiddenimports=[],
+             hiddenimports=['pkg_resources.py2_warn'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
