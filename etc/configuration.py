@@ -21,7 +21,7 @@ CONFIG = {
     'map_width': screen_width,
     'map_height': screen_width,
 
-    'debug': True,
+    'debug': False,
     'logging_level': logging.INFO,
     'map_generation_attempts': 10,
 

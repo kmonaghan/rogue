@@ -147,7 +147,13 @@ class Rogue(tcod.event.EventDispatch):
         #---------------------------------------------------------------------
         # Render and display the dungeon and its inhabitates.
         #---------------------------------------------------------------------
-        self.game_map.current_level.update_and_draw_all(self.map_console, self.player)
+        self.game_map.current_level.render(self.map_console)
+        
+        if not CONFIG.get('debug'):
+            self.game_map.current_level.render_torch(self.player.x,
+                                                    self.player.y,
+                                                    self.player.fov.fov_radius,
+                                                    self.map_console)
 
         if CONFIG.get('debug') and self.game_map.current_level.within_bounds(self.motion.tile.x, self.motion.tile.y):
             for entity in self.game_map.current_level.entities.get_entities_in_position((self.motion.tile.x, self.motion.tile.y)):

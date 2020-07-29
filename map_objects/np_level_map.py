@@ -1,4 +1,6 @@
 import numpy as np
+import time
+
 from random import randint
 
 import tcod
@@ -44,9 +46,7 @@ class LevelMap(Map):
 
         self.paths = []
 
-        self.torchx = 0.0
-        # 1d noise for the torch flickering
-        self.noise = tcod.noise_new(1, 1.0, 1.0)
+        self.noise = tcod.noise.Noise(1)  # 1D noise for the torch flickering.
 
         self.rooms = rooms
 
@@ -198,6 +198,49 @@ class LevelMap(Map):
             if self.explored[entity.x, entity.y]:
                 console.print(entity.x, entity.y, entity.display_char, fg=entity.display_color)
 
+    def render_torch(self, x, y, fov_radius, console: Console) -> None:
+        SQUARED_TORCH_RADIUS = fov_radius * fov_radius
+
+        # Derive the touch from noise based on the current time.
+        torch_t = time.perf_counter() * 5
+        # Randomize the light position between -1.5 and 1.5
+        torch_x = x + self.noise.get_point(torch_t) * 1.5
+        torch_y = y + self.noise.get_point(torch_t + 11) * 1.5
+        # Extra light brightness.
+        brightness = 0.2 * self.noise.get_point(torch_t + 17)
+
+        # Get the squared distance using a mesh grid.
+        x, y = np.mgrid[:self.width, :self.height]
+        # Center the mesh grid on the torch position.
+        x = x.astype(np.float32) - torch_x
+        y = y.astype(np.float32) - torch_y
+
+        distance_squared = x ** 2 + y ** 2  # 2D squared distance array.
+
+        # Get the currently visible cells.
+        visible = (distance_squared < SQUARED_TORCH_RADIUS) & self.fov
+
+        # Invert the values, so that the center is the 'brightest' point.
+        light = SQUARED_TORCH_RADIUS - distance_squared
+        light /= SQUARED_TORCH_RADIUS  # Convert into non-squared distance.
+        light += brightness  # Add random brightness.
+        light.clip(0, 1, out=light)  # Clamp values in-place.
+        light[~visible] = 0  # Set non-visible areas to darkness.
+
+        # Setup background colors for floating point math.
+        light_bg = self.tiles["light"]["bg"].astype(np.float16)
+        #dark_bg = self.tiles["dark"]["bg"].astype(np.float16)
+        light_bg[~self.explored] = 0
+        #dark_bg[~self.explored] = 0
+
+        # Linear interpolation between colors.
+        console.tiles_rgb["bg"] = (
+            #dark_bg + (light_bg - dark_bg) * light[..., np.newaxis]
+            light_bg * light[..., np.newaxis]
+
+        )
+
+
     def render_debug(self, console: Console) -> None:
         for current_path in self.paths:
             for x,y in current_path:
@@ -213,85 +256,9 @@ class LevelMap(Map):
     def render_entity_detail(self, highlighted_path, target, console: Console) -> None:
         if highlighted_path:
             for x,y in highlighted_path:
-                console.bg[x,y] = COLORS.get('show_path2_track')
+                console.bg[x,y] = COLORS.get('show_entity_track')
         if target:
             console.bg[target.x,target.y] = tcod.black
-
-    def update_and_draw_all(self, map_console, player):
-        return self.render(map_console)
-        map_console.clear()
-
-        self.map_bg[explored] = self.dark_map_bg[explored]
-
-        dx = 0.0
-        dy = 0.0
-        di = 0.0
-
-        if not CONFIG.get('debug'):
-            SQUARED_TORCH_RADIUS = player.fov.fov_radius * player.fov.fov_radius
-
-            # slightly change the perlin noise parameter
-            self.torchx += 0.1
-            # randomize the light position between -1.5 and 1.5
-            tdx = [self.torchx + 20.0]
-            dx = tcod.noise_get(self.noise, tdx, tcod.NOISE_SIMPLEX) * 1.5
-            tdx[0] += 30.0
-            dy = tcod.noise_get(self.noise, tdx, tcod.NOISE_SIMPLEX) * 1.5
-            di = 0.2 * tcod.noise_get(
-                self.noise, [self.torchx], tcod.NOISE_SIMPLEX
-            )
-
-            mgrid = np.mgrid[:self.width, :self.height]
-            # get squared distance
-            light = (mgrid[0] - player.x + dx) ** 2 + (
-                mgrid[1] - player.y + dy
-            ) ** 2
-            light = light.astype(np.float16)
-            visible = (light < SQUARED_TORCH_RADIUS) & self.fov[:]
-            light[...] = SQUARED_TORCH_RADIUS - light
-            light[...] /= SQUARED_TORCH_RADIUS
-            light[...] += di
-            light[...] = light.clip(0, 1)
-            light[~visible] = 0
-
-            map_console.bg[...] = (
-                self.light_map_bg.astype(np.float16) - self.map_bg
-            ) * light[..., np.newaxis] + self.map_bg
-
-        else:
-            map_console.bg[explored] = self.dark_map_bg[explored]
-            map_console.bg[where_fov] = self.light_map_bg[where_fov]
-            self.render_debug(map_console)
-
-        map_console.ch[explored] = self.map_char[explored]
-
-        always_visible = self.entities.find_all_visible()
-        for entity in always_visible:
-            if self.explored[entity.x, entity.y]:
-                map_console.ch[entity.x, entity.y] = ord(entity.display_char)
-                map_console.fg[entity.x, entity.y] = entity.display_color
-
-        auras = []
-        for idx, x in enumerate(where_fov[0]):
-            y = where_fov[1][idx]
-            current_entities = self.entities.get_entities_in_position((x, y))
-            entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
-            for entity in entities_in_render_order:
-                if entity.invisible:
-                    continue
-                map_console.ch[x, y] = ord(entity.display_char)
-                map_console.fg[x, y] = entity.display_color
-                if entity.aura:
-                    auras.append(entity)
-            entities_in_render_order.clear()
-            entity = None
-
-        for entity in auras:
-            slice = map_console.bg[entity.x-1:entity.x+2,entity.y-1:entity.y+2]
-
-            for x in range(0, slice.shape[0]):
-                for y in range(0, slice.shape[1]):
-                    slice[x,y] = tcod.color_lerp(tcod.Color(slice[x,y][0],slice[x,y][1],slice[x,y][2]), random_color_shimmer(tcod.red), 0.05)
 
     def clear_paths(self):
         self.paths.clear()
