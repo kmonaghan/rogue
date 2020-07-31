@@ -73,12 +73,17 @@ def chain_lightning(**kwargs):
     game_map = kwargs.get('game_map')
     number_of_dice = kwargs.get('number_of_dice')
     radius = kwargs.get('radius')
+    target = kwargs.get('target')
     target_x = kwargs.get('target_x')
     target_y = kwargs.get('target_y')
     type_of_dice = kwargs.get('type_of_dice')
 
     results = []
     targets = []
+
+    if (not target_x) and target:
+        target_x = target.x
+        target_y = target.y
 
     start_x = max(0, target_x - radius)
     start_y = max(0, target_y - radius)
