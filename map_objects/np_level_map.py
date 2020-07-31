@@ -183,20 +183,21 @@ class LevelMap(Map):
             where_fov = np.where(self.tiles[:])
             self.render_debug(console)
 
-        for idx, x in enumerate(where_fov[0]):
-            y = where_fov[1][idx]
-            current_entities = self.entities.get_entities_in_position((x, y))
-            entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value)
-            for entity in entities_in_render_order:
-                if not entity.invisible:
-                    console.print(entity.x, entity.y, entity.display_char, fg=entity.display_color)
-            entities_in_render_order.clear()
-            entity = None
-
         always_visible = self.entities.find_all_visible()
         for entity in always_visible:
             if self.explored[entity.x, entity.y]:
                 console.print(entity.x, entity.y, entity.display_char, fg=entity.display_color)
+
+        for idx, x in enumerate(where_fov[0]):
+            y = where_fov[1][idx]
+            current_entities = self.entities.get_entities_in_position((x, y))
+            entities_in_render_order = sorted(current_entities, key=lambda x: x.render_order.value, reverse=True)
+            for entity in entities_in_render_order:
+                if not entity.invisible:
+                    console.print(entity.x, entity.y, entity.display_char, fg=entity.display_color)
+                    break
+            entities_in_render_order.clear()
+            entity = None
 
     def render_torch(self, x, y, fov_radius, console: Console) -> None:
         SQUARED_TORCH_RADIUS = fov_radius * fov_radius
@@ -239,7 +240,6 @@ class LevelMap(Map):
             light_bg * light[..., np.newaxis]
 
         )
-
 
     def render_debug(self, console: Console) -> None:
         for current_path in self.paths:

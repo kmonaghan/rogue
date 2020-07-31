@@ -7,11 +7,12 @@ from components.locked import Locked
 from entities.entity import Entity
 
 from etc.colors import COLORS
-from etc.enum import Interactions
+from etc.enum import Interactions, RenderOrder
 
 def door(point = None, locked=False):
     door = Entity(point, '+', 'door', COLORS.get('light_door'), health=Health(4),
-                    blocks=False, interaction=Interactions.DOOR, animate=False, always_visible=True)
+                    blocks=False, interaction=Interactions.DOOR, animate=False,
+                    always_visible=True, render_order=RenderOrder.STAIRS)
 
     door.add_component(Defence(defence = 1), 'defence')
     if locked:
