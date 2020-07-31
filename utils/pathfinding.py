@@ -119,6 +119,9 @@ def get_path_to(start: Tuple[int, int], destination: Tuple[int, int], game_map, 
       Return a list of all the nodes between the start node and destination node.
     """
     cost = create_walkable_cost(game_map, routing_avoid=routing_avoid)
+    #start point needs to be passable.
+    cost[start[0], start[1]] = 1
+
     graph = tcod.path.SimpleGraph(cost=cost,
                                     cardinal=CONFIG.get('cardinal_cost'),
                                     diagonal=CONFIG.get('diagonal_cost'))
@@ -129,7 +132,6 @@ def get_path_to(start: Tuple[int, int], destination: Tuple[int, int], game_map, 
 
     # Compute the path to the destination and remove the starting point.
     path: List[List[int]] = pathfinder.path_to(destination)[1:].tolist()
-
     # Convert from List[List[int]] to List[Tuple[int, int]].
     return [(index[0], index[1]) for index in path]
 

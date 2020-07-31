@@ -324,21 +324,10 @@ class LevelMap(Map):
         if not routing_avoid:
             routing_avoid = []
         walkable = self.walkable.copy()
-        if RoutingOptions.AVOID_BLOCKERS in routing_avoid:
-            walkable = walkable * (1 - self.blocked)
-        if RoutingOptions.AVOID_FOV in routing_avoid:
-            walkable = walkable * (1 - self.fov)
-        #if RoutingOptions.AVOID_FIRE in routing_avoid:
-        #    walkable = walkable * (1 - self.fire)
-        #if RoutingOptions.AVOID_STEAM in routing_avoid:
-        #    walkable = walkable * (1 - self.steam)
 
         mask = np.isin(self.grid, routing_avoid)
 
         walkable[mask] = 0
-
-        if Tiles.STAIRS_FLOOR in routing_avoid:
-            pass
 
         return walkable
 
