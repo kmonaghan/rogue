@@ -87,6 +87,7 @@ class Rogue(tcod.event.EventDispatch):
         self.lbut = self.mbut = self.rbut = 0
         self.quest_request = None
         self.using_item = None
+        self.last_debug_entity = None
 
     def start_fresh_game(self):
         logging.basicConfig(filename=f'{resource_path("log")}/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}.log', filemode='w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=CONFIG.get('logging_level'))
@@ -168,6 +169,10 @@ class Rogue(tcod.event.EventDispatch):
                         target = entity.ai.tree.namespace.get("target")
                         if path or target:
                             self.game_map.current_level.render_entity_detail(path, target, self.map_console)
+                    if not (entity == self.last_debug_entity):
+                        entity.debug()
+                        self.last_debug_entity = entity
+
         #---------------------------------------------------------------------
         # Render infomation panels.
         #---------------------------------------------------------------------

@@ -22,6 +22,7 @@ class InNamespace(Node):
 
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
+        self.namespace["decision_path"].append(self.name)
         if self.namespace.get(self.name):
             return TreeStates.SUCCESS, []
         else:

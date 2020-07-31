@@ -26,7 +26,6 @@ class MoveTowardsTargetEntity(Node):
                                                 game_map,
                                                 routing_avoid=owner.movement.routing_avoid)
         if len(self.namespace["path"]) < 1:
-            self.target_position = None
             return TreeStates.SUCCESS, []
         results = [{
             ResultTypes.MOVE_WITH_PATH: (owner, self.namespace["path"])}]

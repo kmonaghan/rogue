@@ -21,7 +21,7 @@ class Character(Entity):
         self.species = species
 
     def __str__(self):
-        desc = self.name.title()
+        desc = super().__str__()
 
         desc += self.species_describe()
 
@@ -33,8 +33,6 @@ class Character(Entity):
                 desc += " O:" + str(self.offence.power)
             if self.defence:
                 desc += " D:" + str(self.defence.defence)
-            desc += " " + str(self.point)
-            desc += " " + str(self.uuid)
 
         return f"{desc}"
 
@@ -82,3 +80,15 @@ class Character(Entity):
             return self.subspecies.subcolor
 
         return super(Character, self).display_color
+
+    def debug(self):
+        super().debug()
+
+        if self.level:
+            print(f"{self.level}")
+
+        if self.ai:
+            target = self.ai.tree.namespace.get("target")
+            if target:
+                print(f"targeting: {target}")
+            print(f"Last behaviours: {self.ai.tree.namespace.get('decision_path')}")

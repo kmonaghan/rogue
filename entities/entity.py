@@ -16,6 +16,7 @@ from game_messages import Message
 from map_objects.point import Point
 
 from etc.colors import COLORS
+from etc.configuration import CONFIG
 from etc.enum import ResultTypes, RenderOrder, Interactions
 
 import uuid
@@ -73,7 +74,13 @@ class Entity:
         self.turn = {}
 
     def __str__(self):
-        return f"{self.name.title()}"
+        desc = self.name.title()
+
+        if CONFIG.get('debug'):
+            desc += " " + str(self.point)
+            desc += " " + str(self.uuid)
+
+        return f"{desc}"
 
     def __repr__(self):
         return f"{self.name.title()}"
@@ -184,3 +191,6 @@ class Entity:
     def clone(self):
         for att in dir(self):
             logging.info (att, getattr(self, att))
+
+    def debug(self):
+        print(self.__str__())

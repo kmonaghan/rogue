@@ -13,6 +13,7 @@ class Root:
         self.child.parent = self
 
     def tick(self, owner, game_map):
+        self.namespace["decision_path"] = []
         return self.child.tick(owner, game_map)
 
 
@@ -26,4 +27,4 @@ class Node:
 
     def tick(self, owner, game_map):
         #print(self.__class__.__name__)
-        pass
+        self.namespace["decision_path"].append(self.__class__.__name__)
