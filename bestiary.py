@@ -753,7 +753,7 @@ def convert_npc_to_zombie(npc):
     npc.add_component(ZombieNPC(species=npc.species), 'ai')
     npc.add_component(Health(max(1, npc.health.max_hp // 2)), 'health')
     npc.add_component(DamageModifier(blunt=0.8, slashing=1.2, poison=0), 'damagemodifier')
-    npc.species=Species.UNDEAD
+    npc.species=Species.ZOMBIE
     npc.movement.routing_avoid.append(Tiles.SHALLOW_WATER)
 
     teeth = equipment.teeth()

@@ -383,6 +383,50 @@ def lightning(**kwargs):
 
     return results
 
+def magic_missile(**kwargs):
+    '''Cast a number of magic missiles.
+
+    Cast a missile that does 1d6 damage. 1 missile plus an additional missile
+    per 3 caster level.
+    e.g.:
+    Caster level 1: 1 missile
+    Caster level 3: 2 missiles
+    Caster level 5: 2 missiles
+    Caster level 7: 3 missiles
+    etc.
+
+    Parameters
+    ----------
+    kwargs:
+       caster (Entity): Entity that initiated the spell.
+       game_map (GameMap): Current game map.
+       target (Entity): The entity that is being targetted by the spell.
+
+    Returns
+    -------
+    results (list)
+        Results of casting the spell.
+    '''
+    caster = kwargs.get('caster')
+    game_map = kwargs.get('game_map')
+    target = kwargs.get('target')
+
+    results = []
+
+    if not game_map.current_level.fov[target.x, target.y]:
+        results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
+        return results
+
+    missiles = (caster.level.current_level // 3) + 1
+    for _ in range(missiles):
+        damage = die_roll(1, 6)
+        results.append({ResultTypes.MESSAGE: Message(f"A magic missile strikes {target.name}.", COLORS.get('effect_text'), target=target, type=MessageType.EFFECT)})
+        damage_results, total_damage = target.health.take_damage(damage, caster, DamageType.MAGIC)
+        results.append({ResultTypes.MESSAGE: Message(f"{target.name} takes {str(total_damage)} damage.", COLORS.get('damage_text'))})
+        results.extend(damage_results)
+
+    return results
+
 def mapping(**kwargs):
     '''Cast mapping.
 

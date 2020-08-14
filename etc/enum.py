@@ -275,6 +275,7 @@ class Species(Enum):
     SNAKE = auto()
     TROLL = auto()
     UNDEAD = auto()
+    ZOMBIE = auto()
 
 SPECIES_STRINGS = {
     Species.ANIMAL: "animal",
@@ -295,6 +296,7 @@ SPECIES_STRINGS = {
     Species.SNAKE: "snake",
     Species.TROLL: "troll",
     Species.UNDEAD: "undead",
+    Species.ZOMBIE: "zombie",
 }
 
 VERMIN_GENERATORS = [
@@ -377,22 +379,24 @@ class Interactions(Enum):
 class DamageType(Enum):
     DEFAULT = auto()
     BLUNT = auto()
-    SLASHING = auto()
-    PIERCING = auto()
+    ELECTRIC = auto()
     FIRE = auto()
     ICE = auto()
-    ELECTRIC = auto()
+    MAGIC = auto()
+    PIERCING = auto()
     POISON = auto()
+    SLASHING = auto()
 
 string_to_damage_type = {
-    'DEFAULT': DamageType.DEFAULT,
     'BLUNT': DamageType.BLUNT,
-    'SLASHING': DamageType.SLASHING,
-    'PIERCING': DamageType.PIERCING,
+    'DEFAULT': DamageType.DEFAULT,
+    'ELECTRIC': DamageType.ELECTRIC,
     'FIRE': DamageType.FIRE,
     'ICE': DamageType.ICE,
-    'ELECTRIC': DamageType.ELECTRIC,
+    'MAGIC': DamageType.MAGIC,
+    'PIERCING': DamageType.PIERCING,
     'POISON': DamageType.POISON,
+    'SLASHING': DamageType.SLASHING,
 }
 
 class EquipmentSlot(Enum):
