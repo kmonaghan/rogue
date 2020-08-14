@@ -91,7 +91,7 @@ def calculate_dijkstra(game_map, target_points = None, routing_avoid=None, block
 
     return dist
 
-def get_path_to(start: Tuple[int, int], destination: Tuple[int, int], game_map, routing_avoid=None) -> List[Tuple[int, int]]:
+def get_path_to(game_map, start: Tuple[int, int], destination: Tuple[int, int], routing_avoid=None) -> List[Tuple[int, int]]:
     """Calculate the cost of moving into a node.
     The base cost of a walkable node is 1. If there is a blocking entity, this
     is increased by blocking_entity_cost. If avoid_entity is passed through, the
@@ -100,13 +100,13 @@ def get_path_to(start: Tuple[int, int], destination: Tuple[int, int], game_map, 
 
     Parameters
     ----------
+    game_map: GameMap
+
     start: Tuple(int, int)
         Where the path will start.
 
     destination: Tuple(int, int)
         Where the path should end.
-
-    game_map: GameMap
 
     target_points: List[(int, int)]
 
@@ -135,29 +135,47 @@ def get_path_to(start: Tuple[int, int], destination: Tuple[int, int], game_map, 
     # Convert from List[List[int]] to List[Tuple[int, int]].
     return [(index[0], index[1]) for index in path]
 
-def move_to_radius_of_target(game_map, source, target, radius,
-                                 routing_avoid=None):
-    aslice = game_map.current_level.dijkstra_player[source.x-1:source.x+2, source.y-1:source.y+2].copy()
-    if aslice[1,1] == radius:
-        return source
+def move_to_radius_of_target(game_map, source, target, radius, routing_avoid=None):
+    """Calculate the cost of moving into a node.
+    The base cost of a walkable node is 1. If there is a blocking entity, this
+    is increased by blocking_entity_cost. If avoid_entity is passed through, the
+    nodes within a radius of 2 have their cost increased by a factor of five and
+    nodes within a radius of 1 are increased by a factor of 10.
 
-    if aslice[1,1] > radius:
-        #We want to roll down the hill
-        aslice[aslice == 0] = 99
-        target_value = np.amin(aslice)
+    Parameters
+    ----------
+    game_map: GameMap
 
-    else:
-        #Back up the hill
-        target_value = np.amax(aslice)
+    source: Tuple(int, int)
+        Where the path will start.
 
-    if aslice[1,1] == target_value:
-        return source
+    target: Tuple(int, int)
+        Where the path should end.
 
-    itemindex = np.where(aslice==target_value)
+    target_points: List[(int, int)]
 
-    idx = randint(0, len(itemindex[0]) - 1)
+    routing_avoid: List[RoutingOptions]
+      Dungeon features to avoid in the path.
 
-    return translate_point(source, itemindex[0][idx], itemindex[1][idx])
+    Returns
+    -------
+    path: List[Tuple[int, int]]
+      Return a list of all the nodes between the start node and destination node.
+    """
+    cost = create_walkable_cost(game_map, routing_avoid)
+    dist = tcod.path.maxarray(game_map.current_level.walkable.shape, dtype=np.int32)
+
+    dist[target[0]-radius:target[0]+radius, target[1]+radius] = 0
+    dist[target[0]-radius:target[0]+radius, target[1]-radius] = 0
+    dist[target[0]+radius, target[1]-radius:target[1]+radius+1] = 0
+    dist[target[0]-radius, target[1]-radius:target[1]+radius] = 0
+
+    tcod.path.dijkstra2d(dist, cost, CONFIG.get('cardinal_cost'), CONFIG.get('diagonal_cost'))
+
+    path = tcod.path.hillclimb2d(dist, source, True, True)[1:].tolist()
+
+    # Convert from List[List[int]] to List[Tuple[int, int]].
+    return [(index[0], index[1]) for index in path]
 
 def translate_point(point, x, y):
 

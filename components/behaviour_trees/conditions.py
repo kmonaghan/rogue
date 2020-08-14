@@ -36,8 +36,7 @@ class IsAdjacent(Node):
         if not target:
             return TreeStates.FAILURE, []
 
-        distance = owner.point.distance_to(target.point)
-        if distance < 2:
+        if owner.point.is_neighbouring_point(target.point):
             return TreeStates.SUCCESS, []
         else:
             return TreeStates.FAILURE, []
@@ -65,6 +64,22 @@ class WithinL2Radius(Node):
             return TreeStates.FAILURE, []
         distance = owner.point.distance_to(target.point)
         if distance <= self.radius:
+            return TreeStates.SUCCESS, []
+        else:
+            return TreeStates.FAILURE, []
+
+class WithinRadius(Node):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        target = self.namespace.get("target")
+        if not target:
+            logging.info(f"No target for WithinRadius")
+            return TreeStates.FAILURE, []
+
+        if owner.point.chebyshev_distance(target.point) < self.radius:
             return TreeStates.SUCCESS, []
         else:
             return TreeStates.FAILURE, []

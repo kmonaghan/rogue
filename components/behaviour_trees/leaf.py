@@ -13,6 +13,79 @@ from map_objects.point import Point
 from utils.pathfinding import get_path_to, move_to_radius_of_target
 from utils.utils import random_walkable_position, random_adjacent
 
+class Attack(Node):
+    """The owner attackes the target."""
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        target = self.namespace.get("target")
+        if not target:
+            logging.info(f"No target - how did we get here?")
+            return TreeStates.FAILURE, []
+
+        if target.health.dead:
+            #logging.info("Attack: FAILURE - target dead, removing")
+            del self.namespace["target"]
+            return TreeStates.FAILURE, []
+
+        return (TreeStates.SUCCESS,
+                    owner.offence.attack(target, game_map))
+
+class CastSpell(Node):
+    """The owner casts a spell the target."""
+    def __init__(self, spell):
+        self.spell = spell
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        target = self.namespace.get("target")
+        if not target:
+            logging.info(f"No target - how did we get here?")
+            return TreeStates.FAILURE, []
+
+        if target.health.dead:
+            #logging.info("Attack: FAILURE - target dead, removing")
+            del self.namespace["target"]
+            return TreeStates.FAILURE, []
+
+        return (TreeStates.SUCCESS,
+                    self.spell(game_map=game_map,
+                                caster=owner,
+                                target=target))
+
+class Disolve(Node):
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        target = self.namespace["corpse"]
+
+        if target:
+            del self.namespace["corpse"]
+            if target.death.rotting_time > 1:
+                target.death.rotting_time = min(1, target.death.rotting_time - 5)
+                target.death.decompose(game_map)
+
+            return TreeStates.SUCCESS, []
+
+        return TreeStates.FAILURE, []
+
+class DoNothing(Node):
+    """Take no action and pass the turn."""
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        return TreeStates.SUCCESS, []
+
+class Envelop(Node):
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        target = self.namespace["paralyzed"]
+
+        if target:
+            del self.namespace["paralyzed"]
+            return TreeStates.SUCCESS, [{ResultTypes.SET_POSITION: (owner, target.point)}]
+
+        return TreeStates.FAILURE, []
+
 class MoveTowardsTargetEntity(Node):
     """Move the owner towards a target and remember the target's point."""
     def tick(self, owner, game_map):
@@ -21,9 +94,9 @@ class MoveTowardsTargetEntity(Node):
         if not target:
             return TreeStates.FAILURE, []
 
-        self.namespace["path"] = get_path_to((owner.x, owner.y),
+        self.namespace["path"] = get_path_to(game_map,
+                                                (owner.x, owner.y),
                                                 (target.x, target.y),
-                                                game_map,
                                                 routing_avoid=owner.movement.routing_avoid)
         if len(self.namespace["path"]) < 1:
             return TreeStates.SUCCESS, []
@@ -49,10 +122,10 @@ class MoveTowardsPointInNamespace(Node):
             if not game_map.current_level.blocked[path[0][0], path[0][1]]:
                 return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
 
-        path = get_path_to((owner.x, owner.y),
-                                (point.x, point.y),
-                                game_map,
-                                routing_avoid=owner.movement.routing_avoid)
+        path = get_path_to(game_map,
+                            (owner.x, owner.y),
+                            (point.x, point.y),
+                            routing_avoid=owner.movement.routing_avoid)
         self.namespace["path"] = path
 
         if len(path) < 1:
@@ -69,46 +142,15 @@ class SeekTowardsLInfinityRadius(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
         target = self.namespace.get("target")
-        point = move_to_radius_of_target(
-            game_map,
-            owner.point,
-            target.point,
-            radius=self.radius,
-            routing_avoid=owner.movement.routing_avoid)
-
-        if point == owner.point:
+        if not target:
             return TreeStates.FAILURE, []
 
-        results = [{ResultTypes.SET_POSITION: (owner, point)}]
-        return TreeStates.SUCCESS, results
-
-class TravelToRandomPosition(Node):
-    """Pick a random position on the map and walk towards it until getting
-    there. Once there, a new target is picked.
-
-    Attributes:
-        target_position: the target point
-    """
-    def __init__(self):
-        self.target_position = None
-
-    def tick(self, owner, game_map):
-        super().tick(owner, game_map)
-        if not self.target_position or (self.target_position == owner.point):
-            self.target_position = random_walkable_position(game_map, owner)
-
-        path = self.namespace.get("path")
-
-        if path and len(path) > 1:
-            path.pop(0)
-
-            if game_map.current_level.accessible_tile(path[0][0], path[0][1]):
-                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
-
-        path = get_path_to((owner.x, owner.y),
-                            (self.target_position.x, self.target_position.y),
-                            game_map,
-                            routing_avoid=owner.movement.routing_avoid)
+        path = move_to_radius_of_target(
+            game_map,
+            (owner.x, owner.y),
+            (target.x, target.y),
+            radius=self.radius,
+            routing_avoid=owner.movement.routing_avoid)
 
         self.namespace["path"] = path
 
@@ -126,8 +168,34 @@ class Skitter(Node):
         return TreeStates.SUCCESS, results
 
 class Swarm(Node):
+    """Have an entity attempt to follow another entity of a particular species.
+    The entity will try and find an entity within [radius] squares that moved in
+    its last turn and move towards it.
 
-    def __init__(self, species, radius = 3, follow_chance = 75):
+    Parameters
+    ----------
+    species: etc.enum.Species
+        The species of entity that the owner will follow.
+    radius: int
+        How far away to look for other entities of the given species.
+        Default: 3
+    follow_chance: int
+         Likely hood that the entity will swarm.
+         Default: 75
+
+    Attributes
+    ----------
+    species: etc.enum.Species
+        The species of entity that the owner will follow.
+    radius: int
+        How far away to look for other entities of the given species.
+        Default: 3
+    follow_chance: int
+         Likely hood that the entity will swarm.
+         Default: 75
+
+    """
+    def __init__(self, species, radius = 3, follow_chance = 100):
         self.species = species
         self.radius = radius
         self.chance = follow_chance
@@ -145,52 +213,15 @@ class Swarm(Node):
             if len(moved) > 0:
                 follow_npc = choice(moved)
 
-                path = get_path_to((owner.x, owner.y),
+                path = get_path_to(game_map,
+                                    (owner.x, owner.y),
                                     (follow_npc.x, follow_npc.y),
-                                    game_map,
                                     routing_avoid=owner.movement.routing_avoid)
 
-                if len(path) < 1:
-                    return TreeStates.FAILURE, []
-
-                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
+                if len(path) > 0:
+                    return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
 
         return TreeStates.FAILURE, []
-
-class DoNothing(Node):
-    """Take no action and pass the turn."""
-    def tick(self, owner, game_map):
-        super().tick(owner, game_map)
-        return TreeStates.SUCCESS, []
-
-class Attack(Node):
-    """The owner attackes the target."""
-    def tick(self, owner, game_map):
-        super().tick(owner, game_map)
-        target = self.namespace.get("target")
-        if not target:
-            logging.info(f"No target - how did we get here?")
-            return TreeStates.FAILURE, []
-
-        if target.health.dead:
-            #logging.info("Attack: FAILURE - target dead, removing")
-            del self.namespace["target"]
-            return TreeStates.FAILURE, []
-
-        return (TreeStates.SUCCESS,
-                    owner.offence.attack(target, game_map))
-
-class PointToTarget(Node):
-    def __init__(self, target_point, target_point_name):
-        self.target_point = target_point
-        self.target_point_name = target_point_name
-
-    """The owner attackes the target."""
-    def tick(self, owner, game_map):
-        super().tick(owner, game_map)
-        self.namespace[self.target_point_name] = self.target_point
-
-        return TreeStates.SUCCESS, []
 
 class SpawnEntity(Node):
     """Spawn an entity beside the current enity.
@@ -262,6 +293,54 @@ class SpawnEntity(Node):
                 logging.info(f"{owner} can't spawn {self.maker} as no room.")
         return TreeStates.FAILURE, []
 
+class TravelToRandomPosition(Node):
+    """Pick a random position on the map and walk towards it until getting
+    there. Once there, a new target is picked.
+
+    Attributes:
+        target_position: the target point
+    """
+    def __init__(self):
+        self.target_position = None
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        if not self.target_position or (self.target_position == owner.point):
+            self.target_position = random_walkable_position(game_map, owner)
+
+        path = self.namespace.get("path")
+
+        if path and len(path) > 1:
+            path.pop(0)
+
+            if game_map.current_level.accessible_tile(path[0][0], path[0][1]):
+                return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
+
+        path = get_path_to(game_map,
+                            (owner.x, owner.y),
+                            (self.target_position.x, self.target_position.y),
+                            routing_avoid=owner.movement.routing_avoid)
+
+        self.namespace["path"] = path
+
+        if len(path) < 1:
+            self.target_position = None
+            return TreeStates.SUCCESS, []
+
+        return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
+
+class PointToTarget(Node):
+    def __init__(self, target_point, target_point_name):
+        self.target_point = target_point
+        self.target_point_name = target_point_name
+
+    """The owner attackes the target."""
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        self.namespace[self.target_point_name] = self.target_point
+
+        return TreeStates.SUCCESS, []
+
 class PickUp(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
@@ -272,33 +351,5 @@ class PickUp(Node):
             del self.namespace["item"]
 
             return TreeStates.SUCCESS, [{ResultTypes.ADD_ITEM_TO_INVENTORY: item}]
-
-        return TreeStates.FAILURE, []
-
-class Envelop(Node):
-    def tick(self, owner, game_map):
-        super().tick(owner, game_map)
-
-        target = self.namespace["paralyzed"]
-
-        if target:
-            del self.namespace["paralyzed"]
-            return TreeStates.SUCCESS, [{ResultTypes.SET_POSITION: (owner, target.point)}]
-
-        return TreeStates.FAILURE, []
-
-class Disolve(Node):
-    def tick(self, owner, game_map):
-        super().tick(owner, game_map)
-
-        target = self.namespace["corpse"]
-
-        if target:
-            del self.namespace["corpse"]
-            if target.death.rotting_time > 1:
-                target.death.rotting_time = min(1, target.death.rotting_time - 5)
-                target.death.decompose(game_map)
-
-            return TreeStates.SUCCESS, []
 
         return TreeStates.FAILURE, []

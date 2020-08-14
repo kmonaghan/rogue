@@ -23,11 +23,6 @@ def unpack_single_key_dict(d):
 #-----------------------------------------------------------------------------
 # Geometric operations.
 #-----------------------------------------------------------------------------
-def l2_distance(source, target):
-    dx = target[0] - source[0]
-    dy = target[1] - source[1]
-    return math.sqrt(dx*dx + dy*dy)
-
 def coordinates_on_circle(center, radius):
     circle = set()
     circle.update((center[0] + radius - i, center[1] + i)

@@ -18,12 +18,12 @@ from components.behaviour_trees.composite import (
 from components.behaviour_trees.leaf import (
      Attack, MoveTowardsTargetEntity, TravelToRandomPosition, SeekTowardsLInfinityRadius,
      MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, Swarm, PointToTarget,
-     PickUp, Disolve, Envelop)
+     PickUp, Disolve, Envelop, CastSpell)
 from components.behaviour_trees.conditions import (
     IsAdjacent, IsFinished, IsItemInSpot, WithinPlayerFov, InNamespace, CoinFlip,
     FindNearestTargetEntity, WithinL2Radius, OtherEntityInSameSpot,
     OutsideL2Radius, CheckHealthStatus, SetNamespace, NumberOfEntities,
-    IsNPCInSpot, IsCorpseInSpot, IsNPCAdjacent, IsNPCAParalyzed, ChangeAI)
+    IsNPCInSpot, IsCorpseInSpot, IsNPCAdjacent, IsNPCAParalyzed, ChangeAI, WithinRadius)
 
 class BaseAI:
     """Base class for NPC AI.
@@ -144,34 +144,6 @@ class FrozenNPC(BaseAI):
     def __init__(self):
         self.tree = Root(DoNothing())
 
-class NecromancerNPC(BaseAI):
-    """AI for a necromancer.
-
-    Necromancers attempt to always stay at exactly a given radius of the
-    target.  If they fall within the radius, they will move away, if they fall
-    outside the radius, they will move towards.  When they are at exactly the
-    desired radius, they will spawn a zombie with a certain probability.
-    """
-    def __init__(self, move_towards_radius=6, seeking_radius=3):
-        self.tree = Root(
-            Selection(
-                Sequence(
-                    Negate(NumberOfEntities(radius=2, species=Species.UNDEAD, number_of_entities=4)),
-                    CoinFlip(p=0.3),
-                    SpawnEntity(bestiary.generate_random_zombie, min_time=0, max_time=0),
-                ),
-#                Sequence(
-#                    #WithinL2Radius(radius=move_towards_radius),
-#                    SeekTowardsLInfinityRadius(radius=seeking_radius)
-#                ),
-                Sequence(
-                    InNamespace(name="target"),
-                    IsAdjacent(),
-                    Attack()
-                ),
-            )
-        )
-
 class HunterNPC(BaseAI):
     def __init__(self, sensing_range=12):
         self.sensing_range = sensing_range
@@ -239,7 +211,7 @@ class ConfusedNPC(BaseAI):
                 Skitter()))
 
 class SpawningNPC(BaseAI):
-    """AI for an entity that spawns another entity.
+    """AI for an entity that spawns another entity and does nothing else.
 
     Parameters
     ----------
@@ -257,10 +229,11 @@ class SpawningNPC(BaseAI):
             Selection(
                 Sequence(
                     SpawnEntity(spawn, min_time=min_time, max_time=max_time)),
-                DoNothing()))
+                )
+            )
 
 class PredatorNPC(BaseAI):
-    """A NPC which hunts other NPCs.
+    """An entity which hunts other entity of a given species.
 
     Will randomly wander until it encounters a NPC of the correct type
     """
@@ -307,18 +280,22 @@ class HatchingNPC(BaseAI):
                 )))
 
 class CaptainNPC(BaseAI):
-    """AI for a .
+    """AI for an entity that will spawn creatures to fill out a squad and then
+    pitch in themselves.
 
-    The captain will stay in the one spot unti the payer comes into view and will
-    then attack. Until then it will spawn NPCs.
+    The captain will stay in the one spot until the player comes into view and
+    will then attack. Until then it will spawn NPCs.
 
-    This is meant for use with the brrcks prefab.
+    This is meant for use with the barrcks prefab.
 
     """
     def __init__(self, spawn, min_time=5, max_time=10):
         number_of_turns = randint(min_time, max_time)
         self.tree = Root(
             Selection(
+                Sequence(
+                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)
+                ),
                 Sequence(
                     InNamespace(name="target"),
                     IsAdjacent(),
@@ -327,9 +304,6 @@ class CaptainNPC(BaseAI):
                 Sequence(
                     WithinPlayerFov(),
                     MoveTowardsTargetEntity()
-                ),
-                Sequence(
-                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)
                 ),
             )
         )
@@ -383,6 +357,42 @@ class WarlordNPC(BaseAI):
             )
         )
 
+class NecromancerNPC(BaseAI):
+    """AI for a necromancer.
+
+    Necromancers attempt to always stay at exactly a given radius of the
+    target.  If they fall within the radius, they will move away, if they fall
+    outside the radius, they will move towards.  When they are at exactly the
+    desired radius, they will spawn a zombie with a certain probability.
+    """
+
+    def __init__(self, radius=3):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    WithinPlayerFov(),
+                    WithinRadius(radius=radius),
+                    SeekTowardsLInfinityRadius(radius=radius)
+                ),
+                Sequence(
+                    Negate(NumberOfEntities(radius=2, species=Species.UNDEAD, number_of_entities=4)),
+                    CoinFlip(p=0.3),
+                    SpawnEntity(bestiary.generate_random_zombie, min_time=0, max_time=0),
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    WithinPlayerFov(),
+                    CastSpell(spell=tome.magic_missile)
+                ),
+                DoNothing()
+            )
+        )
+
 class ZombieNPC(BaseAI):
     """Rwarrr...."""
     def __init__(self, move_towards_radius=6, species=Species.NONDESCRIPT):
@@ -398,7 +408,7 @@ class ZombieNPC(BaseAI):
                     FindNearestTargetEntity(range=move_towards_radius,species_type=species),
                     MoveTowardsTargetEntity(),
                 ),
-                Swarm(species=species),
+                Swarm(species=Species.ZOMBIE),
                 Skitter()))
 
 class CleanerNPC(BaseAI):
