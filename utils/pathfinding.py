@@ -46,7 +46,6 @@ def create_walkable_cost(game_map, routing_avoid=None, blocking_entity_cost = 10
         cost[avoid_entity.x-1:avoid_entity.x+2, avoid_entity.y-1:avoid_entity.y+2] = np.multiply(cost[avoid_entity.x-1:avoid_entity.x+2, avoid_entity.y-1:avoid_entity.y+2], 2)
         cost[avoid_entity.x,avoid_entity.y] = cost[avoid_entity.x,avoid_entity.y] * 3
 
-
     for entity in game_map.current_level.entities:
         # Check that an enitiy blocks movement and the cost isn't zero (blocking.)
         if entity.blocks and cost[entity.x, entity.y]:
@@ -187,10 +186,12 @@ def move_to_radius_of_target(game_map, source, target, radius, routing_avoid=Non
     cost = create_walkable_cost(game_map, routing_avoid)
     dist = tcod.path.maxarray(game_map.current_level.walkable.shape, dtype=np.int32)
 
-    dist[target[0]-radius:target[0]+radius, target[1]+radius] = 0
-    dist[target[0]-radius:target[0]+radius, target[1]-radius] = 0
-    dist[target[0]+radius, target[1]-radius:target[1]+radius+1] = 0
-    dist[target[0]-radius, target[1]-radius:target[1]+radius] = 0
+    move_options = np.zeros(cost.shape, dtype=np.int8)
+    walkable = game_map.current_level.make_walkable_array(routing_avoid=routing_avoid).astype(np.int)
+    move_options[target[0]-radius:target[0]+radius+1,target[1]-radius:target[1]+radius+1] = walkable[target[0]-radius:target[0]+radius+1,target[1]-radius:target[1]+radius+1]
+    move_options[target[0]-radius+1:target[0]+radius,target[1]-radius+1:target[1]+radius] = 0
+
+    dist[np.where(move_options == 1)] = 0
 
     tcod.path.dijkstra2d(dist, cost, CONFIG.get('cardinal_cost'), CONFIG.get('diagonal_cost'))
 

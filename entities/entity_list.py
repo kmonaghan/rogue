@@ -37,6 +37,11 @@ class EntityList:
         self.coordinate_map[new_position].append(entity)
 
     def get_entities_in_position(self, position):
+        if position[0] < 0 or position[0] > self.width:
+            return None
+        if position[1] < 0 or position[1] > self.height:
+            return None
+
         return self.coordinate_map[position]
 
     def __iter__(self):

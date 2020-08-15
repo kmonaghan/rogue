@@ -234,7 +234,7 @@ class NumberOfEntities(Node):
         count = 0
         for (x, y) in set_a:
             current_entities = game_map.current_level.entities.get_entities_in_position((x, y))
-            for entity in current_entities:
+            for entity in current_entities or []:
                 if entity.species == self.species:
                     count += 1
 
