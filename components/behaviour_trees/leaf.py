@@ -310,16 +310,23 @@ class TravelToRandomPosition(Node):
 
         path = self.namespace.get("path")
 
+        blocking_entity = None
         if path and len(path) > 1:
-            path.pop(0)
-
-            if game_map.current_level.accessible_tile(path[0][0], path[0][1]):
+            if not game_map.current_level.blocked[path[1][0], path[1][1]]:
+                path.pop(0)
                 return TreeStates.SUCCESS, [{ResultTypes.MOVE_WITH_PATH: (owner, path)}]
+            else:
+                if self.target_position == Point(path[1][0], path[1][1]):
+                    self.target_position = None
+                    return TreeStates.SUCCESS, []
+                else:
+                    blocking_entity = (path[1][0], path[1][1])
 
         path = get_path_to(game_map,
                             (owner.x, owner.y),
                             (self.target_position.x, self.target_position.y),
-                            routing_avoid=owner.movement.routing_avoid)
+                            routing_avoid=owner.movement.routing_avoid,
+                            blocking_entity = blocking_entity)
 
         self.namespace["path"] = path
 

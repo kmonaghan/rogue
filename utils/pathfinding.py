@@ -9,7 +9,7 @@ from etc.enum import RoutingOptions
 from map_objects.point import Point
 from utils.utils import matprint
 
-def create_walkable_cost(game_map, routing_avoid=None, blocking_entity_cost = 10, avoid_entity = None):
+def create_walkable_cost(game_map, routing_avoid=None, blocking_entity_cost = 10, avoid_entity = None, blocking_entity = None):
     """Calculate the cost of moving into a node.
     The base cost of a walkable node is 1. If there is a blocking entity, this
     is increased by blocking_entity_cost. If avoid_entity is passed through, the
@@ -24,11 +24,15 @@ def create_walkable_cost(game_map, routing_avoid=None, blocking_entity_cost = 10
       Dungeon features to avoid in the path.
 
     blocking_entity_cost: int
-      The cost to try and move through a node with a blocking entity.
+      The cost to try and move through a node with a blocking entity. Set to 0
+      if entities should be always avoided.
 
     avoid_entity: Entity
       An entity than imposes a repelling effect and increases the cost of
       passing near it.
+
+    blocking_entity: (int, int)
+        Position of an entity that will block any attempt to pass it
 
     Returns
     -------
@@ -42,6 +46,7 @@ def create_walkable_cost(game_map, routing_avoid=None, blocking_entity_cost = 10
         cost[avoid_entity.x-1:avoid_entity.x+2, avoid_entity.y-1:avoid_entity.y+2] = np.multiply(cost[avoid_entity.x-1:avoid_entity.x+2, avoid_entity.y-1:avoid_entity.y+2], 2)
         cost[avoid_entity.x,avoid_entity.y] = cost[avoid_entity.x,avoid_entity.y] * 3
 
+
     for entity in game_map.current_level.entities:
         # Check that an enitiy blocks movement and the cost isn't zero (blocking.)
         if entity.blocks and cost[entity.x, entity.y]:
@@ -49,7 +54,13 @@ def create_walkable_cost(game_map, routing_avoid=None, blocking_entity_cost = 10
             # A lower number means more enemies will crowd behind each other in
             # hallways.  A higher number means enemies will take longer paths in
             # order to surround the player.
-            cost[entity.x, entity.y] += blocking_entity_cost
+            if blocking_entity_cost > 1:
+                cost[entity.x, entity.y] += blocking_entity_cost
+            else:
+                cost[entity.x, entity.y] = 0
+
+    if blocking_entity:
+        cost[blocking_entity[0], blocking_entity[1]] = 0
 
     return cost
 
@@ -70,7 +81,8 @@ def calculate_dijkstra(game_map, target_points = None, routing_avoid=None, block
       Dungeon features to avoid in the path.
 
     blocking_entity_cost: int
-      The cost to try and move through a node with a blocking entity.
+      The cost to try and move through a node with a blocking entity. Set to 0
+      if entities should be always avoided.
 
     avoid_entity: Entity
       An entity than imposes a repelling effect and increases the cost of
@@ -91,7 +103,7 @@ def calculate_dijkstra(game_map, target_points = None, routing_avoid=None, block
 
     return dist
 
-def get_path_to(game_map, start: Tuple[int, int], destination: Tuple[int, int], routing_avoid=None) -> List[Tuple[int, int]]:
+def get_path_to(game_map, start: Tuple[int, int], destination: Tuple[int, int], routing_avoid=None, blocking_entity_cost = 10, blocking_entity = None) -> List[Tuple[int, int]]:
     """Calculate the cost of moving into a node.
     The base cost of a walkable node is 1. If there is a blocking entity, this
     is increased by blocking_entity_cost. If avoid_entity is passed through, the
@@ -113,12 +125,22 @@ def get_path_to(game_map, start: Tuple[int, int], destination: Tuple[int, int], 
     routing_avoid: List[RoutingOptions]
       Dungeon features to avoid in the path.
 
+    blocking_entity_cost: int
+      The cost to try and move through a node with a blocking entity. Set to 0
+      if entities should be always avoided.
+
+    blocking_entity: (int, int)
+        Position of an entity that will block any attempt to pass it
+
     Returns
     -------
     path: List[Tuple[int, int]]
       Return a list of all the nodes between the start node and destination node.
     """
-    cost = create_walkable_cost(game_map, routing_avoid=routing_avoid)
+    cost = create_walkable_cost(game_map,
+                                routing_avoid=routing_avoid,
+                                blocking_entity_cost = blocking_entity_cost,
+                                blocking_entity = blocking_entity)
     #start point needs to be passable.
     cost[start[0], start[1]] = 1
 
