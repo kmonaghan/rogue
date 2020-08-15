@@ -87,6 +87,9 @@ class Character(Entity):
         if self.level:
             print(f"{self.level}")
 
+        if self.movement and self.movement.has_moved:
+            print(f"Moved last turn from {self.movement.last_move}")
+
         if self.ai:
             target = self.ai.tree.namespace.get("target")
             if target:
