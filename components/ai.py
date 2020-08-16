@@ -52,41 +52,6 @@ class BaseAI:
         if current_target and current_target.uuid == target.uuid:
             del self.tree.namespace["target"]
 
-class PatrollingNPC(BaseAI):
-    """Simple NPC ai.
-
-    When in the targets POV, attempt to move towards the target.  If adjacent
-    to the target, attack.
-    """
-    def __init__(self):
-        self.tree = Root(
-            Selection(
-                Sequence(
-                    InNamespace(name="target"),
-                    IsAdjacent(),
-                    Attack()),
-                Sequence(
-                    WithinPlayerFov(),
-                    MoveTowardsTargetEntity()),
-                Sequence(
-                    InNamespace(name="target_point"),
-                    MoveTowardsPointInNamespace(name="target_point")),
-                TravelToRandomPosition()))
-
-class TetheredNPC(BaseAI):
-    """Simple NPC ai.
-
-    """
-    def __init__(self, radius=4, tether_point=None):
-        self.tree = Root(
-            Selection(
-                Sequence(
-                    PointToTarget(tether_point, "radius_point"),
-                    OutsideL2Radius(radius),
-                    MoveTowardsPointInNamespace(name="radius_point")
-                ),
-                Skitter()))
-
 class BasicNPC(BaseAI):
     """Simple NPC ai.
 
@@ -107,6 +72,101 @@ class BasicNPC(BaseAI):
                     InNamespace(name="target_point"),
                     MoveTowardsPointInNamespace(name="target_point")),
                 TravelToRandomPosition()))
+
+class CaptainNPC(BaseAI):
+    """AI for an entity that will spawn creatures to fill out a squad and then
+    pitch in themselves.
+
+    The captain will stay in the one spot until the player comes into view and
+    will then attack. Until then it will spawn NPCs.
+
+    This is meant for use with the barrcks prefab.
+
+    """
+    def __init__(self, spawn, min_time=5, max_time=10):
+        number_of_turns = randint(min_time, max_time)
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()
+                ),
+                Sequence(
+                    WithinPlayerFov(),
+                    MoveTowardsTargetEntity()
+                ),
+            )
+        )
+
+class CleanerNPC(BaseAI):
+    def __init__(self):
+        self.tree = Root(
+            Selection(
+                Sequence( #Do something to entity in spot
+                    OtherEntityInSameSpot(),
+                    Selection(
+                        Sequence(
+                            IsItemInSpot(),
+                            PickUp()
+                        ),
+                        Sequence(
+                            IsCorpseInSpot(),
+                            Disolve()
+                        ),
+                        Sequence(
+                            IsNPCInSpot(),
+                            Attack()
+                        ),
+                    ),
+                ),
+                Sequence( #Do something to entity adject
+                    IsNPCAdjacent(),
+                    Selection(
+                        Sequence(
+                            IsNPCAParalyzed(),
+                            Envelop()
+                        ),
+                        Sequence(
+                            InNamespace(name="target"),
+                            IsAdjacent(),
+                            Attack()
+                        ),
+                    )
+                ),
+                Sequence( #Shuffle along
+                    Skitter()
+                )
+            ))
+
+class ConfusedNPC(BaseAI):
+    """A confused NPC.
+
+    Will randomly wander and attack random entities
+    """
+    def __init__(self, previous_ai, number_of_turns=10):
+        self.number_of_turns = number_of_turns
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsFinished(number_of_turns),
+                    ChangeAI(previous_ai)
+                ),
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Skitter()))
+
+class FrozenNPC(BaseAI):
+    """AI for a frozen NPC.
+
+    Always passes the turn without acting.
+    """
+    def __init__(self):
+        self.tree = Root(DoNothing())
 
 class GuardNPC(BaseAI):
     """An ai for a NPC which guards a point.
@@ -136,13 +196,28 @@ class GuardNPC(BaseAI):
                 ),
                 Skitter()))
 
-class FrozenNPC(BaseAI):
-    """AI for a frozen NPC.
+class HatchingNPC(BaseAI):
+    """AI for an entity that turns into another entity.
 
-    Always passes the turn without acting.
+    Parameters
+    ----------
+    spawn: method
+        The method to generate the spawned entity.
+    min_time: int
+        Mininum number of turns before attempting to spawn.
+        Default: 5
+    max_time: int
+        Maximium number of turns before spawning.
+        Default: 10
     """
-    def __init__(self):
-        self.tree = Root(DoNothing())
+    def __init__(self, spawn, min_time=5, max_time=10):
+        number_of_turns = randint(min_time, max_time)
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsFinished(number_of_turns),
+                    SpawnEntity(spawn, hatch=True)
+                )))
 
 class HunterNPC(BaseAI):
     def __init__(self, sensing_range=12):
@@ -174,63 +249,41 @@ class HuntingNPC(BaseAI):
                     MoveTowardsTargetEntity()),
                 TravelToRandomPosition()))
 
-class SkitteringNPC(BaseAI):
-    """An impatient NPC.
+class NecromancerNPC(BaseAI):
+    """AI for a necromancer.
 
-    When close by, attempts to move towards the target.  Otherwise, moves to a
-    random adjacent square.
+    Necromancers attempt to always stay at exactly a given radius of the
+    target.  If they fall within the radius, they will move away, if they fall
+    outside the radius, they will move towards.  When they are at exactly the
+    desired radius, they will spawn a zombie with a certain probability.
     """
-    def __init__(self, skittering_range=3):
-        self.skittering_range = skittering_range
+
+    def __init__(self, radius=3):
         self.tree = Root(
             Selection(
                 Sequence(
-                    IsAdjacent(),
-                    Attack()),
-                Sequence(
-                    WithinL2Radius(radius=skittering_range),
-                    MoveTowardsTargetEntity()),
-                Skitter()))
-
-class ConfusedNPC(BaseAI):
-    """A confused NPC.
-
-    Will randomly wander and attack random entities
-    """
-    def __init__(self, previous_ai, number_of_turns=10):
-        self.number_of_turns = number_of_turns
-        self.tree = Root(
-            Selection(
-                Sequence(
-                    IsFinished(number_of_turns),
-                    ChangeAI(previous_ai)
+                    WithinPlayerFov(),
+                    WithinRadius(radius=radius),
+                    SeekTowardsLInfinityRadius(radius=radius)
                 ),
                 Sequence(
-                    IsAdjacent(),
-                    Attack()),
-                Skitter()))
-
-class SpawningNPC(BaseAI):
-    """AI for an entity that spawns another entity and does nothing else.
-
-    Parameters
-    ----------
-    spawn: method
-        The method to generate the spawned entity.
-    min_time: int
-        Mininum number of turns before attempting to spawn.
-        Default: 5
-    max_time: int
-        Maximium number of turns before spawning.
-        Default: 10
-    """
-    def __init__(self, spawn=None, min_time = 5, max_time = 10):
-        self.tree = Root(
-            Selection(
+                    Negate(NumberOfEntities(radius=2, species=Species.UNDEAD, number_of_entities=4)),
+                    CoinFlip(p=0.3),
+                    SpawnEntity(bestiary.generate_random_zombie, min_time=0, max_time=0),
+                ),
                 Sequence(
-                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)),
-                )
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    WithinPlayerFov(),
+                    CastSpell(spell=tome.magic_missile)
+                ),
+                DoNothing()
             )
+        )
 
 class PredatorNPC(BaseAI):
     """An entity which hunts other entity of a given species.
@@ -256,8 +309,47 @@ class PredatorNPC(BaseAI):
                 ),
                 TravelToRandomPosition()))
 
-class HatchingNPC(BaseAI):
-    """AI for an entity that turns into another entity.
+class PatrollingNPC(BaseAI):
+    """Simple NPC ai.
+
+    When in the targets POV, attempt to move towards the target.  If adjacent
+    to the target, attack.
+    """
+    def __init__(self):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinPlayerFov(),
+                    MoveTowardsTargetEntity()),
+                Sequence(
+                    InNamespace(name="target_point"),
+                    MoveTowardsPointInNamespace(name="target_point")),
+                TravelToRandomPosition()))
+
+class SkitteringNPC(BaseAI):
+    """An impatient NPC.
+
+    When close by, attempts to move towards the target.  Otherwise, moves to a
+    random adjacent square.
+    """
+    def __init__(self, skittering_range=3):
+        self.skittering_range = skittering_range
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    IsAdjacent(),
+                    Attack()),
+                Sequence(
+                    WithinL2Radius(radius=skittering_range),
+                    MoveTowardsTargetEntity()),
+                Skitter()))
+
+class SpawningNPC(BaseAI):
+    """AI for an entity that spawns another entity and does nothing else.
 
     Parameters
     ----------
@@ -270,43 +362,27 @@ class HatchingNPC(BaseAI):
         Maximium number of turns before spawning.
         Default: 10
     """
-    def __init__(self, spawn, min_time=5, max_time=10):
-        number_of_turns = randint(min_time, max_time)
+    def __init__(self, spawn=None, min_time = 5, max_time = 10):
         self.tree = Root(
             Selection(
                 Sequence(
-                    IsFinished(number_of_turns),
-                    SpawnEntity(spawn, hatch=True)
-                )))
+                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)),
+                )
+            )
 
-class CaptainNPC(BaseAI):
-    """AI for an entity that will spawn creatures to fill out a squad and then
-    pitch in themselves.
-
-    The captain will stay in the one spot until the player comes into view and
-    will then attack. Until then it will spawn NPCs.
-
-    This is meant for use with the barrcks prefab.
+class TetheredNPC(BaseAI):
+    """Simple NPC ai.
 
     """
-    def __init__(self, spawn, min_time=5, max_time=10):
-        number_of_turns = randint(min_time, max_time)
+    def __init__(self, radius=4, tether_point=None):
         self.tree = Root(
             Selection(
                 Sequence(
-                    SpawnEntity(spawn, min_time=min_time, max_time=max_time)
+                    PointToTarget(tether_point, "radius_point"),
+                    OutsideL2Radius(radius),
+                    MoveTowardsPointInNamespace(name="radius_point")
                 ),
-                Sequence(
-                    InNamespace(name="target"),
-                    IsAdjacent(),
-                    Attack()
-                ),
-                Sequence(
-                    WithinPlayerFov(),
-                    MoveTowardsTargetEntity()
-                ),
-            )
-        )
+                Skitter()))
 
 class WarlordNPC(BaseAI):
     """AI for a warlord.
@@ -357,42 +433,6 @@ class WarlordNPC(BaseAI):
             )
         )
 
-class NecromancerNPC(BaseAI):
-    """AI for a necromancer.
-
-    Necromancers attempt to always stay at exactly a given radius of the
-    target.  If they fall within the radius, they will move away, if they fall
-    outside the radius, they will move towards.  When they are at exactly the
-    desired radius, they will spawn a zombie with a certain probability.
-    """
-
-    def __init__(self, radius=3):
-        self.tree = Root(
-            Selection(
-                Sequence(
-                    WithinPlayerFov(),
-                    WithinRadius(radius=radius),
-                    SeekTowardsLInfinityRadius(radius=radius)
-                ),
-                Sequence(
-                    Negate(NumberOfEntities(radius=2, species=Species.UNDEAD, number_of_entities=4)),
-                    CoinFlip(p=0.3),
-                    SpawnEntity(bestiary.generate_random_zombie, min_time=0, max_time=0),
-                ),
-                Sequence(
-                    InNamespace(name="target"),
-                    IsAdjacent(),
-                    Attack()
-                ),
-                Sequence(
-                    InNamespace(name="target"),
-                    WithinPlayerFov(),
-                    CastSpell(spell=tome.magic_missile)
-                ),
-                DoNothing()
-            )
-        )
-
 class ZombieNPC(BaseAI):
     """Rwarrr...."""
     def __init__(self, move_towards_radius=6, species=Species.NONDESCRIPT):
@@ -410,43 +450,3 @@ class ZombieNPC(BaseAI):
                 ),
                 Swarm(species=Species.ZOMBIE),
                 Skitter()))
-
-class CleanerNPC(BaseAI):
-    def __init__(self):
-        self.tree = Root(
-            Selection(
-                Sequence( #Do something to entity in spot
-                    OtherEntityInSameSpot(),
-                    Selection(
-                        Sequence(
-                            IsItemInSpot(),
-                            PickUp()
-                        ),
-                        Sequence(
-                            IsCorpseInSpot(),
-                            Disolve()
-                        ),
-                        Sequence(
-                            IsNPCInSpot(),
-                            Attack()
-                        ),
-                    ),
-                ),
-                Sequence( #Do something to entity adject
-                    IsNPCAdjacent(),
-                    Selection(
-                        Sequence(
-                            IsNPCAParalyzed(),
-                            Envelop()
-                        ),
-                        Sequence(
-                            InNamespace(name="target"),
-                            IsAdjacent(),
-                            Attack()
-                        ),
-                    )
-                ),
-                Sequence( #Shuffle along
-                    Skitter()
-                )
-            ))
