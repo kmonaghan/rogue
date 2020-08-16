@@ -331,8 +331,45 @@ class LevelMap(Map):
 
         return walkable
 
-    def find_closest_entity(self, point, range = 2, species_type = None):
-        return self.entities.find_closest(point, species_type, max_distance=range)
+    def find_closest_entity(self, point, species = None, radius = 2):
+        """Find all the closest entity of a species to a given point within a
+        given radius.
+
+        Parameters
+        ----------
+        point: Point
+            Center point of the search
+        species: etc.enum.Species
+            Species that this entity will attempt to find.
+        radius: int
+            The radius to search within.
+
+        Returns
+        -------
+        Entity or None
+          A valid entity or None if none found.
+        """
+        return self.entities.find_closest(point, species, radius)
+
+    def find_entities_in_radius(self, point, species = None, radius = 2):
+        """Find all the closest entities of a species to a given point within a
+        given radius.
+
+        Parameters
+        ----------
+        point: Point
+            Center point of the search
+        species: etc.enum.Species
+            Species that this entity will attempt to find.
+        radius: int
+            The radius to search within.
+
+        Returns
+        -------
+        npcs: [Entities]
+          A list of all valid entities.
+        """
+        return self.entities.find_all_closest(point, species, radius)
 
     def find_entities_of_type(self, species_type):
         return self.entities.find_all_of_type(species_type)

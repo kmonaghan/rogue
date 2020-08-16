@@ -16,14 +16,42 @@ from components.behaviour_trees.root import Root
 from components.behaviour_trees.composite import (
     Selection, Sequence, Negate)
 from components.behaviour_trees.leaf import (
-     Attack, MoveTowardsTargetEntity, TravelToRandomPosition, SeekTowardsLInfinityRadius,
-     MoveTowardsPointInNamespace, SpawnEntity, DoNothing, Skitter, Swarm, PointToTarget,
-     PickUp, Disolve, Envelop, CastSpell)
+     Attack,
+     CastSpell,
+     Disolve,
+     DoNothing,
+     Envelop,
+     Heal,
+     MoveTowardsPointInNamespace,
+     MoveTowardsTargetEntity,
+     PickUp,
+     PointToTarget,
+     SeekTowardsLInfinityRadius,
+     Skitter,
+     SpawnEntity,
+     Swarm,
+     TravelToRandomPosition,)
 from components.behaviour_trees.conditions import (
-    IsAdjacent, IsFinished, IsItemInSpot, WithinPlayerFov, InNamespace, CoinFlip,
-    FindNearestTargetEntity, WithinL2Radius, OtherEntityInSameSpot,
-    OutsideL2Radius, CheckHealthStatus, SetNamespace, NumberOfEntities,
-    IsNPCInSpot, IsCorpseInSpot, IsNPCAdjacent, IsNPCAParalyzed, ChangeAI, WithinRadius)
+    ChangeAI,
+    CheckHealthStatus,
+    CoinFlip,
+    FindEntities,
+    FindNearestTargetEntity,
+    InNamespace,
+    IsAdjacent,
+    IsCorpseInSpot,
+    IsFinished,
+    IsItemInSpot,
+    IsNPCAdjacent,
+    IsNPCAParalyzed,
+    IsNPCInSpot,
+    NumberOfEntities,
+    OtherEntityInSameSpot,
+    OutsideL2Radius,
+    SetNamespace,
+    WithinL2Radius,
+    WithinPlayerFov,
+    WithinRadius,)
 
 class BaseAI:
     """Base class for NPC AI.
@@ -219,6 +247,46 @@ class HatchingNPC(BaseAI):
                     SpawnEntity(spawn, hatch=True)
                 )))
 
+class HealerNPC(BaseAI):
+    """AI for an entity that will heal other entities.
+
+    This entity will attempt to do one of the following:
+    1. Heal most injured entity in range
+    2. If within the player's FOV stay heal radius away
+    3. If the entity's target is adjacent, attack
+    4. Follow another entity of the same species that moved last turn
+    5. move to a random empty square
+    
+    Parameters
+    ----------
+    species: etc.enum.Species
+        Species that this entity will attempt to heal.
+    radius:
+        The range that this entity will heal at.
+    """
+    def __init__(self, species=None, radius=3):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    FindEntities(species=species, radius=radius),
+                    InNamespace(name="entities"),
+                    Heal()
+                ),
+                Sequence(
+                    WithinPlayerFov(),
+                    WithinRadius(radius=radius),
+                    SeekTowardsLInfinityRadius(radius=radius)
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    IsAdjacent(),
+                    Attack()
+                ),
+                Swarm(species=species),
+                Skitter()
+            )
+        )
+
 class HunterNPC(BaseAI):
     def __init__(self, sensing_range=12):
         self.sensing_range = sensing_range
@@ -304,7 +372,7 @@ class PredatorNPC(BaseAI):
                     InNamespace(name="target"),
                     MoveTowardsTargetEntity()),
                 Sequence(
-                    FindNearestTargetEntity(range=2,species_type=self.target_species),
+                    FindNearestTargetEntity(species=self.target_species),
                     MoveTowardsTargetEntity(),
                 ),
                 TravelToRandomPosition()))
@@ -445,7 +513,7 @@ class ZombieNPC(BaseAI):
                     WithinL2Radius(radius=move_towards_radius),
                     MoveTowardsTargetEntity()),
                 Sequence(
-                    FindNearestTargetEntity(range=move_towards_radius,species_type=species),
+                    FindNearestTargetEntity(species=species, radius=move_towards_radius),
                     MoveTowardsTargetEntity(),
                 ),
                 Swarm(species=Species.ZOMBIE),

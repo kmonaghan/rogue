@@ -4,6 +4,8 @@ import logging
 
 from random import choice, randint, uniform
 
+import tome
+
 from components.behaviour_trees.root import Node
 
 from etc.enum import TreeStates, ResultTypes
@@ -83,6 +85,30 @@ class Envelop(Node):
         if target:
             del self.namespace["paralyzed"]
             return TreeStates.SUCCESS, [{ResultTypes.SET_POSITION: (owner, target.point)}]
+
+        return TreeStates.FAILURE, []
+
+class Heal(Node):
+    """Heal the most injured entity in a given list.
+
+    The entity is healed for [casters level]d8 points.
+    """
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        entities = self.namespace["entities"]
+
+        if entities:
+            entities.sort(key=lambda x: x.health.hp)
+            self.namespace.pop("entities", None)
+
+            if entities[0].health.hp < entities[0].health.max_hp:
+                return (TreeStates.SUCCESS,
+                            tome.heal(game_map=game_map,
+                                        caster=owner,
+                                        target=entities[0],
+                                        number_of_dice=owner.level.current_level,
+                                        type_of_dice=8))
 
         return TreeStates.FAILURE, []
 
@@ -195,7 +221,7 @@ class Swarm(Node):
          Default: 75
 
     """
-    def __init__(self, species, radius = 3, follow_chance = 100):
+    def __init__(self, species, radius = 3, follow_chance = 75):
         self.species = species
         self.radius = radius
         self.chance = follow_chance
@@ -204,7 +230,7 @@ class Swarm(Node):
         super().tick(owner, game_map)
 
         if randint(1,100) < self.chance:
-            npcs = game_map.current_level.entities.find_all_closest(owner.point, self.species, max_distance=self.radius)
+            npcs = game_map.current_level.entities.find_all_closest(owner.point, self.species, radius=self.radius)
             moved = []
             for npc in npcs:
                 if npc.movement and npc.movement.has_moved:

@@ -157,22 +157,69 @@ class ChangeAI(Node):
         owner.add_component(self.ai, 'ai')
         return TreeStates.SUCCESS, []
 
+class FindEntities(Node):
+    """Find all entities of a particular species withing a given radius.
+
+    Parameters
+    ----------
+    species: etc.enum.Species
+        Species that should be searched for.
+    radius:
+        The range to search within.
+
+    Attributes
+    ----------
+    species: etc.enum.Species
+        Species that should be searched for.
+    radius:
+        The range to search within.
+    """
+    def __init__(self, species = None, radius = 2):
+        self.radius = radius
+        self.species = species
+
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        entities = game_map.current_level.find_entities_in_radius(owner.point, self.species, self.radius)
+
+        if entities and len(entities) > 1:
+            self.namespace["entities"] = entities
+            return TreeStates.SUCCESS, []
+        else:
+            self.namespace.pop("entities", None)
+            return TreeStates.FAILURE, []
+
 class FindNearestTargetEntity(Node):
+    """Find the nearest entity of a particular species and set it as the target.
 
-        def __init__(self, range = 2, species_type = None):
-            self.range = range
-            self.species = species_type
+    Parameters
+    ----------
+    species: etc.enum.Species
+        Species that should be searched for.
+    radius:
+        The range to search within.
 
-        def tick(self, owner, game_map):
-            super().tick(owner, game_map)
-            target = game_map.current_level.find_closest_entity(owner, self.range, self.species)
+    Attributes
+    ----------
+    species: etc.enum.Species
+        Species that should be searched for.
+    radius:
+        The range to search within.
+    """
+    def __init__(self, species = None, radius = 2):
+        self.radius = radius
+        self.species = species
 
-            if target:
-                self.namespace["target"] = target
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+        target = game_map.current_level.find_closest_entity(owner.point, self.species, self.radius)
 
-                return TreeStates.SUCCESS, []
-            else:
-                return TreeStates.FAILURE, []
+        if target:
+            self.namespace["target"] = target
+
+            return TreeStates.SUCCESS, []
+        else:
+            return TreeStates.FAILURE, []
 
 class CheckHealthStatus(Node):
     """Check if an entity's health is under a given level.
@@ -303,7 +350,7 @@ class IsNPCAdjacent(Node):
     def tick(self, owner, game_map):
         super().tick(owner, game_map)
 
-        npcs = game_map.current_level.entities.find_all_closest(owner.point, max_distance=1)
+        npcs = game_map.current_level.entities.find_all_closest(owner.point, radius=1)
 
         if len(npcs) > 0:
             self.namespace['adjacent'] = npcs

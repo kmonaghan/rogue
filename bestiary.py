@@ -10,21 +10,20 @@ from game_messages import Message
 
 import quest
 
-from components.ai import (BasicNPC, CaptainNPC, CleanerNPC, GuardNPC,
-                            PatrollingNPC, WarlordNPC, NecromancerNPC,
-                            PredatorNPC, SpawningNPC, HatchingNPC,
-                            TetheredNPC, ZombieNPC)
+from components.ai import (BasicNPC, CaptainNPC, CleanerNPC, GuardNPC, HatchingNPC,
+                            HealerNPC, NecromancerNPC, PatrollingNPC, PredatorNPC,
+                            SpawningNPC, TetheredNPC, WarlordNPC, ZombieNPC,)
 from components.berserk import Berserk
 from components.children import Children
 from components.damagemodifier import DamageModifier
+from components.defence import Defence
 from components.display import Display
 from components.fov import FOV
 from components.health import Health
 from components.interaction import Interaction
 from components.level import Level
-from components.offence import Offence
-from components.defence import Defence
 from components.naming import Naming
+from components.offence import Offence
 from components.questgiver import Questgiver
 from components.regeneration import Regeneration
 from components.spawn import Spawn
@@ -700,16 +699,19 @@ def generate_npc(type, dungeon_level = 1, point = None, upgrade_chance = 98):
 
 def reanmimate(npc):
     if (npc.death.skeletal):
-        return convert_npc_to_skeleton(npc)
+        return convert_to_skeleton(npc)
 
-    return convert_npc_to_zombie(npc)
+    return convert_to_zombie(npc)
 
 def generate_random_skeleton(point = None, dungeon_level = 1):
     npc = random_npc(point = point, dungeon_level = dungeon_level)
 
-    return convert_npc_to_skeleton(npc)
+    return convert_to_skeleton(npc)
 
-def convert_npc_to_skeleton(npc):
+def convert_to_cleric(npc):
+    npc.add_component(HealerNPC(npc.species), 'ai')
+
+def convert_to_skeleton(npc):
     npc.char = 'S'
     npc.add_component(Naming(npc.base_name, prefix='Skeletal'), 'naming')
     npc.add_component(BasicNPC(), 'ai')
@@ -724,9 +726,9 @@ def convert_npc_to_skeleton(npc):
 def generate_random_vampire(point = None, dungeon_level = 1):
     npc = random_npc(point = point, dungeon_level = dungeon_level)
 
-    return convert_npc_to_vampire(npc)
+    return convert_to_vampire(npc)
 
-def convert_npc_to_vampire(npc):
+def convert_to_vampire(npc):
     npc.char = 'V'
     npc.add_component(Naming(npc.base_name, prefix='Vampiric'), 'naming')
     npc.add_component(Health(npc.health.max_hp * 1.5), 'health')
@@ -745,9 +747,9 @@ def convert_npc_to_vampire(npc):
 def generate_random_zombie(point = None, dungeon_level = 1):
     npc = random_npc(point = point, dungeon_level = dungeon_level)
 
-    return convert_npc_to_zombie(npc)
+    return convert_to_zombie(npc)
 
-def convert_npc_to_zombie(npc):
+def convert_to_zombie(npc):
     npc.char = 'Z'
     npc.add_component(Naming(npc.base_name, prefix='Zombie'), 'naming')
     npc.add_component(ZombieNPC(species=npc.species), 'ai')
@@ -759,7 +761,7 @@ def convert_npc_to_zombie(npc):
     teeth = equipment.teeth()
     teeth.lootable = False
     equipment.add_infection(teeth, name="Zombification", chance=50,
-                            on_turn=None, on_death=convert_npc_to_zombie)
+                            on_turn=None, on_death=convert_to_zombie)
 
     npc.inventory.add_item(teeth)
     npc.equipment.toggle_equip(teeth)

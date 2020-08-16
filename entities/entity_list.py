@@ -47,46 +47,63 @@ class EntityList:
     def __iter__(self):
         yield from self.lst
 
-    def find_closest(self, point, species, max_distance=2):
+    def find_closest(self, point, species, radius=2):
+        """Find all the closest entity of a species to a given point within a
+        given radius.
+
+        Parameters
+        ----------
+        point: Point
+            Center point of the search
+        species: etc.enum.Species
+            Species that this entity will attempt to find.
+        radius: int
+            The radius to search within.
+
+        Returns
+        -------
+        Entity or None
+          A valid entity or None if none found.
+        """
+        entities = self.find_all_closest(point, species, radius)
+
         npc = None
+        dist = radius + 1
 
-        start_x = max(0, point.x - max_distance)
-        start_y = max(0, point.y - max_distance)
-
-        end_x = min(self.width, start_x + (max_distance * 2) + 1)
-        end_y = min(self.height, start_y + (max_distance * 2) + 1)
-
-        dist = max_distance + 1
-
-        #logging.info("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
-        for x in range(start_x, end_x):
-            for y in range(start_y, end_y):
-                #logging.info ("checking " + str(x) + ", " + str(y))
-
-                if (len(self.coordinate_map[(x, y)])):
-                    for entity in self.coordinate_map[(x, y)]:
-                        if (point.x == x) and (point.y == y):
-                            continue
-                        if isinstance(entity, Character) and (entity.species == species) and not entity.health.dead:
-                            entity_distance = abs(x - point.x)
-                            if (entity_distance < dist):
-                                #logging.info("FOUND!")
-                                npc = entity
-                #else:
-                #    #logging.info "no entites at " + str(x) + ", " + str(y)
-
+        for entity in entities or []:
+            if isinstance(entity, Character) and (entity.species == species) and not entity.health.dead:
+                entity_distance = abs(entity.x - point.x)
+                if (entity_distance < dist):
+                    npc = entity
         return npc
 
-    def find_all_closest(self, point, species=None, max_distance=2):
+    def find_all_closest(self, point, species, radius=2):
+        """Find all the closest entities of a species to a given point within a
+        given radius.
+
+        Parameters
+        ----------
+        point: Point
+            Center point of the search
+        species: etc.enum.Species
+            Species that this entity will attempt to find.
+        radius: int
+            The radius to search within.
+
+        Returns
+        -------
+        npcs: [Entities]
+          A list of all valid entities.
+        """
         npcs = []
 
-        start_x = max(0, point.x - max_distance)
-        start_y = max(0, point.y - max_distance)
+        start_x = max(0, point.x - radius)
+        start_y = max(0, point.y - radius)
 
-        end_x = min(self.width, start_x + (max_distance * 2) + 1)
-        end_y = min(self.height, start_y + (max_distance * 2) + 1)
+        end_x = min(self.width, start_x + (radius * 2) + 1)
+        end_y = min(self.height, start_y + (radius * 2) + 1)
 
-        dist = max_distance + 1
+        dist = radius + 1
 
         #logging.info("Start looking from: (" + str(start_x) + ", " + str(start_y) +")")
         for x in range(start_x, end_x):
