@@ -180,5 +180,20 @@
       "Critical Range" : "20"
     },
     "Description" : "An item you can use."
+  },
+  {
+    "Name" : "short bow",
+    "Character" : "}",
+    "Power" : 2,
+    "Equipment Slots" : "MAIN_HAND",
+    "Damage" : {
+      "Damage Type" : "PIERCING",
+      "number_of_dice" : 1,
+      "type_of_dice" : 6,
+      "Critical" : "2",
+      "Critical Range" : "20"
+    },
+    "Description" : "An item you can use.",
+    "Reach" : 3
   }
 ]

@@ -708,6 +708,12 @@ def generate_random_skeleton(point = None, dungeon_level = 1):
 
     return convert_to_skeleton(npc)
 
+def convert_to_archer(npc):
+    bow = equipment.create_weapon('short bow')
+    npc.inventory.add_item(bow)
+    npc.equipment.toggle_equip(bow)
+    npc.base_name = f"Archer {npc.base_name}"
+
 def convert_to_cleric(npc):
     npc.add_component(HealerNPC(npc.species), 'ai')
 

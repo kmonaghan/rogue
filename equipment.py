@@ -521,6 +521,7 @@ def weapon_from_json(data, point = None):
     equippable_component.damage_type = string_to_damage_type.get(data['Damage']['Damage Type'], DamageType.DEFAULT)
     equippable_component.number_of_dice = data['Damage']['number_of_dice']
     equippable_component.type_of_dice = data['Damage']['type_of_dice']
+    equippable_component.reach = data.get('Reach', 1)
 
     item = Entity(point,
                     data['Character'],

@@ -4,10 +4,10 @@ import logging
 
 import random
 
-from etc.enum import TreeStates, HealthStates, Species
+from etc.enum import EquipmentSlot, TreeStates, HealthStates, Species
 from components.behaviour_trees.root import Node
 from map_objects.point import Point
-from utils.utils import coordinates_within_circle
+from utils.utils import bresenham_line, coordinates_within_circle
 
 class InNamespace(Node):
     """Check if a variable is set within the tree's namespace.
@@ -267,6 +267,27 @@ class SetNamespace(Node):
         self.namespace[self.name] = self.name
 
         return TreeStates.SUCCESS, []
+
+class TargetWithinRange(Node):
+    """Return success if target is within range of the owner's weapon carried in
+    the main hand and within line of sight."""
+    def tick(self, owner, game_map):
+        super().tick(owner, game_map)
+
+        target = self.namespace.get("target")
+        if not target:
+            return TreeStates.FAILURE, []
+
+        weapon = owner.equipment.get_equipped_in_slot(EquipmentSlot.MAIN_HAND)
+
+        distance = owner.point.chebyshev_distance(target.point)
+        if distance <= weapon.equippable.reach:
+            end = bresenham_line(game_map, owner.point.tuple(), target.point.tuple())
+
+            if end[-1] == target.point.tuple():
+                return TreeStates.SUCCESS, []
+
+        return TreeStates.FAILURE, []
 
 class NumberOfEntities(Node):
     def __init__(self, radius=3, species=Species.UNDEAD, number_of_entities=0):

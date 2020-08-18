@@ -110,7 +110,7 @@ def bresenham_line(game_map, source, target):
         List of tuples.
     '''
     ray, _, target_idx = _bresenham_ray(game_map, source, target)
-    return ray[:target_idx]
+    return ray[:target_idx+1]
 
 def bresenham_ray(game_map, source, target):
     '''Use Bresenham's line drawing algorithm to draw a ray starting at [source],

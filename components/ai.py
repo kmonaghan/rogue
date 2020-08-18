@@ -49,6 +49,7 @@ from components.behaviour_trees.conditions import (
     OtherEntityInSameSpot,
     OutsideL2Radius,
     SetNamespace,
+    TargetWithinRange,
     WithinL2Radius,
     WithinPlayerFov,
     WithinRadius,)
@@ -83,8 +84,13 @@ class BaseAI:
 class BasicNPC(BaseAI):
     """Simple NPC ai.
 
-    When in the targets POV, attempt to move towards the target.  If adjacent
-    to the target, attack.
+    This entity will attempt to do one of the following:
+    1. If the entity's target is adjacent, attack
+    2. If the entity's target is within range of the entity's weapon, attack
+    3. If withing the player's FOV, move towards the player
+    4. If a target point is set, move towards it
+    5. Travel to a random empty tile
+
     """
     def __init__(self):
         self.tree = Root(
@@ -92,14 +98,22 @@ class BasicNPC(BaseAI):
                 Sequence(
                     InNamespace(name="target"),
                     IsAdjacent(),
-                    Attack()),
+                    Attack()
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    TargetWithinRange(),
+                    Attack()
+                ),
                 Sequence(
                     WithinPlayerFov(),
                     MoveTowardsTargetEntity()),
                 Sequence(
                     InNamespace(name="target_point"),
                     MoveTowardsPointInNamespace(name="target_point")),
-                TravelToRandomPosition()))
+                TravelToRandomPosition()
+            )
+        )
 
 class CaptainNPC(BaseAI):
     """AI for an entity that will spawn creatures to fill out a squad and then
@@ -256,7 +270,7 @@ class HealerNPC(BaseAI):
     3. If the entity's target is adjacent, attack
     4. Follow another entity of the same species that moved last turn
     5. move to a random empty square
-    
+
     Parameters
     ----------
     species: etc.enum.Species

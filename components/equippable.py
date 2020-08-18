@@ -5,7 +5,7 @@ from utils.random_utils import die_roll
 class Equippable:
     def __init__(self, slot, power=0, power_bonus= 0, defence=0, defence_bonus = 0,
                     max_hp_bonus=0, bonus_damage=0, attribute=None,
-                    damage_type=DamageType.DEFAULT):
+                    damage_type=DamageType.DEFAULT, reach=1):
         self.slot = slot
         self._power = power
         self.power_bonus = power_bonus
@@ -18,6 +18,7 @@ class Equippable:
         self.bonus_damage = 0
         self.attribute = attribute
         self.damage_type = damage_type
+        self.reach = reach
 
     def damage(self):
         """Calculate damage done in a hit."""
