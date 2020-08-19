@@ -43,8 +43,8 @@ from components.behaviour_trees.conditions import (
     IsFinished,
     IsItemInSpot,
     IsNPCAdjacent,
-    IsNPCAParalyzed,
     IsNPCInSpot,
+    IsNPCParalyzed,
     NumberOfEntities,
     OtherEntityInSameSpot,
     OutsideL2Radius,
@@ -169,7 +169,7 @@ class CleanerNPC(BaseAI):
                     IsNPCAdjacent(),
                     Selection(
                         Sequence(
-                            IsNPCAParalyzed(),
+                            IsNPCParalyzed(),
                             Envelop()
                         ),
                         Sequence(
