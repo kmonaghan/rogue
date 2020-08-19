@@ -10,9 +10,21 @@ from game_messages import Message
 
 import quest
 
-from components.ai import (BasicNPC, CaptainNPC, CleanerNPC, GuardNPC, HatchingNPC,
-                            HealerNPC, NecromancerNPC, PatrollingNPC, PredatorNPC,
-                            SpawningNPC, TetheredNPC, WarlordNPC, ZombieNPC,)
+from components.ai import (
+    ArcherNPC,
+    BasicNPC,
+    CaptainNPC,
+    CleanerNPC,
+    GuardNPC,
+    HatchingNPC,
+    HealerNPC,
+    NecromancerNPC,
+    PatrollingNPC,
+    PredatorNPC,
+    SpawningNPC,
+    TetheredNPC,
+    WarlordNPC,
+    ZombieNPC,)
 from components.berserk import Berserk
 from components.children import Children
 from components.damagemodifier import DamageModifier
@@ -713,6 +725,7 @@ def convert_to_archer(npc):
     npc.inventory.add_item(bow)
     npc.equipment.toggle_equip(bow)
     npc.base_name = f"Archer {npc.base_name}"
+    npc.add_component(ArcherNPC(bow.equippable.reach - 1), 'ai')
 
 def convert_to_cleric(npc):
     npc.add_component(HealerNPC(npc.species), 'ai')

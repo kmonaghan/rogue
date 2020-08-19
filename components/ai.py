@@ -82,7 +82,7 @@ class BaseAI:
             del self.tree.namespace["target"]
 
 class BasicNPC(BaseAI):
-    """Simple NPC ai.
+    """Simple NPC AI that acts as the default for most NPCs.
 
     This entity will attempt to do one of the following:
     1. If the entity's target is adjacent, attack
@@ -108,6 +108,43 @@ class BasicNPC(BaseAI):
                 Sequence(
                     WithinPlayerFov(),
                     MoveTowardsTargetEntity()),
+                Sequence(
+                    InNamespace(name="target_point"),
+                    MoveTowardsPointInNamespace(name="target_point")),
+                TravelToRandomPosition()
+            )
+        )
+
+class ArcherNPC(BaseAI):
+    """This AI presumes that the entity is armed with a ranged weapon. This
+    means they will try and stay out of reach of their target and attack at
+    range.
+
+    This entity will attempt to do one of the following:
+    1. If too close to the target, move away
+    2. If the entity's target is within range of the entity's weapon, attack
+    3. If not within range of the target, move towards the target
+    4. If a target point is set, move towards it
+    5. Pick a random empty tile and start travelling towards it
+    
+    """
+    def __init__(self, radius=3):
+        self.tree = Root(
+            Selection(
+                Sequence(
+                    InNamespace(name="target"),
+                    WithinRadius(radius=radius),
+                    SeekTowardsLInfinityRadius(radius=radius)
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    TargetWithinRange(),
+                    Attack()
+                ),
+                Sequence(
+                    InNamespace(name="target"),
+                    MoveTowardsTargetEntity()
+                ),
                 Sequence(
                     InNamespace(name="target_point"),
                     MoveTowardsPointInNamespace(name="target_point")),
