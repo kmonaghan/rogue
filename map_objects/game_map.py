@@ -220,7 +220,7 @@ class GameMap:
         npc_chances[Species.RATNEST] = from_dungeon_level([[95, 1]], self.dungeon_level)
         npc_chances[Species.BAT] = from_dungeon_level([[95, 1]], self.dungeon_level)
         npc_chances[Species.BATROOST] = from_dungeon_level([[95, 1]], self.dungeon_level)
-        npc_chances[Species.HORNET] = from_dungeon_level([[95, 1]], self.dungeon_level)
+        npc_chances[Species.INSECT] = from_dungeon_level([[95, 1]], self.dungeon_level)
         npc_chances[Species.HORNETNEST] = from_dungeon_level([[95, 1]], self.dungeon_level)
 
         max_npcs = len(self.current_level.caves[0]) // 15

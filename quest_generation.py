@@ -21,7 +21,7 @@ def kill_vermin():
 
 def kill_humanoid(type = None):
     if not type:
-        type = choice(HUMANOIDS)
+        key = choice(HUMANOIDS)
         value = SPECIES_STRINGS[key]
     else:
         value = SPECIES_STRINGS[type]
@@ -44,6 +44,7 @@ def kill_mini_boss(npc, room_name = None):
 
     q1 = quest.Quest("Cut off the head", quest_text, 100, target_npc=npc)
 
+    return q1
 
 def kill_warlord():
     title = "Strike him down"

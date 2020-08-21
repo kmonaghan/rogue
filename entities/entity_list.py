@@ -77,7 +77,7 @@ class EntityList:
                     npc = entity
         return npc
 
-    def find_all_closest(self, point, species, radius=2):
+    def find_all_closest(self, point, species=None, radius=2):
         """Find all the closest entities of a species to a given point within a
         given radius.
 
@@ -114,7 +114,7 @@ class EntityList:
                     for entity in self.coordinate_map[(x, y)]:
                         if (point.x == x) and (point.y == y):
                             continue
-                        if isinstance(entity, Character) and not entity.health.dead:
+                        if isinstance(entity, Character) and entity.health and not entity.health.dead:
                             if species and (entity.species != species):
                                 continue
 
