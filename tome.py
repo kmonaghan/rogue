@@ -16,7 +16,7 @@ from map_objects.point import Point
 from game_messages import Message
 
 from utils.random_utils import die_roll
-from utils.utils import bresenham_ray
+from utils.utils import bresenham_line, bresenham_ray
 
 from etc.enum import DamageType, MessageType, ResultTypes
 from etc.colors import COLORS
@@ -416,6 +416,12 @@ def magic_missile(**kwargs):
     if not game_map.current_level.fov[target.x, target.y]:
         results.append({ResultTypes.MESSAGE: Message('You cannot target a tile outside your field of view.', COLORS.get('neutral_text'))})
         return results
+    else:
+        end = bresenham_line(game_map, caster.point.tuple(), target.point.tuple())
+
+        if end[-1] != target.point.tuple():
+            results.append({ResultTypes.MESSAGE: Message('Target is not in line of sight.', COLORS.get('neutral_text'))})
+            return results
 
     missiles = (caster.level.current_level // 3) + 1
     for _ in range(missiles):
